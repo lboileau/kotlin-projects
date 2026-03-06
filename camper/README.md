@@ -1,12 +1,14 @@
 # camper
 
-Kotlin Spring Boot CRUD API for managing worlds.
+A web app for interactive camping trip planning. Invite people on a trip and let everyone view trip details and contribute to planning — dates, meal plans, equipment, and more.
 
-## What's Included
+This project is in early development. Features will be added incrementally.
+
+## Project Structure
 
 - **libs/common** — Shared logging utilities
 - **clients/common** — `Result<T, E>` type, `ClientContext`, error types
-- **clients/world-client** — JDBI-based data access for the `worlds` table
+- **clients/world-client** — JDBI-based data access (sample scaffold)
 - **services/common** — `ApiResponse<T>` shared response type
 - **services/camper-service** — Spring Boot REST API (port 8080)
 - **databases/camper-db** — PostgreSQL schema, Flyway migrations, seed data

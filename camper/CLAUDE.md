@@ -1,6 +1,6 @@
 # camper
 
-Kotlin Spring Boot CRUD API for managing worlds.
+A web app for interactive camping trip planning. Invite people on a trip and let everyone view details and contribute to planning (dates, meal plans, equipment, etc.). Early development — features added incrementally.
 
 ## Project Structure
 
