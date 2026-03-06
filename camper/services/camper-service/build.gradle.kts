@@ -8,6 +8,8 @@ plugins {
 dependencies {
     implementation(project(":clients:client-common"))
     implementation(project(":clients:world-client"))
+    implementation(project(":clients:user-client"))
+    implementation(project(":clients:plan-client"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
