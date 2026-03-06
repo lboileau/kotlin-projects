@@ -83,6 +83,7 @@ Stack (bottom → top):
 10. [client-test] feat(<feature>): client tests — integration tests for client
 11. [service-test] feat(<feature>): service tests — unit tests for service layer
 12. [acceptance] feat(<feature>): acceptance tests — end-to-end API tests
+13. [docs]       feat(<feature>): update documentation and skills — retrospective-driven updates
 ```
 
 Not every feature needs all 12 PRs. Omit layers that don't apply (e.g., no lib changes = skip 4 and 8).
@@ -316,6 +317,70 @@ Present the Graphite stack URL to the user for final review.
 
 ---
 
+## Phase 9: Retrospective & Documentation Update
+
+After the stack is verified and submitted, perform a retrospective on the feature build. This produces a final PR stacked on top that updates all documentation and skills to reflect what was learned.
+
+### Retrospective
+
+Review the entire feature build and identify:
+
+1. **Issues encountered** — What broke? What needed manual fixes? Compilation errors, test failures, missing wiring, type mismatches, etc.
+2. **What was added** — Summarize every new file, module, endpoint, table, and test that was created.
+3. **Patterns discovered** — Any new conventions, workarounds, or approaches that emerged during implementation.
+4. **Skill gaps** — Did any sub-skill (`/service-manager`, `/db-manager`, `/create-acceptance-tests`) produce incorrect or incomplete output? What was missing?
+
+### Documentation Updates
+
+Based on the retrospective, update the following:
+
+#### Project CLAUDE.md (root)
+- Update the **Project Structure** tree to include new modules/directories
+- Add the new feature to the **Architecture** section if it introduced new patterns
+- Update **Quick Start** if new setup steps are needed (e.g., new migrations, new seed data)
+
+#### Module CLAUDE.md files
+- Update any module-level `CLAUDE.md` that gained new capabilities (e.g., new client operations, new service features, new tables)
+- Add schema references for new tables in the database `CLAUDE.md`
+
+#### Project README.md
+- Update the **What's Included** section with new modules/features
+- Add new API endpoints to the **API** table
+- Update **Example** curl commands if new endpoints are noteworthy
+- Update **Initial Setup** if new migrations or seed data were added
+
+#### Database README.md
+- Update schema documentation with new tables/columns
+- Update seed data descriptions
+
+### Skill Updates
+
+If the retrospective identified skill gaps, update the relevant skill files in `templates/skills/`:
+
+- **Patterns that broke** — If a skill produced code that didn't compile or failed tests, document the fix as a correction in the skill so it doesn't happen again.
+- **Missing steps** — If manual steps were needed that a skill should have handled, add them to the skill.
+- **New conventions** — If the feature established a new pattern (e.g., a new relationship type, a new error variant), add it to the relevant skill as a reference.
+
+Only update skills when there is a clear, repeatable lesson — not for one-off quirks.
+
+### Create the Documentation PR
+
+```bash
+gt create -m "feat(<feature>): update documentation and skills" --no-interactive
+```
+
+Commit all documentation and skill updates. This PR should contain **only** documentation changes — no code changes.
+
+Build check: `./gradlew clean build` (ensure nothing was broken by doc changes that touch build files)
+
+```bash
+gt submit --no-interactive
+```
+
+Present the updated stack to the user.
+
+---
+
 ## Graphite Command Reference
 
 Common commands used throughout this workflow:
@@ -375,4 +440,7 @@ User describes feature
         |
         v
 [Phase 8] Final verification & submit stack
+        |
+        v
+[Phase 9] Retrospective & documentation update PR
 ```
