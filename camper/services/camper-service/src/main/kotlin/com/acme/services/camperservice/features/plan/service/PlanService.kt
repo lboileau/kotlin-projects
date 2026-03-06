@@ -10,7 +10,7 @@ class PlanService(planClient: PlanClient, userClient: UserClient) {
     private val getPlans = GetPlansAction(planClient)
     private val updatePlan = UpdatePlanAction(planClient)
     private val deletePlan = DeletePlanAction(planClient)
-    private val getPlanMembers = GetPlanMembersAction(planClient)
+    private val getPlanMembers = GetPlanMembersAction(planClient, userClient)
     private val addPlanMember = AddPlanMemberAction(planClient, userClient)
     private val removePlanMember = RemovePlanMemberAction(planClient)
 

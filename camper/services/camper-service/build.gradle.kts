@@ -24,6 +24,8 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
     testImplementation("org.postgresql:postgresql:42.7.4")
     testImplementation(testFixtures(project(":clients:world-client")))
+    testImplementation(testFixtures(project(":clients:user-client")))
+    testImplementation(testFixtures(project(":clients:plan-client")))
 }
 
 tasks.withType<Test> {
