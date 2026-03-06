@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  hello-world-db:
+    image: postgres:16-alpine
+    container_name: hello-world-db
+    environment:
+      POSTGRES_DB: hello_world_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - hello-world-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  hello-world-db-data:
