@@ -1,5 +1,9 @@
 package com.acme.services.camperservice.config
 
+import com.acme.clients.planclient.api.PlanClient
+import com.acme.clients.planclient.createPlanClient
+import com.acme.clients.userclient.api.UserClient
+import com.acme.clients.userclient.createUserClient
 import com.acme.clients.worldclient.api.WorldClient
 import com.acme.clients.worldclient.createWorldClient
 import com.acme.clients.worldclient.test.WorldTestDb
@@ -30,4 +34,12 @@ class TestContainerConfig {
     @Bean
     @Primary
     fun worldClient(): WorldClient = createWorldClient()
+
+    @Bean
+    @Primary
+    fun userClient(): UserClient = createUserClient()
+
+    @Bean
+    @Primary
+    fun planClient(): PlanClient = createPlanClient()
 }
