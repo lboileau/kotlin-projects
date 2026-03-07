@@ -1,8 +1,11 @@
 package com.acme.services.camperservice.features.plan.controller
 
+import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.plan.dto.AddMemberRequest
 import com.acme.services.camperservice.features.plan.dto.CreatePlanRequest
 import com.acme.services.camperservice.features.plan.dto.UpdatePlanRequest
+import com.acme.services.camperservice.features.plan.mapper.PlanMapper
+import com.acme.services.camperservice.features.plan.params.*
 import com.acme.services.camperservice.features.plan.service.PlanService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -20,13 +23,15 @@ class PlanController(private val planService: PlanService) {
         @RequestBody request: CreatePlanRequest
     ): ResponseEntity<Any> {
         logger.info("POST /api/plans")
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = CreatePlanParam(name = request.name, userId = userId)
+        return planService.create(param).toResponseEntity(successStatus = 201) { PlanMapper.toResponse(it) }
     }
 
     @GetMapping
     fun getPlans(@RequestHeader("X-User-Id") userId: UUID): ResponseEntity<Any> {
         logger.info("GET /api/plans")
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = GetPlansParam(userId = userId)
+        return planService.getPlans(param).toResponseEntity { list -> list.map { PlanMapper.toResponse(it) } }
     }
 
     @PutMapping("/{planId}")
@@ -36,7 +41,8 @@ class PlanController(private val planService: PlanService) {
         @RequestBody request: UpdatePlanRequest
     ): ResponseEntity<Any> {
         logger.info("PUT /api/plans/{}", planId)
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = UpdatePlanParam(planId = planId, name = request.name, userId = userId)
+        return planService.update(param).toResponseEntity { PlanMapper.toResponse(it) }
     }
 
     @DeleteMapping("/{planId}")
@@ -45,7 +51,8 @@ class PlanController(private val planService: PlanService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}", planId)
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = DeletePlanParam(planId = planId, userId = userId)
+        return planService.delete(param).toResponseEntity(successStatus = 204) { }
     }
 
     @GetMapping("/{planId}/members")
@@ -54,7 +61,8 @@ class PlanController(private val planService: PlanService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("GET /api/plans/{}/members", planId)
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = GetPlanMembersParam(planId = planId)
+        return planService.getMembers(param).toResponseEntity { list -> list.map { PlanMapper.toResponse(it) } }
     }
 
     @PostMapping("/{planId}/members")
@@ -64,7 +72,8 @@ class PlanController(private val planService: PlanService) {
         @RequestBody request: AddMemberRequest
     ): ResponseEntity<Any> {
         logger.info("POST /api/plans/{}/members", planId)
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = AddPlanMemberParam(planId = planId, email = request.email)
+        return planService.addMember(param).toResponseEntity(successStatus = 201) { PlanMapper.toResponse(it) }
     }
 
     @DeleteMapping("/{planId}/members/{memberId}")
@@ -74,6 +83,7 @@ class PlanController(private val planService: PlanService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}/members/{}", planId, memberId)
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = RemovePlanMemberParam(planId = planId, userId = memberId, requestingUserId = userId)
+        return planService.removeMember(param).toResponseEntity(successStatus = 204) { }
     }
 }
