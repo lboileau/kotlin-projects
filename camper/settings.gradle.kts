@@ -8,6 +8,8 @@ include(":libs:common")
 include(":clients:common")
 project(":clients:common").name = "client-common"
 include(":clients:world-client")
+include(":clients:user-client")
+include(":clients:plan-client")
 include(":services:common")
 project(":services:common").name = "service-common"
 include(":services:camper-service")

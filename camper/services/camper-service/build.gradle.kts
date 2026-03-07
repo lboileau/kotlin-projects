@@ -8,6 +8,8 @@ plugins {
 dependencies {
     implementation(project(":clients:client-common"))
     implementation(project(":clients:world-client"))
+    implementation(project(":clients:user-client"))
+    implementation(project(":clients:plan-client"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -22,6 +24,8 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
     testImplementation("org.postgresql:postgresql:42.7.4")
     testImplementation(testFixtures(project(":clients:world-client")))
+    testImplementation(testFixtures(project(":clients:user-client")))
+    testImplementation(testFixtures(project(":clients:plan-client")))
 }
 
 tasks.withType<Test> {

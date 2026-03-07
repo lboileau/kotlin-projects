@@ -1,0 +1,43 @@
+package com.acme.services.camperservice.features.plan.mapper
+
+import com.acme.clients.planclient.model.Plan as ClientPlan
+import com.acme.clients.planclient.model.PlanMember as ClientPlanMember
+import com.acme.services.camperservice.features.plan.dto.PlanMemberResponse
+import com.acme.services.camperservice.features.plan.dto.PlanResponse
+import com.acme.services.camperservice.features.plan.model.Plan
+import com.acme.services.camperservice.features.plan.model.PlanMember
+
+object PlanMapper {
+
+    fun fromClient(clientPlan: ClientPlan): Plan = Plan(
+        id = clientPlan.id,
+        name = clientPlan.name,
+        visibility = clientPlan.visibility,
+        ownerId = clientPlan.ownerId,
+        createdAt = clientPlan.createdAt,
+        updatedAt = clientPlan.updatedAt
+    )
+
+    fun fromClient(clientMember: ClientPlanMember, username: String? = null): PlanMember = PlanMember(
+        planId = clientMember.planId,
+        userId = clientMember.userId,
+        username = username,
+        createdAt = clientMember.createdAt
+    )
+
+    fun toResponse(plan: Plan): PlanResponse = PlanResponse(
+        id = plan.id,
+        name = plan.name,
+        visibility = plan.visibility,
+        ownerId = plan.ownerId,
+        createdAt = plan.createdAt,
+        updatedAt = plan.updatedAt
+    )
+
+    fun toResponse(member: PlanMember): PlanMemberResponse = PlanMemberResponse(
+        planId = member.planId,
+        userId = member.userId,
+        username = member.username,
+        createdAt = member.createdAt
+    )
+}
