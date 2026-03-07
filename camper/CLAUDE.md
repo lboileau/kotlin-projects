@@ -14,7 +14,9 @@ camper/
 │   └── common/               # Shared utilities (no I/O)
 ├── clients/
 │   ├── common/               # Result type, error types, ClientContext
-│   └── world-client/         # JDBI data access for worlds table
+│   ├── world-client/         # JDBI data access for worlds table
+│   ├── user-client/          # JDBI data access for users table
+│   └── plan-client/          # JDBI data access for plans & plan_members tables
 ├── services/
 │   ├── common/               # ApiResponse shared type
 │   └── camper-service/       # Spring Boot REST API

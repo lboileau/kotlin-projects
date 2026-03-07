@@ -66,11 +66,60 @@ Every table automatically includes:
 - Password: `postgres`
 - JDBC URL: `jdbc:postgresql://localhost:5433/camper_db`
 
+### users
+
+```sql
+CREATE TABLE users (
+    id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    email      VARCHAR(255) NOT NULL,
+    username   VARCHAR(100),
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    CONSTRAINT uq_users_email UNIQUE (email)
+);
+CREATE INDEX idx_users_email ON users (email);
+```
+
+### plans
+
+```sql
+CREATE TABLE plans (
+    id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    name       VARCHAR(255) NOT NULL,
+    visibility VARCHAR(10)  NOT NULL DEFAULT 'private',
+    owner_id   UUID         NOT NULL,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    CONSTRAINT ck_plans_visibility CHECK (visibility IN ('public', 'private')),
+    CONSTRAINT fk_plans_owner FOREIGN KEY (owner_id) REFERENCES users (id)
+);
+```
+
+### plan_members
+
+```sql
+CREATE TABLE plan_members (
+    plan_id    UUID        NOT NULL,
+    user_id    UUID        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (plan_id, user_id),
+    CONSTRAINT fk_plan_members_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
+    CONSTRAINT fk_plan_members_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
+CREATE INDEX idx_plan_members_user_id ON plan_members (user_id);
+```
+
 ## Relationships
 
-No foreign key relationships yet. The `worlds` table is standalone.
+- `plans.owner_id` → `users.id` (FK)
+- `plan_members.plan_id` → `plans.id` (FK, CASCADE on delete)
+- `plan_members.user_id` → `users.id` (FK)
 
 ## Invariants
 
 - World names must be unique (enforced by `uq_worlds_name`).
-- All columns are NOT NULL.
+- User emails must be unique (enforced by `uq_users_email`).
+- Plan visibility must be 'public' or 'private' (enforced by `ck_plans_visibility`).
+- Plan members are unique per plan (composite PK `plan_id, user_id`).
+- Deleting a plan cascades to plan_members.
+- `username` in users is nullable (auto-created users may not have one).
