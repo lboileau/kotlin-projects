@@ -31,7 +31,8 @@ object PlanMapper {
         visibility = plan.visibility,
         ownerId = plan.ownerId,
         createdAt = plan.createdAt,
-        updatedAt = plan.updatedAt
+        updatedAt = plan.updatedAt,
+        isMember = plan.isMember
     )
 
     fun toResponse(member: PlanMember): PlanMemberResponse = PlanMemberResponse(

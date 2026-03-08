@@ -6,7 +6,7 @@ data class CreatePlanParam(val name: String, val userId: UUID)
 
 data class GetPlansParam(val userId: UUID)
 
-data class UpdatePlanParam(val planId: UUID, val name: String, val userId: UUID)
+data class UpdatePlanParam(val planId: UUID, val name: String, val visibility: String? = null, val userId: UUID)
 
 data class DeletePlanParam(val planId: UUID, val userId: UUID)
 

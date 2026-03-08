@@ -13,6 +13,7 @@ export interface Plan {
   ownerId: string;
   createdAt: string;
   updatedAt: string;
+  isMember: boolean;
 }
 
 export interface PlanMember {
@@ -97,6 +98,13 @@ export const api = {
   removeMember(planId: string, memberId: string): Promise<void> {
     return request(`/api/plans/${planId}/members/${memberId}`, {
       method: 'DELETE',
+    });
+  },
+
+  updatePlan(planId: string, data: { name: string; visibility?: string }): Promise<Plan> {
+    return request(`/api/plans/${planId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
     });
   },
 

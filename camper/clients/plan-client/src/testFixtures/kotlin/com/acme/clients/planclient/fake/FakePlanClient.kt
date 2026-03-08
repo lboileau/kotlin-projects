@@ -66,7 +66,11 @@ class FakePlanClient : PlanClient {
         if (validation is Result.Failure) return validation
 
         val existing = planStore[param.id] ?: return failure(NotFoundError("Plan", param.id.toString()))
-        val updated = existing.copy(name = param.name, updatedAt = Instant.now())
+        val updated = existing.copy(
+            name = param.name,
+            visibility = param.visibility ?: existing.visibility,
+            updatedAt = Instant.now()
+        )
         planStore[param.id] = updated
         return success(updated)
     }

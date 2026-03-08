@@ -41,7 +41,7 @@ class PlanController(private val planService: PlanService) {
         @RequestBody request: UpdatePlanRequest
     ): ResponseEntity<Any> {
         logger.info("PUT /api/plans/{}", planId)
-        val param = UpdatePlanParam(planId = planId, name = request.name, userId = userId)
+        val param = UpdatePlanParam(planId = planId, name = request.name, visibility = request.visibility, userId = userId)
         return planService.update(param).toResponseEntity { PlanMapper.toResponse(it) }
     }
 

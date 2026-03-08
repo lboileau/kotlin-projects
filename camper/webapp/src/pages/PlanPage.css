@@ -205,6 +205,165 @@
   filter: drop-shadow(0 0 20px rgba(240, 208, 96, 0.3));
 }
 
+/* Join camp button for non-members */
+.campsite-join-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-xl);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.campsite-join-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.campsite-join-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.join-ghost-figure {
+  animation: gentle-bob 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(139, 195, 128, 0.2));
+  transition: filter 0.3s ease;
+}
+
+.campsite-join-btn:hover .join-ghost-figure {
+  filter: drop-shadow(0 0 16px rgba(139, 195, 128, 0.4));
+}
+
+.join-label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--sage);
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px 12px;
+  border-radius: 10px;
+  letter-spacing: 0.03em;
+  transition: color 0.3s ease, background 0.3s ease;
+}
+
+.campsite-join-btn:hover .join-label {
+  color: var(--parchment);
+  background: rgba(90, 122, 86, 0.5);
+}
+
+/* Manage Plan button in header */
+.plan-manage-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--parchment);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 248, 231, 0.15);
+  padding: 6px 14px;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-manage-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 248, 231, 0.3);
+}
+
+/* Manage Plan modal */
+.manage-plan-modal {
+  text-align: left;
+}
+
+.manage-plan-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding: var(--space-md) 0;
+}
+
+.manage-plan-setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.manage-plan-setting-label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--charcoal);
+}
+
+.manage-plan-setting-desc {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--charcoal-light);
+  font-style: italic;
+}
+
+/* Visibility toggle */
+.visibility-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.visibility-toggle:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.visibility-toggle-track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--charcoal-light);
+  transition: background 0.3s ease;
+}
+
+.visibility-toggle.public .visibility-toggle-track {
+  background: var(--sage-deep);
+}
+
+.visibility-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.visibility-toggle.public .visibility-toggle-thumb {
+  transform: translateX(20px);
+}
+
+.visibility-toggle-label {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--charcoal);
+  min-width: 50px;
+}
+
 /* Loading */
 .campsite-loading {
   text-align: center;

@@ -49,14 +49,14 @@ API service for camping trip planning — user registration, authentication, and
   - `PUT /api/users/{userId}` — update username (requires `X-User-Id` header)
 
 ### Plan (`features/plan/`)
-- **Model:** `Plan(id, name, visibility, ownerId, createdAt, updatedAt)`, `PlanMember(planId, userId, username?, createdAt)`
-- **DTOs:** `CreatePlanRequest(name)`, `UpdatePlanRequest(name)`, `AddMemberRequest(email)`, `PlanResponse(...)`, `PlanMemberResponse(...)`
+- **Model:** `Plan(id, name, visibility, ownerId, createdAt, updatedAt, isMember=true)`, `PlanMember(planId, userId, username?, createdAt)`
+- **DTOs:** `CreatePlanRequest(name)`, `UpdatePlanRequest(name, visibility?)`, `AddMemberRequest(email)`, `PlanResponse(..., isMember)`, `PlanMemberResponse(...)`
 - **Error:** `PlanError` sealed class — `NotFound`, `NotOwner`, `AlreadyMember`, `NotMember`, `Invalid`
-- **Service params:** `CreatePlanParam(name, userId)`, `GetPlansParam(userId)`, `UpdatePlanParam(planId, name, userId)`, `DeletePlanParam(planId, userId)`, `GetPlanMembersParam(planId)`, `AddPlanMemberParam(planId, email)`, `RemovePlanMemberParam(planId, userId, requestingUserId)`
+- **Service params:** `CreatePlanParam(name, userId)`, `GetPlansParam(userId)`, `UpdatePlanParam(planId, name, visibility?, userId)`, `DeletePlanParam(planId, userId)`, `GetPlanMembersParam(planId)`, `AddPlanMemberParam(planId, email)`, `RemovePlanMemberParam(planId, userId, requestingUserId)`
 - **Actions:**
   - `CreatePlanAction`: Creates private plan, auto-adds creator as member
-  - `GetPlansAction`: Merges user's plans + public plans (deduped)
-  - `UpdatePlanAction`: Owner-only
+  - `GetPlansAction`: Merges user's plans + public plans (deduped), marks non-member public plans with `isMember=false`
+  - `UpdatePlanAction`: Owner-only, supports updating name and/or visibility
   - `DeletePlanAction`: Owner-only
   - `GetPlanMembersAction`: Lists plan members, enriches with username from UserClient
   - `AddPlanMemberAction`: Uses userClient.getOrCreate then adds member
@@ -65,7 +65,7 @@ API service for camping trip planning — user registration, authentication, and
 - **Routes:** (all require `X-User-Id` header)
   - `POST /api/plans` — create plan (201)
   - `GET /api/plans` — list plans
-  - `PUT /api/plans/{planId}` — update plan name (owner only)
+  - `PUT /api/plans/{planId}` — update plan name and/or visibility (owner only)
   - `DELETE /api/plans/{planId}` — delete plan (owner only, 204)
   - `GET /api/plans/{planId}/members` — list members
   - `POST /api/plans/{planId}/members` — add member by email (201)

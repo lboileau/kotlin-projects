@@ -11,7 +11,7 @@ import { AddMemberModal } from '../components/AddMemberModal';
 import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG } from '../components/CampsiteItems';
 import './PlanPage.css';
 
-type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'tent' | 'addMember' | null;
+type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'tent' | 'addMember' | 'managePlan' | null;
 
 const MODAL_CONFIG: Record<string, { title: string; icon: React.ReactNode }> = {
   equipment: {
@@ -107,6 +107,35 @@ export function PlanPage() {
     await loadData();
   };
 
+  const [updatingVisibility, setUpdatingVisibility] = useState(false);
+
+  const handleToggleVisibility = async () => {
+    if (!planId || !plan) return;
+    setUpdatingVisibility(true);
+    try {
+      const newVisibility = plan.visibility === 'public' ? 'private' : 'public';
+      const updated = await api.updatePlan(planId, { name: plan.name, visibility: newVisibility });
+      setPlan(updated);
+    } finally {
+      setUpdatingVisibility(false);
+    }
+  };
+
+  const isMember = members.some(m => m.userId === user?.id);
+
+  const [joining, setJoining] = useState(false);
+
+  const handleJoinPlan = async () => {
+    if (!planId || !user) return;
+    setJoining(true);
+    try {
+      await api.addMember(planId, user.email);
+      await loadData();
+    } finally {
+      setJoining(false);
+    }
+  };
+
   const memberCount = members.length;
 
   return (
@@ -154,6 +183,15 @@ export function PlanPage() {
           </svg>
           <span className="plan-header-title">Campsite</span>
         </div>
+        {isOwner && (
+          <button className="plan-manage-btn" onClick={() => setActiveModal('managePlan')}>
+            <svg width="18" height="18" viewBox="0 0 18 18">
+              <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M9,5 L9,13 M5,9 L13,9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            Manage Plan
+          </button>
+        )}
         <div className="plan-header-user">
           <button className="plan-user-btn" onClick={() => navigate('/account')}>
             <svg width="28" height="28" viewBox="0 0 28 28" className="plan-user-avatar">
@@ -214,7 +252,11 @@ export function PlanPage() {
                     index={i}
                     total={memberCount}
                     timeOfDay={timeOfDay}
-                    onRemove={isOwner && member.userId !== user?.id ? () => handleRemoveMember(member.userId) : undefined}
+                    onRemove={
+                      (member.userId === user?.id && !isOwner) || (isOwner && member.userId !== user?.id)
+                        ? () => handleRemoveMember(member.userId)
+                        : undefined
+                    }
                   />
                 ))}
               </div>
@@ -222,21 +264,40 @@ export function PlanPage() {
               {/* Campfire */}
               <Campfire />
 
-              {/* Invite shadow person — fixed below fire */}
-              <button
-                className="campsite-invite-ghost"
-                onClick={() => setActiveModal('addMember')}
-                title="Invite an adventurer"
-              >
-                <div className="invite-ghost-figure">
-                  <svg width="48" height="64" viewBox="0 0 48 64">
-                    <ellipse cx="24" cy="16" rx="12" ry="12" fill="rgba(255,255,255,0.18)" />
-                    <rect x="14" y="24" width="20" height="28" rx="4" fill="rgba(255,255,255,0.12)" />
-                    <line x1="24" y1="32" x2="24" y2="44" stroke="rgba(255,248,231,0.5)" strokeWidth="2.5" strokeLinecap="round" />
-                    <line x1="18" y1="38" x2="30" y2="38" stroke="rgba(255,248,231,0.5)" strokeWidth="2.5" strokeLinecap="round" />
-                  </svg>
-                </div>
-              </button>
+              {/* Below fire: Join button for non-members, invite ghost for members */}
+              {isMember ? (
+                <button
+                  className="campsite-invite-ghost"
+                  onClick={() => setActiveModal('addMember')}
+                  title="Invite an adventurer"
+                >
+                  <div className="invite-ghost-figure">
+                    <svg width="48" height="64" viewBox="0 0 48 64">
+                      <ellipse cx="24" cy="16" rx="12" ry="12" fill="rgba(255,255,255,0.18)" />
+                      <rect x="14" y="24" width="20" height="28" rx="4" fill="rgba(255,255,255,0.12)" />
+                      <line x1="24" y1="32" x2="24" y2="44" stroke="rgba(255,248,231,0.5)" strokeWidth="2.5" strokeLinecap="round" />
+                      <line x1="18" y1="38" x2="30" y2="38" stroke="rgba(255,248,231,0.5)" strokeWidth="2.5" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  className="campsite-join-btn"
+                  onClick={handleJoinPlan}
+                  disabled={joining}
+                  title="Join this adventure"
+                >
+                  <div className="join-ghost-figure">
+                    <svg width="48" height="64" viewBox="0 0 48 64">
+                      <ellipse cx="24" cy="16" rx="12" ry="12" fill="rgba(139,195,128,0.3)" />
+                      <rect x="14" y="24" width="20" height="28" rx="4" fill="rgba(139,195,128,0.2)" />
+                      <circle cx="24" cy="16" r="6" fill="none" stroke="rgba(139,195,128,0.7)" strokeWidth="1.5" />
+                      <path d="M22,16 L26,16 M24,14 L24,18" stroke="rgba(255,248,231,0.8)" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                  </div>
+                  <span className="join-label">{joining ? 'Joining...' : 'Join Camp'}</span>
+                </button>
+              )}
             </div>
 
           </>
@@ -252,7 +313,47 @@ export function PlanPage() {
         />
       )}
 
-      {activeModal && activeModal !== 'addMember' && MODAL_CONFIG[activeModal] && (
+      {activeModal === 'managePlan' && plan && (
+        <div className="modal-overlay" onClick={() => setActiveModal(null)}>
+          <div className="modal-content manage-plan-modal" onClick={e => e.stopPropagation()}>
+            <h2 className="modal-title">Manage Plan</h2>
+            <div className="modal-divider">
+              <svg width="120" height="12" viewBox="0 0 120 12">
+                <path d="M0,6 Q30,0 60,6 Q90,12 120,6" fill="none" stroke="var(--tan-deep)" strokeWidth="1.5" />
+              </svg>
+            </div>
+            <div className="manage-plan-setting">
+              <div className="manage-plan-setting-info">
+                <span className="manage-plan-setting-label">Plan Visibility</span>
+                <span className="manage-plan-setting-desc">
+                  {plan.visibility === 'public'
+                    ? 'Anyone can discover and view this plan.'
+                    : 'Only members can see this plan.'}
+                </span>
+              </div>
+              <button
+                className={`visibility-toggle ${plan.visibility}`}
+                onClick={handleToggleVisibility}
+                disabled={updatingVisibility}
+              >
+                <span className="visibility-toggle-track">
+                  <span className="visibility-toggle-thumb" />
+                </span>
+                <span className="visibility-toggle-label">
+                  {plan.visibility === 'public' ? 'Public' : 'Private'}
+                </span>
+              </button>
+            </div>
+            <div className="modal-actions" style={{ marginTop: 'var(--space-lg)' }}>
+              <button className="modal-btn" onClick={() => setActiveModal(null)}>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeModal && activeModal !== 'addMember' && activeModal !== 'managePlan' && MODAL_CONFIG[activeModal] && (
         <ComingSoonModal
           isOpen
           onClose={() => setActiveModal(null)}

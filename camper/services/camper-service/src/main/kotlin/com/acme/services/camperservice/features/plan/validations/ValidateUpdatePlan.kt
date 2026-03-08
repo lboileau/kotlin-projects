@@ -18,6 +18,9 @@ internal class ValidateUpdatePlan {
 
     private fun validate(param: UpdatePlanParam): Result<Unit, PlanError> {
         if (param.name.isBlank()) return failure(PlanError.Invalid("name", "must not be blank"))
+        if (param.visibility != null && param.visibility !in listOf("public", "private")) {
+            return failure(PlanError.Invalid("visibility", "must be 'public' or 'private'"))
+        }
         return success(Unit)
     }
 }

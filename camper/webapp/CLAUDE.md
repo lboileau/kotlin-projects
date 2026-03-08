@@ -57,8 +57,8 @@ webapp/
 
 ### Pages
 - **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`.
-- **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline.
-- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Only "add member" works; others show ComingSoonModal.
+- **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
+- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Only "add member" works; others show ComingSoonModal. Owner sees "Manage Plan" button in header (toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others.
 
 ### Visual Design System
 - **Palette:** Defined in `theme.css` as CSS variables (`--lavender`, `--sage`, `--tan`, `--rose`, `--mint`, `--ember`, `--flame`, `--night-sky`, `--parchment`, etc.)
@@ -79,7 +79,9 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | GET | `/api/plans` | X-User-Id | HomePage |
 | POST | `/api/plans` | X-User-Id | HomePage (create trip) |
 | GET | `/api/plans/:id/members` | X-User-Id | PlanPage |
-| POST | `/api/plans/:id/members` | X-User-Id | PlanPage (invite) |
+| PUT | `/api/plans/:id` | X-User-Id | PlanPage (update visibility) |
+| POST | `/api/plans/:id/members` | X-User-Id | PlanPage (invite), HomePage (join) |
+| DELETE | `/api/plans/:id/members/:memberId` | X-User-Id | PlanPage (leave/remove), HomePage (leave) |
 
 ## Running
 

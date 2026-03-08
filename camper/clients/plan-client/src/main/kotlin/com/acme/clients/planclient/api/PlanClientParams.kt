@@ -14,8 +14,8 @@ class GetPublicPlansParam
 /** Parameter for creating a new plan. */
 data class CreatePlanParam(val name: String, val visibility: String, val ownerId: UUID)
 
-/** Parameter for updating a plan's name. */
-data class UpdatePlanParam(val id: UUID, val name: String)
+/** Parameter for updating a plan. */
+data class UpdatePlanParam(val id: UUID, val name: String, val visibility: String? = null)
 
 /** Parameter for deleting a plan. */
 data class DeletePlanParam(val id: UUID)
