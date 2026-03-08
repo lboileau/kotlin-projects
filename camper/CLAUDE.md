@@ -19,7 +19,9 @@ camper/
 │   ├── plan-client/          # JDBI data access for plans & plan_members tables
 │   ├── item-client/          # JDBI data access for items table
 │   ├── itinerary-client/     # JDBI data access for itineraries & itinerary_events tables
-│   └── assignment-client/    # JDBI data access for assignments & assignment_members tables
+│   ├── assignment-client/    # JDBI data access for assignments & assignment_members tables
+│   ├── invitation-client/    # JDBI data access for invitations table
+│   └── email-client/         # Email sending via Resend SDK (+ NoOp for local dev)
 ├── services/
 │   ├── common/               # ApiResponse shared type
 │   └── camper-service/       # Spring Boot REST API
@@ -98,7 +100,7 @@ Hosted on [Railway](https://railway.com) — project **proactive-quietude**.
 - **Webapp** (`webapp/dist`) is served as static files from `/app/static/` by Spring Boot
 - **SPA routing:** `WebConfig.kt` forwards non-API, non-static routes to `index.html` for React Router
 - **Migrations:** Flyway runs automatically on startup. Migration files live in `databases/camper-db/migrations/` (single source of truth) and are copied to the classpath at build time via Gradle `processResources`
-- **Environment variables:** `DB_URL`, `DB_USER`, `DB_PASSWORD` configured on the camper-service in Railway
+- **Environment variables:** `DB_URL`, `DB_USER`, `DB_PASSWORD`, `RESEND_API_KEY` (optional — email sending disabled without it) configured on the camper-service in Railway
 
 ### Deploying
 

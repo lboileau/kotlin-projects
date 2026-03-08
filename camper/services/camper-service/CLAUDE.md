@@ -7,7 +7,7 @@ API service for camping trip planning — user registration, authentication, pla
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, and `assignment-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, and `email-client` for data access
 - Database: `camper-db` (port 5433, database `camper_db`)
 - **WebSocket:** STOMP-over-WebSocket at `/ws` for live updates. `PlanEventPublisher` broadcasts `PlanUpdateMessage(resource, action)` to `/topic/plans/{planId}` after successful mutations.
 
@@ -50,7 +50,7 @@ API service for camping trip planning — user registration, authentication, pla
   - `PUT /api/users/{userId}` — update username (requires `X-User-Id` header)
 
 ### Plan (`features/plan/`)
-- **Model:** `Plan(id, name, visibility, ownerId, createdAt, updatedAt, isMember=true)`, `PlanMember(planId, userId, username?, createdAt)`
+- **Model:** `Plan(id, name, visibility, ownerId, createdAt, updatedAt, isMember=true)`, `PlanMember(planId, userId, username?, email?, invitationStatus?, createdAt)`
 - **DTOs:** `CreatePlanRequest(name)`, `UpdatePlanRequest(name, visibility?)`, `AddMemberRequest(email)`, `PlanResponse(..., isMember)`, `PlanMemberResponse(...)`
 - **Error:** `PlanError` sealed class — `NotFound`, `NotOwner`, `AlreadyMember`, `NotMember`, `Invalid`
 - **Service params:** `CreatePlanParam(name, userId)`, `GetPlansParam(userId)`, `UpdatePlanParam(planId, name, visibility?, userId)`, `DeletePlanParam(planId, userId)`, `GetPlanMembersParam(planId)`, `AddPlanMemberParam(planId, email)`, `RemovePlanMemberParam(planId, userId, requestingUserId)`
@@ -59,10 +59,10 @@ API service for camping trip planning — user registration, authentication, pla
   - `GetPlansAction`: Merges user's plans + public plans (deduped), marks non-member public plans with `isMember=false`
   - `UpdatePlanAction`: Owner-only, supports updating name and/or visibility
   - `DeletePlanAction`: Owner-only
-  - `GetPlanMembersAction`: Lists plan members, enriches with username from UserClient
-  - `AddPlanMemberAction`: Uses userClient.getOrCreate then adds member
+  - `GetPlanMembersAction`: Lists plan members, enriches with username and invitation status
+  - `AddPlanMemberAction`: Uses userClient.getOrCreate, adds member, creates invitation, sends email (with dedup)
   - `RemovePlanMemberAction`: Self-remove or owner can remove
-- **Service:** `PlanService` facade (takes PlanClient + UserClient)
+- **Service:** `PlanService` facade (takes PlanClient + UserClient + EmailClient + InvitationClient)
 - **Routes:** (all require `X-User-Id` header)
   - `POST /api/plans` — create plan (201)
   - `GET /api/plans` — list plans
@@ -136,6 +136,21 @@ API service for camping trip planning — user registration, authentication, pla
   - `DELETE /api/plans/{planId}/assignments/{assignmentId}/members/{memberUserId}` — remove member (204)
   - `PUT /api/plans/{planId}/assignments/{assignmentId}/owner` — transfer ownership
 
+### Webhook (`features/webhook/`)
+- **DTOs:** `ResendWebhookEvent(type, createdAt, data)`, `ResendWebhookData(emailId, from?, to?, subject?)`
+- **Actions:**
+  - `HandleResendWebhookAction`: Maps Resend webhook events to invitation status updates (sent, delivered, bounced, delayed, complained)
+- **Routes:** (no auth required)
+  - `POST /api/webhooks/resend` — Resend delivery webhook (always returns 200 OK)
+
+### Invite Email Flow (cross-cutting: Plan + Webhook)
+- When a member is added to a plan, an invitation email is sent via the `EmailClient`
+- **Dedup logic:** If invitation already has status sent/delivered/delayed/complained, skip re-sending
+- If status is pending/failed/bounced, a new email is sent
+- **Invitation lifecycle:** pending → sent → delivered (via webhook), or pending → sent → bounced/complained (via webhook), or pending → failed (send error)
+- **Email template:** `InviteEmailTemplate` — adventure-themed HTML with inviter name, plan name, CTA button
+- **Local dev:** `NoOpEmailClient` logs instead of sending real emails; no `RESEND_API_KEY` needed
+
 ## Key Patterns
 - `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` / `ItemMapper` / `ItineraryMapper` / `AssignmentMapper` adapt client models to service models
 - Service param objects for all service calls
@@ -154,16 +169,19 @@ API service for camping trip planning — user registration, authentication, pla
 - `ItineraryClientConfig` — creates itinerary client via factory function
 - `WorldServiceConfig` — wires service via `@Configuration` bean
 - `UserServiceConfig` — wires UserService
-- `PlanServiceConfig` — wires PlanService (takes PlanClient + UserClient)
+- `PlanServiceConfig` — wires PlanService (takes PlanClient + UserClient + EmailClient + InvitationClient)
 - `ItemServiceConfig` — wires ItemService (takes ItemClient)
 - `ItineraryServiceConfig` — wires ItineraryService (takes ItineraryClient + PlanClient)
 - `AssignmentClientConfig` — creates assignment client via factory function
 - `AssignmentServiceConfig` — wires AssignmentService (takes AssignmentClient + UserClient)
+- `EmailClientConfig` — creates NoOp or Resend email client based on `RESEND_API_KEY` env var (`@ConditionalOnMissingBean`)
+- `InvitationClientConfig` — creates invitation client via factory function (`@ConditionalOnMissingBean`)
+- `WebhookConfig` — wires HandleResendWebhookAction
 - `WebSocketConfig` — STOMP endpoint `/ws`, topic broker `/topic`, app prefix `/app`
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
 - **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`
