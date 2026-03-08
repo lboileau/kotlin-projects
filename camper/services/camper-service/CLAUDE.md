@@ -1,13 +1,13 @@
 # camper-service
 
-API service for camping trip planning — user registration, authentication, and plan management.
+API service for camping trip planning — user registration, authentication, plan management, and assignment management.
 
 ## Package
 `com.acme.services.camperservice`
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, and `itinerary-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, and `assignment-client` for data access
 - Database: `camper-db` (port 5433, database `camper_db`)
 
 ## Features
@@ -110,8 +110,33 @@ API service for camping trip planning — user registration, authentication, and
   - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event
   - `DELETE /api/plans/{planId}/itinerary/events/{eventId}` — delete event (204)
 
+### Assignment (`features/assignment/`)
+- **Model:** `Assignment(id, planId, name, type, maxOccupancy, ownerId, createdAt, updatedAt)`, `AssignmentMember(assignmentId, userId, username?, createdAt)`, `AssignmentDetail(id, planId, name, type, maxOccupancy, ownerId, members, createdAt, updatedAt)`
+- **DTOs:** `CreateAssignmentRequest(name, type, maxOccupancy?)`, `UpdateAssignmentRequest(name?, maxOccupancy?)`, `AddAssignmentMemberRequest(userId)`, `TransferOwnershipRequest(newOwnerId)`, `AssignmentResponse(...)`, `AssignmentDetailResponse(...)`, `AssignmentMemberResponse(...)`
+- **Error:** `AssignmentError` sealed class — `NotFound`, `NotOwner`, `Invalid`, `AtCapacity`, `AlreadyAssigned`, `AlreadyMember`, `CannotRemoveOwner`, `PlanNotFound`, `DuplicateName`
+- **Service params:** `CreateAssignmentParam(planId, name, type, maxOccupancy?, userId)`, `GetAssignmentsParam(planId, type?)`, `GetAssignmentParam(assignmentId)`, `UpdateAssignmentParam(assignmentId, name?, maxOccupancy?, userId)`, `DeleteAssignmentParam(assignmentId, userId)`, `AddAssignmentMemberParam(assignmentId, memberUserId, userId)`, `RemoveAssignmentMemberParam(assignmentId, memberUserId, userId)`, `TransferOwnershipParam(assignmentId, newOwnerId, userId)`
+- **Actions:**
+  - `CreateAssignmentAction`: Creates assignment within a plan, owner auto-added as member
+  - `GetAssignmentsAction`: Lists assignments for a plan, optionally filtered by type
+  - `GetAssignmentAction`: Gets single assignment with member details
+  - `UpdateAssignmentAction`: Owner-only update of name/maxOccupancy
+  - `DeleteAssignmentAction`: Owner-only deletion
+  - `AddAssignmentMemberAction`: Adds member to assignment (capacity/uniqueness checks)
+  - `RemoveAssignmentMemberAction`: Self-remove or owner can remove (owner cannot be removed)
+  - `TransferOwnershipAction`: Owner-only transfer of ownership to another member
+- **Service:** `AssignmentService` facade (takes AssignmentClient + UserClient)
+- **Routes:** (all require `X-User-Id` header)
+  - `POST /api/plans/{planId}/assignments` — create assignment (201)
+  - `GET /api/plans/{planId}/assignments` — list assignments (optional `?type=` filter)
+  - `GET /api/plans/{planId}/assignments/{assignmentId}` — get assignment detail
+  - `PUT /api/plans/{planId}/assignments/{assignmentId}` — update assignment (owner only)
+  - `DELETE /api/plans/{planId}/assignments/{assignmentId}` — delete assignment (owner only, 204)
+  - `POST /api/plans/{planId}/assignments/{assignmentId}/members` — add member (201)
+  - `DELETE /api/plans/{planId}/assignments/{assignmentId}/members/{memberUserId}` — remove member (204)
+  - `PUT /api/plans/{planId}/assignments/{assignmentId}/owner` — transfer ownership
+
 ## Key Patterns
-- `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` / `ItemMapper` / `ItineraryMapper` adapt client models to service models
+- `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` / `ItemMapper` / `ItineraryMapper` / `AssignmentMapper` adapt client models to service models
 - Service param objects for all service calls
 - Action classes validate, convert params, call client
 - `GlobalExceptionHandler` catches `RuntimeException::class`
@@ -129,9 +154,11 @@ API service for camping trip planning — user registration, authentication, and
 - `PlanServiceConfig` — wires PlanService (takes PlanClient + UserClient)
 - `ItemServiceConfig` — wires ItemService (takes ItemClient)
 - `ItineraryServiceConfig` — wires ItineraryService (takes ItineraryClient + PlanClient)
+- `AssignmentClientConfig` — creates assignment client via factory function
+- `AssignmentServiceConfig` — wires AssignmentService (takes AssignmentClient + UserClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture` use direct SQL for test setup
 - **Clean slate:** Tables truncated via `@BeforeEach`
