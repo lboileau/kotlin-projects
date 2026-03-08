@@ -13,6 +13,8 @@ include(":clients:plan-client")
 include(":clients:item-client")
 include(":clients:itinerary-client")
 include(":clients:assignment-client")
+include(":clients:email-client")
+include(":clients:invitation-client")
 include(":services:common")
 project(":services:common").name = "service-common"
 include(":services:camper-service")
