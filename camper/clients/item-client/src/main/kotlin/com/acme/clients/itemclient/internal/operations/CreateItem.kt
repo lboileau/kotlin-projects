@@ -26,12 +26,12 @@ internal class CreateItem(private val jdbi: Jdbi) {
             handle.createUpdate(
                 """
                 INSERT INTO items (id, plan_id, user_id, name, category, quantity, packed, created_at, updated_at)
-                VALUES (:id, :planId, :userId, :name, :category, :quantity, :packed, :createdAt, :updatedAt)
+                VALUES (:id, CAST(:planId AS uuid), CAST(:userId AS uuid), :name, :category, :quantity, :packed, :createdAt, :updatedAt)
                 """.trimIndent()
             )
                 .bind("id", id)
-                .bind("planId", param.planId)
-                .bind("userId", param.userId)
+                .bind("planId", param.planId?.toString())
+                .bind("userId", param.userId?.toString())
                 .bind("name", param.name)
                 .bind("category", param.category)
                 .bind("quantity", param.quantity)
