@@ -1,9 +1,11 @@
 package com.acme.services.camperservice.features.assignment.controller
 
+import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.assignment.dto.AddAssignmentMemberRequest
 import com.acme.services.camperservice.features.assignment.dto.CreateAssignmentRequest
 import com.acme.services.camperservice.features.assignment.dto.TransferOwnershipRequest
 import com.acme.services.camperservice.features.assignment.dto.UpdateAssignmentRequest
+import com.acme.services.camperservice.features.assignment.params.*
 import com.acme.services.camperservice.features.assignment.service.AssignmentService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -22,7 +24,14 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestBody request: CreateAssignmentRequest
     ): ResponseEntity<Any> {
         logger.info("POST /api/plans/{}/assignments", planId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = CreateAssignmentParam(
+            planId = planId,
+            name = request.name,
+            type = request.type,
+            maxOccupancy = request.maxOccupancy,
+            userId = userId
+        )
+        return assignmentService.create(param).toResponseEntity(successStatus = 201) { it }
     }
 
     @GetMapping
@@ -32,7 +41,8 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestParam(required = false) type: String?
     ): ResponseEntity<Any> {
         logger.info("GET /api/plans/{}/assignments", planId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = GetAssignmentsParam(planId = planId, type = type)
+        return assignmentService.getAssignments(param).toResponseEntity { it }
     }
 
     @GetMapping("/{assignmentId}")
@@ -42,7 +52,8 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("GET /api/plans/{}/assignments/{}", planId, assignmentId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = GetAssignmentParam(assignmentId = assignmentId)
+        return assignmentService.getAssignment(param).toResponseEntity { it }
     }
 
     @PutMapping("/{assignmentId}")
@@ -53,7 +64,13 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestBody request: UpdateAssignmentRequest
     ): ResponseEntity<Any> {
         logger.info("PUT /api/plans/{}/assignments/{}", planId, assignmentId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = UpdateAssignmentParam(
+            assignmentId = assignmentId,
+            name = request.name,
+            maxOccupancy = request.maxOccupancy,
+            userId = userId
+        )
+        return assignmentService.update(param).toResponseEntity { it }
     }
 
     @DeleteMapping("/{assignmentId}")
@@ -63,7 +80,8 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}/assignments/{}", planId, assignmentId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = DeleteAssignmentParam(assignmentId = assignmentId, userId = userId)
+        return assignmentService.delete(param).toResponseEntity(successStatus = 204) { }
     }
 
     @PostMapping("/{assignmentId}/members")
@@ -74,7 +92,12 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestBody request: AddAssignmentMemberRequest
     ): ResponseEntity<Any> {
         logger.info("POST /api/plans/{}/assignments/{}/members", planId, assignmentId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = AddAssignmentMemberParam(
+            assignmentId = assignmentId,
+            memberUserId = request.userId,
+            userId = userId
+        )
+        return assignmentService.addMember(param).toResponseEntity(successStatus = 201) { it }
     }
 
     @DeleteMapping("/{assignmentId}/members/{memberUserId}")
@@ -85,7 +108,12 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}/assignments/{}/members/{}", planId, assignmentId, memberUserId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = RemoveAssignmentMemberParam(
+            assignmentId = assignmentId,
+            memberUserId = memberUserId,
+            userId = userId
+        )
+        return assignmentService.removeMember(param).toResponseEntity(successStatus = 204) { }
     }
 
     @PutMapping("/{assignmentId}/owner")
@@ -96,6 +124,11 @@ class AssignmentController(private val assignmentService: AssignmentService) {
         @RequestBody request: TransferOwnershipRequest
     ): ResponseEntity<Any> {
         logger.info("PUT /api/plans/{}/assignments/{}/owner", planId, assignmentId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not implemented"))
+        val param = TransferOwnershipParam(
+            assignmentId = assignmentId,
+            newOwnerId = request.newOwnerId,
+            userId = userId
+        )
+        return assignmentService.transferOwnership(param).toResponseEntity { it }
     }
 }
