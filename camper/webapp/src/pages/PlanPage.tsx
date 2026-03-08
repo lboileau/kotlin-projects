@@ -9,6 +9,7 @@ import { InteractableItem } from '../components/InteractableItem';
 import { ComingSoonModal } from '../components/ComingSoonModal';
 import { AddMemberModal } from '../components/AddMemberModal';
 import { GearModal, MealModal } from '../components/GearModal';
+import { ItineraryModal } from '../components/ItineraryModal';
 import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG } from '../components/CampsiteItems';
 import './PlanPage.css';
 
@@ -376,7 +377,16 @@ export function PlanPage() {
         />
       )}
 
-      {activeModal && activeModal !== 'addMember' && activeModal !== 'managePlan' && activeModal !== 'equipment' && activeModal !== 'kitchen' && MODAL_CONFIG[activeModal] && (
+      {activeModal === 'itinerary' && planId && (
+        <ItineraryModal
+          isOpen
+          onClose={() => setActiveModal(null)}
+          planId={planId}
+          isOwner={isOwner}
+        />
+      )}
+
+      {activeModal && activeModal !== 'addMember' && activeModal !== 'managePlan' && activeModal !== 'equipment' && activeModal !== 'kitchen' && activeModal !== 'itinerary' && MODAL_CONFIG[activeModal] && (
         <ComingSoonModal
           isOpen
           onClose={() => setActiveModal(null)}
