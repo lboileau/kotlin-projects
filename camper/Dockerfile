@@ -12,6 +12,7 @@ COPY gradlew build.gradle.kts settings.gradle.kts gradle.properties ./
 COPY libs libs
 COPY clients clients
 COPY services services
+COPY databases databases
 RUN ./gradlew :services:camper-service:bootJar --no-daemon
 
 FROM eclipse-temurin:21-jre
