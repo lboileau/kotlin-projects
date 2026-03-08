@@ -18,7 +18,8 @@ camper/
 │   ├── user-client/          # JDBI data access for users table
 │   ├── plan-client/          # JDBI data access for plans & plan_members tables
 │   ├── item-client/          # JDBI data access for items table
-│   └── itinerary-client/     # JDBI data access for itineraries & itinerary_events tables
+│   ├── itinerary-client/     # JDBI data access for itineraries & itinerary_events tables
+│   └── assignment-client/    # JDBI data access for assignments & assignment_members tables
 ├── services/
 │   ├── common/               # ApiResponse shared type
 │   └── camper-service/       # Spring Boot REST API
