@@ -10,6 +10,7 @@ interface AssignmentsModalProps {
   planOwnerId: string;
   currentUserId: string;
   members: PlanMember[];
+  refreshKey?: number;
 }
 
 const AVATAR_COLORS = [
@@ -323,7 +324,7 @@ function AssignmentCard({
   );
 }
 
-export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, currentUserId, members }: AssignmentsModalProps) {
+export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, currentUserId, members, refreshKey }: AssignmentsModalProps) {
   const [assignments, setAssignments] = useState<AssignmentDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -356,6 +357,13 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
       loadAssignments();
     }
   }, [isOpen, loadAssignments]);
+
+  // Live updates: refetch when refreshKey changes while modal is open
+  useEffect(() => {
+    if (isOpen && refreshKey !== undefined && refreshKey > 0) {
+      loadAssignments();
+    }
+  }, [refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (showCreateForm && createInputRef.current) {
