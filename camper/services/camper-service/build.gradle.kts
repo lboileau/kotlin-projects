@@ -38,6 +38,12 @@ dependencies {
     testImplementation(testFixtures(project(":clients:assignment-client")))
 }
 
+tasks.named<Copy>("processResources") {
+    from("${rootProject.projectDir}/databases/camper-db/migrations") {
+        into("db/migration")
+    }
+}
+
 tasks.withType<Test> {
     systemProperty("project.root", rootProject.projectDir.absolutePath)
     systemProperty("spring.profiles.active", "test")
