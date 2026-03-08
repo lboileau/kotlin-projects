@@ -1,0 +1,397 @@
+.home-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+.home-content {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-xl);
+  background: rgba(10, 8, 20, 0.3);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 248, 231, 0.08);
+}
+
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.home-brand-text {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--parchment);
+  letter-spacing: 0.05em;
+}
+
+.home-brand-icon {
+  filter: drop-shadow(0 0 8px rgba(244, 164, 96, 0.3));
+}
+
+.home-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.home-user-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 248, 231, 0.12);
+  border-radius: var(--radius-xl);
+  padding: 4px 14px 4px 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.home-user-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 248, 231, 0.25);
+}
+
+.home-user-avatar {
+  flex-shrink: 0;
+}
+
+.home-user-name {
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  color: var(--lavender-light);
+}
+
+.home-logout {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--rose);
+  background: rgba(232, 180, 184, 0.1);
+  border: 1px solid rgba(232, 180, 184, 0.25);
+  padding: 6px 14px;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.home-logout:hover {
+  background: rgba(232, 180, 184, 0.2);
+  border-color: rgba(232, 180, 184, 0.4);
+}
+
+/* Hero */
+.home-hero {
+  text-align: center;
+  padding: var(--space-2xl) var(--space-xl) var(--space-xl);
+  animation: fade-in-up 0.6s ease backwards;
+}
+
+.home-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--parchment);
+  letter-spacing: 0.04em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.home-subtitle {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--lavender-light);
+  margin-top: var(--space-xs);
+  opacity: 0.7;
+}
+
+/* Trips container */
+.home-trips {
+  flex: 1;
+  padding: 0 var(--space-xl) var(--space-2xl);
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.home-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Trip card wrapper — allows delete zone behind */
+.trip-card-wrapper {
+  position: relative;
+}
+
+/* Trip card */
+.trip-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(250, 245, 235, 0.92);
+  border: 1px solid rgba(168, 139, 91, 0.2);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: fade-in-up 0.5s ease backwards;
+  text-align: left;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 2;
+}
+
+.trip-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 20% 50%, rgba(168, 139, 91, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.trip-card:hover {
+  transform: translateY(-2px) translateX(4px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+  border-color: rgba(168, 139, 91, 0.35);
+}
+
+.trip-card__icon {
+  flex-shrink: 0;
+}
+
+.trip-card__icon--new {
+  opacity: 0.6;
+}
+
+.trip-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.trip-card__name {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  color: var(--charcoal);
+  margin-bottom: 2px;
+}
+
+.trip-card__name--new {
+  color: var(--sage-dark);
+}
+
+.trip-card__date {
+  font-size: 0.78rem;
+  color: var(--charcoal-light);
+  opacity: 0.7;
+}
+
+.trip-card__arrow {
+  flex-shrink: 0;
+  color: var(--tan-deep);
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.trip-card__delete-zone {
+  position: absolute;
+  left: calc(100% - 10px);
+  top: -2px;
+  bottom: 2px;
+  width: 0;
+  overflow: hidden;
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #D94F3B;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  z-index: 1;
+  box-shadow: 2px 0 8px rgba(217, 79, 59, 0.3);
+}
+
+.trip-card-wrapper:hover .trip-card__delete-zone {
+  width: 62px;
+  transition: width 0.3s ease 0.6s;
+}
+
+.trip-card__delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  margin-left: 10px;
+}
+
+.trip-card__delete:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.trip-card:hover .trip-card__arrow {
+  transform: translateX(4px);
+  color: var(--sage-deep);
+}
+
+.trip-card__plus {
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  color: var(--sage);
+  font-weight: 300;
+  transition: transform 0.3s ease;
+}
+
+.trip-card:hover .trip-card__plus {
+  transform: scale(1.2);
+}
+
+/* New trip card */
+.trip-card--new {
+  background: rgba(250, 245, 235, 0.6);
+  border-style: dashed;
+  border-color: rgba(143, 176, 138, 0.3);
+}
+
+.trip-card--new:hover {
+  background: rgba(250, 245, 235, 0.85);
+  border-color: rgba(143, 176, 138, 0.5);
+}
+
+/* Form card */
+.trip-card--form {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  cursor: default;
+}
+
+.trip-create-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-family: var(--font-body);
+  border: 2px solid var(--tan-deep);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--charcoal);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.trip-create-input:focus {
+  border-color: var(--sage-deep);
+  box-shadow: 0 0 0 3px rgba(143, 176, 138, 0.25);
+  outline: none;
+}
+
+.trip-create-input::placeholder {
+  color: var(--tan-deep);
+  font-style: italic;
+}
+
+.trip-create-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.trip-create-cancel {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  color: var(--charcoal-light);
+  background: none;
+  border: 1px solid var(--tan-deep);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: background 0.2s ease;
+}
+
+.trip-create-cancel:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.trip-create-submit {
+  padding: 8px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, var(--sage-deep), var(--sage-dark));
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-body);
+  box-shadow: 0 4px 12px rgba(90, 122, 86, 0.3);
+  transition: all 0.3s ease;
+}
+
+.trip-create-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(90, 122, 86, 0.4);
+}
+
+.trip-create-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading state */
+.home-loading {
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--lavender-light);
+  opacity: 0.7;
+  font-style: italic;
+  animation: fade-in 0.3s ease;
+}
+
+.home-loading-flame {
+  width: 20px;
+  height: 30px;
+  margin: 0 auto var(--space-md);
+  background: radial-gradient(ellipse at bottom, var(--ember) 0%, transparent 70%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: campfire-dance 0.8s ease-in-out infinite;
+}
+
+.home-error {
+  text-align: center;
+  color: var(--rose);
+  background: rgba(232, 180, 184, 0.15);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  font-size: 0.9rem;
+}
+
+/* Empty state */
+.home-empty {
+  text-align: center;
+  padding: var(--space-2xl);
+  animation: fade-in 0.5s ease;
+}
+
+.home-empty-icon {
+  opacity: 0.5;
+  margin-bottom: var(--space-md);
+  animation: gentle-bob 4s ease-in-out infinite;
+}
+
+.home-empty-text {
+  color: var(--lavender-light);
+  font-style: italic;
+  opacity: 0.6;
+}
