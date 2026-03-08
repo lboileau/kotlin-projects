@@ -354,11 +354,12 @@ export function PlanPage() {
         </div>
       )}
 
-      {activeModal === 'equipment' && planId && user && (
+      {activeModal === 'equipment' && planId && user && plan && (
         <GearModal
           isOpen
           onClose={() => setActiveModal(null)}
           planId={planId}
+          planOwnerId={plan.ownerId}
           members={members}
           currentUserId={user.id}
         />

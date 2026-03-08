@@ -6,6 +6,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   planId: string;
+  planOwnerId: string;
   members: PlanMember[];
   currentUserId: string;
 }
@@ -29,12 +30,13 @@ function getCategoryLabel(category: string): string {
 
 interface ItemRowProps {
   item: Item;
+  canEdit: boolean;
   onTogglePacked: (item: Item) => void;
   onDelete: (item: Item) => void;
   onUpdate: (item: Item, name: string, quantity: number, category: string) => void;
 }
 
-function ItemRow({ item, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
+function ItemRow({ item, canEdit, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
   const [editQty, setEditQty] = useState(item.quantity);
@@ -99,7 +101,8 @@ function ItemRow({ item, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
     <div className={`gear-item ${item.packed ? 'gear-item--packed' : ''}`}>
       <button
         className={`gear-check ${item.packed ? 'gear-check--checked' : ''}`}
-        onClick={() => onTogglePacked(item)}
+        onClick={() => canEdit && onTogglePacked(item)}
+        disabled={!canEdit}
         aria-label={item.packed ? 'Unpack item' : 'Pack item'}
       >
         {item.packed && (
@@ -113,18 +116,20 @@ function ItemRow({ item, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
       </span>
       <span className="gear-item-name">{item.name}</span>
       {item.quantity > 1 && <span className="gear-item-qty">×{item.quantity}</span>}
-      <div className="gear-item-actions">
-        <button className="gear-item-edit" onClick={() => setEditing(true)} title="Edit">
-          <svg width="14" height="14" viewBox="0 0 14 14">
-            <path d="M10,2 L12,4 L5,11 L2,12 L3,9 Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-          </svg>
-        </button>
-        <button className="gear-item-delete" onClick={() => onDelete(item)} title="Remove">
-          <svg width="14" height="14" viewBox="0 0 14 14">
-            <path d="M3,3 L11,11 M11,3 L3,11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
+      {canEdit && (
+        <div className="gear-item-actions">
+          <button className="gear-item-edit" onClick={() => setEditing(true)} title="Edit">
+            <svg width="14" height="14" viewBox="0 0 14 14">
+              <path d="M10,2 L12,4 L5,11 L2,12 L3,9 Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <button className="gear-item-delete" onClick={() => onDelete(item)} title="Remove">
+            <svg width="14" height="14" viewBox="0 0 14 14">
+              <path d="M3,3 L11,11 M11,3 L3,11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -195,9 +200,10 @@ interface ChecklistSectionProps {
   onRefresh: () => void;
   defaultExpanded?: boolean;
   accentColor?: string;
+  canEdit: boolean;
 }
 
-function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefresh, defaultExpanded = true, accentColor }: ChecklistSectionProps) {
+function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefresh, defaultExpanded = true, accentColor, canEdit }: ChecklistSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const packedCount = items.filter(i => i.packed).length;
@@ -267,6 +273,7 @@ function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefres
                 <ItemRow
                   key={item.id}
                   item={item}
+                  canEdit={canEdit}
                   onTogglePacked={handleTogglePacked}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
@@ -275,9 +282,9 @@ function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefres
             </div>
           ))}
           {totalCount === 0 && (
-            <p className="gear-empty">No items yet — add some gear below.</p>
+            <p className="gear-empty">{canEdit ? 'No items yet — add some gear below.' : 'No items yet.'}</p>
           )}
-          <AddItemForm onAdd={handleAdd} />
+          {canEdit && <AddItemForm onAdd={handleAdd} />}
         </div>
       )}
     </div>
@@ -293,7 +300,7 @@ const MEMBER_COLORS = [
   'var(--tan)',
 ];
 
-export function GearModal({ isOpen, onClose, planId, members, currentUserId }: Props) {
+export function GearModal({ isOpen, onClose, planId, planOwnerId, members, currentUserId }: Props) {
   const [planItems, setPlanItems] = useState<Item[]>([]);
   const [memberItems, setMemberItems] = useState<Record<string, Item[]>>({});
   const [loading, setLoading] = useState(true);
@@ -401,6 +408,7 @@ export function GearModal({ isOpen, onClose, planId, members, currentUserId }: P
                 ownerId={planId}
                 onRefresh={loadItems}
                 defaultExpanded={true}
+                canEdit={currentUserId === planOwnerId}
               />
 
               {/* Divider */}
@@ -429,6 +437,7 @@ export function GearModal({ isOpen, onClose, planId, members, currentUserId }: P
                     onRefresh={loadItems}
                     defaultExpanded={isCurrentUser}
                     accentColor={MEMBER_COLORS[i % MEMBER_COLORS.length]}
+                    canEdit={isCurrentUser}
                   />
                 );
               })}
