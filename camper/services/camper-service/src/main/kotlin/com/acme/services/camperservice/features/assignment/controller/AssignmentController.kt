@@ -1,5 +1,6 @@
 package com.acme.services.camperservice.features.assignment.controller
 
+import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.assignment.dto.AddAssignmentMemberRequest
 import com.acme.services.camperservice.features.assignment.dto.CreateAssignmentRequest
@@ -7,6 +8,7 @@ import com.acme.services.camperservice.features.assignment.dto.TransferOwnership
 import com.acme.services.camperservice.features.assignment.dto.UpdateAssignmentRequest
 import com.acme.services.camperservice.features.assignment.params.*
 import com.acme.services.camperservice.features.assignment.service.AssignmentService
+import com.acme.services.camperservice.websocket.PlanEventPublisher
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,7 +16,10 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/plans/{planId}/assignments")
-class AssignmentController(private val assignmentService: AssignmentService) {
+class AssignmentController(
+    private val assignmentService: AssignmentService,
+    private val eventPublisher: PlanEventPublisher,
+) {
     private val logger = LoggerFactory.getLogger(AssignmentController::class.java)
 
     @PostMapping
@@ -31,7 +36,9 @@ class AssignmentController(private val assignmentService: AssignmentService) {
             maxOccupancy = request.maxOccupancy,
             userId = userId
         )
-        return assignmentService.create(param).toResponseEntity(successStatus = 201) { it }
+        val result = assignmentService.create(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "assignments", "updated")
+        return result.toResponseEntity(successStatus = 201) { it }
     }
 
     @GetMapping
@@ -70,7 +77,9 @@ class AssignmentController(private val assignmentService: AssignmentService) {
             maxOccupancy = request.maxOccupancy,
             userId = userId
         )
-        return assignmentService.update(param).toResponseEntity { it }
+        val result = assignmentService.update(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "assignments", "updated")
+        return result.toResponseEntity { it }
     }
 
     @DeleteMapping("/{assignmentId}")
@@ -81,7 +90,9 @@ class AssignmentController(private val assignmentService: AssignmentService) {
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}/assignments/{}", planId, assignmentId)
         val param = DeleteAssignmentParam(assignmentId = assignmentId, userId = userId)
-        return assignmentService.delete(param).toResponseEntity(successStatus = 204) { }
+        val result = assignmentService.delete(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "assignments", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 
     @PostMapping("/{assignmentId}/members")
@@ -97,7 +108,9 @@ class AssignmentController(private val assignmentService: AssignmentService) {
             memberUserId = request.userId,
             userId = userId
         )
-        return assignmentService.addMember(param).toResponseEntity(successStatus = 201) { it }
+        val result = assignmentService.addMember(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "assignments", "updated")
+        return result.toResponseEntity(successStatus = 201) { it }
     }
 
     @DeleteMapping("/{assignmentId}/members/{memberUserId}")
@@ -113,7 +126,9 @@ class AssignmentController(private val assignmentService: AssignmentService) {
             memberUserId = memberUserId,
             userId = userId
         )
-        return assignmentService.removeMember(param).toResponseEntity(successStatus = 204) { }
+        val result = assignmentService.removeMember(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "assignments", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 
     @PutMapping("/{assignmentId}/owner")
@@ -129,6 +144,8 @@ class AssignmentController(private val assignmentService: AssignmentService) {
             newOwnerId = request.newOwnerId,
             userId = userId
         )
-        return assignmentService.transferOwnership(param).toResponseEntity { it }
+        val result = assignmentService.transferOwnership(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "assignments", "updated")
+        return result.toResponseEntity { it }
     }
 }

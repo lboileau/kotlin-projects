@@ -1,5 +1,6 @@
 package com.acme.services.camperservice.features.plan.controller
 
+import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.plan.dto.AddMemberRequest
 import com.acme.services.camperservice.features.plan.dto.CreatePlanRequest
@@ -7,6 +8,7 @@ import com.acme.services.camperservice.features.plan.dto.UpdatePlanRequest
 import com.acme.services.camperservice.features.plan.mapper.PlanMapper
 import com.acme.services.camperservice.features.plan.params.*
 import com.acme.services.camperservice.features.plan.service.PlanService
+import com.acme.services.camperservice.websocket.PlanEventPublisher
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,7 +16,10 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/plans")
-class PlanController(private val planService: PlanService) {
+class PlanController(
+    private val planService: PlanService,
+    private val eventPublisher: PlanEventPublisher,
+) {
     private val logger = LoggerFactory.getLogger(PlanController::class.java)
 
     @PostMapping
@@ -42,7 +47,9 @@ class PlanController(private val planService: PlanService) {
     ): ResponseEntity<Any> {
         logger.info("PUT /api/plans/{}", planId)
         val param = UpdatePlanParam(planId = planId, name = request.name, visibility = request.visibility, userId = userId)
-        return planService.update(param).toResponseEntity { PlanMapper.toResponse(it) }
+        val result = planService.update(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "plan", "updated")
+        return result.toResponseEntity { PlanMapper.toResponse(it) }
     }
 
     @DeleteMapping("/{planId}")
@@ -52,7 +59,9 @@ class PlanController(private val planService: PlanService) {
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}", planId)
         val param = DeletePlanParam(planId = planId, userId = userId)
-        return planService.delete(param).toResponseEntity(successStatus = 204) { }
+        val result = planService.delete(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "plan", "deleted")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 
     @GetMapping("/{planId}/members")
@@ -73,7 +82,9 @@ class PlanController(private val planService: PlanService) {
     ): ResponseEntity<Any> {
         logger.info("POST /api/plans/{}/members", planId)
         val param = AddPlanMemberParam(planId = planId, email = request.email)
-        return planService.addMember(param).toResponseEntity(successStatus = 201) { PlanMapper.toResponse(it) }
+        val result = planService.addMember(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "members", "updated")
+        return result.toResponseEntity(successStatus = 201) { PlanMapper.toResponse(it) }
     }
 
     @DeleteMapping("/{planId}/members/{memberId}")
@@ -84,6 +95,8 @@ class PlanController(private val planService: PlanService) {
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}/members/{}", planId, memberId)
         val param = RemovePlanMemberParam(planId = planId, userId = memberId, requestingUserId = userId)
-        return planService.removeMember(param).toResponseEntity(successStatus = 204) { }
+        val result = planService.removeMember(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "members", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 }
