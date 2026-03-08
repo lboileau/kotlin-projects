@@ -1,11 +1,13 @@
 package com.acme.services.camperservice.features.item.controller
 
+import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.item.dto.CreateItemRequest
 import com.acme.services.camperservice.features.item.dto.UpdateItemRequest
 import com.acme.services.camperservice.features.item.mapper.ItemMapper
 import com.acme.services.camperservice.features.item.params.*
 import com.acme.services.camperservice.features.item.service.ItemService
+import com.acme.services.camperservice.websocket.PlanEventPublisher
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,7 +15,10 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/items")
-class ItemController(private val itemService: ItemService) {
+class ItemController(
+    private val itemService: ItemService,
+    private val eventPublisher: PlanEventPublisher,
+) {
     private val logger = LoggerFactory.getLogger(ItemController::class.java)
 
     @PostMapping
@@ -31,7 +36,12 @@ class ItemController(private val itemService: ItemService) {
             ownerId = request.ownerId,
             requestingUserId = userId,
         )
-        return itemService.create(param).toResponseEntity(successStatus = 201) { ItemMapper.toResponse(it) }
+        val result = itemService.create(param)
+        if (result is Result.Success) {
+            val planId = if (request.ownerType == "plan") request.ownerId else result.value.planId
+            planId?.let { eventPublisher.publishUpdate(it, "items", "updated") }
+        }
+        return result.toResponseEntity(successStatus = 201) { ItemMapper.toResponse(it) }
     }
 
     @GetMapping
@@ -70,7 +80,11 @@ class ItemController(private val itemService: ItemService) {
             packed = request.packed,
             requestingUserId = userId,
         )
-        return itemService.update(param).toResponseEntity { ItemMapper.toResponse(it) }
+        val result = itemService.update(param)
+        if (result is Result.Success) {
+            result.value.planId?.let { eventPublisher.publishUpdate(it, "items", "updated") }
+        }
+        return result.toResponseEntity { ItemMapper.toResponse(it) }
     }
 
     @DeleteMapping("/{id}")
@@ -79,7 +93,12 @@ class ItemController(private val itemService: ItemService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/items/{}", id)
+        val planId = (itemService.getById(GetItemParam(id = id, requestingUserId = userId)) as? Result.Success)?.value?.planId
         val param = DeleteItemParam(id = id, requestingUserId = userId)
-        return itemService.delete(param).toResponseEntity(successStatus = 204) { }
+        val result = itemService.delete(param)
+        if (result is Result.Success) {
+            planId?.let { eventPublisher.publishUpdate(it, "items", "updated") }
+        }
+        return result.toResponseEntity(successStatus = 204) { }
     }
 }
