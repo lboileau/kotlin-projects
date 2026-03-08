@@ -53,7 +53,19 @@ internal class AddPlanMemberAction(
             is Result.Failure -> return Result.Failure(PlanError.fromClientError(result.error))
         }
 
-        // Create invitation record in pending state
+        // Check existing invitation status before upserting (dedup logic)
+        val existingStatus = when (val result = invitationClient.getByPlanIdAndUserId(
+            GetByPlanIdAndUserIdParam(planId = param.planId, userId = user.id)
+        )) {
+            is Result.Success -> result.value?.status
+            is Result.Failure -> null
+        }
+        if (existingStatus != null && existingStatus in skipStatuses) {
+            logger.debug("Skipping email send — invitation already has status={}", existingStatus)
+            return Result.Success(member)
+        }
+
+        // Create or update invitation record in pending state
         val invitation = when (val result = invitationClient.upsert(
             UpsertInvitationParam(
                 planId = param.planId,
@@ -69,18 +81,6 @@ internal class AddPlanMemberAction(
                 logger.warn("Failed to upsert invitation: {}", result.error.message)
                 return Result.Success(member)
             }
-        }
-
-        // Check if we should skip sending (dedup logic)
-        val existingStatus = when (val result = invitationClient.getByPlanIdAndUserId(
-            GetByPlanIdAndUserIdParam(planId = param.planId, userId = user.id)
-        )) {
-            is Result.Success -> result.value?.status
-            is Result.Failure -> null
-        }
-        if (existingStatus != null && existingStatus != "pending" && existingStatus in skipStatuses) {
-            logger.debug("Skipping email send — invitation already has status={}", existingStatus)
-            return Result.Success(member)
         }
 
         // Fetch plan name and inviter name for the email
