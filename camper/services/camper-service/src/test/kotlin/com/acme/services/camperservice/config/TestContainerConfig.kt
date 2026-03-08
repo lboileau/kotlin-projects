@@ -1,5 +1,7 @@
 package com.acme.services.camperservice.config
 
+import com.acme.clients.assignmentclient.api.AssignmentClient
+import com.acme.clients.assignmentclient.createAssignmentClient
 import com.acme.clients.itemclient.api.ItemClient
 import com.acme.clients.itemclient.createItemClient
 import com.acme.clients.planclient.api.PlanClient
@@ -48,4 +50,8 @@ class TestContainerConfig {
     @Bean
     @Primary
     fun itemClient(): ItemClient = createItemClient()
+
+    @Bean
+    @Primary
+    fun assignmentClient(): AssignmentClient = createAssignmentClient()
 }

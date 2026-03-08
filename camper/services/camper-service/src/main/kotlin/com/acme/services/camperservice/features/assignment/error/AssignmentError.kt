@@ -14,6 +14,7 @@ sealed class AssignmentError(override val message: String) : AppError {
     data class AlreadyMember(val assignmentId: String, val userId: String) : AssignmentError("User $userId is already a member of assignment $assignmentId")
     data class CannotRemoveOwner(val assignmentId: String, val userId: String) : AssignmentError("Cannot remove owner $userId from assignment $assignmentId")
     data class PlanNotFound(val planId: String) : AssignmentError("Plan not found: $planId")
+    data class DuplicateName(val name: String, val type: String) : AssignmentError("Assignment '$name' already exists for this plan and type '$type'")
 
     companion object {
         fun fromClientError(error: AppError): AssignmentError = when (error) {
@@ -24,6 +25,7 @@ sealed class AssignmentError(override val message: String) : AppError {
                     AlreadyAssigned(parts.getOrElse(0) { "" }, parts.getOrElse(1) { "" }, parts.getOrElse(2) { "" })
                 }
                 error.detail.contains("already a member") -> AlreadyMember(error.entity, error.detail)
+                error.detail.contains("already exists") -> DuplicateName(error.entity, error.detail)
                 else -> Invalid("unknown", error.message)
             }
             is ValidationError -> Invalid(error.field, error.reason)

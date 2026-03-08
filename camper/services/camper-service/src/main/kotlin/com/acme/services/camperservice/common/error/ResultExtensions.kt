@@ -121,6 +121,8 @@ fun AssignmentError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
     is AssignmentError.PlanNotFound -> ResponseEntity.status(404)
         .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is AssignmentError.DuplicateName -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
 }
 
 @JvmName("assignmentResultToResponseEntity")
