@@ -16,7 +16,7 @@ class AssignmentService(
     private val getAssignment = GetAssignmentAction(assignmentClient, userClient)
     private val updateAssignment = UpdateAssignmentAction(assignmentClient, planClient)
     private val deleteAssignment = DeleteAssignmentAction(assignmentClient, planClient)
-    private val addAssignmentMember = AddAssignmentMemberAction(assignmentClient)
+    private val addAssignmentMember = AddAssignmentMemberAction(assignmentClient, userClient)
     private val removeAssignmentMember = RemoveAssignmentMemberAction(assignmentClient, planClient)
     private val transferOwnership = TransferOwnershipAction(assignmentClient, planClient)
 

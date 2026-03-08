@@ -40,6 +40,18 @@ object AssignmentMapper {
         updatedAt = assignment.updatedAt
     )
 
+    fun toDetailResponse(assignment: Assignment, members: List<AssignmentMember>): AssignmentDetailResponse = AssignmentDetailResponse(
+        id = assignment.id,
+        planId = assignment.planId,
+        name = assignment.name,
+        type = assignment.type,
+        maxOccupancy = assignment.maxOccupancy,
+        ownerId = assignment.ownerId,
+        members = members.map { toResponse(it) },
+        createdAt = assignment.createdAt,
+        updatedAt = assignment.updatedAt
+    )
+
     fun toResponse(detail: AssignmentDetail): AssignmentDetailResponse = AssignmentDetailResponse(
         id = detail.id,
         planId = detail.planId,
