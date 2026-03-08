@@ -61,6 +61,7 @@ webapp/
 - **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
 - **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; tent/kitchen/itinerary show ComingSoonModal. Owner sees "Manage Plan" button in header (toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others.
   - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars.
+  - **MealModal** — Same checklist structure as GearModal but with meal categories (breakfast, lunch, dinner, snacks). Opens from the kitchen campsite item. Both modals share a generic `ChecklistModal` component internally.
 
 ### Visual Design System
 - **Palette:** Defined in `theme.css` as CSS variables (`--lavender`, `--sage`, `--tan`, `--rose`, `--mint`, `--ember`, `--flame`, `--night-sky`, `--parchment`, etc.)

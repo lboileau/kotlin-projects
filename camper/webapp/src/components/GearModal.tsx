@@ -2,41 +2,52 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, type Item, type PlanMember } from '../api/client';
 import './GearModal.css';
 
-interface Props {
+export interface CategoryDef {
+  value: string;
+  label: string;
+  icon: string;
+}
+
+interface ChecklistModalConfig {
+  title: string;
+  icon: React.ReactNode;
+  emptyText: string;
+  loadingText: string;
+  addPlaceholder: string;
+  sharedTitle: string;
+  sharedSubtitle: string;
+  personalDividerLabel: string;
+  categories: CategoryDef[];
+}
+
+interface ChecklistModalProps {
   isOpen: boolean;
   onClose: () => void;
   planId: string;
   planOwnerId: string;
   members: PlanMember[];
   currentUserId: string;
+  config: ChecklistModalConfig;
 }
 
-const CATEGORIES = [
-  { value: 'camp', label: 'Camp', icon: '△' },
-  { value: 'canoe', label: 'Canoe', icon: '◠' },
-  { value: 'kitchen', label: 'Kitchen', icon: '◉' },
-  { value: 'personal', label: 'Personal', icon: '◈' },
-  { value: 'food_item', label: 'Food', icon: '◎' },
-  { value: 'misc', label: 'Misc', icon: '◇' },
-];
-
-function getCategoryIcon(category: string): string {
-  return CATEGORIES.find(c => c.value === category)?.icon ?? '◇';
+function getCategoryIcon(category: string, categories: CategoryDef[]): string {
+  return categories.find(c => c.value === category)?.icon ?? '◇';
 }
 
-function getCategoryLabel(category: string): string {
-  return CATEGORIES.find(c => c.value === category)?.label ?? category;
+function getCategoryLabel(category: string, categories: CategoryDef[]): string {
+  return categories.find(c => c.value === category)?.label ?? category;
 }
 
 interface ItemRowProps {
   item: Item;
   canEdit: boolean;
+  categories: CategoryDef[];
   onTogglePacked: (item: Item) => void;
   onDelete: (item: Item) => void;
   onUpdate: (item: Item, name: string, quantity: number, category: string) => void;
 }
 
-function ItemRow({ item, canEdit, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
+function ItemRow({ item, canEdit, categories, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
   const [editQty, setEditQty] = useState(item.quantity);
@@ -80,7 +91,7 @@ function ItemRow({ item, canEdit, onTogglePacked, onDelete, onUpdate }: ItemRowP
           value={editCategory}
           onChange={e => setEditCategory(e.target.value)}
         >
-          {CATEGORIES.map(c => (
+          {categories.map(c => (
             <option key={c.value} value={c.value}>{c.icon} {c.label}</option>
           ))}
         </select>
@@ -111,8 +122,8 @@ function ItemRow({ item, canEdit, onTogglePacked, onDelete, onUpdate }: ItemRowP
           </svg>
         )}
       </button>
-      <span className="gear-item-category-icon" title={getCategoryLabel(item.category)}>
-        {getCategoryIcon(item.category)}
+      <span className="gear-item-category-icon" title={getCategoryLabel(item.category, categories)}>
+        {getCategoryIcon(item.category, categories)}
       </span>
       <span className="gear-item-name">{item.name}</span>
       {item.quantity > 1 && <span className="gear-item-qty">×{item.quantity}</span>}
@@ -135,12 +146,14 @@ function ItemRow({ item, canEdit, onTogglePacked, onDelete, onUpdate }: ItemRowP
 }
 
 interface AddItemFormProps {
+  categories: CategoryDef[];
+  placeholder: string;
   onAdd: (name: string, category: string, quantity: number) => Promise<void>;
 }
 
-function AddItemForm({ onAdd }: AddItemFormProps) {
+function AddItemForm({ categories, placeholder, onAdd }: AddItemFormProps) {
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('camp');
+  const [category, setCategory] = useState(categories[0]?.value ?? '');
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -166,7 +179,7 @@ function AddItemForm({ onAdd }: AddItemFormProps) {
         className="gear-add-input"
         value={name}
         onChange={e => setName(e.target.value)}
-        placeholder="Add gear item..."
+        placeholder={placeholder}
         disabled={adding}
       />
       <select
@@ -175,7 +188,7 @@ function AddItemForm({ onAdd }: AddItemFormProps) {
         onChange={e => setCategory(e.target.value)}
         disabled={adding}
       >
-        {CATEGORIES.map(c => (
+        {categories.map(c => (
           <option key={c.value} value={c.value}>{c.icon} {c.label}</option>
         ))}
       </select>
@@ -201,9 +214,12 @@ interface ChecklistSectionProps {
   defaultExpanded?: boolean;
   accentColor?: string;
   canEdit: boolean;
+  categories: CategoryDef[];
+  addPlaceholder: string;
+  emptyText: string;
 }
 
-function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefresh, defaultExpanded = true, accentColor, canEdit }: ChecklistSectionProps) {
+function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefresh, defaultExpanded = true, accentColor, canEdit, categories, addPlaceholder, emptyText }: ChecklistSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const packedCount = items.filter(i => i.packed).length;
@@ -236,7 +252,7 @@ function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefres
     return acc;
   }, {});
 
-  const categoryOrder = CATEGORIES.map(c => c.value);
+  const categoryOrder = categories.map(c => c.value);
   const sortedCategories = Object.keys(grouped).sort((a, b) => {
     const ai = categoryOrder.indexOf(a);
     const bi = categoryOrder.indexOf(b);
@@ -266,14 +282,15 @@ function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefres
           {sortedCategories.map(cat => (
             <div key={cat} className="gear-category-group">
               <div className="gear-category-label">
-                <span className="gear-category-icon">{getCategoryIcon(cat)}</span>
-                <span>{getCategoryLabel(cat)}</span>
+                <span className="gear-category-icon">{getCategoryIcon(cat, categories)}</span>
+                <span>{getCategoryLabel(cat, categories)}</span>
               </div>
               {grouped[cat].map(item => (
                 <ItemRow
                   key={item.id}
                   item={item}
                   canEdit={canEdit}
+                  categories={categories}
                   onTogglePacked={handleTogglePacked}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
@@ -282,9 +299,9 @@ function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefres
             </div>
           ))}
           {totalCount === 0 && (
-            <p className="gear-empty">{canEdit ? 'No items yet — add some gear below.' : 'No items yet.'}</p>
+            <p className="gear-empty">{canEdit ? emptyText : 'No items yet.'}</p>
           )}
-          {canEdit && <AddItemForm onAdd={handleAdd} />}
+          {canEdit && <AddItemForm categories={categories} placeholder={addPlaceholder} onAdd={handleAdd} />}
         </div>
       )}
     </div>
@@ -300,7 +317,7 @@ const MEMBER_COLORS = [
   'var(--tan)',
 ];
 
-export function GearModal({ isOpen, onClose, planId, planOwnerId, members, currentUserId }: Props) {
+function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, currentUserId, config }: ChecklistModalProps) {
   const [planItems, setPlanItems] = useState<Item[]>([]);
   const [memberItems, setMemberItems] = useState<Record<string, Item[]>>({});
   const [loading, setLoading] = useState(true);
@@ -334,6 +351,14 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
 
   if (!isOpen) return null;
 
+  // Filter items to only those matching this modal's categories
+  const categoryValues = new Set(config.categories.map(c => c.value));
+  const filteredPlanItems = planItems.filter(i => categoryValues.has(i.category));
+  const filteredMemberItems: Record<string, Item[]> = {};
+  for (const [userId, items] of Object.entries(memberItems)) {
+    filteredMemberItems[userId] = items.filter(i => categoryValues.has(i.category));
+  }
+
   // Sort members: current user first, then named, then pending
   const sortedMembers = [...members].sort((a, b) => {
     if (a.userId === currentUserId) return -1;
@@ -343,9 +368,9 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
     return 0;
   });
 
-  const totalPlanPacked = planItems.filter(i => i.packed).length;
-  const totalPlanCount = planItems.length;
-  const allMemberItems = Object.values(memberItems).flat();
+  const totalPlanPacked = filteredPlanItems.filter(i => i.packed).length;
+  const totalPlanCount = filteredPlanItems.length;
+  const allMemberItems = Object.values(filteredMemberItems).flat();
   const totalPersonalPacked = allMemberItems.filter(i => i.packed).length;
   const totalPersonalCount = allMemberItems.length;
   const grandTotal = totalPlanCount + totalPersonalCount;
@@ -358,15 +383,10 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
         <div className="gear-modal-header">
           <div className="gear-modal-header-left">
             <div className="gear-modal-icon">
-              <svg width="36" height="36" viewBox="0 0 48 48">
-                <rect x="12" y="8" width="24" height="32" rx="6" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="2" />
-                <rect x="16" y="12" width="16" height="10" rx="3" fill="var(--sage-deep)" />
-                <path d="M15,14 Q12,28 15,36" fill="none" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" />
-                <path d="M33,14 Q36,28 33,36" fill="none" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" />
-              </svg>
+              {config.icon}
             </div>
             <div>
-              <h2 className="gear-modal-title">Equipment & Gear</h2>
+              <h2 className="gear-modal-title">{config.title}</h2>
               <p className="gear-modal-subtitle">
                 {grandTotal === 0
                   ? 'Start packing for your adventure'
@@ -385,7 +405,7 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
         {grandTotal > 0 && (
           <div className="gear-overall-progress">
             <div className="gear-overall-bar">
-              <div className="gear-overall-fill" style={{ width: `${grandTotal > 0 ? (grandPacked / grandTotal) * 100 : 0}%` }} />
+              <div className="gear-overall-fill" style={{ width: `${(grandPacked / grandTotal) * 100}%` }} />
             </div>
           </div>
         )}
@@ -395,20 +415,23 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
           {loading ? (
             <div className="gear-loading">
               <div className="gear-loading-pack" />
-              <p>Unpacking the supply chest...</p>
+              <p>{config.loadingText}</p>
             </div>
           ) : (
             <>
               {/* Plan checklist */}
               <ChecklistSection
-                title="Shared Camp Gear"
-                subtitle="For the whole group"
-                items={planItems}
+                title={config.sharedTitle}
+                subtitle={config.sharedSubtitle}
+                items={filteredPlanItems}
                 ownerType="plan"
                 ownerId={planId}
                 onRefresh={loadItems}
                 defaultExpanded={true}
                 canEdit={currentUserId === planOwnerId}
+                categories={config.categories}
+                addPlaceholder={config.addPlaceholder}
+                emptyText={config.emptyText}
               />
 
               {/* Divider */}
@@ -416,7 +439,7 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
                 <svg width="200" height="16" viewBox="0 0 200 16">
                   <path d="M0,8 Q50,2 100,8 Q150,14 200,8" fill="none" stroke="var(--tan-deep)" strokeWidth="1" opacity="0.5" />
                 </svg>
-                <span className="gear-divider-label">Personal Packs</span>
+                <span className="gear-divider-label">{config.personalDividerLabel}</span>
                 <svg width="200" height="16" viewBox="0 0 200 16">
                   <path d="M0,8 Q50,14 100,8 Q150,2 200,8" fill="none" stroke="var(--tan-deep)" strokeWidth="1" opacity="0.5" />
                 </svg>
@@ -424,7 +447,7 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
 
               {/* Member checklists */}
               {sortedMembers.map((member, i) => {
-                const items = memberItems[member.userId] ?? [];
+                const items = filteredMemberItems[member.userId] ?? [];
                 const isCurrentUser = member.userId === currentUserId;
                 const displayName = member.username || 'Pending Adventurer';
                 return (
@@ -438,6 +461,9 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
                     defaultExpanded={isCurrentUser}
                     accentColor={MEMBER_COLORS[i % MEMBER_COLORS.length]}
                     canEdit={isCurrentUser}
+                    categories={config.categories}
+                    addPlaceholder={config.addPlaceholder}
+                    emptyText={config.emptyText}
                   />
                 );
               })}
@@ -447,4 +473,80 @@ export function GearModal({ isOpen, onClose, planId, planOwnerId, members, curre
       </div>
     </div>
   );
+}
+
+// ── Gear Modal ──────────────────────────────
+
+const GEAR_CATEGORIES: CategoryDef[] = [
+  { value: 'camp', label: 'Camp', icon: '△' },
+  { value: 'canoe', label: 'Canoe', icon: '◠' },
+  { value: 'kitchen', label: 'Kitchen', icon: '◉' },
+  { value: 'personal', label: 'Personal', icon: '◈' },
+  { value: 'food_item', label: 'Food', icon: '◎' },
+  { value: 'misc', label: 'Misc', icon: '◇' },
+];
+
+const GEAR_CONFIG: ChecklistModalConfig = {
+  title: 'Equipment & Gear',
+  icon: (
+    <svg width="36" height="36" viewBox="0 0 48 48">
+      <rect x="12" y="8" width="24" height="32" rx="6" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="2" />
+      <rect x="16" y="12" width="16" height="10" rx="3" fill="var(--sage-deep)" />
+      <path d="M15,14 Q12,28 15,36" fill="none" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M33,14 Q36,28 33,36" fill="none" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  ),
+  emptyText: 'No items yet — add some gear below.',
+  loadingText: 'Unpacking the supply chest...',
+  addPlaceholder: 'Add gear item...',
+  sharedTitle: 'Shared Camp Gear',
+  sharedSubtitle: 'For the whole group',
+  personalDividerLabel: 'Personal Packs',
+  categories: GEAR_CATEGORIES,
+};
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  planId: string;
+  planOwnerId: string;
+  members: PlanMember[];
+  currentUserId: string;
+}
+
+export function GearModal(props: ModalProps) {
+  return <ChecklistModal {...props} config={GEAR_CONFIG} />;
+}
+
+// ── Meal Modal ──────────────────────────────
+
+const MEAL_CATEGORIES: CategoryDef[] = [
+  { value: 'breakfast', label: 'Breakfast', icon: '☀' },
+  { value: 'lunch', label: 'Lunch', icon: '◐' },
+  { value: 'dinner', label: 'Dinner', icon: '☽' },
+  { value: 'snacks', label: 'Snacks', icon: '✦' },
+];
+
+const MEAL_CONFIG: ChecklistModalConfig = {
+  title: 'Camp Kitchen & Meals',
+  icon: (
+    <svg width="36" height="36" viewBox="0 0 48 48">
+      <ellipse cx="24" cy="28" rx="16" ry="5" fill="var(--charcoal-light)" />
+      <path d="M8,28 Q8,42 24,42 Q40,42 40,28" fill="var(--charcoal-light)" />
+      <path d="M18,18 Q16,10 20,4" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M24,16 Q22,8 26,2" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M30,18 Q28,10 32,6" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  ),
+  emptyText: 'No items yet — plan some meals below.',
+  loadingText: 'Opening the recipe book...',
+  addPlaceholder: 'Add food item...',
+  sharedTitle: 'Group Meal Plan',
+  sharedSubtitle: 'Shared provisions',
+  personalDividerLabel: 'Personal Provisions',
+  categories: MEAL_CATEGORIES,
+};
+
+export function MealModal(props: ModalProps) {
+  return <ChecklistModal {...props} config={MEAL_CONFIG} />;
 }
