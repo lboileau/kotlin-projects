@@ -344,10 +344,11 @@ Based on the retrospective, update the following:
 - Add schema references for new tables in the database `CLAUDE.md`
 
 #### Project README.md
-- Update the **What's Included** section with new modules/features
+- Update the **Project Structure** section with new modules/directories
 - Add new API endpoints to the **API** table
 - Update **Example** curl commands if new endpoints are noteworthy
-- Update **Initial Setup** if new migrations or seed data were added
+- Update **Prerequisites** if new tools are required
+- Update **Quick Start** / **Manual Setup** if new steps are needed
 
 #### Database README.md
 - Update schema documentation with new tables/columns
