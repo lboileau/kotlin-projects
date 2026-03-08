@@ -323,14 +323,14 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
       const planData = await api.getItems('plan', planId);
       setPlanItems(planData);
 
-      // Derive number of days from existing items (never reduce below current)
+      // Derive number of days from existing items
       if (config.dayTabs) {
         let maxDay = 1;
         for (const item of planData) {
           const parsed = parseDayCategory(item.category);
           if (parsed && parsed.day > maxDay) maxDay = parsed.day;
         }
-        setNumDays(prev => Math.max(prev, maxDay));
+        setNumDays(maxDay);
       }
 
       if (!config.planOnly) {
@@ -356,6 +356,11 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
       loadItems();
     }
   }, [isOpen, loadItems]);
+
+  // Clamp activeDay when numDays shrinks
+  useEffect(() => {
+    if (activeDay > numDays) setActiveDay(numDays);
+  }, [numDays, activeDay]);
 
   if (!isOpen) return null;
 
@@ -392,12 +397,10 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
     filteredMemberItems[userId] = items.filter(i => categoryValues.has(i.category));
   }
 
-  // Sort members: current user first, then named, then pending
-  const sortedMembers = [...members].sort((a, b) => {
+  // Filter out pending members (no username), sort current user first
+  const sortedMembers = [...members].filter(m => m.username || m.userId === currentUserId).sort((a, b) => {
     if (a.userId === currentUserId) return -1;
     if (b.userId === currentUserId) return 1;
-    if (a.username && !b.username) return -1;
-    if (!a.username && b.username) return 1;
     return 0;
   });
 
