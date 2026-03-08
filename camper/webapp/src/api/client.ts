@@ -35,6 +35,25 @@ export interface Item {
   updatedAt: string;
 }
 
+export interface Itinerary {
+  id: string;
+  planId: string;
+  events: ItineraryEvent[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ItineraryEvent {
+  id: string;
+  itineraryId: string;
+  title: string;
+  description: string | null;
+  details: string | null;
+  eventAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -146,6 +165,30 @@ export const api = {
 
   deleteItem(itemId: string): Promise<void> {
     return request(`/api/items/${itemId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  getItinerary(planId: string): Promise<Itinerary> {
+    return request(`/api/plans/${planId}/itinerary`);
+  },
+
+  addEvent(planId: string, data: { title: string; description?: string | null; details?: string | null; eventAt: string }): Promise<ItineraryEvent> {
+    return request(`/api/plans/${planId}/itinerary/events`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateEvent(planId: string, eventId: string, data: { title: string; description?: string | null; details?: string | null; eventAt: string }): Promise<ItineraryEvent> {
+    return request(`/api/plans/${planId}/itinerary/events/${eventId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteEvent(planId: string, eventId: string): Promise<void> {
+    return request(`/api/plans/${planId}/itinerary/events/${eventId}`, {
       method: 'DELETE',
     });
   },
