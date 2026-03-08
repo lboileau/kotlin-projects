@@ -3,7 +3,7 @@ spring:
     name: camper-service
   web:
     resources:
-      static-locations: file:/app/static/
+      static-locations: file:/app/static/,classpath:/static/
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5433/camper_db}
     username: ${DB_USER:postgres}
