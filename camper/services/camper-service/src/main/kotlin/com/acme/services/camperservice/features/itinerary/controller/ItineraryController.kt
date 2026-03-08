@@ -1,11 +1,13 @@
 package com.acme.services.camperservice.features.itinerary.controller
 
+import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.itinerary.dto.AddEventRequest
 import com.acme.services.camperservice.features.itinerary.dto.UpdateEventRequest
 import com.acme.services.camperservice.features.itinerary.mapper.ItineraryMapper
 import com.acme.services.camperservice.features.itinerary.params.*
 import com.acme.services.camperservice.features.itinerary.service.ItineraryService
+import com.acme.services.camperservice.websocket.PlanEventPublisher
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,7 +15,10 @@ import java.util.UUID
 
 @RestController
 @RequestMapping("/api/plans/{planId}/itinerary")
-class ItineraryController(private val itineraryService: ItineraryService) {
+class ItineraryController(
+    private val itineraryService: ItineraryService,
+    private val eventPublisher: PlanEventPublisher,
+) {
     private val logger = LoggerFactory.getLogger(ItineraryController::class.java)
 
     @GetMapping
@@ -29,7 +34,9 @@ class ItineraryController(private val itineraryService: ItineraryService) {
     fun deleteItinerary(@PathVariable planId: UUID): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}/itinerary", planId)
         val param = DeleteItineraryParam(planId = planId)
-        return itineraryService.deleteItinerary(param).toResponseEntity(successStatus = 204) { }
+        val result = itineraryService.deleteItinerary(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 
     @PostMapping("/events")
@@ -45,7 +52,9 @@ class ItineraryController(private val itineraryService: ItineraryService) {
             details = request.details,
             eventAt = request.eventAt
         )
-        return itineraryService.addEvent(param).toResponseEntity(successStatus = 201) {
+        val result = itineraryService.addEvent(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")
+        return result.toResponseEntity(successStatus = 201) {
             ItineraryMapper.toResponse(it)
         }
     }
@@ -65,7 +74,9 @@ class ItineraryController(private val itineraryService: ItineraryService) {
             details = request.details,
             eventAt = request.eventAt
         )
-        return itineraryService.updateEvent(param).toResponseEntity { ItineraryMapper.toResponse(it) }
+        val result = itineraryService.updateEvent(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")
+        return result.toResponseEntity { ItineraryMapper.toResponse(it) }
     }
 
     @DeleteMapping("/events/{eventId}")
@@ -75,6 +86,8 @@ class ItineraryController(private val itineraryService: ItineraryService) {
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/plans/{}/itinerary/events/{}", planId, eventId)
         val param = DeleteEventParam(planId = planId, eventId = eventId)
-        return itineraryService.deleteEvent(param).toResponseEntity(successStatus = 204) { }
+        val result = itineraryService.deleteEvent(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 }
