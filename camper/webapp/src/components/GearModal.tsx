@@ -18,6 +18,8 @@ interface ChecklistModalConfig {
   sharedSubtitle: string;
   personalDividerLabel: string;
   categories: CategoryDef[];
+  planOnly?: boolean;
+  dayTabs?: boolean;
 }
 
 interface ChecklistModalProps {
@@ -208,9 +210,10 @@ interface ChecklistSectionProps {
   title: string;
   subtitle?: string;
   items: Item[];
-  ownerType: string;
-  ownerId: string;
-  onRefresh: () => void;
+  onAdd: (name: string, category: string, quantity: number) => Promise<void>;
+  onToggle: (item: Item) => Promise<void>;
+  onDelete: (item: Item) => Promise<void>;
+  onUpdate: (item: Item, name: string, quantity: number, category: string) => Promise<void>;
   defaultExpanded?: boolean;
   accentColor?: string;
   canEdit: boolean;
@@ -219,32 +222,12 @@ interface ChecklistSectionProps {
   emptyText: string;
 }
 
-function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefresh, defaultExpanded = true, accentColor, canEdit, categories, addPlaceholder, emptyText }: ChecklistSectionProps) {
+function ChecklistSection({ title, subtitle, items, onAdd, onToggle, onDelete, onUpdate, defaultExpanded = true, accentColor, canEdit, categories, addPlaceholder, emptyText }: ChecklistSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const packedCount = items.filter(i => i.packed).length;
   const totalCount = items.length;
   const progress = totalCount > 0 ? (packedCount / totalCount) * 100 : 0;
-
-  const handleAdd = async (name: string, category: string, quantity: number) => {
-    await api.createItem({ name, category, quantity, packed: false, ownerType, ownerId });
-    onRefresh();
-  };
-
-  const handleTogglePacked = async (item: Item) => {
-    await api.updateItem(item.id, { name: item.name, category: item.category, quantity: item.quantity, packed: !item.packed });
-    onRefresh();
-  };
-
-  const handleDelete = async (item: Item) => {
-    await api.deleteItem(item.id);
-    onRefresh();
-  };
-
-  const handleUpdate = async (item: Item, name: string, quantity: number, category: string) => {
-    await api.updateItem(item.id, { name, category, quantity, packed: item.packed });
-    onRefresh();
-  };
 
   // Group items by category
   const grouped = items.reduce<Record<string, Item[]>>((acc, item) => {
@@ -291,9 +274,9 @@ function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefres
                   item={item}
                   canEdit={canEdit}
                   categories={categories}
-                  onTogglePacked={handleTogglePacked}
-                  onDelete={handleDelete}
-                  onUpdate={handleUpdate}
+                  onTogglePacked={onToggle}
+                  onDelete={onDelete}
+                  onUpdate={onUpdate}
                 />
               ))}
             </div>
@@ -301,7 +284,7 @@ function ChecklistSection({ title, subtitle, items, ownerType, ownerId, onRefres
           {totalCount === 0 && (
             <p className="gear-empty">{canEdit ? emptyText : 'No items yet.'}</p>
           )}
-          {canEdit && <AddItemForm categories={categories} placeholder={addPlaceholder} onAdd={handleAdd} />}
+          {canEdit && <AddItemForm categories={categories} placeholder={addPlaceholder} onAdd={onAdd} />}
         </div>
       )}
     </div>
@@ -317,30 +300,55 @@ const MEMBER_COLORS = [
   'var(--tan)',
 ];
 
+// Day-prefix helpers for dayTabs mode
+function toDayCategory(day: number, baseCategory: string): string {
+  return `day${day}:${baseCategory}`;
+}
+
+function parseDayCategory(category: string): { day: number; base: string } | null {
+  const match = category.match(/^day(\d+):(.+)$/);
+  if (match) return { day: parseInt(match[1]), base: match[2] };
+  return null;
+}
+
 function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, currentUserId, config }: ChecklistModalProps) {
   const [planItems, setPlanItems] = useState<Item[]>([]);
   const [memberItems, setMemberItems] = useState<Record<string, Item[]>>({});
   const [loading, setLoading] = useState(true);
+  const [activeDay, setActiveDay] = useState(1);
+  const [numDays, setNumDays] = useState(1);
 
   const loadItems = useCallback(async () => {
     try {
       const planData = await api.getItems('plan', planId);
       setPlanItems(planData);
 
-      const memberData: Record<string, Item[]> = {};
-      const results = await Promise.all(
-        members.map(m => api.getItems('user', m.userId).then(items => ({ userId: m.userId, items })))
-      );
-      for (const r of results) {
-        memberData[r.userId] = r.items;
+      // Derive number of days from existing items (never reduce below current)
+      if (config.dayTabs) {
+        let maxDay = 1;
+        for (const item of planData) {
+          const parsed = parseDayCategory(item.category);
+          if (parsed && parsed.day > maxDay) maxDay = parsed.day;
+        }
+        setNumDays(prev => Math.max(prev, maxDay));
       }
-      setMemberItems(memberData);
+
+      if (!config.planOnly) {
+        const memberData: Record<string, Item[]> = {};
+        const results = await Promise.all(
+          members.map(m => api.getItems('user', m.userId).then(items => ({ userId: m.userId, items })))
+        );
+        for (const r of results) {
+          memberData[r.userId] = r.items;
+        }
+        setMemberItems(memberData);
+      }
     } catch {
       // fail silently
     } finally {
       setLoading(false);
     }
-  }, [planId, members]);
+  }, [planId, members, config.planOnly, config.dayTabs]);
 
   useEffect(() => {
     if (isOpen) {
@@ -353,7 +361,32 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
 
   // Filter items to only those matching this modal's categories
   const categoryValues = new Set(config.categories.map(c => c.value));
-  const filteredPlanItems = planItems.filter(i => categoryValues.has(i.category));
+
+  let filteredPlanItems: Item[];
+  if (config.dayTabs) {
+    // For day-tabbed modals, all items have day-prefixed categories (e.g. day1:breakfast)
+    // Filter to items whose base category matches, regardless of day
+    filteredPlanItems = planItems.filter(i => {
+      const parsed = parseDayCategory(i.category);
+      return parsed && categoryValues.has(parsed.base);
+    });
+  } else {
+    filteredPlanItems = planItems.filter(i => categoryValues.has(i.category));
+  }
+
+  // Items for the active day (stripped categories for display)
+  const activeDayItems: Item[] = config.dayTabs
+    ? filteredPlanItems
+        .filter(i => {
+          const parsed = parseDayCategory(i.category);
+          return parsed && parsed.day === activeDay;
+        })
+        .map(i => {
+          const parsed = parseDayCategory(i.category)!;
+          return { ...i, category: parsed.base };
+        })
+    : filteredPlanItems;
+
   const filteredMemberItems: Record<string, Item[]> = {};
   for (const [userId, items] of Object.entries(memberItems)) {
     filteredMemberItems[userId] = items.filter(i => categoryValues.has(i.category));
@@ -370,11 +403,60 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
 
   const totalPlanPacked = filteredPlanItems.filter(i => i.packed).length;
   const totalPlanCount = filteredPlanItems.length;
-  const allMemberItems = Object.values(filteredMemberItems).flat();
+  const allMemberItems = config.planOnly ? [] : Object.values(filteredMemberItems).flat();
   const totalPersonalPacked = allMemberItems.filter(i => i.packed).length;
   const totalPersonalCount = allMemberItems.length;
   const grandTotal = totalPlanCount + totalPersonalCount;
   const grandPacked = totalPlanPacked + totalPersonalPacked;
+
+  // CRUD callbacks — with day prefix when dayTabs
+  const makePlanCrud = (ownerType: string, ownerId: string) => ({
+    onAdd: async (name: string, category: string, quantity: number) => {
+      const cat = config.dayTabs ? toDayCategory(activeDay, category) : category;
+      await api.createItem({ name, category: cat, quantity, packed: false, ownerType, ownerId });
+      loadItems();
+    },
+    onToggle: async (item: Item) => {
+      // item may have stripped category — find original
+      const realCategory = config.dayTabs ? toDayCategory(activeDay, item.category) : item.category;
+      await api.updateItem(item.id, { name: item.name, category: realCategory, quantity: item.quantity, packed: !item.packed });
+      loadItems();
+    },
+    onDelete: async (item: Item) => {
+      await api.deleteItem(item.id);
+      loadItems();
+    },
+    onUpdate: async (item: Item, name: string, quantity: number, category: string) => {
+      const cat = config.dayTabs ? toDayCategory(activeDay, category) : category;
+      await api.updateItem(item.id, { name, category: cat, quantity, packed: item.packed });
+      loadItems();
+    },
+  });
+
+  const makeMemberCrud = (userId: string) => ({
+    onAdd: async (name: string, category: string, quantity: number) => {
+      await api.createItem({ name, category, quantity, packed: false, ownerType: 'user', ownerId: userId });
+      loadItems();
+    },
+    onToggle: async (item: Item) => {
+      await api.updateItem(item.id, { name: item.name, category: item.category, quantity: item.quantity, packed: !item.packed });
+      loadItems();
+    },
+    onDelete: async (item: Item) => {
+      await api.deleteItem(item.id);
+      loadItems();
+    },
+    onUpdate: async (item: Item, name: string, quantity: number, category: string) => {
+      await api.updateItem(item.id, { name, category, quantity, packed: item.packed });
+      loadItems();
+    },
+  });
+
+  const handleAddDay = () => {
+    const newDay = numDays + 1;
+    setNumDays(newDay);
+    setActiveDay(newDay);
+  };
 
   return (
     <div className="modal-overlay gear-modal-overlay" onClick={onClose}>
@@ -419,54 +501,73 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
             </div>
           ) : (
             <>
+              {/* Day tabs (for dayTabs mode) */}
+              {config.dayTabs && (
+                <div className="gear-day-tabs">
+                  {Array.from({ length: numDays }, (_, i) => i + 1).map(day => (
+                    <button
+                      key={day}
+                      className={`gear-day-tab ${day === activeDay ? 'gear-day-tab--active' : ''}`}
+                      onClick={() => setActiveDay(day)}
+                    >
+                      Day {day}
+                    </button>
+                  ))}
+                  <button className="gear-day-tab gear-day-tab--add" onClick={handleAddDay} title="Add another day">
+                    +
+                  </button>
+                </div>
+              )}
+
               {/* Plan checklist */}
               <ChecklistSection
-                title={config.sharedTitle}
-                subtitle={config.sharedSubtitle}
-                items={filteredPlanItems}
-                ownerType="plan"
-                ownerId={planId}
-                onRefresh={loadItems}
+                title={config.dayTabs ? `Day ${activeDay}` : config.sharedTitle}
+                subtitle={config.dayTabs ? undefined : config.sharedSubtitle}
+                items={activeDayItems}
+                {...makePlanCrud('plan', planId)}
                 defaultExpanded={true}
-                canEdit={currentUserId === planOwnerId}
+                canEdit={config.planOnly || currentUserId === planOwnerId}
                 categories={config.categories}
                 addPlaceholder={config.addPlaceholder}
                 emptyText={config.emptyText}
               />
 
-              {/* Divider */}
-              <div className="gear-divider">
-                <svg width="200" height="16" viewBox="0 0 200 16">
-                  <path d="M0,8 Q50,2 100,8 Q150,14 200,8" fill="none" stroke="var(--tan-deep)" strokeWidth="1" opacity="0.5" />
-                </svg>
-                <span className="gear-divider-label">{config.personalDividerLabel}</span>
-                <svg width="200" height="16" viewBox="0 0 200 16">
-                  <path d="M0,8 Q50,14 100,8 Q150,2 200,8" fill="none" stroke="var(--tan-deep)" strokeWidth="1" opacity="0.5" />
-                </svg>
-              </div>
+              {!config.planOnly && (
+                <>
+                  {/* Divider */}
+                  <div className="gear-divider">
+                    <svg width="200" height="16" viewBox="0 0 200 16">
+                      <path d="M0,8 Q50,2 100,8 Q150,14 200,8" fill="none" stroke="var(--tan-deep)" strokeWidth="1" opacity="0.5" />
+                    </svg>
+                    <span className="gear-divider-label">{config.personalDividerLabel}</span>
+                    <svg width="200" height="16" viewBox="0 0 200 16">
+                      <path d="M0,8 Q50,14 100,8 Q150,2 200,8" fill="none" stroke="var(--tan-deep)" strokeWidth="1" opacity="0.5" />
+                    </svg>
+                  </div>
 
-              {/* Member checklists */}
-              {sortedMembers.map((member, i) => {
-                const items = filteredMemberItems[member.userId] ?? [];
-                const isCurrentUser = member.userId === currentUserId;
-                const displayName = member.username || 'Pending Adventurer';
-                return (
-                  <ChecklistSection
-                    key={member.userId}
-                    title={isCurrentUser ? `${displayName} (You)` : displayName}
-                    items={items}
-                    ownerType="user"
-                    ownerId={member.userId}
-                    onRefresh={loadItems}
-                    defaultExpanded={isCurrentUser}
-                    accentColor={MEMBER_COLORS[i % MEMBER_COLORS.length]}
-                    canEdit={isCurrentUser}
-                    categories={config.categories}
-                    addPlaceholder={config.addPlaceholder}
-                    emptyText={config.emptyText}
-                  />
-                );
-              })}
+                  {/* Member checklists */}
+                  {sortedMembers.map((member, i) => {
+                    const items = filteredMemberItems[member.userId] ?? [];
+                    const isCurrentUser = member.userId === currentUserId;
+                    const displayName = member.username || 'Pending Adventurer';
+                    const crud = makeMemberCrud(member.userId);
+                    return (
+                      <ChecklistSection
+                        key={member.userId}
+                        title={isCurrentUser ? `${displayName} (You)` : displayName}
+                        items={items}
+                        {...crud}
+                        defaultExpanded={isCurrentUser}
+                        accentColor={MEMBER_COLORS[i % MEMBER_COLORS.length]}
+                        canEdit={isCurrentUser}
+                        categories={config.categories}
+                        addPlaceholder={config.addPlaceholder}
+                        emptyText={config.emptyText}
+                      />
+                    );
+                  })}
+                </>
+              )}
             </>
           )}
         </div>
@@ -545,6 +646,8 @@ const MEAL_CONFIG: ChecklistModalConfig = {
   sharedSubtitle: 'Shared provisions',
   personalDividerLabel: 'Personal Provisions',
   categories: MEAL_CATEGORIES,
+  planOnly: true,
+  dayTabs: true,
 };
 
 export function MealModal(props: ModalProps) {

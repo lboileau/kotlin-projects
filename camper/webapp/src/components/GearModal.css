@@ -604,6 +604,75 @@
   transform: none;
 }
 
+/* ── Day Tabs ──────────────────────────── */
+
+.gear-day-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-sm) 0 var(--space-xs);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.gear-day-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.gear-day-tab {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid rgba(168, 139, 91, 0.2);
+  background: rgba(255, 255, 255, 0.3);
+  color: var(--charcoal-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gear-day-tab:hover {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(168, 139, 91, 0.35);
+  color: var(--charcoal);
+}
+
+.gear-day-tab--active {
+  background: var(--sage-deep);
+  border-color: var(--sage-deep);
+  color: white;
+  box-shadow: 0 2px 8px rgba(90, 122, 86, 0.25);
+}
+
+.gear-day-tab--active:hover {
+  background: var(--sage-dark);
+  border-color: var(--sage-dark);
+  color: white;
+}
+
+.gear-day-tab--add {
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  border-style: dashed;
+  color: var(--tan-dark);
+}
+
+.gear-day-tab--add:hover {
+  border-style: solid;
+  background: rgba(143, 176, 138, 0.12);
+  border-color: var(--sage-deep);
+  color: var(--sage-deep);
+}
+
 /* ── Divider ────────────────────────────── */
 
 .gear-divider {
