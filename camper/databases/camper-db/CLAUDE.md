@@ -131,6 +131,38 @@ CREATE INDEX idx_items_plan_id ON items(plan_id);
 CREATE INDEX idx_items_user_id ON items(user_id);
 ```
 
+### itineraries
+
+```sql
+CREATE TABLE itineraries (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id    UUID        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL    DEFAULT now(),
+    updated_at TIMESTAMPTZ NOT NULL    DEFAULT now(),
+
+    CONSTRAINT uq_itineraries_plan_id UNIQUE (plan_id),
+    CONSTRAINT fk_itineraries_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE
+);
+```
+
+### itinerary_events
+
+```sql
+CREATE TABLE itinerary_events (
+    id             UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    itinerary_id   UUID         NOT NULL,
+    title          VARCHAR(255) NOT NULL,
+    description    TEXT,
+    details        TEXT,
+    event_at       TIMESTAMPTZ  NOT NULL,
+    created_at     TIMESTAMPTZ  NOT NULL    DEFAULT now(),
+    updated_at     TIMESTAMPTZ  NOT NULL    DEFAULT now(),
+
+    CONSTRAINT fk_itinerary_events_itinerary FOREIGN KEY (itinerary_id) REFERENCES itineraries (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_itinerary_events_itinerary_id ON itinerary_events (itinerary_id);
+```
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -138,6 +170,8 @@ CREATE INDEX idx_items_user_id ON items(user_id);
 - `plan_members.user_id` → `users.id` (FK)
 - `items.plan_id` → `plans.id` (FK, CASCADE on delete)
 - `items.user_id` → `users.id` (FK, CASCADE on delete)
+- `itineraries.plan_id` → `plans.id` (FK, CASCADE on delete, UNIQUE — 1:1 with plans)
+- `itinerary_events.itinerary_id` → `itineraries.id` (FK, CASCADE on delete)
 
 ## Invariants
 
@@ -149,3 +183,6 @@ CREATE INDEX idx_items_user_id ON items(user_id);
 - Deleting a user cascades to items.
 - `username` in users is nullable (auto-created users may not have one).
 - Each item must have exactly one owner — either `plan_id` or `user_id` (enforced by `chk_items_single_owner`).
+- Each plan has at most one itinerary (enforced by `uq_itineraries_plan_id`).
+- Deleting a plan cascades to itineraries, which cascades to itinerary_events.
+- `description` and `details` in itinerary_events are nullable.

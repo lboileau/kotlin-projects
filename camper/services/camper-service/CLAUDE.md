@@ -7,7 +7,7 @@ API service for camping trip planning — user registration, authentication, and
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, and `item-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, and `itinerary-client` for data access
 - Database: `camper-db` (port 5433, database `camper_db`)
 
 ## Features
@@ -91,8 +91,27 @@ API service for camping trip planning — user registration, authentication, and
   - `DELETE /api/items/{id}` — delete item (204)
 - **Polymorphic ownership:** Items belong to either a plan or a user via nullable FK columns (`plan_id`, `user_id`) with a DB CHECK constraint. Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
 
+### Itinerary (`features/itinerary/`)
+- **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
+- **DTOs:** `AddEventRequest(title, description?, details?, eventAt)`, `UpdateEventRequest(title, description?, details?, eventAt)`, `ItineraryResponse(id, planId, events, createdAt, updatedAt)`, `ItineraryEventResponse(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
+- **Error:** `ItineraryError` sealed class — `PlanNotFound(planId)`, `NotFound(planId)`, `EventNotFound(eventId)`, `Invalid(field, reason)`
+- **Service params:** `GetItineraryParam(planId)`, `DeleteItineraryParam(planId)`, `AddEventParam(planId, title, description?, details?, eventAt)`, `UpdateEventParam(planId, eventId, title, description?, details?, eventAt)`, `DeleteEventParam(planId, eventId)`
+- **Actions:**
+  - `GetItineraryAction`: Fetches itinerary by planId with events ordered by eventAt
+  - `DeleteItineraryAction`: Deletes itinerary and all events (cascade)
+  - `AddEventAction`: Auto-creates itinerary if none exists, then adds event
+  - `UpdateEventAction`: Updates event fields
+  - `DeleteEventAction`: Deletes a single event
+- **Service:** `ItineraryService` facade (takes ItineraryClient + PlanClient)
+- **Routes:** (all require `X-User-Id` header)
+  - `GET /api/plans/{planId}/itinerary` — get itinerary with events
+  - `DELETE /api/plans/{planId}/itinerary` — delete itinerary (204)
+  - `POST /api/plans/{planId}/itinerary/events` — add event (201, auto-creates itinerary)
+  - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event
+  - `DELETE /api/plans/{planId}/itinerary/events/{eventId}` — delete event (204)
+
 ## Key Patterns
-- `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` adapt client models to service models
+- `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` / `ItemMapper` / `ItineraryMapper` adapt client models to service models
 - Service param objects for all service calls
 - Action classes validate, convert params, call client
 - `GlobalExceptionHandler` catches `RuntimeException::class`
@@ -104,13 +123,15 @@ API service for camping trip planning — user registration, authentication, and
 - `UserClientConfig` — creates user client via factory function
 - `PlanClientConfig` — creates plan client via factory function
 - `ItemClientConfig` — creates item client via factory function
+- `ItineraryClientConfig` — creates itinerary client via factory function
 - `WorldServiceConfig` — wires service via `@Configuration` bean
 - `UserServiceConfig` — wires UserService
 - `PlanServiceConfig` — wires PlanService (takes PlanClient + UserClient)
 - `ItemServiceConfig` — wires ItemService (takes ItemClient)
+- `ItineraryServiceConfig` — wires ItineraryService (takes ItineraryClient + PlanClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture` use direct SQL for test setup
 - **Clean slate:** Tables truncated via `@BeforeEach`
