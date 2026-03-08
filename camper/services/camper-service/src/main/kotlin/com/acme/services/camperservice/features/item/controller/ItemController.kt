@@ -1,7 +1,9 @@
 package com.acme.services.camperservice.features.item.controller
 
+import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.item.dto.CreateItemRequest
 import com.acme.services.camperservice.features.item.dto.UpdateItemRequest
+import com.acme.services.camperservice.features.item.mapper.ItemMapper
 import com.acme.services.camperservice.features.item.params.*
 import com.acme.services.camperservice.features.item.service.ItemService
 import org.slf4j.LoggerFactory
@@ -20,7 +22,16 @@ class ItemController(private val itemService: ItemService) {
         @RequestBody request: CreateItemRequest
     ): ResponseEntity<Any> {
         logger.info("POST /api/items")
-        return ResponseEntity.status(501).build()
+        val param = CreateItemParam(
+            name = request.name,
+            category = request.category,
+            quantity = request.quantity,
+            packed = request.packed,
+            ownerType = request.ownerType,
+            ownerId = request.ownerId,
+            requestingUserId = userId,
+        )
+        return itemService.create(param).toResponseEntity(successStatus = 201) { ItemMapper.toResponse(it) }
     }
 
     @GetMapping
@@ -30,7 +41,8 @@ class ItemController(private val itemService: ItemService) {
         @RequestParam ownerId: UUID
     ): ResponseEntity<Any> {
         logger.info("GET /api/items?ownerType={}&ownerId={}", ownerType, ownerId)
-        return ResponseEntity.status(501).build()
+        val param = GetItemsByOwnerParam(ownerType = ownerType, ownerId = ownerId, requestingUserId = userId)
+        return itemService.getByOwner(param).toResponseEntity { list -> list.map { ItemMapper.toResponse(it) } }
     }
 
     @GetMapping("/{id}")
@@ -39,7 +51,8 @@ class ItemController(private val itemService: ItemService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("GET /api/items/{}", id)
-        return ResponseEntity.status(501).build()
+        val param = GetItemParam(id = id, requestingUserId = userId)
+        return itemService.getById(param).toResponseEntity { ItemMapper.toResponse(it) }
     }
 
     @PutMapping("/{id}")
@@ -49,7 +62,15 @@ class ItemController(private val itemService: ItemService) {
         @RequestBody request: UpdateItemRequest
     ): ResponseEntity<Any> {
         logger.info("PUT /api/items/{}", id)
-        return ResponseEntity.status(501).build()
+        val param = UpdateItemParam(
+            id = id,
+            name = request.name,
+            category = request.category,
+            quantity = request.quantity,
+            packed = request.packed,
+            requestingUserId = userId,
+        )
+        return itemService.update(param).toResponseEntity { ItemMapper.toResponse(it) }
     }
 
     @DeleteMapping("/{id}")
@@ -58,6 +79,7 @@ class ItemController(private val itemService: ItemService) {
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/items/{}", id)
-        return ResponseEntity.status(501).build()
+        val param = DeleteItemParam(id = id, requestingUserId = userId)
+        return itemService.delete(param).toResponseEntity(successStatus = 204) { }
     }
 }
