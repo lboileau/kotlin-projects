@@ -6,61 +6,14 @@ import { ParallaxBackground } from '../components/ParallaxBackground';
 import { Campfire } from '../components/Campfire';
 import { CamperAvatar } from '../components/CamperAvatar';
 import { InteractableItem } from '../components/InteractableItem';
-import { ComingSoonModal } from '../components/ComingSoonModal';
 import { AddMemberModal } from '../components/AddMemberModal';
 import { GearModal, MealModal } from '../components/GearModal';
 import { ItineraryModal } from '../components/ItineraryModal';
+import { AssignmentsModal } from '../components/AssignmentsModal';
 import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG } from '../components/CampsiteItems';
 import './PlanPage.css';
 
-type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'tent' | 'addMember' | 'managePlan' | null;
-
-const MODAL_CONFIG: Record<string, { title: string; icon: React.ReactNode }> = {
-  equipment: {
-    title: 'Equipment & Gear',
-    icon: (
-      <svg width="48" height="48" viewBox="0 0 48 48">
-        <rect x="12" y="8" width="24" height="32" rx="6" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="2" />
-        <rect x="16" y="12" width="16" height="10" rx="3" fill="var(--sage-deep)" />
-        <path d="M15,14 Q12,28 15,36" fill="none" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" />
-        <path d="M33,14 Q36,28 33,36" fill="none" stroke="var(--sage-dark)" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  kitchen: {
-    title: 'Camp Kitchen & Meals',
-    icon: (
-      <svg width="48" height="48" viewBox="0 0 48 48">
-        <ellipse cx="24" cy="28" rx="16" ry="5" fill="var(--charcoal-light)" />
-        <path d="M8,28 Q8,42 24,42 Q40,42 40,28" fill="var(--charcoal-light)" />
-        <path d="M18,18 Q16,10 20,4" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" />
-        <path d="M24,16 Q22,8 26,2" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" />
-        <path d="M30,18 Q28,10 32,6" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    ),
-  },
-  itinerary: {
-    title: 'Trail Map & Itinerary',
-    icon: (
-      <svg width="48" height="48" viewBox="0 0 48 48">
-        <rect x="6" y="10" width="36" height="28" rx="2" fill="var(--parchment)" stroke="var(--tan-deep)" strokeWidth="1.5" />
-        <path d="M12,22 Q20,16 28,24 Q36,30 42,20" fill="none" stroke="var(--rose-deep)" strokeWidth="1.5" strokeDasharray="3,2" />
-        <circle cx="16" cy="20" r="2" fill="var(--sage)" />
-        <circle cx="36" cy="22" r="2" fill="var(--flame)" />
-      </svg>
-    ),
-  },
-  tent: {
-    title: 'Tents & Canoe Pairings',
-    icon: (
-      <svg width="48" height="48" viewBox="0 0 48 48">
-        <polygon points="24,6 6,40 42,40" fill="var(--rose)" stroke="var(--rose-deep)" strokeWidth="2" />
-        <polygon points="24,6 24,40 42,40" fill="var(--rose-deep)" opacity="0.4" />
-        <path d="M19,40 Q22,28 24,24 Q26,28 29,40" fill="var(--rose-deep)" />
-      </svg>
-    ),
-  },
-};
+type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'addMember' | 'managePlan' | null;
 
 export function PlanPage() {
   const { planId } = useParams<{ planId: string }>();
@@ -220,7 +173,7 @@ export function PlanPage() {
         ) : (
           <>
             {/* Background items — on the ground below the 50% treeline */}
-            <InteractableItem id="tent" label="Tents & Canoe Pairings" x={10} y={58} onClick={() => setActiveModal('tent')}>
+            <InteractableItem id="tent" label="Tents & Canoe Pairings" x={10} y={58} onClick={() => setActiveModal('assignments')}>
               <TentSVG />
             </InteractableItem>
 
@@ -386,12 +339,14 @@ export function PlanPage() {
         />
       )}
 
-      {activeModal && activeModal !== 'addMember' && activeModal !== 'managePlan' && activeModal !== 'equipment' && activeModal !== 'kitchen' && activeModal !== 'itinerary' && MODAL_CONFIG[activeModal] && (
-        <ComingSoonModal
+      {activeModal === 'assignments' && planId && user && plan && (
+        <AssignmentsModal
           isOpen
           onClose={() => setActiveModal(null)}
-          title={MODAL_CONFIG[activeModal].title}
-          icon={MODAL_CONFIG[activeModal].icon}
+          planId={planId}
+          planOwnerId={plan.ownerId}
+          currentUserId={user.id}
+          members={members}
         />
       )}
     </div>
