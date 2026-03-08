@@ -7,6 +7,7 @@ import com.acme.clients.common.Result
 import com.acme.clients.planclient.fake.FakePlanClient
 import com.acme.clients.planclient.model.Plan
 import com.acme.clients.userclient.fake.FakeUserClient
+import com.acme.clients.gearsyncclient.fake.FakeGearSyncClient
 import com.acme.clients.userclient.model.User
 import com.acme.services.camperservice.features.assignment.error.AssignmentError
 import com.acme.services.camperservice.features.assignment.params.*
@@ -23,7 +24,8 @@ class AssignmentServiceTest {
     private val fakeAssignmentClient = FakeAssignmentClient()
     private val fakePlanClient = FakePlanClient()
     private val fakeUserClient = FakeUserClient()
-    private val assignmentService = AssignmentService(fakeAssignmentClient, fakePlanClient, fakeUserClient)
+    private val fakeGearSyncClient = FakeGearSyncClient()
+    private val assignmentService = AssignmentService(fakeAssignmentClient, fakePlanClient, fakeUserClient, fakeGearSyncClient)
 
     private val planOwnerId = UUID.randomUUID()
     private val assignmentOwnerId = UUID.randomUUID()

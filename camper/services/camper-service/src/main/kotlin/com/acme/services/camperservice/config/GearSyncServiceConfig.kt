@@ -2,19 +2,24 @@ package com.acme.services.camperservice.config
 
 import com.acme.clients.assignmentclient.api.AssignmentClient
 import com.acme.clients.gearsyncclient.api.GearSyncClient
+import com.acme.clients.gearsyncclient.createGearSyncClient
+import com.acme.clients.itemclient.api.ItemClient
 import com.acme.clients.planclient.api.PlanClient
-import com.acme.clients.userclient.api.UserClient
-import com.acme.services.camperservice.features.assignment.service.AssignmentService
+import com.acme.services.camperservice.features.gearsync.service.GearSyncService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class AssignmentServiceConfig {
+class GearSyncServiceConfig {
     @Bean
-    fun assignmentService(
+    fun gearSyncClient(
         assignmentClient: AssignmentClient,
+        itemClient: ItemClient,
         planClient: PlanClient,
-        userClient: UserClient,
+    ): GearSyncClient = createGearSyncClient(assignmentClient, itemClient, planClient)
+
+    @Bean
+    fun gearSyncService(
         gearSyncClient: GearSyncClient,
-    ): AssignmentService = AssignmentService(assignmentClient, planClient, userClient, gearSyncClient)
+    ): GearSyncService = GearSyncService(gearSyncClient)
 }
