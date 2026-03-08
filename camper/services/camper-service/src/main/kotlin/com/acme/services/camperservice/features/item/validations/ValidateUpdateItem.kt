@@ -1,6 +1,8 @@
 package com.acme.services.camperservice.features.item.validations
 
 import com.acme.clients.common.Result
+import com.acme.clients.common.failure
+import com.acme.clients.common.success
 import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.item.params.UpdateItemParam
 import org.slf4j.LoggerFactory
@@ -15,6 +17,8 @@ internal class ValidateUpdateItem {
     }
 
     private fun validate(param: UpdateItemParam): Result<Unit, ItemError> {
-        TODO()
+        if (param.name.isBlank()) return failure(ItemError.Invalid("name", "must not be blank"))
+        if (param.quantity <= 0) return failure(ItemError.Invalid("quantity", "must be greater than 0"))
+        return success(Unit)
     }
 }
