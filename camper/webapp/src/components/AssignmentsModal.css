@@ -17,7 +17,7 @@
   border-radius: var(--radius-lg);
   max-width: 620px;
   width: 94%;
-  max-height: 85vh;
+  height: 80vh;
   display: flex;
   flex-direction: column;
   animation: scale-in 0.3s ease;
@@ -115,7 +115,7 @@
 .assign-tabs {
   display: flex;
   gap: 4px;
-  padding: var(--space-sm) var(--space-xl) 0;
+  padding: var(--space-sm) var(--space-xl) var(--space-sm);
   position: relative;
   z-index: 1;
 }
@@ -427,12 +427,9 @@
   opacity: 1;
 }
 
-.assign-member-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
+.assign-mini-avatar {
   flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
 
 .assign-member-name {
@@ -687,6 +684,110 @@
   border: 1px solid rgba(232, 93, 58, 0.15);
 }
 
+/* ── Add Member ─────────────────────────── */
+
+.assign-add-member-btn {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(168, 139, 91, 0.3);
+  background: rgba(168, 139, 91, 0.08);
+  color: var(--tan-deep);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.assign-add-member-btn:hover {
+  background: rgba(168, 139, 91, 0.18);
+}
+
+.assign-add-member-panel {
+  background: rgba(168, 139, 91, 0.08);
+  border-top: 1px solid rgba(168, 139, 91, 0.2);
+  margin: var(--space-sm) calc(-1 * var(--space-md)) calc(-1 * var(--space-md));
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+.assign-add-member-heading {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tan-deep);
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.assign-add-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assign-add-member-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 5px var(--space-sm);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  transition: background 0.15s ease;
+  text-align: left;
+}
+
+.assign-add-member-option .assign-mini-avatar {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.assign-add-member-option:hover:not(:disabled) {
+  background: rgba(168, 139, 91, 0.15);
+}
+
+.assign-add-member-option--taken {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+
+.assign-add-member-name {
+  flex: 1;
+}
+
+.assign-add-member-group {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--charcoal-light);
+}
+
+.assign-add-member-empty {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.assign-add-error {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--flame);
+  background: rgba(232, 93, 58, 0.1);
+  padding: 4px var(--space-sm);
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-xs);
+  border: 1px solid rgba(232, 93, 58, 0.15);
+}
+
 /* ── Responsive ─────────────────────────── */
 
 @media (max-width: 600px) {
@@ -710,6 +811,6 @@
   }
 
   .assign-tabs {
-    padding: var(--space-sm) var(--space-md) 0;
+    padding: var(--space-sm) var(--space-md) var(--space-sm);
   }
 }

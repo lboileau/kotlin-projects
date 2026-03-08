@@ -81,23 +81,23 @@ ON CONFLICT DO NOTHING;
 INSERT INTO assignments (id, plan_id, name, type, max_occupancy, owner_id, created_at, updated_at)
 VALUES
     -- Summer Camping Trip: 2 tents, 1 canoe
-    ('aa110000-0001-0001-0001-000000000001', '10aabb00-1111-2222-3333-444455556666', 'Big Agnes Copper Spur', 'tent', 3, 'd3bbef22-cf3e-7b2b-ee90-9eeceg6b3d44', now(), now()),
-    ('aa110000-0001-0001-0001-000000000002', '10aabb00-1111-2222-3333-444455556666', 'MSR Hubba Hubba', 'tent', 2, 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', now(), now()),
-    ('aa110000-0001-0001-0001-000000000003', '10aabb00-1111-2222-3333-444455556666', 'Old Town Discovery', 'canoe', 3, 'd3bbef22-cf3e-7b2b-ee90-9eeceg6b3d44', now(), now()),
+    ('aa110000-0001-0001-0001-000000000001', '10aabb00-1111-2222-3333-444455556666', 'Big Agnes Copper Spur', 'tent', 3, 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now(), now()),
+    ('aa110000-0001-0001-0001-000000000002', '10aabb00-1111-2222-3333-444455556666', 'MSR Hubba Hubba', 'tent', 2, 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now(), now()),
+    ('aa110000-0001-0001-0001-000000000003', '10aabb00-1111-2222-3333-444455556666', 'Old Town Discovery', 'canoe', 3, 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now(), now()),
     -- Fall Retreat: 1 tent, 1 canoe
-    ('aa110000-0002-0002-0002-000000000001', '20bbcc00-2222-3333-4444-555566667777', 'REI Half Dome', 'tent', 4, 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', now(), now()),
-    ('aa110000-0002-0002-0002-000000000002', '20bbcc00-2222-3333-4444-555566667777', 'Grumman Alumacraft', 'canoe', 2, 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', now(), now())
+    ('aa110000-0002-0002-0002-000000000001', '20bbcc00-2222-3333-4444-555566667777', 'REI Half Dome', 'tent', 4, 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now(), now()),
+    ('aa110000-0002-0002-0002-000000000002', '20bbcc00-2222-3333-4444-555566667777', 'Grumman Alumacraft', 'canoe', 2, 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now(), now())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO assignment_members (assignment_id, user_id, plan_id, assignment_type, created_at)
 VALUES
     -- Summer Camping Trip tent assignments: Alice in Big Agnes, Bob in MSR Hubba
-    ('aa110000-0001-0001-0001-000000000001', 'd3bbef22-cf3e-7b2b-ee90-9eeceg6b3d44', '10aabb00-1111-2222-3333-444455556666', 'tent', now()),
-    ('aa110000-0001-0001-0001-000000000002', 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', '10aabb00-1111-2222-3333-444455556666', 'tent', now()),
+    ('aa110000-0001-0001-0001-000000000001', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', '10aabb00-1111-2222-3333-444455556666', 'tent', now()),
+    ('aa110000-0001-0001-0001-000000000002', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', '10aabb00-1111-2222-3333-444455556666', 'tent', now()),
     -- Summer Camping Trip canoe assignments: Alice and Bob in Old Town Discovery
-    ('aa110000-0001-0001-0001-000000000003', 'd3bbef22-cf3e-7b2b-ee90-9eeceg6b3d44', '10aabb00-1111-2222-3333-444455556666', 'canoe', now()),
-    ('aa110000-0001-0001-0001-000000000003', 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', '10aabb00-1111-2222-3333-444455556666', 'canoe', now()),
+    ('aa110000-0001-0001-0001-000000000003', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', '10aabb00-1111-2222-3333-444455556666', 'canoe', now()),
+    ('aa110000-0001-0001-0001-000000000003', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', '10aabb00-1111-2222-3333-444455556666', 'canoe', now()),
     -- Fall Retreat: Bob in REI Half Dome tent and Grumman canoe
-    ('aa110000-0002-0002-0002-000000000001', 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', '20bbcc00-2222-3333-4444-555566667777', 'tent', now()),
-    ('aa110000-0002-0002-0002-000000000002', 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', '20bbcc00-2222-3333-4444-555566667777', 'canoe', now())
+    ('aa110000-0002-0002-0002-000000000001', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', '20bbcc00-2222-3333-4444-555566667777', 'tent', now()),
+    ('aa110000-0002-0002-0002-000000000002', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', '20bbcc00-2222-3333-4444-555566667777', 'canoe', now())
 ON CONFLICT DO NOTHING;

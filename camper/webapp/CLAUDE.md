@@ -31,6 +31,7 @@ webapp/
 │   │   ├── CampsiteItems.tsx           # SVG art: TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG
 │   │   ├── InteractableItem.tsx/css    # Hoverable/clickable campsite object with glow + tooltip
 │   │   ├── GearModal.tsx/css            # Equipment & gear management modal (checklist per owner)
+│   │   ├── AssignmentsModal.tsx/css    # Tent & canoe group assignments modal
 │   │   ├── ComingSoonModal.tsx         # Themed "not ready" modal with flavor text
 │   │   ├── AddMemberModal.tsx          # Form modal to invite member by email
 │   │   ├── Modal.css                   # Shared modal styles (parchment aesthetic)
@@ -47,7 +48,7 @@ webapp/
 ## Architecture
 
 ### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`
+- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`
 - `request<T>()` helper auto-injects `X-User-Id` from localStorage
 - All methods return typed promises; throws on non-OK responses
 
@@ -59,9 +60,10 @@ webapp/
 ### Pages
 - **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`.
 - **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
-- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealModal; tent/itinerary show ComingSoonModal. Owner sees "Manage Plan" button in header (toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others.
-  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars.
-  - **MealModal** — Plan-only checklist (no personal sections) with day tabs. Categories: breakfast, lunch, dinner, snacks. Everyone can edit the meal plan. Day tabs let users organize meals per day (Day 1, Day 2, etc.) with a "+" button to add more days. Items are stored with day-prefixed categories (e.g. `day1:breakfast`) which the UI parses for display. Opens from the kitchen campsite item. Both modals share a generic `ChecklistModal` component internally.
+- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others.
+  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists.
+  - **MealModal** — Plan-only checklist (no personal sections) with day tabs. Categories: breakfast, lunch, dinner, snacks. Everyone can edit the meal plan. Day tabs let users organize meals per day (Day 1, Day 2, etc.) with a "+" button to add more days. Items are stored with day-prefixed categories (e.g. `day1:breakfast`) which the UI parses for display. Empty trailing days are automatically removed when all items are deleted. Opens from the kitchen campsite item. Both modals share a generic `ChecklistModal` component internally.
+  - **AssignmentsModal** — Fixed-height modal with two tabs (Tents / Canoes). Cards show assignment name, owner, occupancy bar, and member list with mini SVG avatar heads. Features: "Add Tent" / "Add Canoe" buttons (creator auto-added if not already in a group of that type); join (auto-leaves current group of same type); leave (including owner self-leave); owner/plan-owner "Add Member" panel showing available plan members with greyed-out entries for those already in another group of the same type; inline edit name/max occupancy; delete. Pending adventurers are filtered from the add-member list.
 
 ### Visual Design System
 - **Palette:** Defined in `theme.css` as CSS variables (`--lavender`, `--sage`, `--tan`, `--rose`, `--mint`, `--ember`, `--flame`, `--night-sky`, `--parchment`, etc.)
@@ -89,6 +91,14 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | POST | `/api/items` | X-User-Id | GearModal (create item) |
 | PUT | `/api/items/:id` | X-User-Id | GearModal (update item) |
 | DELETE | `/api/items/:id` | X-User-Id | GearModal (delete item) |
+| GET | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (list) |
+| GET | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (detail) |
+| POST | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (create) |
+| PUT | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (update) |
+| DELETE | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (delete) |
+| POST | `/api/plans/:id/assignments/:assignmentId/members` | X-User-Id | AssignmentsModal (add member) |
+| DELETE | `/api/plans/:id/assignments/:assignmentId/members/:userId` | X-User-Id | AssignmentsModal (remove member) |
+| PUT | `/api/plans/:id/assignments/:assignmentId/owner` | X-User-Id | AssignmentsModal (transfer ownership) |
 
 ## Running
 

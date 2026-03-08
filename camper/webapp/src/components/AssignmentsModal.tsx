@@ -12,18 +12,41 @@ interface AssignmentsModalProps {
   members: PlanMember[];
 }
 
-const MEMBER_COLORS = [
-  'var(--lavender)',
-  'var(--sage)',
-  'var(--rose)',
-  'var(--mint)',
-  'var(--butter)',
-  'var(--tan)',
+const AVATAR_COLORS = [
+  { hood: '#3A5A3A', skin: '#D4A574' },
+  { hood: '#2A3A4A', skin: '#C4946A' },
+  { hood: '#6A3A2A', skin: '#DCAC7C' },
+  { hood: '#3A4A3A', skin: '#C89A6A' },
+  { hood: '#4A3A2A', skin: '#D4A070' },
+  { hood: '#3A3A5A', skin: '#CCA478' },
+  { hood: '#4A5A4A', skin: '#D8AA74' },
+  { hood: '#3A4A3A', skin: '#C8986A' },
 ];
 
-function getMemberColor(userId: string, allMembers: PlanMember[]): string {
+function getMemberColorIndex(userId: string, allMembers: PlanMember[]): number {
   const idx = allMembers.findIndex(m => m.userId === userId);
-  return MEMBER_COLORS[(idx === -1 ? 0 : idx) % MEMBER_COLORS.length];
+  return (idx === -1 ? 0 : idx) % AVATAR_COLORS.length;
+}
+
+function MiniAvatar({ userId, allMembers, size = 22 }: { userId: string; allMembers: PlanMember[]; size?: number }) {
+  const idx = getMemberColorIndex(userId, allMembers);
+  const color = AVATAR_COLORS[idx];
+  return (
+    <svg width={size} height={size} viewBox="0 0 28 28" className="assign-mini-avatar">
+      {/* Face */}
+      <circle cx="14" cy="16" r="11" fill={color.skin} />
+      {/* Hood */}
+      <path d="M3,16 Q3,4 14,3 Q25,4 25,16" fill={color.hood} />
+      <ellipse cx="14" cy="16" rx="12" ry="3" fill={color.hood} opacity="0.6" />
+      {/* Eyes */}
+      <ellipse cx="10" cy="16" rx="1.6" ry="1.3" fill="#2A2A2A" />
+      <ellipse cx="18" cy="16" rx="1.6" ry="1.3" fill="#2A2A2A" />
+      <circle cx="10.5" cy="15.6" r="0.5" fill="rgba(255,255,255,0.8)" />
+      <circle cx="18.5" cy="15.6" r="0.5" fill="rgba(255,255,255,0.8)" />
+      {/* Mouth */}
+      <path d="M11,20 Q14,21.5 17,20" fill="none" stroke="#3A2A2A" strokeWidth="0.8" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 function getMemberName(userId: string, members: PlanMember[]): string {
@@ -43,11 +66,15 @@ interface EditFormData {
 
 interface AssignmentCardProps {
   assignment: AssignmentDetail;
+  allAssignments: AssignmentDetail[];
   planOwnerId: string;
   currentUserId: string;
   planMembers: PlanMember[];
+  showAddMember: boolean;
+  onToggleAddMember: (assignmentId: string | null) => void;
   onJoin: (assignmentId: string) => void;
   onLeave: (assignmentId: string) => void;
+  onAddMember: (assignmentId: string, userId: string) => void;
   onRemoveMember: (assignmentId: string, userId: string) => void;
   onDelete: (assignmentId: string) => void;
   onUpdate: (assignmentId: string, name: string, maxOccupancy: number) => void;
@@ -55,17 +82,22 @@ interface AssignmentCardProps {
 
 function AssignmentCard({
   assignment,
+  allAssignments,
   planOwnerId,
   currentUserId,
   planMembers,
+  showAddMember,
+  onToggleAddMember,
   onJoin,
   onLeave,
+  onAddMember,
   onRemoveMember,
   onDelete,
   onUpdate,
 }: AssignmentCardProps) {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<EditFormData>({ name: assignment.name, maxOccupancy: assignment.maxOccupancy });
+  const [addError, setAddError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isAssignmentOwner = assignment.ownerId === currentUserId;
@@ -83,6 +115,8 @@ function AssignmentCard({
   const handleStartEdit = () => {
     setEditForm({ name: assignment.name, maxOccupancy: assignment.maxOccupancy });
     setEditing(true);
+    onToggleAddMember(null);
+    setAddError('');
   };
 
   const handleSaveEdit = () => {
@@ -103,6 +137,25 @@ function AssignmentCard({
   };
 
   const fillPct = assignment.maxOccupancy > 0 ? (spotsUsed / assignment.maxOccupancy) * 100 : 0;
+
+  // Members eligible to be added: plan members not already in this assignment
+  const memberIdsInAssignment = new Set(assignment.members.map(m => m.userId));
+  const addablemembers = planMembers.filter(m => !memberIdsInAssignment.has(m.userId) && m.username);
+
+  const handleAddMember = (userId: string) => {
+    setAddError('');
+    // Check if user is already in another assignment of the same type
+    const existingAssignment = allAssignments.find(
+      a => a.id !== assignment.id && a.type === assignment.type && a.members.some(m => m.userId === userId)
+    );
+    if (existingAssignment) {
+      const userName = getMemberName(userId, planMembers);
+      setAddError(`${userName} is already in ${existingAssignment.name}`);
+      return;
+    }
+    onAddMember(assignment.id, userId);
+    setShowAddMember(false);
+  };
 
   return (
     <div className="assign-card">
@@ -185,14 +238,13 @@ function AssignmentCard({
       {/* Members list */}
       <div className="assign-card-members">
         {assignment.members.map(member => {
-          const color = getMemberColor(member.userId, planMembers);
           const name = member.username || 'Pending Adventurer';
           const isMe = member.userId === currentUserId;
           const isOwnerMember = member.userId === assignment.ownerId;
           const canRemove = canManage && !isOwnerMember && !isMe;
           return (
             <div key={member.userId} className="assign-member">
-              <span className="assign-member-dot" style={{ background: color }} />
+              <MiniAvatar userId={member.userId} allMembers={planMembers} />
               <span className="assign-member-name">{name}{isMe ? ' (You)' : ''}</span>
               {isOwnerMember && <span className="assign-member-badge">owner</span>}
               {canRemove && (
@@ -211,22 +263,62 @@ function AssignmentCard({
         })}
       </div>
 
-      {/* Join / Leave buttons */}
+      {/* Join / Leave / Add buttons */}
       <div className="assign-card-footer">
-        {!isMember && spotsAvailable > 0 && (
+        {!showAddMember && !isMember && spotsAvailable > 0 && (
           <button className="assign-join-btn" onClick={() => onJoin(assignment.id)}>
             Join
           </button>
         )}
-        {!isMember && spotsAvailable <= 0 && (
+        {!showAddMember && !isMember && spotsAvailable <= 0 && (
           <span className="assign-full-badge">Full</span>
         )}
-        {isMember && !isAssignmentOwner && (
+        {!showAddMember && isMember && (
           <button className="assign-leave-btn" onClick={() => onLeave(assignment.id)}>
             Leave
           </button>
         )}
+        {canManage && spotsAvailable > 0 && (
+          <button
+            className="assign-add-member-btn"
+            onClick={() => { onToggleAddMember(showAddMember ? null : assignment.id); setAddError(''); }}
+          >
+            {showAddMember ? 'Cancel' : 'Add Member'}
+          </button>
+        )}
       </div>
+
+      {/* Add member panel */}
+      {showAddMember && spotsAvailable > 0 && (
+        <div className="assign-add-member-panel">
+          <span className="assign-add-member-heading">Add a member</span>
+          {addError && <p className="assign-add-error">{addError}</p>}
+          <div className="assign-add-member-list">
+            {addablemembers.length === 0 ? (
+              <span className="assign-add-member-empty">All plan members are in this group</span>
+            ) : (
+              addablemembers.map(m => {
+                const existingGroup = allAssignments.find(
+                  a => a.id !== assignment.id && a.type === assignment.type && a.members.some(mem => mem.userId === m.userId)
+                );
+                const inGroup = !!existingGroup;
+                return (
+                  <button
+                    key={m.userId}
+                    className={`assign-add-member-option ${inGroup ? 'assign-add-member-option--taken' : ''}`}
+                    onClick={() => handleAddMember(m.userId)}
+                    disabled={inGroup}
+                  >
+                    <MiniAvatar userId={m.userId} allMembers={planMembers} />
+                    <span className="assign-add-member-name">{m.username || 'Pending Adventurer'}</span>
+                    {inGroup && <span className="assign-add-member-group">{existingGroup.name}</span>}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -239,6 +331,7 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createForm, setCreateForm] = useState<CreateFormData>({ name: '', maxOccupancy: 4 });
   const [creating, setCreating] = useState(false);
+  const [addMemberCardId, setAddMemberCardId] = useState<string | null>(null);
   const createInputRef = useRef<HTMLInputElement>(null);
 
   const loadAssignments = useCallback(async () => {
@@ -274,11 +367,16 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
   useEffect(() => {
     setCreateForm({ name: '', maxOccupancy: activeTab === 'tent' ? 4 : 2 });
     setShowCreateForm(false);
+    setAddMemberCardId(null);
   }, [activeTab]);
 
   if (!isOpen) return null;
 
   const filteredAssignments = assignments.filter(a => a.type === activeTab);
+
+  const findCurrentAssignment = (type: 'tent' | 'canoe') => {
+    return assignments.find(a => a.type === type && a.members.some(m => m.userId === currentUserId));
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -286,11 +384,20 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
     setCreating(true);
     setError('');
     try {
-      await api.createAssignment(planId, {
+      const created = await api.createAssignment(planId, {
         name: createForm.name.trim(),
         type: activeTab,
         maxOccupancy: createForm.maxOccupancy,
       });
+      // Auto-add creator if they're not already in a group of this type
+      const currentGroup = findCurrentAssignment(activeTab);
+      if (!currentGroup) {
+        try {
+          await api.addAssignmentMember(planId, created.id, currentUserId);
+        } catch {
+          // Ignore if add fails (e.g. already at capacity somehow)
+        }
+      }
       setCreateForm({ name: '', maxOccupancy: activeTab === 'tent' ? 4 : 2 });
       setShowCreateForm(false);
       await loadAssignments();
@@ -303,7 +410,15 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
 
   const handleJoin = async (assignmentId: string) => {
     setError('');
+    setAddMemberCardId(null);
     try {
+      const target = assignments.find(a => a.id === assignmentId);
+      if (target) {
+        const currentGroup = findCurrentAssignment(target.type as 'tent' | 'canoe');
+        if (currentGroup) {
+          await api.removeAssignmentMember(planId, currentGroup.id, currentUserId);
+        }
+      }
       await api.addAssignmentMember(planId, assignmentId, currentUserId);
       await loadAssignments();
     } catch (err) {
@@ -313,6 +428,7 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
 
   const handleLeave = async (assignmentId: string) => {
     setError('');
+    setAddMemberCardId(null);
     try {
       await api.removeAssignmentMember(planId, assignmentId, currentUserId);
       await loadAssignments();
@@ -323,11 +439,22 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
 
   const handleRemoveMember = async (assignmentId: string, userId: string) => {
     setError('');
+    setAddMemberCardId(null);
     try {
       await api.removeAssignmentMember(planId, assignmentId, userId);
       await loadAssignments();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove member');
+    }
+  };
+
+  const handleAddMember = async (assignmentId: string, userId: string) => {
+    setError('');
+    try {
+      await api.addAssignmentMember(planId, assignmentId, userId);
+      await loadAssignments();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to add member');
     }
   };
 
@@ -371,11 +498,7 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
             </div>
             <div>
               <h2 className="assign-modal-title">Camp Assignments</h2>
-              <p className="assign-modal-subtitle">
-                {assignments.length === 0
-                  ? 'Organize your crew into groups'
-                  : `${assignments.length} group${assignments.length !== 1 ? 's' : ''} set up`}
-              </p>
+              <p className="assign-modal-subtitle">Organize your crew into tents & canoes</p>
             </div>
           </div>
           <button className="assign-modal-close" onClick={onClose} aria-label="Close">
@@ -438,11 +561,15 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
                 <AssignmentCard
                   key={assignment.id}
                   assignment={assignment}
+                  allAssignments={assignments}
                   planOwnerId={planOwnerId}
                   currentUserId={currentUserId}
                   planMembers={members}
+                  showAddMember={addMemberCardId === assignment.id}
+                  onToggleAddMember={setAddMemberCardId}
                   onJoin={handleJoin}
                   onLeave={handleLeave}
+                  onAddMember={handleAddMember}
                   onRemoveMember={handleRemoveMember}
                   onDelete={handleDelete}
                   onUpdate={handleUpdate}
@@ -512,7 +639,7 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
                 <line x1="7" y1="2" x2="7" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              Create Group
+              Add {activeTab === 'tent' ? 'Tent' : 'Canoe'}
             </button>
           )}
           <button className="modal-btn modal-btn--secondary" onClick={onClose}>
