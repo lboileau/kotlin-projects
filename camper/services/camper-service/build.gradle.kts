@@ -13,6 +13,8 @@ dependencies {
     implementation(project(":clients:item-client"))
     implementation(project(":clients:itinerary-client"))
     implementation(project(":clients:assignment-client"))
+    implementation(project(":clients:email-client"))
+    implementation(project(":clients:invitation-client"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -37,6 +39,8 @@ dependencies {
     testImplementation(testFixtures(project(":clients:item-client")))
     testImplementation(testFixtures(project(":clients:itinerary-client")))
     testImplementation(testFixtures(project(":clients:assignment-client")))
+    testImplementation(testFixtures(project(":clients:email-client")))
+    testImplementation(testFixtures(project(":clients:invitation-client")))
 }
 
 tasks.named<Copy>("processResources") {

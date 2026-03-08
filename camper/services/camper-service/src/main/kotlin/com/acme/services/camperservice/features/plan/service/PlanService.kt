@@ -1,17 +1,24 @@
 package com.acme.services.camperservice.features.plan.service
 
+import com.acme.clients.emailclient.api.EmailClient
+import com.acme.clients.invitationclient.api.InvitationClient
 import com.acme.clients.planclient.api.PlanClient
 import com.acme.clients.userclient.api.UserClient
 import com.acme.services.camperservice.features.plan.actions.*
 import com.acme.services.camperservice.features.plan.params.*
 
-class PlanService(planClient: PlanClient, userClient: UserClient) {
+class PlanService(
+    planClient: PlanClient,
+    userClient: UserClient,
+    emailClient: EmailClient,
+    invitationClient: InvitationClient
+) {
     private val createPlan = CreatePlanAction(planClient)
     private val getPlans = GetPlansAction(planClient)
     private val updatePlan = UpdatePlanAction(planClient)
     private val deletePlan = DeletePlanAction(planClient)
-    private val getPlanMembers = GetPlanMembersAction(planClient, userClient)
-    private val addPlanMember = AddPlanMemberAction(planClient, userClient)
+    private val getPlanMembers = GetPlanMembersAction(planClient, userClient, invitationClient)
+    private val addPlanMember = AddPlanMemberAction(planClient, userClient, emailClient, invitationClient)
     private val removePlanMember = RemovePlanMemberAction(planClient)
 
     fun create(param: CreatePlanParam) = createPlan.execute(param)

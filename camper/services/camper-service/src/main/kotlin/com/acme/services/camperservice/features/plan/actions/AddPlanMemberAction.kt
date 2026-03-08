@@ -1,6 +1,8 @@
 package com.acme.services.camperservice.features.plan.actions
 
 import com.acme.clients.common.Result
+import com.acme.clients.emailclient.api.EmailClient
+import com.acme.clients.invitationclient.api.InvitationClient
 import com.acme.clients.planclient.api.AddMemberParam
 import com.acme.clients.planclient.api.PlanClient
 import com.acme.clients.userclient.api.GetOrCreateUserParam
@@ -14,7 +16,9 @@ import org.slf4j.LoggerFactory
 
 internal class AddPlanMemberAction(
     private val planClient: PlanClient,
-    private val userClient: UserClient
+    private val userClient: UserClient,
+    private val emailClient: EmailClient,
+    private val invitationClient: InvitationClient
 ) {
     private val logger = LoggerFactory.getLogger(AddPlanMemberAction::class.java)
     private val validate = ValidateAddPlanMember()
@@ -34,5 +38,7 @@ internal class AddPlanMemberAction(
             is Result.Success -> Result.Success(PlanMapper.fromClient(result.value, user.username))
             is Result.Failure -> Result.Failure(PlanError.fromClientError(result.error))
         }
+
+        // TODO: Invitation email sending will be implemented in the service-impl PR
     }
 }

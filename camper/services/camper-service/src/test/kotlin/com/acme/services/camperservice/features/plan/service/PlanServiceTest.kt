@@ -1,6 +1,8 @@
 package com.acme.services.camperservice.features.plan.service
 
 import com.acme.clients.common.Result
+import com.acme.clients.emailclient.fake.FakeEmailClient
+import com.acme.clients.invitationclient.fake.FakeInvitationClient
 import com.acme.clients.planclient.fake.FakePlanClient
 import com.acme.clients.userclient.fake.FakeUserClient
 import com.acme.clients.userclient.model.User
@@ -17,7 +19,9 @@ class PlanServiceTest {
 
     private val fakePlanClient = FakePlanClient()
     private val fakeUserClient = FakeUserClient()
-    private val planService = PlanService(fakePlanClient, fakeUserClient)
+    private val fakeEmailClient = FakeEmailClient()
+    private val fakeInvitationClient = FakeInvitationClient()
+    private val planService = PlanService(fakePlanClient, fakeUserClient, fakeEmailClient, fakeInvitationClient)
 
     private val ownerId = UUID.randomUUID()
     private val otherUserId = UUID.randomUUID()
@@ -26,6 +30,8 @@ class PlanServiceTest {
     fun setUp() {
         fakePlanClient.reset()
         fakeUserClient.reset()
+        fakeEmailClient.reset()
+        fakeInvitationClient.reset()
         fakeUserClient.seed(
             User(id = ownerId, email = "owner@example.com", username = "owner", createdAt = Instant.now(), updatedAt = Instant.now()),
             User(id = otherUserId, email = "other@example.com", username = "other", createdAt = Instant.now(), updatedAt = Instant.now())
@@ -193,7 +199,7 @@ class PlanServiceTest {
         fun `addMember adds user by email`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
 
-            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com"))
+            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
 
             assertThat(result.isSuccess).isTrue()
             val member = (result as Result.Success).value
@@ -206,7 +212,7 @@ class PlanServiceTest {
         fun `addMember creates user when email does not exist`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
 
-            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = "newuser@example.com"))
+            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = "newuser@example.com", requestingUserId = ownerId))
 
             assertThat(result.isSuccess).isTrue()
         }
@@ -214,9 +220,9 @@ class PlanServiceTest {
         @Test
         fun `addMember returns AlreadyMember for duplicate`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
-            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com"))
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
 
-            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com"))
+            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(PlanError.AlreadyMember::class.java)
@@ -226,7 +232,7 @@ class PlanServiceTest {
         fun `addMember returns Invalid when email is blank`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
 
-            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = ""))
+            val result = planService.addMember(AddPlanMemberParam(planId = plan.id, email = "", requestingUserId = ownerId))
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(PlanError.Invalid::class.java)
@@ -238,7 +244,7 @@ class PlanServiceTest {
         @Test
         fun `removeMember allows self-remove`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
-            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com"))
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
 
             val result = planService.removeMember(RemovePlanMemberParam(planId = plan.id, userId = otherUserId, requestingUserId = otherUserId))
 
@@ -248,7 +254,7 @@ class PlanServiceTest {
         @Test
         fun `removeMember allows owner to remove another user`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
-            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com"))
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
 
             val result = planService.removeMember(RemovePlanMemberParam(planId = plan.id, userId = otherUserId, requestingUserId = ownerId))
 
@@ -258,12 +264,12 @@ class PlanServiceTest {
         @Test
         fun `removeMember returns NotOwner when non-owner tries to remove another user`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
-            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com"))
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
             val thirdUserId = UUID.randomUUID()
             fakeUserClient.seed(
                 User(id = thirdUserId, email = "third@example.com", username = "third", createdAt = Instant.now(), updatedAt = Instant.now())
             )
-            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "third@example.com"))
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "third@example.com", requestingUserId = ownerId))
 
             val result = planService.removeMember(RemovePlanMemberParam(planId = plan.id, userId = thirdUserId, requestingUserId = otherUserId))
 
@@ -277,7 +283,7 @@ class PlanServiceTest {
         @Test
         fun `getMembers returns all members of a plan`() {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
-            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com"))
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
 
             val result = planService.getMembers(GetPlanMembersParam(plan.id))
 

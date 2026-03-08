@@ -18,10 +18,12 @@ object PlanMapper {
         updatedAt = clientPlan.updatedAt
     )
 
-    fun fromClient(clientMember: ClientPlanMember, username: String? = null): PlanMember = PlanMember(
+    fun fromClient(clientMember: ClientPlanMember, username: String? = null, email: String? = null, invitationStatus: String? = null): PlanMember = PlanMember(
         planId = clientMember.planId,
         userId = clientMember.userId,
         username = username,
+        email = email,
+        invitationStatus = invitationStatus,
         createdAt = clientMember.createdAt
     )
 
@@ -39,6 +41,8 @@ object PlanMapper {
         planId = member.planId,
         userId = member.userId,
         username = member.username,
+        email = member.email,
+        invitationStatus = member.invitationStatus,
         createdAt = member.createdAt
     )
 }

@@ -12,6 +12,6 @@ data class DeletePlanParam(val planId: UUID, val userId: UUID)
 
 data class GetPlanMembersParam(val planId: UUID)
 
-data class AddPlanMemberParam(val planId: UUID, val email: String)
+data class AddPlanMemberParam(val planId: UUID, val email: String, val requestingUserId: UUID)
 
 data class RemovePlanMemberParam(val planId: UUID, val userId: UUID, val requestingUserId: UUID)
