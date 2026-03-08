@@ -43,3 +43,27 @@ VALUES
     ('bb220000-0004-4000-8000-000000000004', NULL, 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', 'Sleeping Pad', 'personal', 1, false, now(), now()),
     ('bb220000-0005-4000-8000-000000000005', NULL, 'e4ccf033-d04f-8c3c-ffa1-affdh07c4e55', 'Water Bottle', 'personal', 2, true, now(), now())
 ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO itineraries (id, plan_id, created_at, updated_at)
+VALUES
+    ('aa001100-aaaa-bbbb-cccc-ddddeeee0001', '10aabb00-1111-2222-3333-444455556666', now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO itinerary_events (id, itinerary_id, title, description, details, event_at, created_at, updated_at)
+VALUES
+    ('bb001100-1111-2222-3333-444455550001', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
+     'Arrive at campsite', 'Set up tents and organize the camp area before dark.',
+     'Site #14 at Pine Ridge Campground. Check-in at the ranger station on the way in.',
+     '2026-07-10 15:00:00+00', now(), now()),
+    ('bb001100-1111-2222-3333-444455550002', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
+     'Morning hike to Eagle Peak', 'A moderate 5-mile loop trail with great views of the valley.',
+     NULL,
+     '2026-07-11 08:00:00+00', now(), now()),
+    ('bb001100-1111-2222-3333-444455550003', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
+     'Campfire dinner', 'Cook dinner over the fire and share stories.',
+     'Bring foil packets for veggies. Bob is handling the firewood.',
+     '2026-07-11 18:30:00+00', now(), now()),
+    ('bb001100-1111-2222-3333-444455550004', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
+     'Pack up and head home', NULL, NULL,
+     '2026-07-12 10:00:00+00', now(), now())
+ON CONFLICT DO NOTHING;
