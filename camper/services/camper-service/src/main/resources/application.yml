@@ -1,6 +1,9 @@
 spring:
   application:
     name: camper-service
+  web:
+    resources:
+      static-locations: file:/app/static/
 
 server:
   port: 8080
