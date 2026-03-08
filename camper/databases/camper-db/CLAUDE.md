@@ -109,11 +109,35 @@ CREATE TABLE plan_members (
 CREATE INDEX idx_plan_members_user_id ON plan_members (user_id);
 ```
 
+### items
+
+```sql
+CREATE TABLE items (
+    id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id    UUID         REFERENCES plans(id) ON DELETE CASCADE,
+    user_id    UUID         REFERENCES users(id) ON DELETE CASCADE,
+    name       VARCHAR(255) NOT NULL,
+    category   VARCHAR(50)  NOT NULL,
+    quantity   INTEGER      NOT NULL DEFAULT 1,
+    packed     BOOLEAN      NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    CONSTRAINT chk_items_single_owner CHECK (
+        (plan_id IS NOT NULL AND user_id IS NULL) OR
+        (plan_id IS NULL AND user_id IS NOT NULL)
+    )
+);
+CREATE INDEX idx_items_plan_id ON items(plan_id);
+CREATE INDEX idx_items_user_id ON items(user_id);
+```
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
 - `plan_members.plan_id` → `plans.id` (FK, CASCADE on delete)
 - `plan_members.user_id` → `users.id` (FK)
+- `items.plan_id` → `plans.id` (FK, CASCADE on delete)
+- `items.user_id` → `users.id` (FK, CASCADE on delete)
 
 ## Invariants
 
@@ -121,5 +145,7 @@ CREATE INDEX idx_plan_members_user_id ON plan_members (user_id);
 - User emails must be unique (enforced by `uq_users_email`).
 - Plan visibility must be 'public' or 'private' (enforced by `ck_plans_visibility`).
 - Plan members are unique per plan (composite PK `plan_id, user_id`).
-- Deleting a plan cascades to plan_members.
+- Deleting a plan cascades to plan_members and items.
+- Deleting a user cascades to items.
 - `username` in users is nullable (auto-created users may not have one).
+- Each item must have exactly one owner — either `plan_id` or `user_id` (enforced by `chk_items_single_owner`).
