@@ -16,6 +16,63 @@ PostgreSQL database for the Camper project.
 
 **Indexes:** `idx_worlds_name` on `name`
 
+### users
+
+| Column     | Type          | Constraints                          |
+|------------|---------------|--------------------------------------|
+| id         | UUID          | PK, DEFAULT gen_random_uuid()        |
+| email      | VARCHAR(255)  | NOT NULL, UNIQUE (uq_users_email)    |
+| username   | VARCHAR(100)  | nullable                             |
+| created_at | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+| updated_at | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+
+**Indexes:** `idx_users_email` on `email`
+
+### plans
+
+| Column     | Type          | Constraints                          |
+|------------|---------------|--------------------------------------|
+| id         | UUID          | PK, DEFAULT gen_random_uuid()        |
+| name       | VARCHAR(255)  | NOT NULL                             |
+| visibility | VARCHAR(10)   | NOT NULL, DEFAULT 'private', CHECK IN ('public', 'private') |
+| owner_id   | UUID          | NOT NULL, FK -> users(id)            |
+| created_at | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+| updated_at | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+
+### plan_members
+
+| Column     | Type          | Constraints                          |
+|------------|---------------|--------------------------------------|
+| plan_id    | UUID          | PK (composite), FK -> plans(id) ON DELETE CASCADE |
+| user_id    | UUID          | PK (composite), FK -> users(id)     |
+| created_at | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+
+**Indexes:** `idx_plan_members_user_id` on `user_id`
+
+### itineraries
+
+| Column     | Type          | Constraints                          |
+|------------|---------------|--------------------------------------|
+| id         | UUID          | PK, DEFAULT gen_random_uuid()        |
+| plan_id    | UUID          | NOT NULL, UNIQUE, FK -> plans(id) ON DELETE CASCADE |
+| created_at | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+| updated_at | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+
+### itinerary_events
+
+| Column       | Type          | Constraints                          |
+|--------------|---------------|--------------------------------------|
+| id           | UUID          | PK, DEFAULT gen_random_uuid()        |
+| itinerary_id | UUID          | NOT NULL, FK -> itineraries(id) ON DELETE CASCADE |
+| title        | VARCHAR(255)  | NOT NULL                             |
+| description  | TEXT          | nullable                             |
+| details      | TEXT          | nullable                             |
+| event_at     | TIMESTAMPTZ   | NOT NULL                             |
+| created_at   | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+| updated_at   | TIMESTAMPTZ   | NOT NULL, DEFAULT now()              |
+
+**Indexes:** `idx_itinerary_events_itinerary_id` on `itinerary_id`
+
 ## Local Setup
 
 ### Start the database
