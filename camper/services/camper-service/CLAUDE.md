@@ -7,7 +7,7 @@ API service for camping trip planning — user registration, authentication, and
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, and `plan-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, and `item-client` for data access
 - Database: `camper-db` (port 5433, database `camper_db`)
 
 ## Features
@@ -71,6 +71,26 @@ API service for camping trip planning — user registration, authentication, and
   - `POST /api/plans/{planId}/members` — add member by email (201)
   - `DELETE /api/plans/{planId}/members/{memberId}` — remove member (204)
 
+### Item (`features/item/`)
+- **Model:** `Item(id, planId?, userId?, name, category, quantity, packed, createdAt, updatedAt)`
+- **DTOs:** `CreateItemRequest(name, category, quantity, packed, ownerType, ownerId)`, `UpdateItemRequest(name, category, quantity, packed)`, `ItemResponse(...)`
+- **Error:** `ItemError` sealed class — `NotFound(itemId)`, `Invalid(field, reason)`
+- **Service params:** `CreateItemParam(name, category, quantity, packed, ownerType, ownerId, requestingUserId)`, `GetItemParam(id, requestingUserId)`, `GetItemsByOwnerParam(ownerType, ownerId, requestingUserId)`, `UpdateItemParam(id, name, category, quantity, packed, requestingUserId)`, `DeleteItemParam(id, requestingUserId)`
+- **Actions:**
+  - `CreateItemAction`: Validates, converts ownerType/ownerId to planId/userId, creates item
+  - `GetItemAction`: Fetches item by ID
+  - `GetItemsByOwnerAction`: Lists items by plan or user owner
+  - `UpdateItemAction`: Updates item fields
+  - `DeleteItemAction`: Deletes item
+- **Service:** `ItemService` facade (takes ItemClient)
+- **Routes:** (all require `X-User-Id` header)
+  - `POST /api/items` — create item (201)
+  - `GET /api/items?ownerType={type}&ownerId={id}` — list items by owner
+  - `GET /api/items/{id}` — get item by ID
+  - `PUT /api/items/{id}` — update item
+  - `DELETE /api/items/{id}` — delete item (204)
+- **Polymorphic ownership:** Items belong to either a plan or a user via nullable FK columns (`plan_id`, `user_id`) with a DB CHECK constraint. Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
+
 ## Key Patterns
 - `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` adapt client models to service models
 - Service param objects for all service calls
@@ -83,12 +103,14 @@ API service for camping trip planning — user registration, authentication, and
 - `WorldClientConfig` — creates client via factory function
 - `UserClientConfig` — creates user client via factory function
 - `PlanClientConfig` — creates plan client via factory function
+- `ItemClientConfig` — creates item client via factory function
 - `WorldServiceConfig` — wires service via `@Configuration` bean
 - `UserServiceConfig` — wires UserService
 - `PlanServiceConfig` — wires PlanService (takes PlanClient + UserClient)
+- `ItemServiceConfig` — wires ItemService (takes ItemClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture` use direct SQL for test setup
 - **Clean slate:** Tables truncated via `@BeforeEach`
