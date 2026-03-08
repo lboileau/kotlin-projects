@@ -135,6 +135,18 @@ API service for camping trip planning — user registration, authentication, pla
   - `DELETE /api/plans/{planId}/assignments/{assignmentId}/members/{memberUserId}` — remove member (204)
   - `PUT /api/plans/{planId}/assignments/{assignmentId}/owner` — transfer ownership
 
+### Gear Sync (`features/gearsync/`)
+- **DTOs:** `GearSyncResponse(items)`, `GearSyncItemResponse(name, category, quantity)`
+- **Error:** `GearSyncError` sealed class — `PlanNotFound(planId)`
+- **Service params:** `SyncGearParam(planId)`
+- **Actions:**
+  - `SyncGearAction`: Delegates to `GearSyncClient` to idempotently sync gear items (Tents, Canoes, Paddles, Life Jackets). Maps client result to service DTOs.
+- **Service:** `GearSyncService` facade (takes GearSyncClient)
+- **Routes:** (requires `X-User-Id` header)
+  - `POST /api/plans/{planId}/gear-sync` — sync gear from assignments (200)
+- **Auto-sync:** AssignmentService automatically calls `gearSyncClient.sync()` after successful assignment creation and deletion. Paddles and life jackets count is based on `maxOccupancy` (not actual member count).
+- **Composite client:** `gear-sync-client` is a client library that orchestrates AssignmentClient, ItemClient, and PlanClient. Sync logic lives in the client for reusability. Managed item names: "Tents" (camp), "Canoes" (canoe), "Paddles" (canoe), "Life Jackets" (canoe).
+
 ## Key Patterns
 - `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` / `ItemMapper` / `ItineraryMapper` / `AssignmentMapper` adapt client models to service models
 - Service param objects for all service calls
@@ -155,10 +167,11 @@ API service for camping trip planning — user registration, authentication, pla
 - `ItemServiceConfig` — wires ItemService (takes ItemClient)
 - `ItineraryServiceConfig` — wires ItineraryService (takes ItineraryClient + PlanClient)
 - `AssignmentClientConfig` — creates assignment client via factory function
-- `AssignmentServiceConfig` — wires AssignmentService (takes AssignmentClient + UserClient)
+- `AssignmentServiceConfig` — wires AssignmentService (takes AssignmentClient + PlanClient + UserClient + GearSyncClient)
+- `GearSyncServiceConfig` — creates GearSyncClient via factory, wires GearSyncService (takes GearSyncClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `GearSyncServiceTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `GearSyncAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `GearSyncFixture` use direct SQL for test setup
 - **Clean slate:** Tables truncated via `@BeforeEach`

@@ -111,6 +111,7 @@ The API runs on `http://localhost:8080`. The webapp runs on `http://localhost:30
 | POST | `/api/plans/{planId}/assignments/{assignmentId}/members` | Add assignment member |
 | DELETE | `/api/plans/{planId}/assignments/{assignmentId}/members/{userId}` | Remove assignment member |
 | PUT | `/api/plans/{planId}/assignments/{assignmentId}/owner` | Transfer assignment ownership |
+| POST | `/api/plans/{planId}/gear-sync` | Sync gear items from assignments |
 | GET | `/api/worlds/{id}` | Get a world by ID |
 | GET | `/api/worlds` | List all worlds |
 | POST | `/api/worlds` | Create a world |
