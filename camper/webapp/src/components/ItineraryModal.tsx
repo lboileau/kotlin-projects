@@ -8,6 +8,7 @@ interface Props {
   onClose: () => void;
   planId: string;
   isOwner: boolean;
+  refreshKey?: number;
 }
 
 interface EventFormData {
@@ -47,7 +48,7 @@ function groupEventsByDate(events: ItineraryEvent[]): Map<string, ItineraryEvent
   return groups;
 }
 
-export function ItineraryModal({ isOpen, onClose, planId, isOwner }: Props) {
+export function ItineraryModal({ isOpen, onClose, planId, isOwner, refreshKey }: Props) {
   const [events, setEvents] = useState<ItineraryEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -72,6 +73,13 @@ export function ItineraryModal({ isOpen, onClose, planId, isOwner }: Props) {
   useEffect(() => {
     if (isOpen) loadEvents();
   }, [isOpen, loadEvents]);
+
+  // Live updates: refetch when refreshKey changes while modal is open
+  useEffect(() => {
+    if (isOpen && refreshKey !== undefined && refreshKey > 0) {
+      loadEvents();
+    }
+  }, [refreshKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetForm = () => {
     setForm(EMPTY_FORM);
