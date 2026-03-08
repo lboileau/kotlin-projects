@@ -1,0 +1,71 @@
+.interactable-item {
+  position: absolute;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  z-index: 8;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.interactable-item:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.interactable-item__glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 248, 231, 0.15) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.interactable-item--hovered .interactable-item__glow {
+  opacity: 1;
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.interactable-item__content {
+  position: relative;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  transition: filter 0.3s ease;
+}
+
+.interactable-item--hovered .interactable-item__content {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4))
+          drop-shadow(0 0 16px rgba(244, 164, 96, 0.4));
+}
+
+.interactable-item__tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  white-space: nowrap;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--parchment);
+  background: rgba(26, 19, 51, 0.9);
+  border: 1px solid rgba(255, 248, 231, 0.15);
+  padding: 6px 14px;
+  border-radius: 20px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.interactable-item__tooltip--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.tooltip-icon {
+  margin-right: 4px;
+  color: var(--ember);
+}

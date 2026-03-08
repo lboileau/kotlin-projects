@@ -1,0 +1,125 @@
+.camper-avatar {
+  position: absolute;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 6px;
+  animation: fade-in 0.4s ease-out backwards;
+  z-index: 5;
+}
+
+.camper-avatar--add {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.3s ease;
+}
+
+.camper-avatar--add:hover {
+  transform: translate(var(--tx, 0), var(--ty, 0)) scale(1.08);
+}
+
+.camper-avatar--add:hover .avatar-figure--ghost {
+  filter: drop-shadow(0 0 12px rgba(255, 248, 231, 0.4));
+}
+
+.camper-avatar--add:hover .avatar-name--ghost {
+  color: rgba(255, 248, 231, 0.8);
+}
+
+.avatar-figure {
+  position: relative;
+  animation: gentle-bob 4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.avatar-figure--ghost {
+  animation: gentle-bob 4s ease-in-out infinite;
+  opacity: 0.6;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.camper-avatar--add:hover .avatar-figure--ghost {
+  opacity: 1;
+}
+
+.avatar-name {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--parchment);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2px 8px;
+  border-radius: 8px;
+  white-space: nowrap;
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.avatar-name--ghost {
+  color: rgba(255, 248, 231, 0.4);
+  background: rgba(0, 0, 0, 0.2);
+  transition: color 0.3s ease;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+}
+
+.avatar-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 20;
+}
+
+.camper-avatar:hover .avatar-remove {
+  opacity: 1;
+}
+
+.avatar-remove:hover {
+  transform: scale(1.2);
+}
+
+.camper-avatar--pending {
+  opacity: 0.6;
+}
+
+.avatar-name--pending {
+  color: rgba(255, 248, 231, 0.4);
+  background: rgba(0, 0, 0, 0.2);
+  font-style: italic;
+  font-size: 0.6rem;
+}
+
+/* Scared eye shift at night */
+.avatar-eyes-shift {
+  animation: eyes-shift 6s ease-in-out infinite;
+}
+
+@keyframes eyes-shift {
+  0%, 78%, 100% { transform: translateX(0); }
+  82% { transform: translateX(0.9px); }
+  86%, 89% { transform: translateX(0.9px); }
+  92%, 96% { transform: translateX(-0.5px); }
+  99% { transform: translateX(0); }
+}
+
+.avatar-fire-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 64px;
+  background: radial-gradient(ellipse at center bottom, rgba(244, 164, 96, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+  animation: pulse-glow 3s ease-in-out infinite;
+}

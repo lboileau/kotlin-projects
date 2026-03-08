@@ -1,0 +1,224 @@
+.plan-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header */
+.plan-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-xl);
+  background: rgba(10, 8, 20, 0.4);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 248, 231, 0.06);
+}
+
+.plan-back {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--parchment);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: var(--radius-xl);
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.plan-back:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.plan-header-center {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.plan-header-icon {
+  filter: drop-shadow(0 0 6px rgba(244, 164, 96, 0.3));
+}
+
+.plan-header-title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--parchment);
+  letter-spacing: 0.04em;
+}
+
+/* Campsite scene */
+.campsite-scene {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 34vh;
+}
+
+/* Center campfire area */
+.campsite-center {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+/* Invite ghost person below fire */
+.campsite-invite-ghost {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: var(--space-xl);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.6;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.campsite-invite-ghost:hover {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.campsite-invite-ghost:hover .invite-ghost-figure {
+  filter: drop-shadow(0 0 12px rgba(255, 248, 231, 0.3));
+}
+
+.invite-ghost-figure {
+  animation: gentle-bob 4s ease-in-out infinite;
+  transition: filter 0.3s ease;
+}
+
+.invite-ghost-label {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255, 248, 231, 0.4);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 8px;
+  border-radius: 8px;
+  transition: color 0.3s ease;
+}
+
+.campsite-invite-ghost:hover .invite-ghost-label {
+  color: rgba(255, 248, 231, 0.8);
+}
+
+.campfire-circle {
+  position: absolute;
+  width: 0;
+  height: 0;
+  z-index: 15;
+}
+
+/* User section in header */
+.plan-header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.plan-user-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 248, 231, 0.12);
+  border-radius: var(--radius-xl);
+  padding: 4px 14px 4px 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-user-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 248, 231, 0.25);
+}
+
+.plan-user-avatar {
+  flex-shrink: 0;
+}
+
+.plan-user-name {
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  color: var(--lavender-light);
+}
+
+.plan-logout {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  color: var(--rose);
+  background: rgba(232, 180, 184, 0.1);
+  border: 1px solid rgba(232, 180, 184, 0.25);
+  padding: 6px 14px;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.plan-logout:hover {
+  background: rgba(232, 180, 184, 0.2);
+  border-color: rgba(232, 180, 184, 0.4);
+}
+
+/* Celestial toggle — hidden day/night switch */
+.celestial-toggle {
+  position: fixed;
+  top: 10%;
+  right: 33%;
+  z-index: 45;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.8;
+  transition: opacity 0.3s ease, transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 12px rgba(200, 208, 216, 0.15));
+}
+
+.celestial-toggle:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 20px rgba(240, 208, 96, 0.3));
+}
+
+/* Loading */
+.campsite-loading {
+  text-align: center;
+  color: var(--lavender-light);
+  opacity: 0.7;
+  font-style: italic;
+  animation: fade-in 0.3s ease;
+}
+
+.campsite-loading-flame {
+  width: 24px;
+  height: 36px;
+  margin: 0 auto var(--space-md);
+  background: radial-gradient(ellipse at bottom, var(--ember) 0%, transparent 70%);
+  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+  animation: campfire-dance 0.8s ease-in-out infinite;
+}

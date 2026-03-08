@@ -1,0 +1,356 @@
+.parallax-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  --mouse-x: 0;
+  --mouse-y: 0;
+}
+
+/* Night variant - login page */
+.parallax-bg--night {
+  background: linear-gradient(
+    180deg,
+    #1a1333 0%,
+    var(--night-sky) 30%,
+    var(--night-mid) 60%,
+    var(--twilight) 100%
+  );
+}
+
+/* Dusk variant - home page */
+.parallax-bg--dusk {
+  background: linear-gradient(
+    180deg,
+    #3D3560 0%,
+    #5C4F7A 20%,
+    #8B7BAA 40%,
+    #C4A882 65%,
+    #E8C9A0 85%,
+    var(--tan) 100%
+  );
+}
+
+/* Campsite variant — forest */
+.parallax-bg--campsite {
+  background: #0A0A06;
+  transition: background 1s ease;
+  --campsite-sky-bg: #1A2030;
+}
+
+.parallax-bg--campsite.campsite--day {
+  background: #87CEEB;
+  --campsite-sky-bg: #87CEEB;
+}
+
+/* Deep darkness/light base */
+.campsite-darkness {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 25%,
+    #1A2030 0%,
+    #0E1218 30%,
+    #080A0C 50%,
+    #040402 100%
+  );
+  transition: opacity 1s ease;
+}
+
+.campsite--day .campsite-darkness {
+  background: none;
+}
+
+/* Sky visible through canopy center */
+.campsite-sky-sliver {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  width: 60%;
+  height: 50%;
+  background: radial-gradient(
+    ellipse at 50% 10%,
+    #1A2A3A 0%,
+    #142030 20%,
+    #0E1620 40%,
+    transparent 70%
+  );
+  z-index: 0;
+  transition: background 1s ease;
+}
+
+.campsite--day .campsite-sky-sliver {
+  background: none;
+}
+
+/* Stars in the sky gap — night only */
+.campsite-sky-sliver::before {
+  content: '';
+  position: absolute;
+  top: 5%;
+  left: 30%;
+  width: 2px;
+  height: 2px;
+  background: #AAB8CC;
+  border-radius: 50%;
+  box-shadow:
+    40px 8px 0 0 rgba(170, 184, 204, 0.4),
+    120px 15px 0 0 rgba(170, 184, 204, 0.6),
+    80px 25px 0 0 rgba(170, 184, 204, 0.3),
+    200px 5px 0 0 rgba(170, 184, 204, 0.5),
+    160px 30px 0 0 rgba(170, 184, 204, 0.25),
+    50px 35px 0 0 rgba(170, 184, 204, 0.35),
+    250px 18px 0 0 rgba(170, 184, 204, 0.4);
+  transition: opacity 1s ease;
+}
+
+.campsite--day .campsite-sky-sliver::before {
+  opacity: 0;
+}
+
+/* Moon and stars in canopy gap */
+.campsite-sky-objects {
+  position: absolute;
+  top: 0;
+  left: 20%;
+  width: 60%;
+  height: 45%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.campsite-celestial {
+  position: absolute;
+  top: 18%;
+  right: 18%;
+  filter: drop-shadow(0 0 12px rgba(200, 208, 216, 0.15));
+  pointer-events: auto;
+}
+
+.campsite--day .campsite-celestial {
+  filter: drop-shadow(0 0 16px rgba(240, 208, 96, 0.4));
+}
+
+.campsite-star {
+  position: absolute;
+  background: #C8D0D8;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+  box-shadow: 0 0 3px rgba(200, 208, 216, 0.4);
+}
+
+/* Tree trunk layers — anchored to top, extend full height, floor covers bottoms */
+.campsite-trunks-far,
+.campsite-trunks-mid,
+.campsite-trunks-near {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.campsite-trunks-far { z-index: 1; }
+.campsite-trunks-mid { z-index: 2; }
+.campsite-trunks-near { z-index: 3; }
+
+/* Glowing eyes — behind all tree layers */
+.campsite-eyes {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+}
+
+.forest-eyes {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  animation: eyes-blink var(--duration, 5s) ease-in-out infinite;
+}
+
+.forest-eye {
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+@keyframes eyes-blink {
+  0%, 42%, 48%, 100% { opacity: 0.7; }
+  44%, 46% { opacity: 0; }
+  /* Occasionally disappear */
+  85%, 87% { opacity: 0; }
+}
+
+/* Day variants for trees */
+.campsite--day .campsite-trunks-far rect { fill: #5A4A38; opacity: 1; }
+.campsite--day .campsite-trunks-far polygon { fill: #2E5A28; opacity: 1; }
+.campsite--day .campsite-trunks-mid rect { fill: #4A3A28; opacity: 1; }
+.campsite--day .campsite-trunks-mid polygon { fill: #1E6A1E; opacity: 1; }
+.campsite--day .campsite-trunks-mid line { stroke: #5A4A38; opacity: 1; }
+.campsite--day .campsite-trunks-near rect { fill: #3A2A1E; opacity: 1; }
+.campsite--day .campsite-trunks-near line { stroke: #4A3A28; opacity: 1; }
+.campsite--day .campsite-trunks-near ellipse { fill: #3A2A1E; stroke: #4A3A28; opacity: 1; }
+
+/* Hide eyes during day */
+.campsite--day .campsite-eyes {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+/* Forest floor — sharp edge at 50% screen height */
+.campsite-floor {
+  bottom: 0;
+  height: 50%;
+  background:
+    linear-gradient(180deg, #1A1810 0%, #181610 50%, #1A1810 100%);
+  z-index: 4;
+  border-top: 1px solid #2A2820;
+  transition: background 1s ease, border-color 1s ease;
+}
+
+.campsite--day .campsite-floor {
+  background: linear-gradient(180deg, #5C4A32 0%, #4A3A28 30%, #3E3020 100%);
+  border-top: 1px solid #6A5A42;
+}
+
+/* Ground detail — sharp SVG layer on top of floor */
+.campsite-ground-detail {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Day variant for ground detail */
+.campsite--day .campsite-ground-detail path { stroke: #4A3A28; }
+.campsite--day .campsite-ground-detail polygon { fill: #3E3020; stroke: #4A3A28; }
+.campsite--day .campsite-ground-detail line { stroke: #4A3A28; }
+.campsite--day .campsite-ground-detail g line { stroke: #3E3020; }
+
+/* Low mist */
+.campsite-mist {
+  position: absolute;
+  bottom: 10%;
+  left: 0;
+  width: 100%;
+  height: 30%;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(180, 180, 160, 0.06) 0%,
+    rgba(140, 140, 120, 0.03) 40%,
+    transparent 70%
+  );
+  z-index: 5;
+  pointer-events: none;
+}
+
+.campsite--day .campsite-mist {
+  opacity: 0;
+}
+
+.parallax-layer {
+  position: absolute;
+  width: 100%;
+  transition: transform 0.3s ease-out;
+}
+
+/* Stars */
+.parallax-layer--stars {
+  inset: 0;
+  transform: translate(
+    calc(var(--mouse-x) * -3px),
+    calc(var(--mouse-y) * -3px)
+  );
+}
+
+.star {
+  position: absolute;
+  background: var(--starlight);
+  border-radius: 50%;
+  animation: twinkle var(--duration, 3s) ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(255, 248, 231, 0.6);
+}
+
+/* Far mountains */
+.parallax-layer--mountains-far {
+  bottom: 0;
+  height: 55%;
+  transform: translate(
+    calc(var(--mouse-x) * -8px),
+    calc(var(--mouse-y) * -4px)
+  );
+}
+
+.parallax-bg--night .parallax-layer--mountains-far path {
+  fill: #3A2F55;
+}
+.parallax-bg--dusk .parallax-layer--mountains-far path {
+  fill: #7B6B9A;
+}
+.parallax-bg--campsite .parallax-layer--mountains-far path { fill: transparent; }
+
+/* Near mountains */
+.parallax-layer--mountains-near {
+  bottom: 0;
+  height: 45%;
+  transform: translate(
+    calc(var(--mouse-x) * -15px),
+    calc(var(--mouse-y) * -6px)
+  );
+}
+
+.parallax-bg--night .parallax-layer--mountains-near path {
+  fill: #2D2648;
+}
+.parallax-bg--dusk .parallax-layer--mountains-near path {
+  fill: #6A5A8A;
+}
+.parallax-bg--campsite .parallax-layer--mountains-near path { fill: transparent; }
+
+/* Treeline */
+.parallax-layer--trees {
+  bottom: 0;
+  height: 35%;
+  transform: translate(
+    calc(var(--mouse-x) * -22px),
+    calc(var(--mouse-y) * -8px)
+  );
+}
+
+.parallax-bg--night .parallax-layer--trees path {
+  fill: #1E1A32;
+}
+.parallax-bg--dusk .parallax-layer--trees path {
+  fill: #4A5A48;
+}
+.parallax-bg--campsite .parallax-layer--trees path { fill: transparent; }
+
+/* Ground */
+.parallax-layer--ground {
+  bottom: 0;
+  height: 15%;
+  transform: translate(
+    calc(var(--mouse-x) * -30px),
+    0
+  );
+}
+
+.parallax-bg--night .parallax-layer--ground {
+  background: linear-gradient(180deg, #1a1530 0%, #141020 100%);
+}
+.parallax-bg--dusk .parallax-layer--ground {
+  background: linear-gradient(180deg, #3A4A38 0%, #2A3628 100%);
+}
+.parallax-bg--campsite .parallax-layer--ground { background: transparent; }
+
+/* Floating leaves */
+.floating-leaf {
+  position: absolute;
+  animation: float-leaf 10s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
