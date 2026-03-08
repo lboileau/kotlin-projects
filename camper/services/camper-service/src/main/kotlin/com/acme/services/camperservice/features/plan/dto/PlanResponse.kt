@@ -9,7 +9,8 @@ data class PlanResponse(
     val visibility: String,
     val ownerId: UUID,
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    val isMember: Boolean
 )
 
 data class PlanMemberResponse(

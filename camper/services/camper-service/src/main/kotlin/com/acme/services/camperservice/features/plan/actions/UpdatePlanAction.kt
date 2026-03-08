@@ -27,7 +27,7 @@ internal class UpdatePlanAction(private val planClient: PlanClient) {
         }
 
         logger.debug("Updating plan id={}", param.planId)
-        return when (val result = planClient.update(ClientUpdatePlanParam(id = param.planId, name = param.name))) {
+        return when (val result = planClient.update(ClientUpdatePlanParam(id = param.planId, name = param.name, visibility = param.visibility))) {
             is Result.Success -> Result.Success(PlanMapper.fromClient(result.value))
             is Result.Failure -> Result.Failure(PlanError.fromClientError(result.error))
         }

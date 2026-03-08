@@ -35,7 +35,7 @@ internal class GetPlansAction(private val planClient: PlanClient) {
 
         // Merge: user plans + public plans they're not already part of
         val userPlanIds = userPlans.map { it.id }.toSet()
-        val merged = userPlans + publicPlans.filter { it.id !in userPlanIds }
+        val merged = userPlans + publicPlans.filter { it.id !in userPlanIds }.map { it.copy(isMember = false) }
         return Result.Success(merged)
     }
 }

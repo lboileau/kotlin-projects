@@ -27,19 +27,21 @@ internal class UpdatePlan(
             is Result.Failure -> existing
             is Result.Success -> {
                 val now = Instant.now()
+                val newVisibility = param.visibility ?: existing.value.visibility
                 jdbi.withHandle<Unit, Exception> { handle ->
                     handle.createUpdate(
                         """
-                        UPDATE plans SET name = :name, updated_at = :updatedAt
+                        UPDATE plans SET name = :name, visibility = :visibility, updated_at = :updatedAt
                         WHERE id = :id
                         """.trimIndent()
                     )
                         .bind("id", param.id)
                         .bind("name", param.name)
+                        .bind("visibility", newVisibility)
                         .bind("updatedAt", now)
                         .execute()
                 }
-                success(existing.value.copy(name = param.name, updatedAt = now))
+                success(existing.value.copy(name = param.name, visibility = newVisibility, updatedAt = now))
             }
         }
     }
