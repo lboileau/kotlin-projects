@@ -342,7 +342,10 @@ export function PlanPage() {
       {activeModal === 'assignments' && planId && user && plan && (
         <AssignmentsModal
           isOpen
-          onClose={() => setActiveModal(null)}
+          onClose={() => {
+            api.syncGear(planId).catch(() => {});
+            setActiveModal(null);
+          }}
           planId={planId}
           planOwnerId={plan.ownerId}
           currentUserId={user.id}
