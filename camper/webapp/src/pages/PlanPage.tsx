@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api, type Plan, type PlanMember } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { usePlanUpdates } from '../hooks/usePlanUpdates';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { Campfire } from '../components/Campfire';
 import { CamperAvatar } from '../components/CamperAvatar';
@@ -49,6 +50,23 @@ export function PlanPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Live updates: resource-aware refetch via WebSocket
+  const [assignmentsRefreshKey, setAssignmentsRefreshKey] = useState(0);
+  const [itineraryRefreshKey, setItineraryRefreshKey] = useState(0);
+
+  usePlanUpdates(planId, useCallback((message) => {
+    const { resource } = message;
+    if (resource === 'plan' || resource === 'members') {
+      loadData();
+    }
+    if (resource === 'assignments') {
+      setAssignmentsRefreshKey(k => k + 1);
+    }
+    if (resource === 'itinerary') {
+      setItineraryRefreshKey(k => k + 1);
+    }
+  }, [loadData]));
 
   const handleAddMember = async (email: string) => {
     if (!planId) return;
@@ -336,6 +354,7 @@ export function PlanPage() {
           onClose={() => setActiveModal(null)}
           planId={planId}
           isOwner={isOwner}
+          refreshKey={itineraryRefreshKey}
         />
       )}
 
@@ -347,6 +366,7 @@ export function PlanPage() {
           planOwnerId={plan.ownerId}
           currentUserId={user.id}
           members={members}
+          refreshKey={assignmentsRefreshKey}
         />
       )}
     </div>
