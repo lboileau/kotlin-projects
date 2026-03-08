@@ -9,6 +9,7 @@ API service for camping trip planning — user registration, authentication, pla
 - Spring Boot 3.4.3 application on port 8080
 - Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, and `assignment-client` for data access
 - Database: `camper-db` (port 5433, database `camper_db`)
+- **WebSocket:** STOMP-over-WebSocket at `/ws` for live updates. `PlanEventPublisher` broadcasts `PlanUpdateMessage(resource, action)` to `/topic/plans/{planId}` after successful mutations.
 
 ## Features
 
@@ -142,6 +143,8 @@ API service for camping trip planning — user registration, authentication, pla
 - `GlobalExceptionHandler` catches `RuntimeException::class`
 - `ResultExtensions.kt` maps errors to HTTP responses
 - Trust-based auth via `X-User-Id` header (no tokens/passwords)
+- `PlanEventPublisher` broadcasts WebSocket events after successful controller mutations
+- Controllers inject `PlanEventPublisher` and call `publishUpdate(planId, resource, action)` after `Result.Success`
 
 ## Configuration
 - `WorldClientConfig` — creates client via factory function
@@ -156,9 +159,11 @@ API service for camping trip planning — user registration, authentication, pla
 - `ItineraryServiceConfig` — wires ItineraryService (takes ItineraryClient + PlanClient)
 - `AssignmentClientConfig` — creates assignment client via factory function
 - `AssignmentServiceConfig` — wires AssignmentService (takes AssignmentClient + UserClient)
+- `WebSocketConfig` — STOMP endpoint `/ws`, topic broker `/topic`, app prefix `/app`
 
 ## Testing
 - **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest` use FakeClient from testFixtures
 - **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
 - **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture` use direct SQL for test setup
+- **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`

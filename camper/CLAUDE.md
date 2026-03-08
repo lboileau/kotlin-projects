@@ -52,6 +52,7 @@ Rule of thumb: "Does it do I/O? → `clients/`. Pure logic/types? → `libs/`."
 - **Error handling:** `Result<T, E>` sealed class. Never throw for expected failures.
 - **Client pattern:** Interface + internal facade + operations + param objects. Factory reads env vars. Fake in testFixtures.
 - **Service pattern:** Actions (validate → convert → call client) composed into a Service facade. Validations are 1:1 with actions.
+- **Live updates:** STOMP-over-WebSocket via `PlanEventPublisher`. Controllers publish `{ resource, action }` messages to `/topic/plans/{planId}` after successful mutations. Frontend subscribes per-plan and refetches on notification (deferred while modals are open).
 - **Testing:** Unit tests with FakeClient, acceptance tests with Testcontainers + @SpringBootTest.
 
 ## Key Conventions

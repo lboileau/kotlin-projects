@@ -77,6 +77,7 @@ The API runs on `http://localhost:8080`. The webapp runs on `http://localhost:30
 - **Backend:** Kotlin 2.1.10, Spring Boot 3.4.3, JDBI 3.x, PostgreSQL 16
 - **Frontend:** React 19, TypeScript, Vite 7
 - **Build:** Gradle 8.12 (Kotlin DSL)
+- **Live Updates:** STOMP-over-WebSocket (`/ws`) for real-time plan change notifications
 - **Testing:** JUnit 5, AssertJ, Testcontainers
 
 ## API
@@ -111,6 +112,7 @@ The API runs on `http://localhost:8080`. The webapp runs on `http://localhost:30
 | POST | `/api/plans/{planId}/assignments/{assignmentId}/members` | Add assignment member |
 | DELETE | `/api/plans/{planId}/assignments/{assignmentId}/members/{userId}` | Remove assignment member |
 | PUT | `/api/plans/{planId}/assignments/{assignmentId}/owner` | Transfer assignment ownership |
+| WS | `/ws` | STOMP WebSocket endpoint for live updates |
 | GET | `/api/worlds/{id}` | Get a world by ID |
 | GET | `/api/worlds` | List all worlds |
 | POST | `/api/worlds` | Create a world |

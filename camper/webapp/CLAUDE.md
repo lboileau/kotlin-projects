@@ -7,6 +7,7 @@ Interactive camping trip planner frontend. Aesthetic: **"Enchanted Expedition Jo
 - **Framework:** React 19 + TypeScript
 - **Build:** Vite 7
 - **Routing:** react-router-dom
+- **WebSocket:** @stomp/stompjs for STOMP-over-WebSocket live updates
 - **Styling:** Plain CSS (no framework) with CSS custom properties
 - **Fonts:** Cinzel Decorative (display), Fredericka the Great (headings), Lora (body) — via Google Fonts
 
@@ -22,6 +23,8 @@ webapp/
 │   ├── App.tsx             # Router + AuthProvider
 │   ├── api/
 │   │   └── client.ts       # API client (typed fetch wrapper)
+│   ├── hooks/
+│   │   └── usePlanUpdates.ts # STOMP WebSocket hook for live plan updates
 │   ├── context/
 │   │   └── AuthContext.tsx  # Auth state (localStorage-persisted)
 │   ├── components/
@@ -51,6 +54,14 @@ webapp/
 - Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`
 - `request<T>()` helper auto-injects `X-User-Id` from localStorage
 - All methods return typed promises; throws on non-OK responses
+
+### Live Updates (`hooks/usePlanUpdates.ts`)
+- `usePlanUpdates(planId, onUpdate)` — connects to `/ws` via STOMP, subscribes to `/topic/plans/{planId}`
+- Calls `onUpdate({ resource, action })` when the server publishes a change notification
+- Reconnects automatically on disconnect (5s delay)
+- PlanPage routes updates by resource type: `plan`/`members` → refetch plan & members immediately; `assignments` → increment `assignmentsRefreshKey`; `itinerary` → increment `itineraryRefreshKey`
+- AssignmentsModal and ItineraryModal accept a `refreshKey` prop — when it increments while the modal is open, they refetch their data
+- Items are not live-updated (modals refetch on open)
 
 ### Auth (`context/AuthContext.tsx`)
 - `AuthProvider` wraps app — stores user in state + localStorage
