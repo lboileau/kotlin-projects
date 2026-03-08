@@ -154,7 +154,7 @@ function AssignmentCard({
       return;
     }
     onAddMember(assignment.id, userId);
-    setShowAddMember(false);
+    onToggleAddMember(null);
   };
 
   return (
