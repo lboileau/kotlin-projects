@@ -23,6 +23,18 @@ export interface PlanMember {
   createdAt: string;
 }
 
+export interface Item {
+  id: string;
+  planId: string | null;
+  userId: string | null;
+  name: string;
+  category: string;
+  quantity: number;
+  packed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -110,6 +122,30 @@ export const api = {
 
   deletePlan(planId: string): Promise<void> {
     return request(`/api/plans/${planId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  getItems(ownerType: string, ownerId: string): Promise<Item[]> {
+    return request(`/api/items?ownerType=${ownerType}&ownerId=${ownerId}`);
+  },
+
+  createItem(data: { name: string; category: string; quantity: number; packed: boolean; ownerType: string; ownerId: string }): Promise<Item> {
+    return request('/api/items', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateItem(itemId: string, data: { name: string; category: string; quantity: number; packed: boolean }): Promise<Item> {
+    return request(`/api/items/${itemId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteItem(itemId: string): Promise<void> {
+    return request(`/api/items/${itemId}`, {
       method: 'DELETE',
     });
   },

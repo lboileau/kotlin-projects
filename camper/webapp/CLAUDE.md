@@ -30,6 +30,7 @@ webapp/
 │   │   ├── CamperAvatar.tsx/css        # SVG illustrated person seated around fire
 │   │   ├── CampsiteItems.tsx           # SVG art: TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG
 │   │   ├── InteractableItem.tsx/css    # Hoverable/clickable campsite object with glow + tooltip
+│   │   ├── GearModal.tsx/css            # Equipment & gear management modal (checklist per owner)
 │   │   ├── ComingSoonModal.tsx         # Themed "not ready" modal with flavor text
 │   │   ├── AddMemberModal.tsx          # Form modal to invite member by email
 │   │   ├── Modal.css                   # Shared modal styles (parchment aesthetic)
@@ -46,7 +47,7 @@ webapp/
 ## Architecture
 
 ### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`
+- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`
 - `request<T>()` helper auto-injects `X-User-Id` from localStorage
 - All methods return typed promises; throws on non-OK responses
 
@@ -58,7 +59,9 @@ webapp/
 ### Pages
 - **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`.
 - **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
-- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Only "add member" works; others show ComingSoonModal. Owner sees "Manage Plan" button in header (toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others.
+- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealModal; tent/itinerary show ComingSoonModal. Owner sees "Manage Plan" button in header (toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others.
+  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars.
+  - **MealModal** — Plan-only checklist (no personal sections) with day tabs. Categories: breakfast, lunch, dinner, snacks. Everyone can edit the meal plan. Day tabs let users organize meals per day (Day 1, Day 2, etc.) with a "+" button to add more days. Items are stored with day-prefixed categories (e.g. `day1:breakfast`) which the UI parses for display. Opens from the kitchen campsite item. Both modals share a generic `ChecklistModal` component internally.
 
 ### Visual Design System
 - **Palette:** Defined in `theme.css` as CSS variables (`--lavender`, `--sage`, `--tan`, `--rose`, `--mint`, `--ember`, `--flame`, `--night-sky`, `--parchment`, etc.)
@@ -82,6 +85,10 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | PUT | `/api/plans/:id` | X-User-Id | PlanPage (update visibility) |
 | POST | `/api/plans/:id/members` | X-User-Id | PlanPage (invite), HomePage (join) |
 | DELETE | `/api/plans/:id/members/:memberId` | X-User-Id | PlanPage (leave/remove), HomePage (leave) |
+| GET | `/api/items?ownerType=&ownerId=` | X-User-Id | GearModal (list items) |
+| POST | `/api/items` | X-User-Id | GearModal (create item) |
+| PUT | `/api/items/:id` | X-User-Id | GearModal (update item) |
+| DELETE | `/api/items/:id` | X-User-Id | GearModal (delete item) |
 
 ## Running
 
