@@ -3,6 +3,7 @@ package com.acme.services.camperservice.common.error
 import com.acme.clients.common.Result
 import com.acme.services.common.ApiResponse
 import com.acme.services.camperservice.features.item.error.ItemError
+import com.acme.services.camperservice.features.itinerary.error.ItineraryError
 import com.acme.services.camperservice.features.plan.error.PlanError
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.world.error.WorldError
@@ -75,6 +76,26 @@ fun ItemError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 
 @JvmName("itemResultToResponseEntity")
 fun <T> Result<T, ItemError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun ItineraryError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is ItineraryError.PlanNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is ItineraryError.NotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is ItineraryError.EventNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is ItineraryError.Invalid -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+}
+
+@JvmName("itineraryResultToResponseEntity")
+fun <T> Result<T, ItineraryError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
 ): ResponseEntity<Any> = when (this) {
