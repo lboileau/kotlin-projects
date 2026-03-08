@@ -267,4 +267,10 @@ export const api = {
       body: JSON.stringify({ newOwnerId }),
     });
   },
+
+  syncGear(planId: string): Promise<{ items: { name: string; category: string; quantity: number }[] }> {
+    return request(`/api/plans/${planId}/gear-sync`, {
+      method: 'POST',
+    });
+  },
 };
