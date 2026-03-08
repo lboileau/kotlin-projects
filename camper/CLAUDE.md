@@ -82,3 +82,34 @@ PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d camper_db -f databa
 # Full build
 ./gradlew clean build
 ```
+
+## Production Deployment
+
+Hosted on [Railway](https://railway.com) — project **proactive-quietude**.
+
+- **URL:** https://camper-service-production.up.railway.app
+- **Dashboard:** https://railway.com/project/a8deb41f-1bc0-4d2e-a986-a1e07d3c1253
+- **Services:** `camper-service` (Spring Boot app) + `Postgres-MuMx` (managed PostgreSQL)
+
+### How it works
+
+- **Dockerfile** builds in three stages: Node (webapp), JDK (Spring Boot jar), JRE (runtime)
+- **Webapp** (`webapp/dist`) is served as static files from `/app/static/` by Spring Boot
+- **SPA routing:** `WebConfig.kt` forwards non-API, non-static routes to `index.html` for React Router
+- **Migrations:** Flyway runs automatically on startup. Migration files live in `databases/camper-db/migrations/` (single source of truth) and are copied to the classpath at build time via Gradle `processResources`
+- **Environment variables:** `DB_URL`, `DB_USER`, `DB_PASSWORD` configured on the camper-service in Railway
+
+### Deploying
+
+```bash
+# Ensure you're linked to the right service
+railway service camper-service
+
+# Deploy from local (uses Dockerfile)
+railway up
+```
+
+### Adding new migrations
+
+1. Add the migration SQL file to `databases/camper-db/migrations/` (e.g. `V010__create_foo.sql`)
+2. That's it — Gradle copies it to the classpath at build time, Flyway applies it on next deploy
