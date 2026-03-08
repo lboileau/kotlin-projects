@@ -13,14 +13,16 @@ In local development, the email client is faked out: no real emails are sent, an
 ### Status Lifecycle
 
 ```
-send() succeeds  →  status: "sent"
-                        ↓
+upsert invitation  →  status: "pending"
+                          ↓
+send() succeeds    →  status: "sent"
+                          ↓
               webhook: email.delivered  →  status: "delivered"
               webhook: email.bounced    →  status: "bounced"
               webhook: email.complained →  status: "complained"
               webhook: email.delivery_delayed → status: "delayed"
 
-send() fails    →  status: "failed"
+send() fails       →  status: "failed"
 ```
 
 ## Entities
@@ -35,7 +37,7 @@ send() fails    →  status: "failed"
 | email | VARCHAR(255) | Recipient email (denormalized for display) |
 | inviter_id | UUID | FK → users |
 | resend_email_id | VARCHAR(255) | Nullable, returned by Resend on success |
-| status | VARCHAR(20) | `sent`, `delivered`, `bounced`, `failed`, `complained`, `delayed` |
+| status | VARCHAR(20) | `pending`, `sent`, `delivered`, `bounced`, `failed`, `complained`, `delayed` |
 | sent_at | TIMESTAMPTZ | When the send was attempted |
 | updated_at | TIMESTAMPTZ | |
 
@@ -152,12 +154,12 @@ Updated flow:
 1. Validate input
 2. Get or create user by email
 3. Add member to plan (handles `AlreadyMember` — if already a member, still proceed to check invitation status)
-4. Fetch existing invitation via `invitationClient.getByPlanIdAndUserId`
-5. If invitation exists and status is `sent`, `delayed`, `delivered`, or `complained` → skip email, return member
+4. Upsert invitation record with status `pending`
+5. If previous invitation exists and status is `sent`, `delayed`, `delivered`, or `complained` → skip email, return member
 6. Fetch plan name (via `planClient.getById`)
 7. Fetch inviter name (via `userClient.getById`)
 8. Send invitation email (via `emailClient.send`)
-9. Create or update invitation record with status `sent` or `failed`
+9. Update invitation status to `sent` with `resend_email_id` (or `failed` if send throws)
 10. Return member (regardless of email success/failure)
 
 ### GetPlanMembersAction (modified)
