@@ -318,15 +318,24 @@ Document the project with these sections:
 - **Key Conventions** — root package, package naming for each module type, DB naming, Kotlin naming, client interface + fake pattern
 - **Quick Start** — docker-compose, flyway, seed, bootRun commands
 
+##### `start.sh` and `stop.sh`
+
+Create convenience scripts at the project root:
+
+**`start.sh`** — Starts the database (docker compose), waits for readiness, runs Flyway migrations, seeds dev data, starts the API service and webapp (if present) in the background, waits for the webapp to be ready, opens the browser, then waits (Ctrl+C to stop). Uses a trap to clean up background processes on exit.
+
+**`stop.sh`** — Kills running service and webapp processes (`pkill -f`), stops the database container (`docker compose down`).
+
+Both scripts should be executable (`chmod +x`).
+
 ##### Root `README.md`
 
 Structure with these sections:
-- **What's Included** — bullet list of each module
-- **Prerequisites** — JDK 21+, Docker
-- **Initial Setup** — one-time: docker-compose, flyway migrate, seed
-- **Quick Start** — `./gradlew :services:<service-name>:bootRun`
+- **Quick Start** — `./start.sh` to bring everything up (opens browser), `./stop.sh` to tear down
+- **Prerequisites** — JDK 21+, Docker, Node.js (if webapp exists), Flyway CLI, psql
+- **Project Structure** — directory tree showing all modules
+- **Manual Setup** — step-by-step: docker-compose, flyway migrate, seed, bootRun, npm run dev
 - **API** — endpoints table with method, path, description
-- **Example** — curl commands for create and list
 - **Testing** — `./gradlew test`, per-module commands, `./gradlew clean build`
 - **Docker** — build and run commands with env vars
 
@@ -369,4 +378,5 @@ After completing all steps, verify:
 - [ ] Acceptance tests use `@SpringBootTest` + `@Import(TestContainerConfig::class)` + `TestRestTemplate`
 - [ ] Acceptance tests include read-your-own-writes tests
 - [ ] Every module has a `CLAUDE.md` (libs/common, clients/world-client, services/<service-name>)
+- [ ] `start.sh` and `stop.sh` exist and are executable
 - [ ] `./gradlew clean build` passes with all tests green
