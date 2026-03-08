@@ -54,6 +54,28 @@ export interface ItineraryEvent {
   updatedAt: string;
 }
 
+export interface Assignment {
+  id: string;
+  planId: string;
+  name: string;
+  type: 'tent' | 'canoe';
+  maxOccupancy: number;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AssignmentDetail extends Assignment {
+  members: AssignmentMember[];
+}
+
+export interface AssignmentMember {
+  assignmentId: string;
+  userId: string;
+  username: string | null;
+  createdAt: string;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -190,6 +212,55 @@ export const api = {
   deleteEvent(planId: string, eventId: string): Promise<void> {
     return request(`/api/plans/${planId}/itinerary/events/${eventId}`, {
       method: 'DELETE',
+    });
+  },
+
+  getAssignments(planId: string, type?: string): Promise<Assignment[]> {
+    const query = type ? `?type=${encodeURIComponent(type)}` : '';
+    return request(`/api/plans/${planId}/assignments${query}`);
+  },
+
+  getAssignment(planId: string, assignmentId: string): Promise<AssignmentDetail> {
+    return request(`/api/plans/${planId}/assignments/${assignmentId}`);
+  },
+
+  createAssignment(planId: string, data: { name: string; type: string; maxOccupancy?: number }): Promise<Assignment> {
+    return request(`/api/plans/${planId}/assignments`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateAssignment(planId: string, assignmentId: string, data: { name?: string; maxOccupancy?: number }): Promise<Assignment> {
+    return request(`/api/plans/${planId}/assignments/${assignmentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteAssignment(planId: string, assignmentId: string): Promise<void> {
+    return request(`/api/plans/${planId}/assignments/${assignmentId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  addAssignmentMember(planId: string, assignmentId: string, userId: string): Promise<AssignmentMember> {
+    return request(`/api/plans/${planId}/assignments/${assignmentId}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ userId }),
+    });
+  },
+
+  removeAssignmentMember(planId: string, assignmentId: string, userId: string): Promise<void> {
+    return request(`/api/plans/${planId}/assignments/${assignmentId}/members/${userId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  transferAssignmentOwnership(planId: string, assignmentId: string, newOwnerId: string): Promise<Assignment> {
+    return request(`/api/plans/${planId}/assignments/${assignmentId}/owner`, {
+      method: 'PUT',
+      body: JSON.stringify({ newOwnerId }),
     });
   },
 };
