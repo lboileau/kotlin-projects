@@ -1,6 +1,9 @@
 package com.acme.services.camperservice.features.plan.service
 
 import com.acme.clients.common.Result
+import com.acme.clients.common.error.InternalError
+import com.acme.clients.emailclient.api.EmailClient
+import com.acme.clients.emailclient.api.SendEmailParam
 import com.acme.clients.emailclient.fake.FakeEmailClient
 import com.acme.clients.invitationclient.fake.FakeInvitationClient
 import com.acme.clients.planclient.fake.FakePlanClient
@@ -237,6 +240,95 @@ class PlanServiceTest {
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(PlanError.Invalid::class.java)
         }
+
+        @Test
+        fun `addMember sends invitation email`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            assertThat(fakeEmailClient.sentEmails).hasSize(1)
+            val sent = fakeEmailClient.sentEmails[0]
+            assertThat(sent.to).isEqualTo("other@example.com")
+            assertThat(sent.subject).contains("Trip")
+            assertThat(sent.html).contains("owner")
+            assertThat(sent.html).contains("Trip")
+        }
+
+        @Test
+        fun `addMember creates pending invitation then updates to sent`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            val invitations = (fakeInvitationClient.getByPlanId(
+                com.acme.clients.invitationclient.api.GetByPlanIdParam(plan.id)
+            ) as Result.Success).value
+            assertThat(invitations).hasSize(1)
+            assertThat(invitations[0].status).isEqualTo("sent")
+            assertThat(invitations[0].resendEmailId).isNotNull()
+        }
+
+        @Test
+        fun `addMember skips email when invitation already sent`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+
+            // First add (sends email)
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+            assertThat(fakeEmailClient.sentEmails).hasSize(1)
+
+            // Remove member so we can re-add
+            planService.removeMember(RemovePlanMemberParam(planId = plan.id, userId = otherUserId, requestingUserId = ownerId))
+            fakeEmailClient.reset()
+
+            // Re-add same user — invitation status is "sent", should skip email
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+            assertThat(fakeEmailClient.sentEmails).isEmpty()
+        }
+
+        @Test
+        fun `addMember marks invitation as failed when email send fails`() {
+            // Use a failing email client
+            val failingEmailClient = object : EmailClient {
+                override fun send(param: SendEmailParam) = Result.Failure(InternalError("SMTP error"))
+            }
+            val failService = PlanService(fakePlanClient, fakeUserClient, failingEmailClient, fakeInvitationClient)
+            val plan = (failService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+
+            val result = failService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            // Member is still added successfully
+            assertThat(result.isSuccess).isTrue()
+
+            // But invitation status is "failed"
+            val invitations = (fakeInvitationClient.getByPlanId(
+                com.acme.clients.invitationclient.api.GetByPlanIdParam(plan.id)
+            ) as Result.Success).value
+            assertThat(invitations).hasSize(1)
+            assertThat(invitations[0].status).isEqualTo("failed")
+        }
+
+        @Test
+        fun `addMember resends email when previous invitation failed`() {
+            // Use a failing email client for first attempt
+            val failingEmailClient = object : EmailClient {
+                override fun send(param: SendEmailParam) = Result.Failure(InternalError("SMTP error"))
+            }
+            val failService = PlanService(fakePlanClient, fakeUserClient, failingEmailClient, fakeInvitationClient)
+            val plan = (failService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+
+            // First add — email fails
+            failService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            // Remove member and re-add with working email client
+            failService.removeMember(RemovePlanMemberParam(planId = plan.id, userId = otherUserId, requestingUserId = ownerId))
+
+            // Re-add with the real (fake but succeeding) email client
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            // Email should have been sent since previous status was "failed"
+            assertThat(fakeEmailClient.sentEmails).hasSize(1)
+        }
     }
 
     @Nested
@@ -309,6 +401,21 @@ class PlanServiceTest {
 
             assertThat(result.isSuccess).isTrue()
             assertThat((result as Result.Success).value).isEmpty()
+        }
+
+        @Test
+        fun `getMembers includes invitation status for invited members`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            val result = planService.getMembers(GetPlanMembersParam(plan.id))
+
+            assertThat(result.isSuccess).isTrue()
+            val members = (result as Result.Success).value
+            val invited = members.find { it.userId == otherUserId }
+            assertThat(invited).isNotNull
+            assertThat(invited!!.invitationStatus).isEqualTo("sent")
+            assertThat(invited.email).isEqualTo("other@example.com")
         }
     }
 }
