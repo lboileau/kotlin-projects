@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":clients:user-client"))
     implementation(project(":clients:plan-client"))
     implementation(project(":clients:item-client"))
+    implementation(project(":clients:itinerary-client"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -28,6 +29,7 @@ dependencies {
     testImplementation(testFixtures(project(":clients:user-client")))
     testImplementation(testFixtures(project(":clients:plan-client")))
     testImplementation(testFixtures(project(":clients:item-client")))
+    testImplementation(testFixtures(project(":clients:itinerary-client")))
 }
 
 tasks.withType<Test> {
