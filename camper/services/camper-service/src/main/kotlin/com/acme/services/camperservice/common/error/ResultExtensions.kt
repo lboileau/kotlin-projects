@@ -2,6 +2,7 @@ package com.acme.services.camperservice.common.error
 
 import com.acme.clients.common.Result
 import com.acme.services.common.ApiResponse
+import com.acme.services.camperservice.features.assignment.error.AssignmentError
 import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.itinerary.error.ItineraryError
 import com.acme.services.camperservice.features.plan.error.PlanError
@@ -96,6 +97,36 @@ fun ItineraryError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 
 @JvmName("itineraryResultToResponseEntity")
 fun <T> Result<T, ItineraryError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun AssignmentError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is AssignmentError.NotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is AssignmentError.NotOwner -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is AssignmentError.Invalid -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is AssignmentError.AtCapacity -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is AssignmentError.AlreadyAssigned -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is AssignmentError.AlreadyMember -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is AssignmentError.CannotRemoveOwner -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is AssignmentError.PlanNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is AssignmentError.DuplicateName -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+}
+
+@JvmName("assignmentResultToResponseEntity")
+fun <T> Result<T, AssignmentError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
 ): ResponseEntity<Any> = when (this) {

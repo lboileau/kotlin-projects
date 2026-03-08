@@ -163,6 +163,51 @@ CREATE TABLE itinerary_events (
 CREATE INDEX idx_itinerary_events_itinerary_id ON itinerary_events (itinerary_id);
 ```
 
+### assignments
+
+```sql
+CREATE TABLE assignments (
+    id            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id       UUID         NOT NULL,
+    name          VARCHAR(255) NOT NULL,
+    type          VARCHAR(10)  NOT NULL,
+    max_occupancy INT          NOT NULL,
+    owner_id      UUID         NOT NULL,
+    created_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    CONSTRAINT ck_assignments_type CHECK (type IN ('tent', 'canoe')),
+    CONSTRAINT ck_assignments_max_occupancy CHECK (max_occupancy > 0),
+    CONSTRAINT uq_assignments_plan_id_name_type UNIQUE (plan_id, name, type),
+    CONSTRAINT fk_assignments_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
+    CONSTRAINT fk_assignments_owner FOREIGN KEY (owner_id) REFERENCES users (id)
+);
+CREATE INDEX idx_assignments_plan_id ON assignments (plan_id);
+CREATE INDEX idx_assignments_owner_id ON assignments (owner_id);
+```
+
+A trigger (`trg_transfer_assignment_ownership`) transfers assignment ownership to the plan owner when the owning user is deleted.
+
+### assignment_members
+
+```sql
+CREATE TABLE assignment_members (
+    assignment_id   UUID        NOT NULL,
+    user_id         UUID        NOT NULL,
+    plan_id         UUID        NOT NULL,
+    assignment_type VARCHAR(10) NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (assignment_id, user_id),
+    CONSTRAINT ck_assignment_members_type CHECK (assignment_type IN ('tent', 'canoe')),
+    CONSTRAINT uq_assignment_members_plan_id_user_id_type UNIQUE (plan_id, user_id, assignment_type),
+    CONSTRAINT fk_assignment_members_assignment FOREIGN KEY (assignment_id) REFERENCES assignments (id) ON DELETE CASCADE,
+    CONSTRAINT fk_assignment_members_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_assignment_members_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_assignment_members_user_id ON assignment_members (user_id);
+CREATE INDEX idx_assignment_members_plan_id ON assignment_members (plan_id);
+CREATE INDEX idx_assignment_members_assignment_id ON assignment_members (assignment_id);
+```
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -172,6 +217,11 @@ CREATE INDEX idx_itinerary_events_itinerary_id ON itinerary_events (itinerary_id
 - `items.user_id` → `users.id` (FK, CASCADE on delete)
 - `itineraries.plan_id` → `plans.id` (FK, CASCADE on delete, UNIQUE — 1:1 with plans)
 - `itinerary_events.itinerary_id` → `itineraries.id` (FK, CASCADE on delete)
+- `assignments.plan_id` → `plans.id` (FK, CASCADE on delete)
+- `assignments.owner_id` → `users.id` (FK; ownership transfers to plan owner on user deletion via trigger)
+- `assignment_members.assignment_id` → `assignments.id` (FK, CASCADE on delete)
+- `assignment_members.user_id` → `users.id` (FK, CASCADE on delete)
+- `assignment_members.plan_id` → `plans.id` (FK, CASCADE on delete)
 
 ## Invariants
 
@@ -179,10 +229,16 @@ CREATE INDEX idx_itinerary_events_itinerary_id ON itinerary_events (itinerary_id
 - User emails must be unique (enforced by `uq_users_email`).
 - Plan visibility must be 'public' or 'private' (enforced by `ck_plans_visibility`).
 - Plan members are unique per plan (composite PK `plan_id, user_id`).
-- Deleting a plan cascades to plan_members and items.
-- Deleting a user cascades to items.
+- Deleting a plan cascades to plan_members, items, itineraries, assignments, and assignment_members.
+- Deleting a user cascades to items and assignment_members.
 - `username` in users is nullable (auto-created users may not have one).
 - Each item must have exactly one owner — either `plan_id` or `user_id` (enforced by `chk_items_single_owner`).
 - Each plan has at most one itinerary (enforced by `uq_itineraries_plan_id`).
 - Deleting a plan cascades to itineraries, which cascades to itinerary_events.
 - `description` and `details` in itinerary_events are nullable.
+- Assignment type must be 'tent' or 'canoe' (enforced by `ck_assignments_type`).
+- Assignment max_occupancy must be > 0 (enforced by `ck_assignments_max_occupancy`).
+- Assignment names are unique per plan and type (enforced by `uq_assignments_plan_id_name_type`).
+- A user can belong to only one assignment of each type per plan (enforced by `uq_assignment_members_plan_id_user_id_type`).
+- Deleting an assignment cascades to its assignment_members.
+- Deleting a user cascades to their assignment_members and transfers ownership of their assignments to the plan owner.
