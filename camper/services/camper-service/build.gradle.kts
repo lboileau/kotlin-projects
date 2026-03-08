@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":clients:world-client"))
     implementation(project(":clients:user-client"))
     implementation(project(":clients:plan-client"))
+    implementation(project(":clients:item-client"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -26,6 +27,7 @@ dependencies {
     testImplementation(testFixtures(project(":clients:world-client")))
     testImplementation(testFixtures(project(":clients:user-client")))
     testImplementation(testFixtures(project(":clients:plan-client")))
+    testImplementation(testFixtures(project(":clients:item-client")))
 }
 
 tasks.withType<Test> {

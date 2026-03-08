@@ -2,6 +2,7 @@ package com.acme.services.camperservice.common.error
 
 import com.acme.clients.common.Result
 import com.acme.services.common.ApiResponse
+import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.plan.error.PlanError
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.world.error.WorldError
@@ -58,6 +59,22 @@ fun PlanError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 
 @JvmName("planResultToResponseEntity")
 fun <T> Result<T, PlanError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun ItemError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is ItemError.NotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is ItemError.Invalid -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+}
+
+@JvmName("itemResultToResponseEntity")
+fun <T> Result<T, ItemError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
 ): ResponseEntity<Any> = when (this) {
