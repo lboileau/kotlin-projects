@@ -222,6 +222,8 @@ export function PlanPage() {
                   <CamperAvatar
                     key={member.userId}
                     name={member.username || null}
+                    email={member.email}
+                    invitationStatus={member.invitationStatus}
                     index={i}
                     total={memberCount}
                     timeOfDay={timeOfDay}

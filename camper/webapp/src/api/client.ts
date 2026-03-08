@@ -20,6 +20,8 @@ export interface PlanMember {
   planId: string;
   userId: string;
   username: string | null;
+  email: string | null;
+  invitationStatus: string | null;
   createdAt: string;
 }
 
