@@ -184,6 +184,16 @@ class UserAcceptanceTest {
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         }
+
+        @Test
+        fun `POST returns 403 when user has no username`() {
+            fixture.insertUser(email = "noname@example.com", username = null)
+
+            val request = AuthRequest(email = "noname@example.com")
+            val response = restTemplate.postForEntity("/api/auth", request, Map::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
     }
 
     @Nested
