@@ -29,7 +29,7 @@ function getMemberColorIndex(userId: string, allMembers: PlanMember[]): number {
   return (idx === -1 ? 0 : idx) % AVATAR_COLORS.length;
 }
 
-function MiniAvatar({ userId, allMembers, size = 22 }: { userId: string; allMembers: PlanMember[]; size?: number }) {
+function MiniAvatar({ userId, allMembers, size = 22, scared = false }: { userId: string; allMembers: PlanMember[]; size?: number; scared?: boolean }) {
   const idx = getMemberColorIndex(userId, allMembers);
   const color = AVATAR_COLORS[idx];
   return (
@@ -39,13 +39,32 @@ function MiniAvatar({ userId, allMembers, size = 22 }: { userId: string; allMemb
       {/* Hood */}
       <path d="M3,16 Q3,4 14,3 Q25,4 25,16" fill={color.hood} />
       <ellipse cx="14" cy="16" rx="12" ry="3" fill={color.hood} opacity="0.6" />
-      {/* Eyes */}
-      <ellipse cx="10" cy="16" rx="1.6" ry="1.3" fill="#2A2A2A" />
-      <ellipse cx="18" cy="16" rx="1.6" ry="1.3" fill="#2A2A2A" />
-      <circle cx="10.5" cy="15.6" r="0.5" fill="rgba(255,255,255,0.8)" />
-      <circle cx="18.5" cy="15.6" r="0.5" fill="rgba(255,255,255,0.8)" />
-      {/* Mouth */}
-      <path d="M11,20 Q14,21.5 17,20" fill="none" stroke="#3A2A2A" strokeWidth="0.8" strokeLinecap="round" />
+      {scared ? (
+        <>
+          {/* Scared brows — raised and angled */}
+          <path d="M7,13 Q9,11.5 12,12.5" fill="none" stroke="#2A2A2A" strokeWidth="0.7" strokeLinecap="round" />
+          <path d="M16,12.5 Q19,11.5 21,13" fill="none" stroke="#2A2A2A" strokeWidth="0.7" strokeLinecap="round" />
+          {/* Scared eyes — wider */}
+          <ellipse cx="10" cy="16" rx="1.8" ry="1.8" fill="white" />
+          <ellipse cx="18" cy="16" rx="1.8" ry="1.8" fill="white" />
+          <ellipse cx="10" cy="16.2" rx="1.1" ry="1.1" fill="#2A2A2A" />
+          <ellipse cx="18" cy="16.2" rx="1.1" ry="1.1" fill="#2A2A2A" />
+          <circle cx="10.4" cy="15.7" r="0.4" fill="rgba(255,255,255,0.9)" />
+          <circle cx="18.4" cy="15.7" r="0.4" fill="rgba(255,255,255,0.9)" />
+          {/* Scared mouth — open O */}
+          <ellipse cx="14" cy="21" rx="2" ry="1.5" fill="#3A2A2A" />
+        </>
+      ) : (
+        <>
+          {/* Eyes */}
+          <ellipse cx="10" cy="16" rx="1.6" ry="1.3" fill="#2A2A2A" />
+          <ellipse cx="18" cy="16" rx="1.6" ry="1.3" fill="#2A2A2A" />
+          <circle cx="10.5" cy="15.6" r="0.5" fill="rgba(255,255,255,0.8)" />
+          <circle cx="18.5" cy="15.6" r="0.5" fill="rgba(255,255,255,0.8)" />
+          {/* Mouth */}
+          <path d="M11,20 Q14,21.5 17,20" fill="none" stroke="#3A2A2A" strokeWidth="0.8" strokeLinecap="round" />
+        </>
+      )}
     </svg>
   );
 }
@@ -382,6 +401,14 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
 
   const filteredAssignments = assignments.filter(a => a.type === activeTab);
 
+  // Active plan members not assigned to any group of the current tab type
+  const assignedUserIds = new Set(
+    assignments
+      .filter(a => a.type === activeTab)
+      .flatMap(a => a.members.map(m => m.userId))
+  );
+  const unassignedMembers = members.filter(m => m.username && !assignedUserIds.has(m.userId));
+
   const findCurrentAssignment = (type: 'tent' | 'canoe') => {
     return assignments.find(a => a.type === type && a.members.some(m => m.userId === currentUserId));
   };
@@ -544,6 +571,20 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
           ) : (
             <>
               {error && <p className="assign-error">{error}</p>}
+
+              {unassignedMembers.length > 0 && (
+                <div className="assign-unassigned">
+                  <span className="assign-unassigned-label">Not yet assigned</span>
+                  <div className="assign-unassigned-list">
+                    {unassignedMembers.map(m => (
+                      <div key={m.userId} className="assign-unassigned-member">
+                        <MiniAvatar userId={m.userId} allMembers={members} size={28} scared />
+                        <span className="assign-unassigned-name">{m.username}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {filteredAssignments.length === 0 && !showCreateForm && (
                 <div className="assign-empty">
