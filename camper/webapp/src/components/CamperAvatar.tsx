@@ -7,6 +7,8 @@ function seededRandom(seed: number) {
 
 interface Props {
   name: string | null;
+  email?: string | null;
+  invitationStatus?: string | null;
   index: number;
   total: number;
   isAddButton?: boolean;
@@ -26,7 +28,7 @@ const AVATAR_COLORS = [
   { body: '#4A5A4A', accent: '#6A7A5A', hood: '#3A4A3A', skin: '#C8986A' },
 ];
 
-export function CamperAvatar({ name, index, total, isAddButton, timeOfDay, onClick, onRemove }: Props) {
+export function CamperAvatar({ name, email, invitationStatus, index, total, isAddButton, timeOfDay, onClick, onRemove }: Props) {
   // Semicircle above fire: 9 o'clock → 12 o'clock → 3 o'clock
   const startAngle = Math.PI;           // 9 o'clock (left)
   const arcSpan = Math.PI;              // 180 degrees
@@ -39,6 +41,7 @@ export function CamperAvatar({ name, index, total, isAddButton, timeOfDay, onCli
 
   const color = AVATAR_COLORS[index % AVATAR_COLORS.length];
   const isPending = !name;
+  const isFailed = invitationStatus === 'failed' || invitationStatus === 'bounced' || invitationStatus === 'complained';
   const displayName = name || null;
 
   if (isAddButton) {
@@ -69,7 +72,8 @@ export function CamperAvatar({ name, index, total, isAddButton, timeOfDay, onCli
 
   return (
     <div
-      className={`camper-avatar ${isPending ? 'camper-avatar--pending' : ''}`}
+      className={`camper-avatar ${isPending ? 'camper-avatar--pending' : ''} ${isFailed ? 'camper-avatar--failed' : ''}`}
+      title={isFailed && email ? `Failed to invite ${email}` : undefined}
       style={{
         transform: `translate(calc(${x}px - 50%), calc(${y}px - 50%))`,
         animationDelay: `${index * 0.1}s`,
@@ -155,7 +159,9 @@ export function CamperAvatar({ name, index, total, isAddButton, timeOfDay, onCli
       </div>
       {displayName
         ? <span className="avatar-name">{displayName}</span>
-        : <span className="avatar-name avatar-name--pending">Pending...</span>
+        : isFailed
+          ? <span className="avatar-name avatar-name--failed">Failed</span>
+          : <span className="avatar-name avatar-name--pending">Pending...</span>
       }
       {onRemove && (
         <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
