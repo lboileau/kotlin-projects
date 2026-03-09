@@ -140,6 +140,47 @@ class JdbiUserClientTest {
     }
 
     @Nested
+    inner class EmailNormalization {
+        @Test
+        fun `create normalizes email to lowercase without dots in local part`() {
+            val result = client.create(CreateUserParam(email = "A.Li.Ce@Example.COM", username = "alice"))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val user = (result as Result.Success).value
+            assertThat(user.email).isEqualTo("alice@example.com")
+        }
+
+        @Test
+        fun `getByEmail finds user regardless of case and dots`() {
+            client.create(CreateUserParam(email = "alice@example.com", username = "alice"))
+
+            val result = client.getByEmail(GetByEmailParam("A.Li.Ce@Example.COM"))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val user = (result as Result.Success).value
+            assertThat(user.username).isEqualTo("alice")
+        }
+
+        @Test
+        fun `create returns ConflictError for email that normalizes to same value`() {
+            client.create(CreateUserParam(email = "alice@example.com"))
+            val result = client.create(CreateUserParam(email = "A.Li.Ce@Example.COM"))
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ConflictError::class.java)
+        }
+
+        @Test
+        fun `getOrCreate finds existing user regardless of case and dots`() {
+            val created = (client.create(CreateUserParam(email = "bob@example.com", username = "bob")) as Result.Success).value
+
+            val result = client.getOrCreate(GetOrCreateUserParam(email = "B.O.B@Example.COM", username = "different"))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val user = (result as Result.Success).value
+            assertThat(user.id).isEqualTo(created.id)
+            assertThat(user.username).isEqualTo("bob")
+        }
+    }
+
+    @Nested
     inner class GetOrCreate {
         @Test
         fun `getOrCreate returns existing user when email exists`() {

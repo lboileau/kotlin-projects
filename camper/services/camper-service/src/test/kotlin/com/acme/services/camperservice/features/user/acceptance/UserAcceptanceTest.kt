@@ -109,6 +109,41 @@ class UserAcceptanceTest {
     }
 
     @Nested
+    inner class EmailNormalization {
+
+        @Test
+        fun `POST normalizes email on creation`() {
+            val request = CreateUserRequest(email = "A.Li.Ce@Example.COM", username = "alice")
+            val response = restTemplate.postForEntity("/api/users", request, UserResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            assertThat(response.body!!.email).isEqualTo("alice@example.com")
+        }
+
+        @Test
+        fun `POST auth finds user regardless of case and dots`() {
+            restTemplate.postForEntity("/api/users", CreateUserRequest(email = "bob@example.com", username = "bob"), UserResponse::class.java)
+
+            val authRequest = AuthRequest(email = "B.O.B@Example.COM")
+            val response = restTemplate.postForEntity("/api/auth", authRequest, AuthResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.username).isEqualTo("bob")
+        }
+
+        @Test
+        fun `POST returns existing user when normalized email matches`() {
+            val first = restTemplate.postForEntity("/api/users", CreateUserRequest(email = "carol@example.com", username = "carol"), UserResponse::class.java)
+
+            val second = restTemplate.postForEntity("/api/users", CreateUserRequest(email = "C.A.R.O.L@Example.COM", username = "different"), UserResponse::class.java)
+
+            assertThat(second.statusCode).isEqualTo(HttpStatus.CREATED)
+            assertThat(second.body!!.id).isEqualTo(first.body!!.id)
+            assertThat(second.body!!.username).isEqualTo("carol")
+        }
+    }
+
+    @Nested
     inner class Authenticate {
 
         @Test
