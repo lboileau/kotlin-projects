@@ -79,6 +79,11 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
         animationDelay: `${index * 0.1}s`,
       }}
     >
+      {!displayName && (
+        <span className={`avatar-name ${isFailed ? 'avatar-name--failed' : 'avatar-name--pending'}`}>
+          {isFailed ? 'Failed' : 'Pending...'}
+        </span>
+      )}
       <div className="avatar-figure">
         <svg width="48" height="64" viewBox="0 0 48 64">
           {isPending ? <>
@@ -157,12 +162,7 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
           </>}
         </svg>
       </div>
-      {displayName
-        ? <span className="avatar-name">{displayName}</span>
-        : isFailed
-          ? <span className="avatar-name avatar-name--failed">Failed</span>
-          : <span className="avatar-name avatar-name--pending">Pending...</span>
-      }
+      {displayName && <span className="avatar-name">{displayName}</span>}
       {onRemove && (
         <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
           <svg width="16" height="16" viewBox="0 0 16 16">
@@ -172,6 +172,7 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
           </svg>
         </button>
       )}
+      {!displayName && email && <span className="avatar-name avatar-name--email">{email}</span>}
       {/* Warm glow from fire on the character */}
       <div className="avatar-fire-glow" />
     </div>

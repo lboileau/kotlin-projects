@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  gap: 6px;
+  gap: 0;
   animation: fade-in 0.4s ease-out backwards;
   z-index: 5;
 }
@@ -57,6 +57,7 @@
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 5px;
 }
 
 .avatar-name--ghost {
@@ -88,7 +89,7 @@
   transform: scale(1.2);
 }
 
-.camper-avatar--pending {
+.camper-avatar--pending .avatar-figure {
   opacity: 0.6;
 }
 
@@ -117,6 +118,10 @@
   font-style: italic;
   font-size: 0.6rem;
   border: 1px solid rgba(232, 93, 58, 0.3);
+}
+
+.avatar-name--email {
+  max-width: 120px;
 }
 
 /* Scared eye shift at night */
