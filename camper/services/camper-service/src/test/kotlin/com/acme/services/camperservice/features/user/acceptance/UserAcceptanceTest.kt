@@ -100,6 +100,17 @@ class UserAcceptanceTest {
         }
 
         @Test
+        fun `POST updates username when existing user has no username`() {
+            fixture.insertUser(email = "invited@example.com", username = null)
+
+            val request = CreateUserRequest(email = "invited@example.com", username = "now-registered")
+            val response = restTemplate.postForEntity("/api/users", request, UserResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            assertThat(response.body!!.username).isEqualTo("now-registered")
+        }
+
+        @Test
         fun `POST returns 400 when email is blank`() {
             val request = CreateUserRequest(email = "")
             val response = restTemplate.postForEntity("/api/users", request, Map::class.java)

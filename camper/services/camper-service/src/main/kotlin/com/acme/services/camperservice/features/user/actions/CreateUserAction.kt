@@ -3,6 +3,7 @@ package com.acme.services.camperservice.features.user.actions
 import com.acme.clients.common.Result
 import com.acme.clients.userclient.api.GetByEmailParam
 import com.acme.clients.userclient.api.UserClient
+import com.acme.clients.userclient.api.UpdateUserParam as ClientUpdateUserParam
 import com.acme.clients.userclient.api.CreateUserParam as ClientCreateUserParam
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.user.mapper.UserMapper
@@ -19,11 +20,17 @@ internal class CreateUserAction(private val userClient: UserClient) {
         val validation = validate.execute(param)
         if (validation is Result.Failure) return validation
 
-        // Idempotent: if email exists, return existing user
+        // Idempotent: if email exists, return existing user (updating username if missing)
         val existing = userClient.getByEmail(GetByEmailParam(param.email))
         if (existing is Result.Success) {
+            val existingUser = existing.value
+            if (existingUser.username == null && param.username != null) {
+                logger.debug("Updating username for existing user email={}", param.email)
+                val updated = userClient.update(ClientUpdateUserParam(id = existingUser.id, username = param.username))
+                if (updated is Result.Success) return Result.Success(UserMapper.fromClient(updated.value))
+            }
             logger.debug("User already exists for email={}, returning existing", param.email)
-            return Result.Success(UserMapper.fromClient(existing.value))
+            return Result.Success(UserMapper.fromClient(existingUser))
         }
 
         logger.debug("Creating user email={}", param.email)

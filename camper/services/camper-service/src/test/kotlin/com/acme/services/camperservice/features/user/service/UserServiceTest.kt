@@ -80,6 +80,27 @@ class UserServiceTest {
         }
 
         @Test
+        fun `create updates username when existing user has no username`() {
+            val first = (userService.create(CreateUserParam(email = "invited@example.com")) as Result.Success).value
+            assertThat(first.username).isNull()
+
+            val second = (userService.create(CreateUserParam(email = "invited@example.com", username = "now-registered")) as Result.Success).value
+
+            assertThat(second.id).isEqualTo(first.id)
+            assertThat(second.username).isEqualTo("now-registered")
+        }
+
+        @Test
+        fun `create does not update username when existing user already has one`() {
+            val first = (userService.create(CreateUserParam(email = "named@example.com", username = "original")) as Result.Success).value
+
+            val second = (userService.create(CreateUserParam(email = "named@example.com", username = "different")) as Result.Success).value
+
+            assertThat(second.id).isEqualTo(first.id)
+            assertThat(second.username).isEqualTo("original")
+        }
+
+        @Test
         fun `create returns Invalid when email is blank`() {
             val result = userService.create(CreateUserParam(email = ""))
 
