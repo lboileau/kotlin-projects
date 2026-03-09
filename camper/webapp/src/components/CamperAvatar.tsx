@@ -42,7 +42,9 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
   const radiusX = Math.max(160, minRadius);
   const radiusY = radiusX * 0.5;
   const x = Math.cos(angle) * radiusX;
-  const y = -Math.sin(angle) * radiusY;
+  // Offset so edge avatars sit at fire level (y=0), center rises above
+  const edgeY = Math.sin(endAngle) * radiusY;
+  const y = -(Math.sin(angle) * radiusY - edgeY);
 
   const color = AVATAR_COLORS[index % AVATAR_COLORS.length];
   const isPending = !name;
