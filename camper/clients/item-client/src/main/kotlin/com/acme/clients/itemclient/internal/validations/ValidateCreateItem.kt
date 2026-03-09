@@ -20,7 +20,7 @@ internal class ValidateCreateItem {
     private fun validate(param: CreateItemParam): Result<Unit, AppError> {
         if (param.name.isBlank()) return failure(ValidationError("name", "must not be blank"))
         if (param.quantity <= 0) return failure(ValidationError("quantity", "must be greater than 0"))
-        if (param.planId == null && param.userId == null) return failure(ValidationError("planId/userId", "at least one of planId or userId must be provided"))
+        if (param.planId == null) return failure(ValidationError("planId", "must be provided"))
         return success(Unit)
     }
 }
