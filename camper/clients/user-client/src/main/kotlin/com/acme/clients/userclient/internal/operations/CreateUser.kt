@@ -1,5 +1,6 @@
 package com.acme.clients.userclient.internal.operations
 
+import com.acme.clients.common.EmailNormalizer
 import com.acme.clients.common.Result
 import com.acme.clients.common.error.AppError
 import com.acme.clients.common.error.ConflictError
@@ -21,7 +22,8 @@ internal class CreateUser(private val jdbi: Jdbi) {
         val validation = validate.execute(param)
         if (validation is Result.Failure) return validation
 
-        logger.debug("Creating user email={}", param.email)
+        val normalizedEmail = EmailNormalizer.normalize(param.email)
+        logger.debug("Creating user email={}", normalizedEmail)
         return try {
             val entity = jdbi.withHandle<User, Exception> { handle ->
                 val id = UUID.randomUUID()
@@ -33,17 +35,17 @@ internal class CreateUser(private val jdbi: Jdbi) {
                     """.trimIndent()
                 )
                     .bind("id", id)
-                    .bind("email", param.email)
+                    .bind("email", normalizedEmail)
                     .bind("username", param.username)
                     .bind("createdAt", now)
                     .bind("updatedAt", now)
                     .execute()
-                User(id = id, email = param.email, username = param.username, createdAt = now, updatedAt = now)
+                User(id = id, email = normalizedEmail, username = param.username, createdAt = now, updatedAt = now)
             }
             success(entity)
         } catch (e: Exception) {
             if (e.message?.contains("uq_users_email") == true || e.message?.contains("duplicate key") == true) {
-                failure(ConflictError("User", "email '${param.email}' already exists"))
+                failure(ConflictError("User", "email '${normalizedEmail}' already exists"))
             } else {
                 throw e
             }

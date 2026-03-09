@@ -91,6 +91,38 @@ class UserServiceTest {
     }
 
     @Nested
+    inner class EmailNormalization {
+        @Test
+        fun `create normalizes email`() {
+            val result = userService.create(CreateUserParam(email = "A.Li.Ce@Example.COM", username = "alice"))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.email).isEqualTo("alice@example.com")
+        }
+
+        @Test
+        fun `authenticate finds user regardless of case and dots`() {
+            userService.create(CreateUserParam(email = "bob@example.com", username = "bob"))
+
+            val result = userService.authenticate(AuthenticateUserParam(email = "B.O.B@Example.COM"))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.username).isEqualTo("bob")
+        }
+
+        @Test
+        fun `create returns existing user when normalized email matches`() {
+            val first = (userService.create(CreateUserParam(email = "carol@example.com", username = "carol")) as Result.Success).value
+            val second = (userService.create(CreateUserParam(email = "C.A.R.O.L@Example.COM", username = "different")) as Result.Success).value
+
+            assertThat(second.id).isEqualTo(first.id)
+            assertThat(second.username).isEqualTo("carol")
+        }
+    }
+
+    @Nested
     inner class Authenticate {
         @Test
         fun `authenticate returns user when email exists`() {

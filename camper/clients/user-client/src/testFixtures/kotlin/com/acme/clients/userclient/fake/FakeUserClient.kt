@@ -7,6 +7,7 @@ import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.common.failure
 import com.acme.clients.common.success
 import com.acme.clients.userclient.api.*
+import com.acme.clients.common.EmailNormalizer
 import com.acme.clients.userclient.internal.validations.ValidateCreateUser
 import com.acme.clients.userclient.internal.validations.ValidateGetUserByEmail
 import com.acme.clients.userclient.internal.validations.ValidateGetUserById
@@ -36,7 +37,8 @@ class FakeUserClient : UserClient {
         val validation = validateGetByEmail.execute(param)
         if (validation is Result.Failure) return validation
 
-        val entity = store.values.find { it.email == param.email }
+        val normalizedEmail = EmailNormalizer.normalize(param.email)
+        val entity = store.values.find { EmailNormalizer.normalize(it.email) == normalizedEmail }
         return if (entity != null) success(entity) else failure(NotFoundError("User", param.email))
     }
 
@@ -44,12 +46,13 @@ class FakeUserClient : UserClient {
         val validation = validateCreate.execute(param)
         if (validation is Result.Failure) return validation
 
-        if (store.values.any { it.email == param.email }) {
-            return failure(ConflictError("User", "email '${param.email}' already exists"))
+        val normalizedEmail = EmailNormalizer.normalize(param.email)
+        if (store.values.any { EmailNormalizer.normalize(it.email) == normalizedEmail }) {
+            return failure(ConflictError("User", "email '${normalizedEmail}' already exists"))
         }
         val entity = User(
             id = UUID.randomUUID(),
-            email = param.email,
+            email = normalizedEmail,
             username = param.username,
             createdAt = Instant.now(),
             updatedAt = Instant.now()
@@ -59,7 +62,8 @@ class FakeUserClient : UserClient {
     }
 
     override fun getOrCreate(param: GetOrCreateUserParam): Result<User, AppError> {
-        val existing = store.values.find { it.email == param.email }
+        val normalizedEmail = EmailNormalizer.normalize(param.email)
+        val existing = store.values.find { EmailNormalizer.normalize(it.email) == normalizedEmail }
         if (existing != null) return success(existing)
 
         return create(CreateUserParam(email = param.email, username = param.username))
