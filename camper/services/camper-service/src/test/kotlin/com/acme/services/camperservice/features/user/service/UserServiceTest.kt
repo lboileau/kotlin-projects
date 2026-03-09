@@ -173,6 +173,18 @@ class UserServiceTest {
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(UserError.Invalid::class.java)
         }
+
+        @Test
+        fun `authenticate returns RegistrationRequired when user has no username`() {
+            userService.create(CreateUserParam(email = "noname@example.com"))
+
+            val result = userService.authenticate(AuthenticateUserParam(email = "noname@example.com"))
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(UserError.RegistrationRequired::class.java)
+            assertThat((error as UserError.RegistrationRequired).email).isEqualTo("noname@example.com")
+        }
     }
 
     @Nested
