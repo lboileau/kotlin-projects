@@ -35,13 +35,13 @@ VALUES
     ('aa110000-0005-4000-8000-000000000005', '10aabb00-1111-2222-3333-444455556666', NULL, 'Tent (4-person)', 'camp', 1, true, now(), now()),
     ('aa110000-0006-4000-8000-000000000006', '10aabb00-1111-2222-3333-444455556666', NULL, 'Firewood Bundle', 'misc', 2, false, now(), now()),
     ('aa110000-0007-4000-8000-000000000007', '10aabb00-1111-2222-3333-444455556666', NULL, 'Hot Dogs', 'food_item', 12, false, now(), now()),
-    -- User items (Alice's personal gear)
-    ('bb220000-0001-4000-8000-000000000001', NULL, 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'Sleeping Bag', 'personal', 1, true, now(), now()),
-    ('bb220000-0002-4000-8000-000000000002', NULL, 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'Headlamp', 'personal', 1, false, now(), now()),
-    ('bb220000-0003-4000-8000-000000000003', NULL, 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'First Aid Kit', 'misc', 1, true, now(), now()),
-    -- User items (Bob's personal gear)
-    ('bb220000-0004-4000-8000-000000000004', NULL, 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'Sleeping Pad', 'personal', 1, false, now(), now()),
-    ('bb220000-0005-4000-8000-000000000005', NULL, 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'Water Bottle', 'personal', 2, true, now(), now()),
+    -- User items (Alice's personal gear for Summer Camping Trip)
+    ('bb220000-0001-4000-8000-000000000001', '10aabb00-1111-2222-3333-444455556666', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'Sleeping Bag', 'personal', 1, true, now(), now()),
+    ('bb220000-0002-4000-8000-000000000002', '10aabb00-1111-2222-3333-444455556666', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'Headlamp', 'personal', 1, false, now(), now()),
+    ('bb220000-0003-4000-8000-000000000003', '10aabb00-1111-2222-3333-444455556666', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'First Aid Kit', 'misc', 1, true, now(), now()),
+    -- User items (Bob's personal gear for Summer Camping Trip)
+    ('bb220000-0004-4000-8000-000000000004', '10aabb00-1111-2222-3333-444455556666', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'Sleeping Pad', 'personal', 1, false, now(), now()),
+    ('bb220000-0005-4000-8000-000000000005', '10aabb00-1111-2222-3333-444455556666', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'Water Bottle', 'personal', 2, true, now(), now()),
     -- Meal plan items (Summer Camping Trip, Day 1)
     ('cc330000-0001-4000-8000-000000000001', '10aabb00-1111-2222-3333-444455556666', NULL, 'Pancakes', 'day1:breakfast', 1, false, now(), now()),
     ('cc330000-0002-4000-8000-000000000002', '10aabb00-1111-2222-3333-444455556666', NULL, 'Coffee', 'day1:breakfast', 1, false, now(), now()),
