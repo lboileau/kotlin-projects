@@ -159,11 +159,12 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
       </div>
       {displayName
         ? <span className="avatar-name">{displayName}</span>
-        : isFailed
-          ? <span className="avatar-name avatar-name--failed">Failed</span>
-          : <span className="avatar-name avatar-name--pending">
-              {email ? email : 'Pending...'}
+        : <>
+            <span className={`avatar-name ${isFailed ? 'avatar-name--failed' : 'avatar-name--pending'}`}>
+              {isFailed ? 'Failed' : 'Pending...'}
             </span>
+            {email && <span className="avatar-name avatar-name--email">{email}</span>}
+          </>
       }
       {onRemove && (
         <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
