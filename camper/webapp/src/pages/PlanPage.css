@@ -310,6 +310,30 @@
   font-style: italic;
 }
 
+/* Plan name input */
+.manage-plan-name-input {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border: 1px solid var(--tan-deep);
+  border-radius: var(--radius-md);
+  background: var(--parchment);
+  color: var(--charcoal);
+}
+
+.manage-plan-name-input:focus {
+  outline: none;
+  border-color: var(--sage-deep);
+  box-shadow: 0 0 0 2px rgba(90, 122, 86, 0.15);
+}
+
+.manage-plan-save-btn {
+  padding: 6px 14px !important;
+  font-size: 0.85rem !important;
+  white-space: nowrap;
+}
+
 /* Visibility toggle */
 .visibility-toggle {
   display: flex;
