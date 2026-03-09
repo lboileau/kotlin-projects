@@ -76,8 +76,11 @@ cd databases/camper-db && flyway -configFiles=flyway.conf migrate
 # Seed dev data
 PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d camper_db -f databases/camper-db/seed/dev_seed.sql
 
-# Run the service
+# Run the service (without invite emails)
 ./gradlew :services:camper-service:bootRun
+
+# Run the service with invite emails (requires Resend API key)
+RESEND_API_KEY=re_xxx EMAIL_FROM="onboarding@resend.dev" APP_BASE_URL="http://localhost:3000" ./gradlew :services:camper-service:bootRun
 
 # Run all tests
 ./gradlew test
@@ -100,13 +103,22 @@ Hosted on [Railway](https://railway.com) — project **proactive-quietude**.
 - **Webapp** (`webapp/dist`) is served as static files from `/app/static/` by Spring Boot
 - **SPA routing:** `WebConfig.kt` forwards non-API, non-static routes to `index.html` for React Router
 - **Migrations:** Flyway runs automatically on startup. Migration files live in `databases/camper-db/migrations/` (single source of truth) and are copied to the classpath at build time via Gradle `processResources`
-- **Environment variables:** `DB_URL`, `DB_USER`, `DB_PASSWORD`, `RESEND_API_KEY` (optional — email sending disabled without it) configured on the camper-service in Railway
+- **Environment variables** (configured on camper-service in Railway):
+  - `DB_URL`, `DB_USER`, `DB_PASSWORD` — PostgreSQL connection (required)
+  - `RESEND_API_KEY` — Resend API key for invite emails (optional — NoOp client used without it)
+  - `EMAIL_FROM` — sender address, must be a verified Resend domain (default: `Camper <noreply@example.com>`)
+  - `APP_BASE_URL` — base URL for links in emails (default: `http://localhost:5173`, set to `https://camper-service-production.up.railway.app` in production)
 
 ### Deploying
 
 ```bash
 # Ensure you're linked to the right service
 railway service camper-service
+
+# Set invite email env vars (one-time)
+railway variables set RESEND_API_KEY=re_your_key
+railway variables set EMAIL_FROM="Camper <noreply@yourdomain.com>"
+railway variables set APP_BASE_URL=https://camper-service-production.up.railway.app
 
 # Deploy from local (uses Dockerfile)
 railway up
