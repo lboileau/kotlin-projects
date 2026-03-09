@@ -35,12 +35,12 @@ API service for camping trip planning — user registration, authentication, pla
 ### User (`features/user/`)
 - **Model:** `User(id, email, username?, createdAt, updatedAt)`
 - **DTOs:** `CreateUserRequest(email, username?)`, `AuthRequest(email)`, `UpdateUserRequest(username)`, `UserResponse(id, email, username?, createdAt, updatedAt)`, `AuthResponse(id, email, username?)`
-- **Error:** `UserError` sealed class — `NotFound(email)`, `Invalid(field, reason)`, `Forbidden(userId)`
+- **Error:** `UserError` sealed class — `NotFound(email)`, `Invalid(field, reason)`, `Forbidden(userId)`, `RegistrationRequired(email)`
 - **Service params:** `GetUserByIdParam(userId)`, `CreateUserParam(email, username?)`, `AuthenticateUserParam(email)`, `UpdateUserParam(userId, username, requestingUserId)`
 - **Actions:**
   - `GetUserByIdAction`: Fetches user by UUID
   - `CreateUserAction`: Idempotent — checks getByEmail first, returns existing if found
-  - `AuthenticateUserAction`: Looks up user by email
+  - `AuthenticateUserAction`: Looks up user by email; returns `RegistrationRequired` error if username is null
   - `UpdateUserAction`: Checks userId == requestingUserId for authorization
 - **Service:** `UserService` facade
 - **Routes:**
@@ -74,23 +74,23 @@ API service for camping trip planning — user registration, authentication, pla
 
 ### Item (`features/item/`)
 - **Model:** `Item(id, planId?, userId?, name, category, quantity, packed, createdAt, updatedAt)`
-- **DTOs:** `CreateItemRequest(name, category, quantity, packed, ownerType, ownerId)`, `UpdateItemRequest(name, category, quantity, packed)`, `ItemResponse(...)`
+- **DTOs:** `CreateItemRequest(name, category, quantity, packed, ownerType, ownerId, planId?)`, `UpdateItemRequest(name, category, quantity, packed)`, `ItemResponse(...)`
 - **Error:** `ItemError` sealed class — `NotFound(itemId)`, `Invalid(field, reason)`
-- **Service params:** `CreateItemParam(name, category, quantity, packed, ownerType, ownerId, requestingUserId)`, `GetItemParam(id, requestingUserId)`, `GetItemsByOwnerParam(ownerType, ownerId, requestingUserId)`, `UpdateItemParam(id, name, category, quantity, packed, requestingUserId)`, `DeleteItemParam(id, requestingUserId)`
+- **Service params:** `CreateItemParam(name, category, quantity, packed, ownerType, ownerId, planId?, requestingUserId)`, `GetItemParam(id, requestingUserId)`, `GetItemsByOwnerParam(ownerType, ownerId, planId?, requestingUserId)`, `UpdateItemParam(id, name, category, quantity, packed, requestingUserId)`, `DeleteItemParam(id, requestingUserId)`
 - **Actions:**
   - `CreateItemAction`: Validates, converts ownerType/ownerId to planId/userId, creates item
   - `GetItemAction`: Fetches item by ID
-  - `GetItemsByOwnerAction`: Lists items by plan or user owner
+  - `GetItemsByOwnerAction`: Lists items by plan or user owner; for user items, optionally filters by planId
   - `UpdateItemAction`: Updates item fields
   - `DeleteItemAction`: Deletes item
 - **Service:** `ItemService` facade (takes ItemClient)
 - **Routes:** (all require `X-User-Id` header)
   - `POST /api/items` — create item (201)
-  - `GET /api/items?ownerType={type}&ownerId={id}` — list items by owner
+  - `GET /api/items?ownerType={type}&ownerId={id}&planId={planId?}` — list items by owner (planId scopes personal items to a plan)
   - `GET /api/items/{id}` — get item by ID
   - `PUT /api/items/{id}` — update item
   - `DELETE /api/items/{id}` — delete item (204)
-- **Polymorphic ownership:** Items belong to either a plan or a user via nullable FK columns (`plan_id`, `user_id`) with a DB CHECK constraint. Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
+- **Polymorphic ownership:** Items have nullable FK columns (`plan_id`, `user_id`). Shared gear: `plan_id` only. Personal gear per plan: both `plan_id` + `user_id`. At least one must be set (DB CHECK constraint). Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
 
 ### Itinerary (`features/itinerary/`)
 - **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
