@@ -89,7 +89,7 @@
   transform: scale(1.2);
 }
 
-.camper-avatar--pending {
+.camper-avatar--pending .avatar-figure {
   opacity: 0.6;
 }
 
