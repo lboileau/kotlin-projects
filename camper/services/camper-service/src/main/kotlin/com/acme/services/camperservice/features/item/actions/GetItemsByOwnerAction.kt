@@ -1,6 +1,7 @@
 package com.acme.services.camperservice.features.item.actions
 
 import com.acme.clients.common.Result
+import com.acme.clients.itemclient.api.GetByPlanIdAndUserIdParam
 import com.acme.clients.itemclient.api.GetByPlanIdParam
 import com.acme.clients.itemclient.api.GetByUserIdParam
 import com.acme.clients.itemclient.api.ItemClient
@@ -23,7 +24,13 @@ internal class GetItemsByOwnerAction(private val itemClient: ItemClient) {
 
         val result = when (param.ownerType) {
             "plan" -> itemClient.getByPlanId(GetByPlanIdParam(planId = param.ownerId))
-            "user" -> itemClient.getByUserId(GetByUserIdParam(userId = param.ownerId))
+            "user" -> {
+                if (param.planId != null) {
+                    itemClient.getByPlanIdAndUserId(GetByPlanIdAndUserIdParam(planId = param.planId, userId = param.ownerId))
+                } else {
+                    itemClient.getByUserId(GetByUserIdParam(userId = param.ownerId))
+                }
+            }
             else -> return Result.Failure(ItemError.Invalid("ownerType", "must be 'plan' or 'user'"))
         }
 

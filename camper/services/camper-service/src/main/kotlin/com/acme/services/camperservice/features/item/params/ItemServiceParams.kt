@@ -9,12 +9,13 @@ data class CreateItemParam(
     val packed: Boolean,
     val ownerType: String,
     val ownerId: UUID,
+    val planId: UUID? = null,
     val requestingUserId: UUID,
 )
 
 data class GetItemParam(val id: UUID, val requestingUserId: UUID)
 
-data class GetItemsByOwnerParam(val ownerType: String, val ownerId: UUID, val requestingUserId: UUID)
+data class GetItemsByOwnerParam(val ownerType: String, val ownerId: UUID, val planId: UUID? = null, val requestingUserId: UUID)
 
 data class UpdateItemParam(
     val id: UUID,

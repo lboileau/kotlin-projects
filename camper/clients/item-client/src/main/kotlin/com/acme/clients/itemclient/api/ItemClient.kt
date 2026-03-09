@@ -23,6 +23,9 @@ interface ItemClient {
     /** Retrieve all items belonging to a user. */
     fun getByUserId(param: GetByUserIdParam): Result<List<Item>, AppError>
 
+    /** Retrieve personal items for a user within a specific plan. */
+    fun getByPlanIdAndUserId(param: GetByPlanIdAndUserIdParam): Result<List<Item>, AppError>
+
     /** Update an existing item. */
     fun update(param: UpdateItemParam): Result<Item, AppError>
 

@@ -19,6 +19,7 @@ class FakeItemClient : ItemClient {
     private val validateGetById = ValidateGetItemById()
     private val validateGetByPlanId = ValidateGetItemsByPlanId()
     private val validateGetByUserId = ValidateGetItemsByUserId()
+    private val validateGetByPlanIdAndUserId = ValidateGetItemsByPlanIdAndUserId()
     private val validateUpdate = ValidateUpdateItem()
     private val validateDelete = ValidateDeleteItem()
 
@@ -62,6 +63,14 @@ class FakeItemClient : ItemClient {
         if (validation is Result.Failure) return validation
 
         val entities = store.values.filter { it.userId == param.userId }.sortedBy { it.createdAt }
+        return success(entities)
+    }
+
+    override fun getByPlanIdAndUserId(param: GetByPlanIdAndUserIdParam): Result<List<Item>, AppError> {
+        val validation = validateGetByPlanIdAndUserId.execute(param)
+        if (validation is Result.Failure) return validation
+
+        val entities = store.values.filter { it.planId == param.planId && it.userId == param.userId }.sortedBy { it.createdAt }
         return success(entities)
     }
 
