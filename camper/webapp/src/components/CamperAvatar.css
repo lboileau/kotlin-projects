@@ -3,7 +3,7 @@
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  gap: 6px;
+  gap: 0;
   animation: fade-in 0.4s ease-out backwards;
   z-index: 5;
 }
@@ -57,6 +57,7 @@
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-bottom: 5px;
 }
 
 .avatar-name--ghost {
@@ -120,8 +121,6 @@
 }
 
 .avatar-name--email {
-  color: rgba(255, 248, 231, 0.5);
-  background: rgba(0, 0, 0, 0.25);
   font-size: 0.55rem;
   max-width: 120px;
 }
