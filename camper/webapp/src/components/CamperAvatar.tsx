@@ -37,9 +37,10 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
   const angle = startAngle + angleStep * index;
   const baseRadiusX = 160;
   const baseRadiusY = 100;
-  const scale = total > 4 ? 1 + (total - 4) * 0.15 : 1;
-  const radiusX = baseRadiusX * scale;
-  const radiusY = baseRadiusY * scale;
+  const scaleX = total > 4 ? 1 + (total - 4) * 0.15 : 1;
+  const scaleY = total > 4 ? 1 + (total - 4) * 0.05 : 1;
+  const radiusX = baseRadiusX * scaleX;
+  const radiusY = baseRadiusY * scaleY;
   const x = Math.cos(angle) * radiusX;
   const y = Math.sin(angle) * radiusY;
 
