@@ -2,6 +2,10 @@ package com.acme.services.camperservice.config
 
 import com.acme.clients.assignmentclient.api.AssignmentClient
 import com.acme.clients.assignmentclient.createAssignmentClient
+import com.acme.clients.emailclient.api.EmailClient
+import com.acme.clients.emailclient.fake.FakeEmailClient
+import com.acme.clients.invitationclient.api.InvitationClient
+import com.acme.clients.invitationclient.fake.FakeInvitationClient
 import com.acme.clients.itemclient.api.ItemClient
 import com.acme.clients.itemclient.createItemClient
 import com.acme.clients.planclient.api.PlanClient
@@ -54,4 +58,12 @@ class TestContainerConfig {
     @Bean
     @Primary
     fun assignmentClient(): AssignmentClient = createAssignmentClient()
+
+    @Bean
+    @Primary
+    fun emailClient(): EmailClient = FakeEmailClient()
+
+    @Bean
+    @Primary
+    fun invitationClient(): InvitationClient = FakeInvitationClient()
 }

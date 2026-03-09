@@ -1,6 +1,8 @@
 package com.acme.services.camperservice.features.plan.actions
 
 import com.acme.clients.common.Result
+import com.acme.clients.invitationclient.api.GetByPlanIdParam
+import com.acme.clients.invitationclient.api.InvitationClient
 import com.acme.clients.planclient.api.GetMembersParam
 import com.acme.clients.planclient.api.PlanClient
 import com.acme.clients.userclient.api.GetByIdParam
@@ -14,7 +16,8 @@ import org.slf4j.LoggerFactory
 
 internal class GetPlanMembersAction(
     private val planClient: PlanClient,
-    private val userClient: UserClient
+    private val userClient: UserClient,
+    private val invitationClient: InvitationClient
 ) {
     private val logger = LoggerFactory.getLogger(GetPlanMembersAction::class.java)
     private val validate = ValidateGetPlanMembers()
@@ -26,12 +29,24 @@ internal class GetPlanMembersAction(
         logger.debug("Getting members for plan id={}", param.planId)
         return when (val result = planClient.getMembers(GetMembersParam(param.planId))) {
             is Result.Success -> {
+                // Fetch invitations for the plan to enrich members with status
+                val invitations = when (val invResult = invitationClient.getByPlanId(GetByPlanIdParam(param.planId))) {
+                    is Result.Success -> invResult.value.associateBy { it.userId }
+                    is Result.Failure -> emptyMap()
+                }
+
                 val members = result.value.map { clientMember ->
-                    val username = when (val userResult = userClient.getById(GetByIdParam(clientMember.userId))) {
-                        is Result.Success -> userResult.value.username
+                    val user = when (val userResult = userClient.getById(GetByIdParam(clientMember.userId))) {
+                        is Result.Success -> userResult.value
                         is Result.Failure -> null
                     }
-                    PlanMapper.fromClient(clientMember, username)
+                    val invitation = invitations[clientMember.userId]
+                    PlanMapper.fromClient(
+                        clientMember,
+                        username = user?.username,
+                        email = user?.email ?: invitation?.email,
+                        invitationStatus = invitation?.status
+                    )
                 }
                 Result.Success(members)
             }

@@ -81,7 +81,7 @@ class PlanController(
         @RequestBody request: AddMemberRequest
     ): ResponseEntity<Any> {
         logger.info("POST /api/plans/{}/members", planId)
-        val param = AddPlanMemberParam(planId = planId, email = request.email)
+        val param = AddPlanMemberParam(planId = planId, email = request.email, requestingUserId = userId)
         val result = planService.addMember(param)
         if (result is Result.Success) eventPublisher.publishUpdate(planId, "members", "updated")
         return result.toResponseEntity(successStatus = 201) { PlanMapper.toResponse(it) }
