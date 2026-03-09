@@ -30,12 +30,16 @@ const AVATAR_COLORS = [
 
 export function CamperAvatar({ name, email, invitationStatus, index, total, isAddButton, timeOfDay, onClick, onRemove }: Props) {
   // Semicircle above fire: 9 o'clock → 12 o'clock → 3 o'clock
+  // Scale radius with member count so avatars don't overlap
   const startAngle = Math.PI;           // 9 o'clock (left)
   const arcSpan = Math.PI;              // 180 degrees
   const angleStep = total > 1 ? arcSpan / (total - 1) : 0;
   const angle = startAngle + angleStep * index;
-  const radiusX = 160;
-  const radiusY = 100;
+  const baseRadiusX = 160;
+  const baseRadiusY = 100;
+  const scale = total > 4 ? 1 + (total - 4) * 0.15 : 1;
+  const radiusX = baseRadiusX * scale;
+  const radiusY = baseRadiusY * scale;
   const x = Math.cos(angle) * radiusX;
   const y = Math.sin(angle) * radiusY;
 
