@@ -20,7 +20,14 @@ internal class AuthenticateUserAction(private val userClient: UserClient) {
 
         logger.debug("Authenticating user email={}", param.email)
         return when (val result = userClient.getByEmail(GetByEmailParam(param.email))) {
-            is Result.Success -> Result.Success(UserMapper.fromClient(result.value))
+            is Result.Success -> {
+                val user = UserMapper.fromClient(result.value)
+                if (user.username == null) {
+                    Result.Failure(UserError.RegistrationRequired(param.email))
+                } else {
+                    Result.Success(user)
+                }
+            }
             is Result.Failure -> Result.Failure(UserError.fromClientError(result.error))
         }
     }

@@ -31,7 +31,11 @@ export function LoginPage() {
       login(user);
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      const message = err instanceof Error ? err.message : 'Something went wrong';
+      if (message.toLowerCase().includes('register')) {
+        setMode('register');
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }

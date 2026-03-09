@@ -35,6 +35,8 @@ fun UserError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
     is UserError.Forbidden -> ResponseEntity.status(403)
         .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is UserError.RegistrationRequired -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("REGISTRATION_REQUIRED", message))
 }
 
 @JvmName("userResultToResponseEntity")
