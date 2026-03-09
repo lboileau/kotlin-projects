@@ -29,15 +29,22 @@ const AVATAR_COLORS = [
 ];
 
 export function CamperAvatar({ name, email, invitationStatus, index, total, isAddButton, timeOfDay, onClick, onRemove }: Props) {
-  // Semicircle above fire: 9 o'clock → 12 o'clock → 3 o'clock
-  const startAngle = Math.PI;           // 9 o'clock (left)
-  const arcSpan = Math.PI;              // 180 degrees
+  // Arc above fire — pad edges so outermost avatars don't overlap inner ones
+  const avatarWidth = 80; // approximate width of avatar + label
+  const arcPad = Math.PI * 0.12; // 22° padding on each side
+  const startAngle = Math.PI - arcPad;
+  const endAngle = arcPad;
+  const arcSpan = startAngle - endAngle;
   const angleStep = total > 1 ? arcSpan / (total - 1) : 0;
-  const angle = startAngle + angleStep * index;
-  const radiusX = 160;
-  const radiusY = 100;
+  const angle = startAngle - angleStep * index;
+  // Scale radius so avatars have enough room
+  const minRadius = total > 1 ? (total * avatarWidth) / arcSpan : 160;
+  const radiusX = Math.max(160, minRadius);
+  const radiusY = radiusX * 0.5;
   const x = Math.cos(angle) * radiusX;
-  const y = Math.sin(angle) * radiusY;
+  // Offset so edge avatars sit at fire level (y=0), center rises above
+  const edgeY = Math.sin(endAngle) * radiusY;
+  const y = -(Math.sin(angle) * radiusY - edgeY);
 
   const color = AVATAR_COLORS[index % AVATAR_COLORS.length];
   const isPending = !name;
@@ -165,10 +172,10 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
       {displayName && <span className="avatar-name">{displayName}</span>}
       {onRemove && (
         <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <circle cx="8" cy="8" r="7" fill="rgba(232,93,58,0.8)" />
-            <line x1="5" y1="5" x2="11" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="11" y1="5" x2="5" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="32" height="32" viewBox="0 0 32 32">
+            {/* Jagged red X — no background */}
+            <line x1="6" y1="7" x2="26" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
+            <line x1="26" y1="7" x2="6" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
           </svg>
         </button>
       )}
