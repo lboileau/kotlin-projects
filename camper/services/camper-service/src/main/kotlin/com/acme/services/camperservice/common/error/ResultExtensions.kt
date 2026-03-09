@@ -3,6 +3,7 @@ package com.acme.services.camperservice.common.error
 import com.acme.clients.common.Result
 import com.acme.services.common.ApiResponse
 import com.acme.services.camperservice.features.assignment.error.AssignmentError
+import com.acme.services.camperservice.features.gearsync.error.GearSyncError
 import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.itinerary.error.ItineraryError
 import com.acme.services.camperservice.features.plan.error.PlanError
@@ -99,6 +100,20 @@ fun ItineraryError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 
 @JvmName("itineraryResultToResponseEntity")
 fun <T> Result<T, ItineraryError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun GearSyncError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is GearSyncError.PlanNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+}
+
+@JvmName("gearSyncResultToResponseEntity")
+fun <T> Result<T, GearSyncError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
 ): ResponseEntity<Any> = when (this) {
