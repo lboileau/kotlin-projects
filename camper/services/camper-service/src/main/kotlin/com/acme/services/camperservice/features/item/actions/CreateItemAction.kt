@@ -20,7 +20,7 @@ internal class CreateItemAction(private val itemClient: ItemClient) {
 
         logger.debug("Creating item name={} for ownerType={} ownerId={}", param.name, param.ownerType, param.ownerId)
 
-        val planId = if (param.ownerType == "plan") param.ownerId else null
+        val planId = if (param.ownerType == "plan") param.ownerId else param.planId
         val userId = if (param.ownerType == "user") param.ownerId else null
 
         return when (val result = itemClient.create(ClientCreateItemParam(

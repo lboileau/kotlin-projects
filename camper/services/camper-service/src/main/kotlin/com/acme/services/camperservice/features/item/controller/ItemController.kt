@@ -34,6 +34,7 @@ class ItemController(
             packed = request.packed,
             ownerType = request.ownerType,
             ownerId = request.ownerId,
+            planId = request.planId,
             requestingUserId = userId,
         )
         val result = itemService.create(param)
@@ -48,10 +49,11 @@ class ItemController(
     fun getByOwner(
         @RequestHeader("X-User-Id") userId: UUID,
         @RequestParam ownerType: String,
-        @RequestParam ownerId: UUID
+        @RequestParam ownerId: UUID,
+        @RequestParam(required = false) planId: UUID?
     ): ResponseEntity<Any> {
-        logger.info("GET /api/items?ownerType={}&ownerId={}", ownerType, ownerId)
-        val param = GetItemsByOwnerParam(ownerType = ownerType, ownerId = ownerId, requestingUserId = userId)
+        logger.info("GET /api/items?ownerType={}&ownerId={}&planId={}", ownerType, ownerId, planId)
+        val param = GetItemsByOwnerParam(ownerType = ownerType, ownerId = ownerId, planId = planId, requestingUserId = userId)
         return itemService.getByOwner(param).toResponseEntity { list -> list.map { ItemMapper.toResponse(it) } }
     }
 

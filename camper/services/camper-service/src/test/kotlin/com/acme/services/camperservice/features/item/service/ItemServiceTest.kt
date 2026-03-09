@@ -53,7 +53,7 @@ class ItemServiceTest {
         }
 
         @Test
-        fun `create returns success for user owner`() {
+        fun `create returns success for user owner with planId`() {
             val result = itemService.create(
                 CreateItemParam(
                     name = "Flashlight",
@@ -62,6 +62,7 @@ class ItemServiceTest {
                     packed = true,
                     ownerType = "user",
                     ownerId = userId,
+                    planId = planId,
                     requestingUserId = requestingUserId,
                 )
             )
@@ -71,8 +72,28 @@ class ItemServiceTest {
             assertThat(item.name).isEqualTo("Flashlight")
             assertThat(item.quantity).isEqualTo(2)
             assertThat(item.packed).isTrue()
-            assertThat(item.planId).isNull()
+            assertThat(item.planId).isEqualTo(planId)
             assertThat(item.userId).isEqualTo(userId)
+        }
+
+        @Test
+        fun `create returns Invalid when user owner has no planId`() {
+            val result = itemService.create(
+                CreateItemParam(
+                    name = "Flashlight",
+                    category = "Lighting",
+                    quantity = 1,
+                    packed = false,
+                    ownerType = "user",
+                    ownerId = userId,
+                    requestingUserId = requestingUserId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ItemError.Invalid::class.java)
+            assertThat((error as ItemError.Invalid).field).isEqualTo("planId")
         }
 
         @Test
@@ -197,22 +218,42 @@ class ItemServiceTest {
         }
 
         @Test
-        fun `getByOwner returns items for user`() {
+        fun `getByOwner returns user items scoped to plan`() {
+            val plan2Id = UUID.randomUUID()
+
             itemService.create(
                 CreateItemParam(
                     name = "Flashlight", category = "Lighting", quantity = 1, packed = false,
-                    ownerType = "user", ownerId = userId, requestingUserId = requestingUserId,
+                    ownerType = "user", ownerId = userId, planId = planId, requestingUserId = requestingUserId,
+                )
+            )
+            itemService.create(
+                CreateItemParam(
+                    name = "Knife", category = "Tools", quantity = 1, packed = false,
+                    ownerType = "user", ownerId = userId, planId = plan2Id, requestingUserId = requestingUserId,
                 )
             )
 
             val result = itemService.getByOwner(
-                GetItemsByOwnerParam(ownerType = "user", ownerId = userId, requestingUserId = requestingUserId)
+                GetItemsByOwnerParam(ownerType = "user", ownerId = userId, planId = planId, requestingUserId = requestingUserId)
             )
 
             assertThat(result.isSuccess).isTrue()
             val items = (result as Result.Success).value
             assertThat(items).hasSize(1)
             assertThat(items[0].name).isEqualTo("Flashlight")
+        }
+
+        @Test
+        fun `getByOwner returns Invalid for user without planId`() {
+            val result = itemService.getByOwner(
+                GetItemsByOwnerParam(ownerType = "user", ownerId = userId, requestingUserId = requestingUserId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ItemError.Invalid::class.java)
+            assertThat((error as ItemError.Invalid).field).isEqualTo("planId")
         }
 
         @Test

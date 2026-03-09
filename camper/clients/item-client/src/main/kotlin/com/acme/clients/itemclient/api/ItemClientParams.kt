@@ -21,6 +21,9 @@ data class GetByPlanIdParam(val planId: UUID)
 /** Parameter for retrieving items by user ID. */
 data class GetByUserIdParam(val userId: UUID)
 
+/** Parameter for retrieving personal items by plan ID and user ID. */
+data class GetByPlanIdAndUserIdParam(val planId: UUID, val userId: UUID)
+
 /** Parameter for updating an existing item. */
 data class UpdateItemParam(
     val id: UUID,
