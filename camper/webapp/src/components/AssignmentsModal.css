@@ -183,6 +183,52 @@
   background: rgba(168, 139, 91, 0.35);
 }
 
+/* ── Unassigned Members ────────────────── */
+
+.assign-unassigned {
+  background: rgba(232, 93, 58, 0.05);
+  border: 1px dashed rgba(232, 93, 58, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.assign-unassigned-label {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--charcoal-light);
+  opacity: 0.7;
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.assign-unassigned-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.assign-unassigned-member {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.assign-unassigned-name {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--charcoal-light);
+  max-width: 56px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
 /* ── Assignment Card ───────────────────── */
 
 .assign-card {
