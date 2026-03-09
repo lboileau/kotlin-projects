@@ -172,10 +172,10 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
       {displayName && <span className="avatar-name">{displayName}</span>}
       {onRemove && (
         <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
-          <svg width="16" height="16" viewBox="0 0 16 16">
-            <circle cx="8" cy="8" r="7" fill="rgba(232,93,58,0.8)" />
-            <line x1="5" y1="5" x2="11" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="11" y1="5" x2="5" y2="11" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+          <svg width="32" height="32" viewBox="0 0 32 32">
+            {/* Jagged red X — no background */}
+            <line x1="6" y1="7" x2="26" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
+            <line x1="26" y1="7" x2="6" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
           </svg>
         </button>
       )}
