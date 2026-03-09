@@ -9,6 +9,7 @@ data class CreateItemRequest(
     val packed: Boolean,
     val ownerType: String,
     val ownerId: UUID,
+    val planId: UUID? = null,
 )
 
 data class UpdateItemRequest(

@@ -69,10 +69,10 @@ webapp/
 - `ProtectedRoute` redirects unauthenticated users to `/login`
 
 ### Pages
-- **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`.
+- **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`. If sign-in fails because user has no username, auto-switches to Register tab with error message.
 - **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
-- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others.
-  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists.
+- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (edit plan name + toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others. Pending (invited but not registered) members show their email address. Campfire circle radius scales dynamically with member count to prevent avatar overlap.
+  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists scoped to the current plan, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists.
   - **MealModal** — Plan-only checklist (no personal sections) with day tabs. Categories: breakfast, lunch, dinner, snacks. Everyone can edit the meal plan. Day tabs let users organize meals per day (Day 1, Day 2, etc.) with a "+" button to add more days. Items are stored with day-prefixed categories (e.g. `day1:breakfast`) which the UI parses for display. Empty trailing days are automatically removed when all items are deleted. Opens from the kitchen campsite item. Both modals share a generic `ChecklistModal` component internally.
   - **AssignmentsModal** — Fixed-height modal with two tabs (Tents / Canoes). Cards show assignment name, owner, occupancy bar, and member list with mini SVG avatar heads. Features: "Add Tent" / "Add Canoe" buttons (creator auto-added if not already in a group of that type); join (auto-leaves current group of same type); leave (including owner self-leave); owner/plan-owner "Add Member" panel showing available plan members with greyed-out entries for those already in another group of the same type; inline edit name/max occupancy; delete. Pending adventurers are filtered from the add-member list.
 
@@ -81,7 +81,7 @@ webapp/
 - **Parallax:** Three variants (`night`, `dusk`, `campsite`) with mouse-tracked layer offsets via CSS custom properties
 - **Campfire:** Multi-layered CSS (outer/mid/inner/core flames) + ember particles + smoke + log/stone ring
 - **Campsite Items:** Pure SVG components for tent, equipment pile, kitchen, map table
-- **Avatars:** SVG-illustrated people with randomized pastel colors, positioned in a circle around campfire using trigonometry
+- **Avatars:** SVG-illustrated people with randomized pastel colors, positioned in a semicircle around campfire using trigonometry. Circle radius scales dynamically (15% per member beyond 4) to prevent overlap
 - **Modals:** Parchment-textured with category-specific flavor text
 
 ## API Endpoints Used
@@ -95,10 +95,10 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | GET | `/api/plans` | X-User-Id | HomePage |
 | POST | `/api/plans` | X-User-Id | HomePage (create trip) |
 | GET | `/api/plans/:id/members` | X-User-Id | PlanPage |
-| PUT | `/api/plans/:id` | X-User-Id | PlanPage (update visibility) |
+| PUT | `/api/plans/:id` | X-User-Id | PlanPage (update name/visibility) |
 | POST | `/api/plans/:id/members` | X-User-Id | PlanPage (invite), HomePage (join) |
 | DELETE | `/api/plans/:id/members/:memberId` | X-User-Id | PlanPage (leave/remove), HomePage (leave) |
-| GET | `/api/items?ownerType=&ownerId=` | X-User-Id | GearModal (list items) |
+| GET | `/api/items?ownerType=&ownerId=&planId=` | X-User-Id | GearModal (list items; planId scopes personal items) |
 | POST | `/api/items` | X-User-Id | GearModal (create item) |
 | PUT | `/api/items/:id` | X-User-Id | GearModal (update item) |
 | DELETE | `/api/items/:id` | X-User-Id | GearModal (delete item) |

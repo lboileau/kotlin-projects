@@ -75,7 +75,7 @@ class ItemAcceptanceTest {
         }
 
         @Test
-        fun `POST creates item for user and returns 201`() {
+        fun `POST creates personal item for user with planId and returns 201`() {
             val request = CreateItemRequest(
                 name = "Headlamp",
                 category = "lighting",
@@ -83,6 +83,7 @@ class ItemAcceptanceTest {
                 packed = true,
                 ownerType = "user",
                 ownerId = userId,
+                planId = planId,
             )
 
             val response = restTemplate.exchange(
@@ -99,7 +100,28 @@ class ItemAcceptanceTest {
             assertThat(body.quantity).isEqualTo(2)
             assertThat(body.packed).isTrue()
             assertThat(body.userId).isEqualTo(userId)
-            assertThat(body.planId).isNull()
+            assertThat(body.planId).isEqualTo(planId)
+        }
+
+        @Test
+        fun `POST returns 400 when user item has no planId`() {
+            val request = CreateItemRequest(
+                name = "Headlamp",
+                category = "lighting",
+                quantity = 1,
+                packed = false,
+                ownerType = "user",
+                ownerId = userId,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(request, userId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         }
 
         @Test
@@ -200,12 +222,15 @@ class ItemAcceptanceTest {
         }
 
         @Test
-        fun `GET returns items by user`() {
-            fixture.insertItem(userId = userId, name = "Headlamp", category = "lighting")
-            fixture.insertItem(userId = userId, name = "Knife", category = "tools")
+        fun `GET returns personal items scoped to plan`() {
+            fixture.insertItem(planId = planId, userId = userId, name = "Headlamp", category = "lighting")
+            fixture.insertItem(planId = planId, userId = userId, name = "Knife", category = "tools")
+
+            val plan2Id = fixture.insertPlan(name = "Other Plan", ownerId = userId)
+            fixture.insertItem(planId = plan2Id, userId = userId, name = "Other Item", category = "misc")
 
             val response = restTemplate.exchange(
-                "/api/items?ownerType=user&ownerId=$userId",
+                "/api/items?ownerType=user&ownerId=$userId&planId=$planId",
                 HttpMethod.GET,
                 entityWithUser(null, userId),
                 Array<ItemResponse>::class.java

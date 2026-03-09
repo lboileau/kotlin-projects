@@ -20,6 +20,7 @@ internal class ValidateCreateItem {
         if (param.name.isBlank()) return failure(ItemError.Invalid("name", "must not be blank"))
         if (param.quantity <= 0) return failure(ItemError.Invalid("quantity", "must be greater than 0"))
         if (param.ownerType != "plan" && param.ownerType != "user") return failure(ItemError.Invalid("ownerType", "must be 'plan' or 'user'"))
+        if (param.ownerType == "user" && param.planId == null) return failure(ItemError.Invalid("planId", "required for user items"))
         return success(Unit)
     }
 }

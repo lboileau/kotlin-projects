@@ -336,7 +336,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
       if (!config.planOnly) {
         const memberData: Record<string, Item[]> = {};
         const results = await Promise.all(
-          members.map(m => api.getItems('user', m.userId).then(items => ({ userId: m.userId, items })))
+          members.map(m => api.getItems('user', m.userId, planId).then(items => ({ userId: m.userId, items })))
         );
         for (const r of results) {
           memberData[r.userId] = r.items;
@@ -438,7 +438,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
 
   const makeMemberCrud = (userId: string) => ({
     onAdd: async (name: string, category: string, quantity: number) => {
-      await api.createItem({ name, category, quantity, packed: false, ownerType: 'user', ownerId: userId });
+      await api.createItem({ name, category, quantity, packed: false, ownerType: 'user', ownerId: userId, planId });
       loadItems();
     },
     onToggle: async (item: Item) => {

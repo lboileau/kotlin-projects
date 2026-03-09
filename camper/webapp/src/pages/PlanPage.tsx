@@ -81,6 +81,19 @@ export function PlanPage() {
   };
 
   const [updatingVisibility, setUpdatingVisibility] = useState(false);
+  const [editPlanName, setEditPlanName] = useState('');
+  const [savingName, setSavingName] = useState(false);
+
+  const handleSavePlanName = async () => {
+    if (!planId || !plan || !editPlanName.trim() || editPlanName.trim() === plan.name) return;
+    setSavingName(true);
+    try {
+      const updated = await api.updatePlan(planId, { name: editPlanName.trim(), visibility: plan.visibility });
+      setPlan(updated);
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const handleToggleVisibility = async () => {
     if (!planId || !plan) return;
@@ -157,7 +170,7 @@ export function PlanPage() {
           <span className="plan-header-title">Campsite</span>
         </div>
         {isOwner && (
-          <button className="plan-manage-btn" onClick={() => setActiveModal('managePlan')}>
+          <button className="plan-manage-btn" onClick={() => { setEditPlanName(plan?.name || ''); setActiveModal('managePlan'); }}>
             <svg width="18" height="18" viewBox="0 0 18 18">
               <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
               <path d="M9,5 L9,13 M5,9 L13,9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -298,6 +311,29 @@ export function PlanPage() {
               </svg>
             </div>
             <div className="manage-plan-setting">
+              <div className="manage-plan-setting-info" style={{ flex: 1 }}>
+                <span className="manage-plan-setting-label">Plan Name</span>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                  <input
+                    type="text"
+                    className="manage-plan-name-input"
+                    value={editPlanName}
+                    onChange={e => setEditPlanName(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleSavePlanName(); }}
+                    placeholder="Plan name"
+                  />
+                  <button
+                    className="modal-btn manage-plan-save-btn"
+                    onClick={handleSavePlanName}
+                    disabled={savingName || !editPlanName.trim() || editPlanName.trim() === plan.name}
+                  >
+                    {savingName ? '...' : 'Save'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="manage-plan-setting">
               <div className="manage-plan-setting-info">
                 <span className="manage-plan-setting-label">Plan Visibility</span>
                 <span className="manage-plan-setting-desc">
@@ -363,7 +399,10 @@ export function PlanPage() {
       {activeModal === 'assignments' && planId && user && plan && (
         <AssignmentsModal
           isOpen
-          onClose={() => setActiveModal(null)}
+          onClose={() => {
+            api.syncGear(planId).catch(() => {});
+            setActiveModal(null);
+          }}
           planId={planId}
           planOwnerId={plan.ownerId}
           currentUserId={user.id}

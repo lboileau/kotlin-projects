@@ -169,11 +169,13 @@ export const api = {
     });
   },
 
-  getItems(ownerType: string, ownerId: string): Promise<Item[]> {
-    return request(`/api/items?ownerType=${ownerType}&ownerId=${ownerId}`);
+  getItems(ownerType: string, ownerId: string, planId?: string): Promise<Item[]> {
+    let url = `/api/items?ownerType=${ownerType}&ownerId=${ownerId}`;
+    if (planId) url += `&planId=${planId}`;
+    return request(url);
   },
 
-  createItem(data: { name: string; category: string; quantity: number; packed: boolean; ownerType: string; ownerId: string }): Promise<Item> {
+  createItem(data: { name: string; category: string; quantity: number; packed: boolean; ownerType: string; ownerId: string; planId?: string }): Promise<Item> {
     return request('/api/items', {
       method: 'POST',
       body: JSON.stringify(data),
@@ -263,6 +265,12 @@ export const api = {
     return request(`/api/plans/${planId}/assignments/${assignmentId}/owner`, {
       method: 'PUT',
       body: JSON.stringify({ newOwnerId }),
+    });
+  },
+
+  syncGear(planId: string): Promise<{ items: { name: string; category: string; quantity: number }[] }> {
+    return request(`/api/plans/${planId}/gear-sync`, {
+      method: 'POST',
     });
   },
 };
