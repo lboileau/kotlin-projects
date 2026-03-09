@@ -6,10 +6,11 @@ Data access client for camping trip gear/equipment items.
 `com.acme.clients.itemclient`
 
 ## Public API (`ItemClient` interface)
-- `create(CreateItemParam)` — Create a new item
+- `create(CreateItemParam)` — Create a new item (planId, userId, or both)
 - `getById(GetByIdParam)` — Retrieve an item by ID
-- `getByPlanId(GetByPlanIdParam)` — Retrieve all items for a plan
-- `getByUserId(GetByUserIdParam)` — Retrieve all items for a user
+- `getByPlanId(GetByPlanIdParam)` — Retrieve all items for a plan (shared + personal)
+- `getByUserId(GetByUserIdParam)` — Retrieve all items for a user (across all plans)
+- `getByPlanIdAndUserId(GetByPlanIdAndUserIdParam)` — Retrieve personal items for a user within a specific plan
 - `update(UpdateItemParam)` — Update an existing item
 - `delete(DeleteItemParam)` — Delete an item by ID
 
@@ -42,7 +43,7 @@ data class Item(
 ## Error Handling
 - Returns `Result<T, AppError>` — never throws for expected failures
 - `NotFoundError` for missing entities
-- `ValidationError` for invalid input (blank name, quantity <= 0, planId/userId constraint)
+- `ValidationError` for invalid input (blank name, quantity <= 0, at least one of planId/userId required)
 
 ## Testing
 - `FakeItemClient` (testFixtures) for consumer testing — references actual validators
