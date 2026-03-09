@@ -309,9 +309,16 @@ Build check: `./gradlew :services:<service-name>:test`
 
 After all PRs are created and stacked:
 
-1. **Full build:** `./gradlew clean build` from the project root — must pass
-2. **Stack review:** Run `gt log` and present the full stack to the user
-3. **Submit all:** `gt submit --no-interactive` to push the entire stack
+1. **Stack review:** Run `gt log` and present the full stack to the user
+2. **Submit all:** `gt submit --no-interactive` to push the entire stack
+3. **Full build:** Run `./gradlew clean build` from the project root — this must pass before proceeding to documentation. This catches issues across the entire codebase, not just the modules touched by this feature (e.g., existing tests broken by schema/model changes).
+
+**All tests must pass.** If any failures are found:
+1. Investigate and fix the root cause
+2. Amend the appropriate PR in the stack
+3. Restack and re-run the full build until green
+
+Do not proceed to documentation until the full build is green.
 
 Present the Graphite stack URL to the user for final review.
 
@@ -319,7 +326,7 @@ Present the Graphite stack URL to the user for final review.
 
 ## Phase 9: Retrospective & Documentation Update
 
-After the stack is verified and submitted, perform a retrospective on the feature build. This produces a final PR stacked on top that updates all documentation and skills to reflect what was learned.
+After the full build passes, perform a retrospective on the feature build. This produces a final PR stacked on top that updates all documentation and skills to reflect what was learned.
 
 ### Retrospective
 
@@ -440,7 +447,7 @@ User describes feature
 [Phase 7] Acceptance Test PR
         |
         v
-[Phase 8] Final verification & submit stack
+[Phase 8] Final verification, submit stack & full build (must be green)
         |
         v
 [Phase 9] Retrospective & documentation update PR

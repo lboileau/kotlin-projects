@@ -122,13 +122,11 @@ CREATE TABLE items (
     packed     BOOLEAN      NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    CONSTRAINT chk_items_single_owner CHECK (
-        (plan_id IS NOT NULL AND user_id IS NULL) OR
-        (plan_id IS NULL AND user_id IS NOT NULL)
-    )
+    CONSTRAINT chk_items_owner CHECK (plan_id IS NOT NULL)
 );
 CREATE INDEX idx_items_plan_id ON items(plan_id);
 CREATE INDEX idx_items_user_id ON items(user_id);
+CREATE INDEX idx_items_plan_id_user_id ON items (plan_id, user_id) WHERE user_id IS NOT NULL;
 ```
 
 ### itineraries
@@ -232,7 +230,7 @@ CREATE INDEX idx_assignment_members_assignment_id ON assignment_members (assignm
 - Deleting a plan cascades to plan_members, items, itineraries, assignments, and assignment_members.
 - Deleting a user cascades to items and assignment_members.
 - `username` in users is nullable (auto-created users may not have one).
-- Each item must have exactly one owner — either `plan_id` or `user_id` (enforced by `chk_items_single_owner`).
+- Each item must belong to a plan (`plan_id` is required). `user_id` is optional — set for personal gear (enforced by `chk_items_owner`).
 - Each plan has at most one itinerary (enforced by `uq_itineraries_plan_id`).
 - Deleting a plan cascades to itineraries, which cascades to itinerary_events.
 - `description` and `details` in itinerary_events are nullable.

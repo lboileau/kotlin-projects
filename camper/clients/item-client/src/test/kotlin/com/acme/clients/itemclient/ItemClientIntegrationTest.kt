@@ -85,15 +85,15 @@ class ItemClientIntegrationTest {
         }
 
         @Test
-        fun `create returns created item with user owner`() {
+        fun `create returns created item with personal gear (plan + user)`() {
             val result = client.create(
-                CreateItemParam(planId = null, userId = testUserId, name = "Flashlight", category = "lighting", quantity = 2, packed = true)
+                CreateItemParam(planId = testPlanId, userId = testUserId, name = "Flashlight", category = "lighting", quantity = 2, packed = true)
             )
             assertThat(result).isInstanceOf(Result.Success::class.java)
             val item = (result as Result.Success).value
             assertThat(item.name).isEqualTo("Flashlight")
             assertThat(item.userId).isEqualTo(testUserId)
-            assertThat(item.planId).isNull()
+            assertThat(item.planId).isEqualTo(testPlanId)
             assertThat(item.quantity).isEqualTo(2)
             assertThat(item.packed).isTrue()
         }
@@ -121,14 +121,14 @@ class ItemClientIntegrationTest {
         }
 
         @Test
-        fun `create returns ValidationError when both planId and userId are set`() {
+        fun `create returns ValidationError when planId is not set`() {
             val result = client.create(
-                CreateItemParam(planId = testPlanId, userId = testUserId, name = "Tent", category = "shelter", quantity = 1, packed = false)
+                CreateItemParam(planId = null, userId = testUserId, name = "Tent", category = "shelter", quantity = 1, packed = false)
             )
             assertThat(result).isInstanceOf(Result.Failure::class.java)
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(ValidationError::class.java)
-            assertThat((error as ValidationError).field).isEqualTo("planId/userId")
+            assertThat((error as ValidationError).field).isEqualTo("planId")
         }
 
         @Test
@@ -139,7 +139,7 @@ class ItemClientIntegrationTest {
             assertThat(result).isInstanceOf(Result.Failure::class.java)
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(ValidationError::class.java)
-            assertThat((error as ValidationError).field).isEqualTo("planId/userId")
+            assertThat((error as ValidationError).field).isEqualTo("planId")
         }
     }
 
@@ -195,7 +195,7 @@ class ItemClientIntegrationTest {
     inner class GetByUserId {
         @Test
         fun `getByUserId returns items belonging to the user`() {
-            client.create(CreateItemParam(planId = null, userId = testUserId, name = "Headlamp", category = "lighting", quantity = 1, packed = false))
+            client.create(CreateItemParam(planId = testPlanId, userId = testUserId, name = "Headlamp", category = "lighting", quantity = 1, packed = false))
 
             val result = client.getByUserId(GetByUserIdParam(testUserId))
             assertThat(result).isInstanceOf(Result.Success::class.java)
