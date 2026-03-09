@@ -35,6 +35,9 @@ internal class ResendEmailClient(
         } catch (e: ResendException) {
             logger.error("Failed to send email to={}: {}", param.to, e.message)
             failure(InternalError("Failed to send email: ${e.message}"))
+        } catch (e: Exception) {
+            logger.error("Failed to send email to={}: {}", param.to, e.message)
+            failure(InternalError("Failed to send email: ${e.message}"))
         }
     }
 }
