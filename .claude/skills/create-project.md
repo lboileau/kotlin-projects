@@ -1,44 +1,40 @@
 # Project Bootstrap
 
-You are a project architect bootstrapping a complete Kotlin project from scratch. You handle root-level project setup yourself, and delegate all client, service, database, and test code generation to sub-agents that invoke the appropriate skills.
+You are the **orchestrator** bootstrapping a complete Kotlin project from scratch. You handle root-level project setup and Gradle wrapper yourself, and delegate all code generation to specialized agent teammates. After each teammate delivers, you run a review cycle before moving on.
 
 ## Critical Rules
 
-1. **Never reference other projects.** The skills are the sole source of truth for how to generate code. Never read, copy from, or use existing projects in the monorepo as reference. If a skill doesn't produce the right output, fix the skill — don't work around it by copying from another project.
-2. **Always run sub-agents in foreground.** Never set `run_in_background: true` on sub-agents. Background agents cannot prompt the user for tool permissions (Write, Bash, etc.) and will silently fail. Foreground agents can prompt interactively and will succeed.
+1. **Never reference other projects.** Skills are the sole source of truth for code generation. Never copy from sibling projects.
+2. **Always run agents in foreground.** Never set `run_in_background: true`. Background agents cannot prompt for permissions and will silently fail.
+3. **Every module gets reviewed.** After each agent delivers code, spawn `code-reviewer` (or `test-reviewer` for tests). Fix cycle until approved.
+4. **Build after every step.** Run module or full build. Nothing moves forward until green.
+
+## Agent Team
+
+| Agent | Purpose | When Spawned |
+|-------|---------|-------------|
+| `kotlin-dev` | Creates clients, libs, services, common modules | Steps 2a-2c, 2e-2f |
+| `db-dev` | Creates database schemas, migrations, seeds | Step 2d |
+| `test-engineer` | Creates test infrastructure and acceptance tests | Step 2f (tests) |
+| `code-reviewer` | Reviews each module against patterns and conventions | After each code step |
+| `test-reviewer` | Reviews tests for quality, coverage, authenticity | After test step |
+
+## Review Cycle Protocol
+
+After each agent delivers code:
+
+1. **Build check** — Run `./gradlew :<module>:build`. Must pass.
+2. **Spawn reviewer** — `code-reviewer` for implementation, `test-reviewer` for tests. Provide the list of files created.
+3. **If CHANGES REQUESTED** — Spawn the developer back with the reviewer's feedback. Rebuild. Re-review. Loop until clean.
+4. **If APPROVED** — Move to next step.
 
 ## How Delegation Works
 
-This skill uses the **Agent tool** to spawn sub-agents in **foreground** mode. Each sub-agent invokes a skill (via the Skill tool) and provides the answers to that skill's interactive prompts. This way:
-- Each sub-skill runs through its real logic and templates
-- Sub-skills can be updated independently — this skill automatically picks up changes
-- Sub-agents run in foreground so they can prompt for tool permissions when needed
-
-### Skills Used
-
-| Skill | Invoked via | Purpose |
-|-------|------------|---------|
-| `/service-manager` | Sub-agent | Creates clients, libs, services, and their Gradle configs |
-| `/db-manager` | Sub-agent | Creates database schemas, migrations, docker-compose, flyway |
-| `/create-acceptance-tests` | Sub-agent | Creates test infrastructure, fixtures, acceptance tests |
-
-### Sub-Agent Prompt Pattern
-
-When spawning a sub-agent, provide a prompt like:
-
-> Use the Skill tool to invoke `/service-manager`. When it asks which command, answer "Create Client". When it asks for information, provide these answers:
-> - Client name: world-client
-> - Purpose: Data access client for the worlds table
-> - ...
->
-> The project root is at `<target>/<project>/`. The root package is `<pkg.dot>`.
-> Write all files. Do not ask any questions — all answers are provided above.
-
-Always include:
-1. Which skill to invoke and which command to run
-2. All answers to the skill's "Gather Information" prompts
-3. The project root path and root package
-4. Instruction to write files without asking questions
+Spawn agent teammates using the Agent tool. Each teammate has skills pre-loaded (see `.claude/agents/`). Provide:
+1. What to build (module name, purpose, all field/type details)
+2. The project root path and root package
+3. Any prior reviewer feedback (if re-doing after review)
+4. Instruction to write all files without asking questions
 
 ---
 
@@ -206,48 +202,58 @@ This creates `gradlew`, `gradlew.bat`, and `gradle/wrapper/` with `gradle-wrappe
 
 ---
 
-#### Step 2: Delegate to Sub-Skills (via sub-agents)
+#### Step 2: Delegate to Agent Teammates
 
-Spawn sub-agents (in **foreground**, never background) to create the remaining modules. Run each sub-agent sequentially — foreground agents block until complete. Steps 2a-2d have no dependencies on each other. Steps 2e-2f depend on earlier steps.
+Spawn agent teammates (in **foreground**, never background) to create the remaining modules. After each teammate delivers, run the review cycle (build → review → fix → re-review) before proceeding.
+
+Steps 2a-2d have no dependencies on each other. Steps 2e-2f depend on earlier steps.
 
 ##### Step 2a: Client Common
 
-Spawn a sub-agent that invokes `/service-manager`:
-- **Command:** Client Common Bootstrap
+Spawn `kotlin-dev`:
+- **Task:** Client Common Bootstrap
 - **Root package:** `<pkg.dot>`
 - **Project root:** `<target>/<project>/`
 - **Instruction:** Create the `clients/common/` module with Result.kt, ClientContext.kt, error types, and ResultTest.kt
 
+Build check → Spawn `code-reviewer` → review cycle.
+
 ##### Step 2b: Service Common
 
-Spawn a sub-agent that invokes `/service-manager`:
-- **Command:** Service Common Bootstrap
+Spawn `kotlin-dev`:
+- **Task:** Service Common Bootstrap
 - **Root package:** `<pkg.dot>`
 - **Project root:** `<target>/<project>/`
 - **Instruction:** Create the `services/common/` module with ApiResponse.kt and ApiResponseTest.kt
 
+Build check → Spawn `code-reviewer` → review cycle.
+
 ##### Step 2c: Common Library
 
-Spawn a sub-agent that invokes `/service-manager`:
-- **Command:** Common Library Bootstrap
+Spawn `kotlin-dev`:
+- **Task:** Common Library Bootstrap
 - **Root package:** `<pkg.dot>`
 - **Project root:** `<target>/<project>/`
 - **Instruction:** Create the `libs/common/` module with logging utilities and CLAUDE.md
 
+Build check → Spawn `code-reviewer` → review cycle.
+
 ##### Step 2d: Database
 
-Spawn a sub-agent that invokes `/db-manager`:
-- **Command:** Create DB
+Spawn `db-dev`:
+- **Task:** Create DB
 - **Database name:** `<db-name>`
 - **Port:** `5433` (or next available)
 - **Tables:** `worlds` with columns: `name VARCHAR(100) NOT NULL` (UNIQUE constraint `uq_worlds_name`), `greeting VARCHAR(255) NOT NULL`. Index: `idx_worlds_name` on `name`.
 - **Seed data:** 3 rows — Earth, Mars, Vulcan with greetings and fixed UUIDs
 - **Project root:** `<target>/<project>/`
 
+Build check → Spawn `code-reviewer` → review cycle.
+
 ##### Step 2e: World Client (after 2a completes)
 
-Spawn a sub-agent that invokes `/service-manager`:
-- **Command:** Create Client
+Spawn `kotlin-dev`:
+- **Task:** Create Client
 - **Client name:** `world-client`
 - **Purpose:** Data access client for the worlds table CRUD operations
 - **Root package:** `<pkg.dot>`
@@ -262,10 +268,12 @@ Spawn a sub-agent that invokes `/service-manager`:
 - **FakeWorldClient:** Must reference the actual validation classes from `internal/validations/`
 - **Project root:** `<target>/<project>/`
 
-##### Step 2f: Service + Tests (after 2a, 2b, 2e complete)
+Build check → Spawn `code-reviewer` → review cycle.
 
-Spawn a sub-agent that invokes `/service-manager`:
-- **Command:** Create API Service
+##### Step 2f: Service (after 2a, 2b, 2e complete)
+
+Spawn `kotlin-dev`:
+- **Task:** Create API Service
 - **Service name:** `<service-name>`
 - **Purpose:** API service for world CRUD
 - **Root package:** `<pkg.dot>`
@@ -291,8 +299,12 @@ Spawn a sub-agent that invokes `/service-manager`:
   - ResultExtensions: `WorldError.toResponseEntity()` + `Result<T, WorldError>.toResponseEntity()` extension
   - Routes: `GET /api/worlds/{id}`, `GET /api/worlds`, `POST /api/worlds`, `PUT /api/worlds/{id}`, `DELETE /api/worlds/{id}`
 
-Then spawn another sub-agent that invokes `/create-acceptance-tests`:
-- **Command:** Create Acceptance Tests
+Build check → Spawn `code-reviewer` → review cycle.
+
+##### Step 2g: Acceptance Tests (after 2f complete)
+
+Spawn `test-engineer`:
+- **Task:** Create Acceptance Tests
 - **Service:** `<service-name>`
 - **Features to test:** `world`
 - **DB schemas:** `worlds` table from `<db-name>`
@@ -301,11 +313,13 @@ Then spawn another sub-agent that invokes `/create-acceptance-tests`:
 - **Endpoints to cover:** all 5 world routes
 - **Include:** read-your-own-writes tests (POST then GET, POST then PUT then GET, POST then DELETE then GET)
 
+Build check → Spawn `test-reviewer` → review cycle.
+
 ---
 
 #### Step 3: Documentation (you do this directly)
 
-After all sub-agents complete, create these files:
+After all teammates complete and reviews pass, create these files:
 
 ##### Root `CLAUDE.md`
 

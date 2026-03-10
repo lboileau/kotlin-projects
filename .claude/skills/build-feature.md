@@ -1,104 +1,114 @@
 # Build Feature Workflow
 
-You are a feature development orchestrator for a Kotlin Gradle monorepo. You guide the user through a structured workflow that produces a clean Graphite PR stack. You delegate code generation to sub-skills (`/service-manager`, `/db-manager`, `/create-acceptance-tests`) but own the workflow, branching, and PR strategy.
+You are the **orchestrator** for a feature development workflow in a Kotlin Gradle monorepo. You coordinate a team of specialized agents to produce a clean Graphite PR stack with reviewed, tested code.
+
+You do NOT write application code yourself. You spawn teammates who do.
 
 ## Critical Rules
 
 1. **Gate on plan approval.** Never start implementation until the user explicitly approves the plan PR.
-2. **One concern per PR.** Each PR in the stack has a single, clear purpose. Never mix contracts with implementations, or implementations with tests.
-3. **Every PR must build.** Run `./gradlew clean build` (or the relevant module build) after each PR. Fix failures before moving on.
-4. **Use Graphite for the stack.** All branches and PRs are created with `gt` commands. The stack must be linear and reviewable.
-5. **Delegate code generation.** Use sub-agents invoking `/service-manager`, `/db-manager`, and `/create-acceptance-tests` for actual code. This skill handles workflow only.
-6. **Never reference other projects.** Use the skills as the sole source of truth for code generation. Do not copy from sibling projects in the monorepo.
+2. **One concern per PR.** Each PR in the stack has a single, clear purpose.
+3. **Every PR must build.** Run `./gradlew clean build` (or module build) after each PR. Fix failures before moving on.
+4. **Every implementation PR must be reviewed.** Spawn `code-reviewer` after implementation PRs, `test-reviewer` after test PRs. Loop until approved.
+5. **Use Graphite for the stack.** All branches and PRs are created with `gt` commands.
+6. **Delegate all code generation.** Use agent teammates for all code. You handle workflow, branching, and coordination only.
+7. **Never reference other projects.** Skills are the sole source of truth for code generation.
+
+---
+
+## Agent Team
+
+| Agent | Purpose | When Spawned |
+|-------|---------|-------------|
+| `architect` | Creates plan, defines contracts, knows all patterns | Phase 1-3 |
+| `db-dev` | Schemas, migrations, seeds | Phase 4-5 (DB work) |
+| `kotlin-dev` | Clients, services, libs | Phase 4-5 (client/service/lib work) |
+| `test-engineer` | Unit, integration, acceptance tests | Phase 6-7 |
+| `code-reviewer` | Reviews implementation against plan + patterns | After each implementation PR |
+| `test-reviewer` | Reviews tests for quality, coverage, authenticity | After each test PR |
+| `doc-updater` | Updates docs and skills from retrospective | Phase 9 |
+
+---
+
+## Review Cycle Protocol
+
+After every implementation or test PR, run this cycle:
+
+```
+┌─────────────────────────────────────┐
+│  Developer writes code              │
+│  Build check (must pass)            │
+│         │                           │
+│         ▼                           │
+│  Reviewer reviews against plan      │
+│         │                           │
+│    ┌────┴────┐                      │
+│    │         │                      │
+│ APPROVED  CHANGES REQUESTED         │
+│    │         │                      │
+│    ▼         ▼                      │
+│  Next PR   Developer fixes          │
+│            Build check              │
+│            Re-review ───────────┐   │
+│                                 │   │
+│            (loop until clean)   │   │
+└─────────────────────────────────┘   │
+```
+
+### Spawning a Reviewer
+
+When spawning a reviewer, provide:
+1. The plan document path: `docs/plans/<feature>.md`
+2. The files changed in this PR (list them)
+3. The layer being reviewed (DB, client, service, test)
+4. Whether this is a first review or re-review (and prior feedback if re-review)
+
+### Handling Review Feedback
+
+When a reviewer returns `CHANGES REQUESTED`:
+1. Summarize the issues clearly
+2. Spawn the appropriate developer with the reviewer's feedback
+3. After fixes, rebuild the module
+4. Re-spawn the reviewer, noting this is a re-review and including prior issues
+
+When a reviewer returns `APPROVED`:
+1. Commit the changes to the current branch
+2. Move to the next PR in the stack
 
 ---
 
 ## Phase 1: Understand the Feature
 
-### Gather Information
+### Spawn the Architect
 
-Ask the user:
-1. **Which project?** (look under the monorepo root for existing projects)
-2. **What feature do you want to add?** Get a clear description.
-3. **What entities/resources are involved?** Names, fields, relationships.
-4. **What API endpoints are needed?** Methods, paths, request/response shapes.
-5. **What database changes are needed?** New tables, columns, constraints.
+Spawn the `architect` agent with:
+- The user's feature description
+- The project path
+- Instruction to gather requirements and scope the feature
 
-### Scope Check
+The architect will:
+1. Identify the project and understand the feature
+2. Check scope (reject if too big, suggest breakdown)
+3. Check for overlap with existing code
+4. Ask clarifying questions if needed
 
-Evaluate the feature size. A feature is **too big** if it involves:
-- More than 2 new tables with complex relationships
-- More than 2 new client interfaces
-- More than 10 new API endpoints
-- Cross-service concerns
-
-If the feature is too big, explain why and ask the user to break it into smaller, independently shippable features. Suggest a breakdown. Do not proceed until scope is manageable.
-
-### Existing Feature Check
-
-Before proceeding, search the project for:
-- Existing entities with similar names or purposes
-- Existing API endpoints that overlap
-- Existing database tables that could be extended
-- Existing clients that already handle related data
-
-If overlap is found, present it to the user and ask:
-- Should we **extend** the existing feature instead?
-- Should we **reuse** existing components (e.g., an existing client)?
-- Is this truly a **new** feature that happens to be adjacent?
-
-Do not proceed until the user confirms the approach.
+Present the architect's questions to the user. Relay answers back.
 
 ---
 
 ## Phase 2: Plan
 
-### Determine Components
+### Architect Creates the Plan
 
-Based on the feature, identify what's needed across each layer:
+Spawn the `architect` agent to create the plan document. Provide:
+- All gathered requirements and user answers
+- The project root path
 
-| Layer | What to determine |
-|-------|-------------------|
-| **Database** | New tables, columns on existing tables, indexes, constraints, seed data |
-| **Client** | New client or new operations on existing client. Interface methods, param objects, model types |
-| **Library** | Any shared types, utilities, or helpers needed (pure logic, no I/O) |
-| **Service** | New feature vertical slice: DTOs, error types, actions, service facade, controller, routes |
-
-### Define the PR Stack
-
-The PR stack follows this order. Skip any layer that isn't needed for this feature.
-
-```
-Stack (bottom → top):
-
-1. [plan]     feat(<feature>): plan — description and breakdown
-2. [db]       feat(<feature>): db contracts — schema files, migration SQL
-3. [client]   feat(<feature>): client contracts — interface, params, model types (no implementation)
-4. [lib]      feat(<feature>): lib contracts — shared types/utilities (if needed)
-5. [service]  feat(<feature>): service contracts — DTOs, error types, action signatures, routes (no implementation)
-6. [db-impl]  feat(<feature>): db implementation — migrations runnable, seed data
-7. [client-impl] feat(<feature>): client implementation — operations, adapters, factory, fake
-8. [lib-impl] feat(<feature>): lib implementation — utility logic (if needed)
-9. [service-impl] feat(<feature>): service implementation — actions, service, controller wiring
-10. [client-test] feat(<feature>): client tests — integration tests for client
-11. [service-test] feat(<feature>): service tests — unit tests for service layer
-12. [acceptance] feat(<feature>): acceptance tests — end-to-end API tests
-13. [docs]       feat(<feature>): update documentation and skills — retrospective-driven updates
-```
-
-Not every feature needs all 12 PRs. Omit layers that don't apply (e.g., no lib changes = skip 4 and 8).
-
-### Write the Plan
-
-Create a plan document with:
-- **Feature summary** — one paragraph
-- **Entities** — names, fields, relationships
-- **API surface** — endpoints table (method, path, description, request body, response)
-- **Database changes** — tables/columns with types and constraints
-- **Client interface** — method signatures and param types
-- **Service layer** — actions, error types, DTOs
-- **PR stack** — numbered list of PRs with titles and one-line descriptions
-- **Open questions** — anything that needs user input
+The architect produces `docs/plans/<feature>.md` with:
+- Feature summary, entities, API surface
+- Database changes, client interface, service layer
+- PR stack with titles and descriptions
+- Open questions
 
 ---
 
@@ -106,28 +116,25 @@ Create a plan document with:
 
 ### Create the Plan PR
 
+You handle the branching and PR creation:
+
 ```bash
-# Ensure we're on the project's main/trunk branch
 cd <project-root>
 gt checkout main
-
-# Create the plan branch
 gt create -m "feat(<feature>): plan — <short description>" --no-interactive
-
-# Write the plan document
-# Place it at: docs/plans/<feature>.md
 ```
 
-Write the plan document to `docs/plans/<feature>.md`, commit, and create the PR:
+Commit the plan document and submit:
 
 ```bash
-gt create -m "feat(<feature>): plan" --no-interactive
+git add docs/plans/<feature>.md
+git commit -m "feat(<feature>): plan"
 gt submit --no-interactive
 ```
 
 ### Wait for Approval
 
-Present the plan PR URL to the user. Clearly state:
+Present the plan PR URL to the user:
 
 > The plan PR is ready for review. Please review the plan and let me know:
 > - **Approved** — I'll proceed with implementation
@@ -135,46 +142,41 @@ Present the plan PR URL to the user. Clearly state:
 
 **Do not proceed until the user says "approved" or equivalent.**
 
-If changes are requested, update the plan document, amend the commit, and re-submit.
+If changes requested, spawn the architect to update the plan, amend, and re-submit.
 
 ---
 
 ## Phase 4: Contract PRs
 
-Once the plan is approved, create contract PRs. These define **interfaces, types, and shapes only** — no implementations.
+Once approved, create contract PRs. These define interfaces, types, and shapes only — no implementations.
 
 ### PR: DB Contracts
-
-Stack on top of the plan PR:
 
 ```bash
 gt create -m "feat(<feature>): db contracts" --no-interactive
 ```
 
-Use a sub-agent with `/db-manager` to create:
-- Schema files (`schema/tables/`)
-- Migration SQL files (`migrations/`)
-- Rollback files (`migrations/rollback/`)
-
-But **only the DDL** — no seed data yet, no MigrationRunner changes.
+Spawn `db-dev` with:
+- The plan document
+- Instruction to create schema files, migration SQL, rollback files (DDL only, no seed data)
 
 Build check: `./gradlew :databases:<db-name>:build`
 
-### PR: Client Contracts
+Spawn `code-reviewer` → review cycle.
 
-Stack on top of DB contracts:
+### PR: Client Contracts
 
 ```bash
 gt create -m "feat(<feature>): client contracts" --no-interactive
 ```
 
-Use a sub-agent with `/service-manager` to create:
-- Client interface with new method signatures (KDoc, no body)
-- Param objects (data classes)
-- Model types (data classes)
-- Update the fake in testFixtures with stub implementations (throw NotImplementedError)
+Spawn `kotlin-dev` with:
+- The plan document
+- Instruction to create: client interface (KDoc, no body), param objects, model types, fake stubs (throw NotImplementedError)
 
 Build check: `./gradlew :clients:<client-name>:build`
+
+Spawn `code-reviewer` → review cycle.
 
 ### PR: Library Contracts (if needed)
 
@@ -182,28 +184,25 @@ Build check: `./gradlew :clients:<client-name>:build`
 gt create -m "feat(<feature>): lib contracts" --no-interactive
 ```
 
-Use a sub-agent with `/service-manager` to create:
-- Type definitions, interfaces, utility signatures
+Spawn `kotlin-dev` with instruction to create type definitions and interfaces.
 
 Build check: `./gradlew :libs:<lib-name>:build`
 
-### PR: Service Contracts
+Spawn `code-reviewer` → review cycle.
 
-Stack on top of client contracts:
+### PR: Service Contracts
 
 ```bash
 gt create -m "feat(<feature>): service contracts" --no-interactive
 ```
 
-Use a sub-agent with `/service-manager` to create:
-- DTOs (request/response data classes)
-- Error sealed class with typed variants
-- Action class signatures (empty/TODO bodies)
-- Service facade method signatures (empty/TODO bodies)
-- Controller with route mappings (return 501 Not Implemented)
-- Service param objects
+Spawn `kotlin-dev` with:
+- The plan document
+- Instruction to create: DTOs, error sealed class, action signatures (TODO bodies), service facade signatures, controller routes (501 stubs), service params
 
 Build check: `./gradlew :services:<service-name>:build`
+
+Spawn `code-reviewer` → review cycle.
 
 ---
 
@@ -217,11 +216,13 @@ Each implementation PR fills in the contract stubs from Phase 4.
 gt create -m "feat(<feature>): db implementation" --no-interactive
 ```
 
-- Add seed data to `seed/dev_seed.sql`
-- Verify migrations are idempotent and runnable
-- Update DB CLAUDE.md and README.md
+Spawn `db-dev` with:
+- The plan document
+- Instruction to add seed data, verify migrations are runnable
 
 Build check: `./gradlew :databases:<db-name>:build`
+
+Spawn `code-reviewer` → review cycle.
 
 ### PR: Client Implementation
 
@@ -229,13 +230,13 @@ Build check: `./gradlew :databases:<db-name>:build`
 gt create -m "feat(<feature>): client implementation" --no-interactive
 ```
 
-Use a sub-agent with `/service-manager` to implement:
-- Operations (JDBI queries)
-- Row adapters
-- Factory wiring
-- Fake client (in testFixtures) with real validation and in-memory storage
+Spawn `kotlin-dev` with:
+- The plan document
+- Instruction to implement: operations (JDBI), row adapters, factory, fake with real validation
 
 Build check: `./gradlew :clients:<client-name>:build`
+
+Spawn `code-reviewer` → review cycle.
 
 ### PR: Library Implementation (if needed)
 
@@ -243,7 +244,7 @@ Build check: `./gradlew :clients:<client-name>:build`
 gt create -m "feat(<feature>): lib implementation" --no-interactive
 ```
 
-Build check: `./gradlew :libs:<lib-name>:build`
+Spawn `kotlin-dev`. Build check. Review cycle.
 
 ### PR: Service Implementation
 
@@ -251,14 +252,13 @@ Build check: `./gradlew :libs:<lib-name>:build`
 gt create -m "feat(<feature>): service implementation" --no-interactive
 ```
 
-Use a sub-agent with `/service-manager` to implement:
-- Actions (validate → convert params → call client)
-- Service facade (delegate to actions)
-- Controller (create service params, call service, map response)
-- Error mapping (`fromClientError`, `toResponseEntity`)
-- Wiring config (`@Configuration` bean)
+Spawn `kotlin-dev` with:
+- The plan document
+- Instruction to implement: actions (validate → convert → call client), service facade, controller, error mapping, config bean
 
 Build check: `./gradlew :services:<service-name>:build`
+
+Spawn `code-reviewer` → review cycle.
 
 ---
 
@@ -270,10 +270,13 @@ Build check: `./gradlew :services:<service-name>:build`
 gt create -m "feat(<feature>): client tests" --no-interactive
 ```
 
-- Integration tests using Testcontainers PostgreSQL
-- Test each client operation: happy path, not found, conflict, validation
+Spawn `test-engineer` with:
+- The plan document
+- Instruction to create integration tests with Testcontainers PostgreSQL
 
 Build check: `./gradlew :clients:<client-name>:test`
+
+Spawn `test-reviewer` → review cycle.
 
 ### PR: Service Tests
 
@@ -281,10 +284,13 @@ Build check: `./gradlew :clients:<client-name>:test`
 gt create -m "feat(<feature>): service tests" --no-interactive
 ```
 
-- Unit tests using the fake client
-- Test each action: happy path, error mapping, validation
+Spawn `test-engineer` with:
+- The plan document
+- Instruction to create unit tests using fake client
 
 Build check: `./gradlew :services:<service-name>:test`
+
+Spawn `test-reviewer` → review cycle.
 
 ---
 
@@ -296,80 +302,51 @@ Build check: `./gradlew :services:<service-name>:test`
 gt create -m "feat(<feature>): acceptance tests" --no-interactive
 ```
 
-Use a sub-agent with `/create-acceptance-tests` to create:
-- Test fixtures with `JdbcTemplate` inserts
-- Acceptance tests per endpoint: happy path, not found, validation, conflicts
-- Read-your-own-writes workflow tests
+Spawn `test-engineer` with:
+- The plan document
+- Instruction to create: test infrastructure (TestContainerConfig), fixtures, acceptance tests per endpoint, read-your-own-writes workflows
 
 Build check: `./gradlew :services:<service-name>:test`
+
+Spawn `test-reviewer` → review cycle.
 
 ---
 
 ## Phase 8: Final Verification
 
-After all PRs are created and stacked:
+After all PRs are created, reviewed, and stacked:
 
-1. **Stack review:** Run `gt log` and present the full stack to the user
-2. **Submit all:** `gt submit --no-interactive` to push the entire stack
-3. **Full build:** Run `./gradlew clean build` from the project root — this must pass before proceeding to documentation. This catches issues across the entire codebase, not just the modules touched by this feature (e.g., existing tests broken by schema/model changes).
+1. **Stack review:** Run `gt log` and present the full stack to the user.
+2. **Submit all:** `gt submit --no-interactive`
+3. **Full build:** `./gradlew clean build` from project root — must pass.
 
-**All tests must pass.** If any failures are found:
-1. Investigate and fix the root cause
-2. Amend the appropriate PR in the stack
-3. Restack and re-run the full build until green
+If any failures:
+1. Identify which layer/PR introduced the failure
+2. Spawn the appropriate developer to fix
+3. Amend the appropriate PR: `git add -A && git commit --amend --no-edit`
+4. Restack: `gt restack`
+5. Re-run full build
+6. Spawn reviewer on the fix if substantive changes were made
 
 Do not proceed to documentation until the full build is green.
 
-Present the Graphite stack URL to the user for final review.
+Present the Graphite stack URL to the user.
 
 ---
 
-## Phase 9: Retrospective & Documentation Update
+## Phase 9: Retrospective & Documentation
 
-After the full build passes, perform a retrospective on the feature build. This produces a final PR stacked on top that updates all documentation and skills to reflect what was learned.
+### Spawn Doc Updater
 
-### Retrospective
+Spawn `doc-updater` with:
+- The plan document
+- A summary of the full build: what was created, what issues were found, what reviewer feedback required fixes
+- The list of all files created/modified across the stack
 
-Review the entire feature build and identify:
-
-1. **Issues encountered** — What broke? What needed manual fixes? Compilation errors, test failures, missing wiring, type mismatches, etc.
-2. **What was added** — Summarize every new file, module, endpoint, table, and test that was created.
-3. **Patterns discovered** — Any new conventions, workarounds, or approaches that emerged during implementation.
-4. **Skill gaps** — Did any sub-skill (`/service-manager`, `/db-manager`, `/create-acceptance-tests`) produce incorrect or incomplete output? What was missing?
-
-### Documentation Updates
-
-Based on the retrospective, update the following:
-
-#### Project CLAUDE.md (root)
-- Update the **Project Structure** tree to include new modules/directories
-- Add the new feature to the **Architecture** section if it introduced new patterns
-- Update **Quick Start** if new setup steps are needed (e.g., new migrations, new seed data)
-
-#### Module CLAUDE.md files
-- Update any module-level `CLAUDE.md` that gained new capabilities (e.g., new client operations, new service features, new tables)
-- Add schema references for new tables in the database `CLAUDE.md`
-
-#### Project README.md
-- Update the **Project Structure** section with new modules/directories
-- Add new API endpoints to the **API** table
-- Update **Example** curl commands if new endpoints are noteworthy
-- Update **Prerequisites** if new tools are required
-- Update **Quick Start** / **Manual Setup** if new steps are needed
-
-#### Database README.md
-- Update schema documentation with new tables/columns
-- Update seed data descriptions
-
-### Skill Updates
-
-If the retrospective identified skill gaps, update the relevant skill files in `templates/skills/`:
-
-- **Patterns that broke** — If a skill produced code that didn't compile or failed tests, document the fix as a correction in the skill so it doesn't happen again.
-- **Missing steps** — If manual steps were needed that a skill should have handled, add them to the skill.
-- **New conventions** — If the feature established a new pattern (e.g., a new relationship type, a new error variant), add it to the relevant skill as a reference.
-
-Only update skills when there is a clear, repeatable lesson — not for one-off quirks.
+The doc-updater will:
+1. Run the retrospective
+2. Update project CLAUDE.md, module CLAUDE.md files, READMEs
+3. Update skills if gaps were found
 
 ### Create the Documentation PR
 
@@ -377,21 +354,13 @@ Only update skills when there is a clear, repeatable lesson — not for one-off 
 gt create -m "feat(<feature>): update documentation and skills" --no-interactive
 ```
 
-Commit all documentation and skill updates. This PR should contain **only** documentation changes — no code changes.
+Commit doc changes. Build check. Submit.
 
-Build check: `./gradlew clean build` (ensure nothing was broken by doc changes that touch build files)
-
-```bash
-gt submit --no-interactive
-```
-
-Present the updated stack to the user.
+Present the final stack to the user.
 
 ---
 
 ## Graphite Command Reference
-
-Common commands used throughout this workflow:
 
 ```bash
 # Start from trunk
@@ -424,31 +393,31 @@ gt submit --no-interactive
 
 ```
 User describes feature
-        |
-        v
-[Phase 1] Understand & scope
-        |
-        v
-[Phase 2] Plan components & PR stack
-        |
-        v
+        │
+        ▼
+[Phase 1] Spawn architect → understand & scope
+        │
+        ▼
+[Phase 2] Spawn architect → create plan
+        │
+        ▼
 [Phase 3] Plan PR → USER APPROVAL GATE
-        |
-        v
+        │
+        ▼
 [Phase 4] Contract PRs (DB → Client → Lib → Service)
-        |
-        v
+        │  └─ code-reviewer after each → fix cycle
+        ▼
 [Phase 5] Implementation PRs (DB → Client → Lib → Service)
-        |
-        v
+        │  └─ code-reviewer after each → fix cycle
+        ▼
 [Phase 6] Test PRs (Client → Service)
-        |
-        v
+        │  └─ test-reviewer after each → fix cycle
+        ▼
 [Phase 7] Acceptance Test PR
-        |
-        v
-[Phase 8] Final verification, submit stack & full build (must be green)
-        |
-        v
-[Phase 9] Retrospective & documentation update PR
+        │  └─ test-reviewer → fix cycle
+        ▼
+[Phase 8] Final verification, full build (must be green)
+        │
+        ▼
+[Phase 9] Spawn doc-updater → retrospective & documentation PR
 ```
