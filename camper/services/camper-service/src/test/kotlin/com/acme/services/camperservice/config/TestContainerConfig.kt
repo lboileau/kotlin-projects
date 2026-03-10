@@ -4,12 +4,18 @@ import com.acme.clients.assignmentclient.api.AssignmentClient
 import com.acme.clients.assignmentclient.createAssignmentClient
 import com.acme.clients.emailclient.api.EmailClient
 import com.acme.clients.emailclient.fake.FakeEmailClient
+import com.acme.clients.ingredientclient.api.IngredientClient
+import com.acme.clients.ingredientclient.fake.FakeIngredientClient
 import com.acme.clients.invitationclient.api.InvitationClient
 import com.acme.clients.invitationclient.fake.FakeInvitationClient
 import com.acme.clients.itemclient.api.ItemClient
 import com.acme.clients.itemclient.createItemClient
 import com.acme.clients.planclient.api.PlanClient
 import com.acme.clients.planclient.createPlanClient
+import com.acme.clients.recipeclient.api.RecipeClient
+import com.acme.clients.recipeclient.fake.FakeRecipeClient
+import com.acme.clients.recipescraperclient.api.RecipeScraperClient
+import com.acme.clients.recipescraperclient.createNoOpRecipeScraperClient
 import com.acme.clients.userclient.api.UserClient
 import com.acme.clients.userclient.createUserClient
 import com.acme.clients.worldclient.api.WorldClient
@@ -66,4 +72,16 @@ class TestContainerConfig {
     @Bean
     @Primary
     fun invitationClient(): InvitationClient = FakeInvitationClient()
+
+    @Bean
+    @Primary
+    fun ingredientClient(): IngredientClient = FakeIngredientClient()
+
+    @Bean
+    @Primary
+    fun recipeClient(): RecipeClient = FakeRecipeClient()
+
+    @Bean
+    @Primary
+    fun recipeScraperClient(): RecipeScraperClient = createNoOpRecipeScraperClient()
 }
