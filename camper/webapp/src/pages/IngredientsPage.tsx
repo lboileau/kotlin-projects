@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   api,
   type IngredientResponse,
   type CreateIngredientRequest,
   type UpdateIngredientRequest,
 } from '../api/client';
-import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
+import { AppHeader } from '../components/AppHeader';
 import './IngredientsPage.css';
 import '../components/Modal.css';
 
@@ -15,9 +14,6 @@ const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces',
 const CATEGORIES = ['produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other'] as const;
 
 export function IngredientsPage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-
   const [ingredients, setIngredients] = useState<IngredientResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -137,20 +133,23 @@ export function IngredientsPage() {
       <ParallaxBackground variant="dusk" />
 
       <div className="ingredients-content">
-        <header className="ingredients-header">
-          <div className="ingredients-header-left">
-            <button className="ingredients-back" onClick={() => navigate('/recipes')}>
-              <svg width="20" height="20" viewBox="0 0 20 20">
-                <path d="M13,4 L7,10 L13,16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              Recipes
-            </button>
-            <h1 className="ingredients-title">Ingredients</h1>
-          </div>
-          <div className="ingredients-header-right">
-            <span className="ingredients-user">{user?.username || user?.email}</span>
-          </div>
-        </header>
+        <AppHeader
+          pageTitle="Ingredients"
+          pageIcon={
+            <svg width="22" height="22" viewBox="0 0 22 22">
+              {/* Carrot body */}
+              <path d="M11,20 Q9,14 8,10 Q9,6 11,4 Q13,6 14,10 Q13,14 11,20 Z" fill="var(--ember)" opacity="0.85" />
+              <path d="M11,20 Q12,14 14,10 Q13,6 11,4" fill="var(--ember)" opacity="0.6" />
+              {/* Lines on carrot */}
+              <line x1="9.5" y1="10" x2="12.5" y2="10" stroke="var(--parchment)" strokeWidth="0.6" opacity="0.4" strokeLinecap="round" />
+              <line x1="9.8" y1="13" x2="12.2" y2="13" stroke="var(--parchment)" strokeWidth="0.6" opacity="0.3" strokeLinecap="round" />
+              {/* Leafy top */}
+              <path d="M11,4 Q8,1 6,2" stroke="var(--sage)" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+              <path d="M11,4 Q11,0 11,1" stroke="var(--sage)" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+              <path d="M11,4 Q14,1 16,2" stroke="var(--sage)" strokeWidth="1.3" fill="none" strokeLinecap="round" />
+            </svg>
+          }
+        />
 
         <div className="ingredients-toolbar">
           <input

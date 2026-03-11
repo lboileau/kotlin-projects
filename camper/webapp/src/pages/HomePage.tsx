@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, type Plan } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
+import { AppHeader } from '../components/AppHeader';
 import './HomePage.css';
 import '../components/Modal.css';
 
@@ -16,7 +17,7 @@ export function HomePage() {
   const [deletingPlan, setDeletingPlan] = useState<Plan | null>(null);
   const [leavingPlan, setLeavingPlan] = useState<Plan | null>(null);
   const [joiningPlanId, setJoiningPlanId] = useState<string | null>(null);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -96,45 +97,17 @@ export function HomePage() {
       <ParallaxBackground variant="dusk" />
 
       <div className="home-content">
-        {/* Header bar */}
-        <header className="home-header">
-          <div className="home-brand">
-            <svg width="28" height="28" viewBox="0 0 28 28" className="home-brand-icon">
-              <polygon points="14,2 4,24 24,24" fill="none" stroke="var(--ember)" strokeWidth="1.5" />
-              <path d="M11,19 Q13,13 14,11 Q15,13 17,19" fill="var(--ember)" opacity="0.7" />
+        <AppHeader
+          pageTitle="Your Expeditions"
+          pageIcon={
+            <svg width="22" height="22" viewBox="0 0 22 22">
+              <path d="M3,17 L3,9 L11,3 L19,9 L19,17 Z" fill="none" stroke="var(--ember)" strokeWidth="1.5" strokeLinejoin="round" />
             </svg>
-            <span className="home-brand-text">Camper</span>
-          </div>
-          <nav className="home-nav">
-            <button className="home-nav-link" onClick={() => navigate('/recipes')}>
-              <svg width="15" height="15" viewBox="0 0 15 15">
-                <rect x="2" y="2" width="11" height="11" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
-                <line x1="5" y1="5.5" x2="10" y2="5.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.8" />
-                <line x1="5" y1="7.5" x2="10" y2="7.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
-                <line x1="5" y1="9.5" x2="8" y2="9.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" opacity="0.4" />
-              </svg>
-              Recipes
-            </button>
-          </nav>
-          <div className="home-user">
-            <button className="home-user-btn" onClick={() => navigate('/account')}>
-              <svg width="28" height="28" viewBox="0 0 28 28" className="home-user-avatar">
-                <defs><clipPath id="avatar-clip-home"><circle cx="14" cy="14" r="13" /></clipPath></defs>
-                <circle cx="14" cy="14" r="13" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="1.5" />
-                <g clipPath="url(#avatar-clip-home)">
-                  <circle cx="14" cy="11" r="5" fill="var(--parchment)" />
-                  <ellipse cx="14" cy="24" rx="8" ry="6" fill="var(--parchment)" />
-                </g>
-              </svg>
-              <span className="home-user-name">{user?.username || user?.email}</span>
-            </button>
-            <button className="home-logout" onClick={logout}>Log Out</button>
-          </div>
-        </header>
+          }
+        />
 
         {/* Hero section */}
         <div className="home-hero">
-          <h1 className="home-title">Your Expeditions</h1>
           <p className="home-subtitle">Choose a trail or chart a new course</p>
         </div>
 

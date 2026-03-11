@@ -9,14 +9,14 @@
   z-index: 1;
   max-width: 860px;
   margin: 0 auto;
-  padding: 0 var(--space-xl) var(--space-2xl);
+  padding: 56px var(--space-xl) var(--space-2xl);
 }
 
 .ingredients-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-xl) 0;
+  padding: var(--space-xl) 0 var(--space-xl) 40px;
 }
 
 .ingredients-header-left {
@@ -65,6 +65,7 @@
 .ingredients-toolbar {
   display: flex;
   gap: var(--space-md);
+  margin-top: var(--space-xl);
   margin-bottom: var(--space-xl);
 }
 

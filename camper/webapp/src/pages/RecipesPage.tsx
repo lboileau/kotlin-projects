@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   api,
   type RecipeResponse,
@@ -10,6 +9,7 @@ import {
 } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
+import { AppHeader } from '../components/AppHeader';
 import './RecipesPage.css';
 import '../components/Modal.css';
 
@@ -26,8 +26,7 @@ interface DraftIngredient {
 }
 
 export function RecipesPage() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [view, setView] = useState<View>('list');
   const [recipes, setRecipes] = useState<RecipeResponse[]>([]);
@@ -487,44 +486,17 @@ export function RecipesPage() {
       <ParallaxBackground variant="dusk" />
 
       <div className="recipes-content">
-        <header className="recipes-header">
-          <div className="recipes-header-left">
-            <button className="recipes-back-home" onClick={() => navigate('/')}>
-              <svg width="20" height="20" viewBox="0 0 20 20">
-                <path d="M13,4 L7,10 L13,16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <svg width="24" height="24" viewBox="0 0 24 24" className="recipes-brand-icon">
-                <polygon points="12,2 4,20 20,20" fill="none" stroke="var(--ember)" strokeWidth="1.5" />
-                <path d="M9,15 Q11,10 12,8 Q13,10 15,15" fill="var(--ember)" opacity="0.7" />
-              </svg>
-              <span className="recipes-brand-text">Camper</span>
-            </button>
-          </div>
-          <div className="recipes-header-title">
-            <svg width="22" height="22" viewBox="0 0 22 22" className="recipes-header-icon">
+        <AppHeader
+          pageTitle="Camp Provisions"
+          pageIcon={
+            <svg width="22" height="22" viewBox="0 0 22 22">
               <rect x="3" y="4" width="16" height="14" rx="2" fill="none" stroke="var(--ember)" strokeWidth="1.5" />
               <line x1="7" y1="8" x2="15" y2="8" stroke="var(--ember)" strokeWidth="1.2" strokeLinecap="round" opacity="0.8" />
               <line x1="7" y1="11" x2="15" y2="11" stroke="var(--ember)" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
               <line x1="7" y1="14" x2="12" y2="14" stroke="var(--ember)" strokeWidth="1.2" strokeLinecap="round" opacity="0.4" />
             </svg>
-            <span className="recipes-header-label">Camp Provisions</span>
-          </div>
-          <div className="recipes-header-right">
-            <button className="recipes-nav-link" onClick={() => navigate('/ingredients')}>Ingredients</button>
-            <button className="recipes-user-btn" onClick={() => navigate('/account')}>
-              <svg width="26" height="26" viewBox="0 0 26 26">
-                <defs><clipPath id="avatar-clip-recipes"><circle cx="13" cy="13" r="12" /></clipPath></defs>
-                <circle cx="13" cy="13" r="12" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="1.5" />
-                <g clipPath="url(#avatar-clip-recipes)">
-                  <circle cx="13" cy="10" r="4.5" fill="var(--parchment)" />
-                  <ellipse cx="13" cy="22" rx="7" ry="5.5" fill="var(--parchment)" />
-                </g>
-              </svg>
-              <span className="recipes-user-name">{user?.username || user?.email}</span>
-            </button>
-            <button className="recipes-logout" onClick={logout}>Log Out</button>
-          </div>
-        </header>
+          }
+        />
 
         {/* ── List View ── */}
         {view === 'list' && (
