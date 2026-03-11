@@ -14,7 +14,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-md) var(--space-xl) var(--space-md) 60px;
   background: rgba(10, 8, 20, 0.4);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 248, 231, 0.06);

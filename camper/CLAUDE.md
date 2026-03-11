@@ -21,7 +21,10 @@ camper/
 │   ├── itinerary-client/     # JDBI data access for itineraries & itinerary_events tables
 │   ├── assignment-client/    # JDBI data access for assignments & assignment_members tables
 │   ├── invitation-client/    # JDBI data access for invitations table
-│   └── email-client/         # Email sending via Resend SDK (+ NoOp for local dev)
+│   ├── email-client/         # Email sending via Resend SDK (+ NoOp for local dev)
+│   ├── ingredient-client/    # JDBI data access for ingredients table
+│   ├── recipe-client/        # JDBI data access for recipes & recipe_ingredients tables
+│   └── recipe-scraper-client/ # Recipe scraping via Claude API (+ NoOp stub)
 ├── services/
 │   ├── common/               # ApiResponse shared type
 │   └── camper-service/       # Spring Boot REST API

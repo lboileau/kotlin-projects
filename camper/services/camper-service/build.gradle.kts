@@ -16,6 +16,9 @@ dependencies {
     implementation(project(":clients:email-client"))
     implementation(project(":clients:invitation-client"))
     implementation(project(":clients:gear-sync-client"))
+    implementation(project(":clients:ingredient-client"))
+    implementation(project(":clients:recipe-client"))
+    implementation(project(":clients:recipe-scraper-client"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -43,6 +46,9 @@ dependencies {
     testImplementation(testFixtures(project(":clients:email-client")))
     testImplementation(testFixtures(project(":clients:invitation-client")))
     testImplementation(testFixtures(project(":clients:gear-sync-client")))
+    testImplementation(testFixtures(project(":clients:ingredient-client")))
+    testImplementation(testFixtures(project(":clients:recipe-client")))
+    testImplementation(testFixtures(project(":clients:recipe-scraper-client")))
 }
 
 tasks.named<Copy>("processResources") {
