@@ -1,0 +1,180 @@
+/* ── Hamburger Toggle ── */
+.sidenav-toggle {
+  position: fixed;
+  top: 10px;
+  left: 16px;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(30, 25, 40, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 248, 231, 0.12);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: opacity 0.15s ease 0.25s, background 0.2s ease, border-color 0.2s ease;
+}
+
+.sidenav-toggle:hover {
+  background: rgba(30, 25, 40, 0.8);
+  border-color: rgba(255, 248, 231, 0.25);
+}
+
+.sidenav-toggle--hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0s;
+}
+
+.sidenav-toggle__bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--lavender-light);
+  border-radius: 1px;
+  transition: all 0.25s ease;
+  transform-origin: center;
+}
+
+/* ── Side Navigation ── */
+.sidenav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1080;
+  width: 240px;
+  height: 100vh;
+  background: rgba(30, 25, 40, 0.95);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid rgba(255, 248, 231, 0.08);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav--open {
+  transform: translateX(0);
+}
+
+/* ── Header (brand + close) ── */
+.sidenav__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 25px;
+  border-bottom: 1px solid rgba(255, 248, 231, 0.06);
+  margin-bottom: var(--space-md);
+}
+
+.sidenav__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--parchment);
+}
+
+.sidenav__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--lavender-light);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.sidenav__close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Nav List ── */
+.sidenav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidenav__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 10px var(--space-lg);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--lavender-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  border-left: 3px solid transparent;
+}
+
+.sidenav__item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--parchment);
+}
+
+.sidenav__item--active {
+  color: var(--parchment);
+  background: rgba(255, 255, 255, 0.07);
+  border-left-color: var(--ember);
+}
+
+.sidenav__item--nested {
+  padding-left: calc(var(--space-lg) + 26px);
+  font-size: 0.84rem;
+}
+
+.sidenav__icon {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+/* ── Group (e.g. Food) ── */
+.sidenav__group {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav__group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 10px var(--space-lg);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--lavender-light);
+  opacity: 0.5;
+  border-left: 3px solid transparent;
+}
+
+.sidenav__group--active .sidenav__group-label {
+  opacity: 0.7;
+}
+
+.sidenav__sublist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}

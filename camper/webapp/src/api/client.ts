@@ -78,6 +78,105 @@ export interface AssignmentMember {
   createdAt: string;
 }
 
+export interface IngredientResponse {
+  id: string;
+  name: string;
+  category: string;
+  defaultUnit: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateIngredientRequest {
+  name: string;
+  category: string;
+  defaultUnit: string;
+}
+
+export interface UpdateIngredientRequest {
+  name?: string;
+  category?: string;
+  defaultUnit?: string;
+}
+
+export interface RecipeResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  webLink: string | null;
+  baseServings: number;
+  status: string;
+  createdBy: string;
+  duplicateOfId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecipeIngredientResponse {
+  id: string;
+  recipeId: string;
+  ingredient: IngredientResponse | null;
+  originalText: string | null;
+  quantity: number;
+  unit: string;
+  status: string;
+  matchedIngredient: IngredientResponse | null;
+  suggestedIngredientName: string | null;
+  reviewFlags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RecipeDetailResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  webLink: string | null;
+  baseServings: number;
+  status: string;
+  createdBy: string;
+  duplicateOf: RecipeResponse | null;
+  ingredients: RecipeIngredientResponse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateRecipeIngredientRequest {
+  ingredientId: string;
+  quantity: number;
+  unit: string;
+}
+
+export interface CreateRecipeRequest {
+  name: string;
+  description?: string;
+  webLink?: string;
+  baseServings: number;
+  ingredients: CreateRecipeIngredientRequest[];
+}
+
+export interface ImportRecipeRequest {
+  url: string;
+}
+
+export interface UpdateRecipeRequest {
+  name?: string;
+  description?: string;
+  baseServings?: number;
+}
+
+export interface ResolveIngredientRequest {
+  action: string;
+  ingredientId?: string;
+  newIngredient?: CreateIngredientRequest;
+  quantity?: number;
+  unit?: string;
+}
+
+export interface ResolveDuplicateRequest {
+  action: string;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -270,6 +369,98 @@ export const api = {
 
   syncGear(planId: string): Promise<{ items: { name: string; category: string; quantity: number }[] }> {
     return request(`/api/plans/${planId}/gear-sync`, {
+      method: 'POST',
+    });
+  },
+
+  getIngredients(): Promise<IngredientResponse[]> {
+    return request('/api/ingredients');
+  },
+
+  createIngredient(data: CreateIngredientRequest): Promise<IngredientResponse> {
+    return request('/api/ingredients', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteIngredient(id: string): Promise<void> {
+    return request(`/api/ingredients/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  updateIngredient(id: string, data: UpdateIngredientRequest): Promise<IngredientResponse> {
+    return request(`/api/ingredients/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  getRecipes(): Promise<RecipeResponse[]> {
+    return request('/api/recipes');
+  },
+
+  getRecipe(id: string): Promise<RecipeDetailResponse> {
+    return request(`/api/recipes/${id}`);
+  },
+
+  createRecipe(data: CreateRecipeRequest): Promise<RecipeResponse> {
+    return request('/api/recipes', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateRecipe(id: string, data: UpdateRecipeRequest): Promise<RecipeResponse> {
+    return request(`/api/recipes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteRecipe(id: string): Promise<void> {
+    return request(`/api/recipes/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  importRecipe(data: ImportRecipeRequest): Promise<RecipeDetailResponse> {
+    return request('/api/recipes/import', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  addRecipeIngredient(recipeId: string, data: CreateRecipeIngredientRequest): Promise<RecipeIngredientResponse> {
+    return request(`/api/recipes/${recipeId}/ingredients`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  removeRecipeIngredient(recipeId: string, ingredientId: string): Promise<void> {
+    return request(`/api/recipes/${recipeId}/ingredients/${ingredientId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  resolveIngredient(recipeId: string, ingredientId: string, data: ResolveIngredientRequest): Promise<RecipeIngredientResponse> {
+    return request(`/api/recipes/${recipeId}/ingredients/${ingredientId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  resolveDuplicate(recipeId: string, data: ResolveDuplicateRequest): Promise<RecipeResponse | null> {
+    return request(`/api/recipes/${recipeId}/resolve-duplicate`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  publishRecipe(recipeId: string): Promise<RecipeResponse> {
+    return request(`/api/recipes/${recipeId}/publish`, {
       method: 'POST',
     });
   },

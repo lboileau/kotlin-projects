@@ -1,13 +1,13 @@
 # camper-service
 
-API service for camping trip planning — user registration, authentication, plan management, and assignment management.
+API service for camping trip planning — user registration, authentication, plan management, assignment management, and recipe management.
 
 ## Package
 `com.acme.services.camperservice`
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, and `email-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, and `recipe-scraper-client` for data access
 - Database: `camper-db` (port 5433, database `camper_db`)
 - **WebSocket:** STOMP-over-WebSocket at `/ws` for live updates. `PlanEventPublisher` broadcasts `PlanUpdateMessage(resource, action)` to `/topic/plans/{planId}` after successful mutations.
 
@@ -143,6 +143,50 @@ API service for camping trip planning — user registration, authentication, pla
 - **Routes:** (no auth required)
   - `POST /api/webhooks/resend` — Resend delivery webhook (always returns 200 OK)
 
+### Ingredient (`features/recipe/`)
+- **Model:** `Ingredient(id, name, category, defaultUnit, createdAt, updatedAt)` (from ingredient-client)
+- **DTOs:** `CreateIngredientRequest(name, category, defaultUnit)`, `UpdateIngredientRequest(name?, category?, defaultUnit?)`, `IngredientResponse(id, name, category, defaultUnit, createdAt, updatedAt)`
+- **Error:** `RecipeError` sealed class (shared with Recipe) — `Invalid(field, reason)`, `IngredientNotFound(id)`, `DuplicateIngredientName(name)`, `NotFound(id)`, `NotCreator(id, userId)`, etc.
+- **Service params:** `ListIngredientsParam(userId)`, `CreateIngredientParam(userId, name, category, defaultUnit)`, `UpdateIngredientParam(ingredientId, userId, name?, category?, defaultUnit?)`
+- **Actions:**
+  - `ListIngredientsAction`: delegates to `ingredientClient.getAll()`
+  - `CreateIngredientAction`: validates name not blank, checks for duplicate via `findByName`, creates
+  - `UpdateIngredientAction`: delegates to `ingredientClient.update`; maps `NotFoundError` → `IngredientNotFound`
+- **Service:** `IngredientService` facade (takes `IngredientClient`)
+- **Routes:** (all require `X-User-Id` header)
+  - `GET /api/ingredients` — list all ingredients
+  - `POST /api/ingredients` — create ingredient (201)
+  - `PUT /api/ingredients/{id}` — update ingredient
+
+### Recipe (`features/recipe/`)
+- **Models:** `Recipe(id, name, description?, webLink?, baseServings, status, createdBy, duplicateOfId?, createdAt, updatedAt)`, `RecipeIngredient(id, recipeId, ingredientId?, originalText?, quantity, unit, status, matchedIngredientId?, suggestedIngredientName?, reviewFlags, createdAt, updatedAt)` (from recipe-client)
+- **DTOs:**
+  - Requests: `CreateRecipeRequest`, `ImportRecipeRequest(url)`, `UpdateRecipeRequest(name?, description?, baseServings?)`, `ResolveIngredientRequest(action, ingredientId?, newIngredient?)`, `ResolveDuplicateRequest(action)`
+  - Responses: `RecipeResponse`, `RecipeDetailResponse` (with `duplicateOf?` + `ingredients`), `RecipeIngredientResponse`
+- **Error:** `RecipeError` sealed class — `NotFound(id)`, `NotCreator(id, userId)`, `Invalid(field, reason)`, `DuplicateWebLink(url)`, `DuplicateIngredientName(name)`, `UnresolvedIngredients(id, count)`, `UnresolvedDuplicate(id)`, `ImportFailed(url, reason)`, `ScrapeFailed(reason)`, `IngredientNotFound(id)`, `AlreadyPublished(id)`
+- **Service params:** `CreateRecipeParam`, `ImportRecipeParam(userId, url)`, `GetRecipeParam(recipeId, userId)`, `ListRecipesParam(userId)`, `UpdateRecipeParam(recipeId, userId, name?, description?, baseServings?)`, `DeleteRecipeParam(recipeId, userId)`, `ResolveIngredientParam(recipeId, recipeIngredientId, userId, action, ingredientId?, newIngredient?)`, `ResolveDuplicateParam(recipeId, userId, action)`, `PublishRecipeParam(recipeId, userId)`
+- **Actions:**
+  - `CreateRecipeAction`: validates name/servings, checks all ingredientIds exist, creates as `published`
+  - `ImportRecipeAction`: validates URL not blank, checks not duplicate webLink, fetches HTML via `java.net.http.HttpClient`, loads all ingredients, calls `RecipeScraperClient`, detects similar recipes, creates as `draft`, adds ingredients with `pending_review`/`approved` status based on `reviewFlags`
+  - `GetRecipeAction`: fetches recipe + ingredients, enriches with `IngredientResponse` map, resolves `duplicateOf`
+  - `ListRecipesAction`: fetches published recipes + user's own drafts, deduplicates by ID
+  - `UpdateRecipeAction`: checks creator, delegates to `recipeClient.update`
+  - `DeleteRecipeAction`: checks creator, delegates to `recipeClient.delete`
+  - `ResolveIngredientAction`: checks creator; handles `CONFIRM_MATCH` (use matchedIngredientId), `CREATE_NEW` (create ingredient then assign), `SELECT_EXISTING` (validate ingredient exists then assign); updates recipe_ingredient to `approved`
+  - `ResolveDuplicateAction`: checks creator; `NOT_DUPLICATE` clears `duplicate_of_id`; `USE_EXISTING` deletes the recipe (returns null → 204)
+  - `PublishRecipeAction`: checks creator, checks not already published, checks no unresolved duplicate, checks all ingredients approved, updates status to `published`
+- **Service:** `RecipeService` facade (takes `RecipeClient`, `IngredientClient`, `RecipeScraperClient`)
+- **Routes:** (all require `X-User-Id` header)
+  - `POST /api/recipes` — create recipe (201)
+  - `POST /api/recipes/import` — import recipe from URL (201)
+  - `GET /api/recipes` — list recipes (published + own drafts)
+  - `GET /api/recipes/{id}` — get recipe detail
+  - `PUT /api/recipes/{id}` — update recipe (creator only)
+  - `DELETE /api/recipes/{id}` — delete recipe (204, creator only)
+  - `PUT /api/recipes/{id}/ingredients/{ingredientId}` — resolve pending ingredient (creator only)
+  - `PUT /api/recipes/{id}/resolve-duplicate` — resolve duplicate flag (creator only; 204 if USE_EXISTING)
+  - `POST /api/recipes/{id}/publish` — publish recipe (creator only)
+
 ### Invite Email Flow (cross-cutting: Plan + Webhook)
 - When a member is added to a plan, an invitation email is sent via the `EmailClient`
 - **Dedup logic:** If invitation already has status sent/delivered/delayed/complained, skip re-sending
@@ -178,10 +222,15 @@ API service for camping trip planning — user registration, authentication, pla
 - `InvitationClientConfig` — creates invitation client via factory function (`@ConditionalOnMissingBean`)
 - `WebhookConfig` — wires HandleResendWebhookAction
 - `WebSocketConfig` — STOMP endpoint `/ws`, topic broker `/topic`, app prefix `/app`
+- `IngredientClientConfig` — creates ingredient client via factory function
+- `RecipeClientConfig` — creates recipe client via factory function
+- `RecipeScraperClientConfig` — creates NoOp or Claude-backed scraper client based on `ANTHROPIC_API_KEY` env var
+- `IngredientServiceConfig` — wires IngredientService (takes IngredientClient)
+- `RecipeServiceConfig` — wires RecipeService (takes RecipeClient + IngredientClient + RecipeScraperClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `RecipeFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`

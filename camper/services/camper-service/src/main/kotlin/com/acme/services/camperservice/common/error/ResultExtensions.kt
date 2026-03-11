@@ -7,6 +7,7 @@ import com.acme.services.camperservice.features.gearsync.error.GearSyncError
 import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.itinerary.error.ItineraryError
 import com.acme.services.camperservice.features.plan.error.PlanError
+import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.world.error.WorldError
 import org.springframework.http.ResponseEntity
@@ -144,6 +145,40 @@ fun AssignmentError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 
 @JvmName("assignmentResultToResponseEntity")
 fun <T> Result<T, AssignmentError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun RecipeError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is RecipeError.NotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is RecipeError.NotCreator -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is RecipeError.Invalid -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is RecipeError.DuplicateWebLink -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is RecipeError.DuplicateIngredientName -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is RecipeError.UnresolvedIngredients -> ResponseEntity.status(422)
+        .body(ApiResponse.ErrorBody("UNPROCESSABLE_ENTITY", message))
+    is RecipeError.UnresolvedDuplicate -> ResponseEntity.status(422)
+        .body(ApiResponse.ErrorBody("UNPROCESSABLE_ENTITY", message))
+    is RecipeError.ImportFailed -> ResponseEntity.status(422)
+        .body(ApiResponse.ErrorBody("IMPORT_FAILED", message))
+    is RecipeError.ScrapeFailed -> ResponseEntity.status(422)
+        .body(ApiResponse.ErrorBody("SCRAPE_FAILED", message))
+    is RecipeError.IngredientNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is RecipeError.AlreadyPublished -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+}
+
+@JvmName("recipeResultToResponseEntity")
+fun <T> Result<T, RecipeError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
 ): ResponseEntity<Any> = when (this) {

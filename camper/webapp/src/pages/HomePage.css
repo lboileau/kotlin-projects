@@ -9,6 +9,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-top: 56px;
 }
 
 /* Header */
@@ -16,7 +17,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-md) var(--space-xl);
+  padding: var(--space-md) var(--space-xl) var(--space-md) 60px;
   background: rgba(10, 8, 20, 0.3);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 248, 231, 0.08);
@@ -38,6 +39,33 @@
 
 .home-brand-icon {
   filter: drop-shadow(0 0 8px rgba(244, 164, 96, 0.3));
+}
+
+.home-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.home-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 248, 231, 0.12);
+  border-radius: var(--radius-xl);
+  padding: 6px 14px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--lavender-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.home-nav-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 248, 231, 0.25);
+  color: var(--parchment);
 }
 
 .home-user {
