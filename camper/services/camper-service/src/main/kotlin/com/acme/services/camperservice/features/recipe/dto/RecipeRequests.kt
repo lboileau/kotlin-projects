@@ -24,7 +24,9 @@ data class UpdateRecipeRequest(val name: String?, val description: String?, val 
 data class ResolveIngredientRequest(
     val action: String,
     val ingredientId: UUID?,
-    val newIngredient: CreateIngredientRequest?
+    val newIngredient: CreateIngredientRequest?,
+    val quantity: BigDecimal?,
+    val unit: String?
 )
 
 data class ResolveDuplicateRequest(val action: String)

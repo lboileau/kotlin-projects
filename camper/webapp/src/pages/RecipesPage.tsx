@@ -17,7 +17,6 @@ const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces',
 const CATEGORIES = ['produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other'] as const;
 
 type View = 'list' | 'detail' | 'create' | 'edit' | 'import';
-type ResolveMode = 'choose' | 'create_new' | 'select_existing';
 
 interface DraftIngredient {
   ingredientId: string;
@@ -50,6 +49,7 @@ export function RecipesPage() {
   const [pendingIngredient, setPendingIngredient] = useState<IngredientResponse | null>(null);
   const [pendingQty, setPendingQty] = useState<number>(1);
   const [pendingUnit, setPendingUnit] = useState<string>('pieces');
+  const [categorySearch, setCategorySearch] = useState('');
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -65,20 +65,33 @@ export function RecipesPage() {
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState('');
 
-  // Review / resolve state
-  const [resolvingIngredientId, setResolvingIngredientId] = useState<string | null>(null);
-  const [resolveMode, setResolveMode] = useState<ResolveMode>('choose');
+  // Ingredient resolve modal state
+  const [resolveModalIngredient, setResolveModalIngredient] = useState<RecipeDetailResponse['ingredients'][0] | null>(null);
+  const [resolveSelectedId, setResolveSelectedId] = useState<string | null>(null);
+  const [resolveSearchQuery, setResolveSearchQuery] = useState('');
+  const [resolveCreateMode, setResolveCreateMode] = useState(false);
   const [newIngName, setNewIngName] = useState('');
   const [newIngCategory, setNewIngCategory] = useState<string>('produce');
   const [newIngUnit, setNewIngUnit] = useState<string>('pieces');
-  const [resolveSelectSearch, setResolveSelectSearch] = useState('');
-  const [resolveSelectOpen, setResolveSelectOpen] = useState(false);
+  const [resolveQty, setResolveQty] = useState<number>(1);
+  const [resolveUnit, setResolveUnit] = useState<string>('pieces');
   const [resolving, setResolving] = useState(false);
   const [resolveError, setResolveError] = useState('');
   const [publishing, setPublishing] = useState(false);
 
   // Delete confirmation
   const [deletingRecipe, setDeletingRecipe] = useState<RecipeDetailResponse | null>(null);
+
+  // Add ingredient (detail view)
+  const [addIngredientOpen, setAddIngredientOpen] = useState(false);
+  const [addIngredientSearch, setAddIngredientSearch] = useState('');
+  const [addCreateMode, setAddCreateMode] = useState(false);
+  const [addNewName, setAddNewName] = useState('');
+  const [addNewCategory, setAddNewCategory] = useState<string>('produce');
+  const [addNewUnit, setAddNewUnit] = useState<string>('pieces');
+  const [addNewQty, setAddNewQty] = useState<number>(1);
+  const [addCreating, setAddCreating] = useState(false);
+  const [addError, setAddError] = useState('');
 
   useEffect(() => {
     Promise.all([api.getRecipes(), api.getIngredients()])
@@ -96,8 +109,7 @@ export function RecipesPage() {
     try {
       const detail = await api.getRecipe(recipe.id);
       setSelectedRecipe(detail);
-      setResolvingIngredientId(null);
-      setResolveMode('choose');
+      setResolveModalIngredient(null);
       setResolveError('');
       setView('detail');
     } catch {
@@ -133,22 +145,25 @@ export function RecipesPage() {
     setView('import');
   };
 
-  const handleAddDraftIngredient = () => {
-    if (!pendingIngredient) return;
-    if (draftIngredients.some(d => d.ingredientId === pendingIngredient.id)) {
+  const handleAddDraftIngredient = (ing?: IngredientResponse) => {
+    const ingredient = ing ?? pendingIngredient;
+    if (!ingredient) return;
+    if (draftIngredients.some(d => d.ingredientId === ingredient.id)) {
       setCreateError('That ingredient is already added');
       return;
     }
     setDraftIngredients(prev => [...prev, {
-      ingredientId: pendingIngredient.id,
-      ingredientName: pendingIngredient.name,
-      quantity: pendingQty,
-      unit: pendingUnit,
+      ingredientId: ingredient.id,
+      ingredientName: ingredient.name,
+      quantity: ing ? 1 : pendingQty,
+      unit: ing ? ingredient.defaultUnit : pendingUnit,
     }]);
-    setPendingIngredient(null);
-    setIngredientSearch('');
-    setPendingQty(1);
-    setPendingUnit('pieces');
+    if (!ing) {
+      setPendingIngredient(null);
+      setIngredientSearch('');
+      setPendingQty(1);
+      setPendingUnit('pieces');
+    }
     setCreateError('');
   };
 
@@ -205,8 +220,7 @@ export function RecipesPage() {
       };
       setRecipes(prev => [recipeEntry, ...prev]);
       setSelectedRecipe(detail);
-      setResolvingIngredientId(null);
-      setResolveMode('choose');
+      setResolveModalIngredient(null);
       setResolveError('');
       setView('detail');
     } catch (err) {
@@ -282,30 +296,53 @@ export function RecipesPage() {
     setRecipes(prev => prev.map(r => r.id === entry.id ? entry : r));
   };
 
-  const handleStartResolve = (ingredientId: string, suggestedName: string, defaultUnit: string) => {
-    setResolvingIngredientId(ingredientId);
-    setResolveMode('choose');
-    setNewIngName(suggestedName);
+  const openResolveModal = (ri: RecipeDetailResponse['ingredients'][0]) => {
+    setResolveModalIngredient(ri);
+    setResolveSelectedId(ri.matchedIngredient?.id ?? ri.ingredient?.id ?? null);
+    setResolveSearchQuery('');
+    setResolveCreateMode(false);
+    setNewIngName(ri.suggestedIngredientName ?? '');
     setNewIngCategory('produce');
-    setNewIngUnit(defaultUnit);
-    setResolveSelectSearch('');
+    setNewIngUnit(ri.matchedIngredient?.defaultUnit ?? ri.ingredient?.defaultUnit ?? 'pieces');
+    setResolveQty(ri.quantity);
+    setResolveUnit(ri.unit);
     setResolveError('');
   };
 
-  const handleCancelResolve = () => {
-    setResolvingIngredientId(null);
-    setResolveMode('choose');
+  const closeResolveModal = () => {
+    setResolveModalIngredient(null);
     setResolveError('');
   };
 
-  const handleResolveConfirm = async (ingredientId: string) => {
-    if (!selectedRecipe) return;
+  const handleResolveSave = async () => {
+    if (!selectedRecipe || !resolveModalIngredient) return;
     setResolving(true);
     setResolveError('');
     try {
-      await api.resolveIngredient(selectedRecipe.id, ingredientId, { action: 'CONFIRM_MATCH' });
+      if (resolveCreateMode) {
+        if (!newIngName.trim()) { setResolveError('Ingredient name is required'); setResolving(false); return; }
+        const newIngredient: CreateIngredientRequest = {
+          name: newIngName.trim(),
+          category: newIngCategory,
+          defaultUnit: newIngUnit,
+        };
+        await api.resolveIngredient(selectedRecipe.id, resolveModalIngredient.id, { action: 'CREATE_NEW', newIngredient, quantity: resolveQty, unit: resolveUnit });
+        const updatedIngredients = await api.getIngredients();
+        setIngredients(updatedIngredients);
+      } else if (resolveSelectedId) {
+        // Is this the matched ingredient? Use CONFIRM_MATCH. Otherwise SELECT_EXISTING.
+        if (resolveSelectedId === resolveModalIngredient.matchedIngredient?.id) {
+          await api.resolveIngredient(selectedRecipe.id, resolveModalIngredient.id, { action: 'CONFIRM_MATCH', quantity: resolveQty, unit: resolveUnit });
+        } else {
+          await api.resolveIngredient(selectedRecipe.id, resolveModalIngredient.id, { action: 'SELECT_EXISTING', ingredientId: resolveSelectedId, quantity: resolveQty, unit: resolveUnit });
+        }
+      } else {
+        setResolveError('Select an ingredient or create a new one');
+        setResolving(false);
+        return;
+      }
       await refreshDetail(selectedRecipe.id);
-      setResolvingIngredientId(null);
+      closeResolveModal();
     } catch (err) {
       setResolveError(err instanceof Error ? err.message : 'Failed to resolve ingredient');
     } finally {
@@ -313,43 +350,60 @@ export function RecipesPage() {
     }
   };
 
-  const handleResolveCreateNew = async (ingredientId: string) => {
+  const handleRemoveIngredient = async (recipeIngredientId?: string) => {
     if (!selectedRecipe) return;
-    if (!newIngName.trim()) { setResolveError('Ingredient name is required'); return; }
+    const targetId = recipeIngredientId || resolveModalIngredient?.id;
+    if (!targetId) return;
     setResolving(true);
     setResolveError('');
-    const newIngredient: CreateIngredientRequest = {
-      name: newIngName.trim(),
-      category: newIngCategory,
-      defaultUnit: newIngUnit,
-    };
     try {
-      await api.resolveIngredient(selectedRecipe.id, ingredientId, { action: 'CREATE_NEW', newIngredient });
-      const newIng = await api.getIngredients();
-      setIngredients(newIng);
+      await api.removeRecipeIngredient(selectedRecipe.id, targetId);
       await refreshDetail(selectedRecipe.id);
-      setResolvingIngredientId(null);
-      setResolveMode('choose');
+      if (resolveModalIngredient) closeResolveModal();
     } catch (err) {
-      setResolveError(err instanceof Error ? err.message : 'Failed to create ingredient');
+      setResolveError(err instanceof Error ? err.message : 'Failed to remove ingredient');
     } finally {
       setResolving(false);
     }
   };
 
-  const handleResolveSelectExisting = async (ingredientId: string, existingId: string) => {
+  const handleAddIngredientToRecipe = async (ing: IngredientResponse) => {
     if (!selectedRecipe) return;
-    setResolving(true);
-    setResolveError('');
+    setAddError('');
     try {
-      await api.resolveIngredient(selectedRecipe.id, ingredientId, { action: 'SELECT_EXISTING', ingredientId: existingId });
+      await api.addRecipeIngredient(selectedRecipe.id, {
+        ingredientId: ing.id,
+        quantity: 1,
+        unit: ing.defaultUnit,
+      });
       await refreshDetail(selectedRecipe.id);
-      setResolvingIngredientId(null);
-      setResolveMode('choose');
     } catch (err) {
-      setResolveError(err instanceof Error ? err.message : 'Failed to link ingredient');
+      setAddError(err instanceof Error ? err.message : 'Failed to add ingredient');
+    }
+  };
+
+  const handleCreateAndAddIngredient = async () => {
+    if (!selectedRecipe || !addNewName.trim()) return;
+    setAddCreating(true);
+    setAddError('');
+    try {
+      const newIng = await api.createIngredient({ name: addNewName.trim(), category: addNewCategory, defaultUnit: addNewUnit });
+      setIngredients(prev => [...prev, newIng]);
+      await api.addRecipeIngredient(selectedRecipe.id, {
+        ingredientId: newIng.id,
+        quantity: addNewQty,
+        unit: addNewUnit,
+      });
+      await refreshDetail(selectedRecipe.id);
+      setAddCreateMode(false);
+      setAddNewName('');
+      setAddNewCategory('produce');
+      setAddNewUnit('pieces');
+      setAddNewQty(1);
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : 'Failed to create ingredient');
     } finally {
-      setResolving(false);
+      setAddCreating(false);
     }
   };
 
@@ -392,15 +446,35 @@ export function RecipesPage() {
     i.name.toLowerCase().includes(ingredientSearch.toLowerCase())
   );
 
+  // Group ingredients by category for the pill picker
+  const ingredientsByCategory = CATEGORIES.reduce((acc, cat) => {
+    const items = ingredients.filter(i =>
+      i.category === cat &&
+      (!categorySearch || i.name.toLowerCase().includes(categorySearch.toLowerCase())) &&
+      !draftIngredients.some(d => d.ingredientId === i.id)
+    );
+    if (items.length > 0) acc.push({ category: cat, items });
+    return acc;
+  }, [] as { category: string; items: IngredientResponse[] }[]);
+
   const filteredRecipes = recipes.filter(r =>
     r.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const resolveSelectFiltered = ingredients.filter(i =>
-    i.name.toLowerCase().includes(resolveSelectSearch.toLowerCase())
-  );
-
   const pendingCount = selectedRecipe?.ingredients.filter(i => i.status === 'pending_review').length ?? 0;
+
+  // For the resolve modal: suggested matches and search results
+  const resolveModalSuggestions = resolveModalIngredient
+    ? [resolveModalIngredient.matchedIngredient, resolveModalIngredient.ingredient]
+        .filter((x): x is IngredientResponse => x != null && x.id !== undefined)
+        .filter((x, i, arr) => arr.findIndex(a => a.id === x.id) === i)
+    : [];
+  const resolveSearchResults = resolveSearchQuery.length > 0
+    ? ingredients.filter(i => i.name.toLowerCase().includes(resolveSearchQuery.toLowerCase()) && !resolveModalSuggestions.some(s => s.id === i.id))
+    : [];
+  const resolvePreviewIngredient = resolveCreateMode
+    ? null
+    : ingredients.find(i => i.id === resolveSelectedId) ?? resolveModalSuggestions.find(s => s.id === resolveSelectedId) ?? null;
   const canPublish = selectedRecipe?.status === 'draft'
     && selectedRecipe.createdBy === user?.id
     && pendingCount === 0
@@ -436,6 +510,7 @@ export function RecipesPage() {
             <span className="recipes-header-label">Camp Provisions</span>
           </div>
           <div className="recipes-header-right">
+            <button className="recipes-nav-link" onClick={() => navigate('/ingredients')}>Ingredients</button>
             <button className="recipes-user-btn" onClick={() => navigate('/account')}>
               <svg width="26" height="26" viewBox="0 0 26 26">
                 <defs><clipPath id="avatar-clip-recipes"><circle cx="13" cy="13" r="12" /></clipPath></defs>
@@ -687,13 +762,14 @@ export function RecipesPage() {
                 ) : (
                   <ul className="recipe-detail__ingredient-list">
                     {selectedRecipe.ingredients.map(ri => {
-                      const isResolving = resolvingIngredientId === ri.id;
-                      const displayName = ri.ingredient?.name ?? ri.suggestedIngredientName ?? ri.originalText ?? '—';
+                      const globalName = ri.ingredient?.name;
+                      const displayName = globalName ?? ri.suggestedIngredientName ?? ri.originalText ?? '—';
+                      const isPending = ri.status === 'pending_review';
                       return (
-                        <li key={ri.id} className={`recipe-detail__ingredient ${ri.status === 'pending_review' ? 'recipe-detail__ingredient--pending' : ''}`}>
+                        <li key={ri.id} className={`recipe-detail__ingredient ${isPending ? 'recipe-detail__ingredient--pending' : ''}`}>
                           <div className="recipe-detail__ingredient-row">
                             <span className="recipe-detail__ingredient-status-icon">
-                              {ri.status === 'approved' ? (
+                              {!isPending ? (
                                 <svg width="14" height="14" viewBox="0 0 14 14">
                                   <circle cx="7" cy="7" r="6" fill="none" stroke="var(--sage-deep)" strokeWidth="1.3" />
                                   <path d="M4,7 L6,9 L10,5" fill="none" stroke="var(--sage-deep)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
@@ -710,172 +786,325 @@ export function RecipesPage() {
                               {ri.quantity % 1 === 0 ? ri.quantity : ri.quantity.toFixed(2)} {ri.unit}
                             </span>
                             <span className="recipe-detail__ingredient-name">{displayName}</span>
-                            {ri.status === 'pending_review' && isCreator && !isResolving && (
-                              <button
-                                className="review-resolve-btn"
-                                onClick={() => handleStartResolve(
-                                  ri.id,
-                                  ri.suggestedIngredientName ?? displayName,
-                                  ri.matchedIngredient?.defaultUnit ?? 'pieces'
-                                )}
-                              >
-                                Resolve
-                              </button>
-                            )}
-                            {ri.status === 'pending_review' && !isCreator && (
-                              <span className="recipe-detail__ingredient-flag">needs review</span>
-                            )}
+                            <span className="recipe-detail__ingredient-category">
+                              {ri.ingredient?.category ?? ri.matchedIngredient?.category ?? ''}
+                            </span>
+                            <span className="recipe-detail__ingredient-source">
+                              {globalName && ri.originalText && ri.originalText !== globalName
+                                ? `"${ri.originalText}"`
+                                : ''}
+                            </span>
+                            <span className="recipe-detail__ingredient-action">
+                              {isPending && !isCreator && (
+                                <span className="recipe-detail__ingredient-flag">needs review</span>
+                              )}
+                              {isCreator && (
+                                <>
+                                  <button
+                                    className={isPending ? 'review-resolve-btn' : 'review-edit-btn'}
+                                    onClick={() => openResolveModal(ri)}
+                                  >
+                                    {isPending ? 'Resolve' : 'Edit'}
+                                  </button>
+                                  <button
+                                    className="review-remove-btn"
+                                    onClick={() => handleRemoveIngredient(ri.id)}
+                                  >
+                                    ✕
+                                  </button>
+                                </>
+                              )}
+                            </span>
                           </div>
-
-                          {/* Inline resolution panel */}
-                          {isResolving && (
-                            <div className="review-panel">
-                              {ri.originalText && (
-                                <p className="review-panel__original">
-                                  <span className="review-panel__original-label">Original:</span>
-                                  "{ri.originalText}"
-                                </p>
-                              )}
-
-                              {resolveMode === 'choose' && (
-                                <div className="review-panel__actions">
-                                  {ri.matchedIngredient && (
-                                    <button
-                                      className="review-btn review-btn--confirm"
-                                      disabled={resolving}
-                                      onClick={() => handleResolveConfirm(ri.id)}
-                                    >
-                                      <svg width="13" height="13" viewBox="0 0 13 13">
-                                        <circle cx="6.5" cy="6.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
-                                        <path d="M3.5,6.5 L5.5,8.5 L9.5,4.5" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                                      </svg>
-                                      Confirm "{ri.matchedIngredient.name}"
-                                    </button>
-                                  )}
-                                  <button
-                                    className="review-btn review-btn--secondary"
-                                    disabled={resolving}
-                                    onClick={() => { setResolveMode('select_existing'); setResolveSelectSearch(''); }}
-                                  >
-                                    Select existing
-                                  </button>
-                                  <button
-                                    className="review-btn review-btn--secondary"
-                                    disabled={resolving}
-                                    onClick={() => setResolveMode('create_new')}
-                                  >
-                                    Create new
-                                  </button>
-                                  <button
-                                    className="review-btn review-btn--cancel"
-                                    onClick={handleCancelResolve}
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              )}
-
-                              {resolveMode === 'select_existing' && (
-                                <div className="review-panel__select">
-                                  <p className="review-panel__mode-label">Select from existing ingredients:</p>
-                                  <div className="recipes-ingredient-search-wrap">
-                                    <input
-                                      className="recipes-input"
-                                      placeholder="Search ingredients..."
-                                      value={resolveSelectSearch}
-                                      autoFocus
-                                      onChange={e => setResolveSelectSearch(e.target.value)}
-                                      onFocus={() => setResolveSelectOpen(true)}
-                                      onBlur={() => setTimeout(() => setResolveSelectOpen(false), 150)}
-                                    />
-                                    {resolveSelectOpen && resolveSelectSearch.length > 0 && resolveSelectFiltered.length > 0 && (
-                                      <ul className="recipes-ingredient-dropdown">
-                                        {resolveSelectFiltered.slice(0, 8).map(ing => (
-                                          <li
-                                            key={ing.id}
-                                            className="recipes-ingredient-option"
-                                            onMouseDown={() => handleResolveSelectExisting(ri.id, ing.id)}
-                                          >
-                                            <span className="recipes-ingredient-option__name">{ing.name}</span>
-                                            <span className="recipes-ingredient-option__cat">{ing.category}</span>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    )}
-                                  </div>
-                                  <button className="review-btn review-btn--cancel" onClick={() => setResolveMode('choose')}>
-                                    ← Back
-                                  </button>
-                                </div>
-                              )}
-
-                              {resolveMode === 'create_new' && (
-                                <div className="review-panel__create">
-                                  <p className="review-panel__mode-label">Create a new ingredient:</p>
-                                  <div className="review-panel__create-fields">
-                                    <div className="recipes-field">
-                                      <label className="recipes-label">Name</label>
-                                      <input
-                                        className="recipes-input"
-                                        value={newIngName}
-                                        onChange={e => setNewIngName(e.target.value)}
-                                        autoFocus
-                                      />
-                                    </div>
-                                    <div className="review-panel__create-row">
-                                      <div className="recipes-field">
-                                        <label className="recipes-label">Category</label>
-                                        <select
-                                          className="recipes-input recipes-select"
-                                          value={newIngCategory}
-                                          onChange={e => setNewIngCategory(e.target.value)}
-                                        >
-                                          {CATEGORIES.map(c => (
-                                            <option key={c} value={c}>{c}</option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                      <div className="recipes-field">
-                                        <label className="recipes-label">Default unit</label>
-                                        <select
-                                          className="recipes-input recipes-select"
-                                          value={newIngUnit}
-                                          onChange={e => setNewIngUnit(e.target.value)}
-                                        >
-                                          {UNITS.map(u => (
-                                            <option key={u} value={u}>{u}</option>
-                                          ))}
-                                        </select>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="review-panel__create-actions">
-                                    <button className="review-btn review-btn--cancel" onClick={() => setResolveMode('choose')}>
-                                      ← Back
-                                    </button>
-                                    <button
-                                      className="review-btn review-btn--confirm"
-                                      disabled={resolving || !newIngName.trim()}
-                                      onClick={() => handleResolveCreateNew(ri.id)}
-                                    >
-                                      {resolving ? 'Creating...' : 'Create & Link'}
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
-
-                              {resolveError && <p className="review-panel__error">{resolveError}</p>}
-                            </div>
-                          )}
                         </li>
                       );
                     })}
                   </ul>
                 )}
 
-                {/* Global resolve error (shown when not in ingredient resolve mode) */}
-                {resolveError && !resolvingIngredientId && (
+                {isCreator && (
+                  <div className="recipe-detail__add-ingredient">
+                    {!addIngredientOpen ? (
+                      <button
+                        className="recipe-detail__add-btn"
+                        onClick={() => { setAddIngredientOpen(true); setAddIngredientSearch(''); setAddCreateMode(false); setAddError(''); }}
+                      >
+                        + Add Ingredient
+                      </button>
+                    ) : (
+                      <div className="recipe-detail__add-picker">
+                        <div className="recipe-detail__add-picker-header">
+                          <input
+                            type="text"
+                            className="recipes-input"
+                            placeholder="Search ingredients..."
+                            value={addIngredientSearch}
+                            onChange={e => setAddIngredientSearch(e.target.value)}
+                            autoFocus
+                          />
+                          <button className="recipe-detail__add-close" onClick={() => setAddIngredientOpen(false)}>✕</button>
+                        </div>
+                        {addError && <p className="recipes-form-error" style={{ marginBottom: 'var(--space-sm)' }}>{addError}</p>}
+
+                        {!addCreateMode ? (
+                          <>
+                            <div className="recipe-detail__add-categories">
+                              {Object.entries(
+                                ingredients
+                                  .filter(ing => {
+                                    const q = addIngredientSearch.toLowerCase();
+                                    return !q || ing.name.toLowerCase().includes(q) || ing.category.toLowerCase().includes(q);
+                                  })
+                                  .reduce<Record<string, IngredientResponse[]>>((acc, ing) => {
+                                    (acc[ing.category] = acc[ing.category] || []).push(ing);
+                                    return acc;
+                                  }, {})
+                              )
+                                .sort(([a], [b]) => a.localeCompare(b))
+                                .map(([cat, ings]) => (
+                                  <div key={cat} className="recipe-detail__add-category-group">
+                                    <span className="recipe-detail__add-category-label">{cat}</span>
+                                    <div className="recipe-detail__add-pills">
+                                      {ings.sort((a, b) => a.name.localeCompare(b.name)).map(ing => (
+                                        <button
+                                          key={ing.id}
+                                          className="ingredient-pill"
+                                          onClick={() => handleAddIngredientToRecipe(ing)}
+                                        >
+                                          {ing.name}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                            </div>
+                            <button
+                              className="recipe-detail__add-create-btn"
+                              onClick={() => { setAddCreateMode(true); setAddNewName(addIngredientSearch); }}
+                            >
+                              + Create new ingredient
+                            </button>
+                          </>
+                        ) : (
+                          <div className="recipe-detail__add-create-form">
+                            <div className="recipe-detail__add-create-row">
+                              <input
+                                type="text"
+                                className="recipes-input"
+                                placeholder="Ingredient name"
+                                value={addNewName}
+                                onChange={e => setAddNewName(e.target.value)}
+                                autoFocus
+                              />
+                            </div>
+                            <div className="recipe-detail__add-create-row">
+                              <select className="recipes-select" value={addNewCategory} onChange={e => setAddNewCategory(e.target.value)}>
+                                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                              </select>
+                              <input
+                                type="number"
+                                className="recipes-input recipes-input--qty"
+                                placeholder="Qty"
+                                value={addNewQty}
+                                onChange={e => setAddNewQty(Number(e.target.value) || 0)}
+                                min={0}
+                                step="any"
+                              />
+                              <select className="recipes-select" value={addNewUnit} onChange={e => setAddNewUnit(e.target.value)}>
+                                {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                              </select>
+                            </div>
+                            <div className="recipe-detail__add-create-actions">
+                              <button className="recipe-detail__add-create-cancel" onClick={() => setAddCreateMode(false)}>Cancel</button>
+                              <button
+                                className="recipe-detail__add-create-save"
+                                onClick={handleCreateAndAddIngredient}
+                                disabled={addCreating || !addNewName.trim()}
+                              >
+                                {addCreating ? 'Creating...' : 'Create & Add'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {resolveError && !resolveModalIngredient && (
                   <p className="recipes-form-error" style={{ marginTop: 'var(--space-sm)' }}>{resolveError}</p>
+                )}
+
+                {/* ── Ingredient Resolve Modal ── */}
+                {resolveModalIngredient && (
+                  <div className="modal-overlay" onClick={closeResolveModal}>
+                    <div className="resolve-modal" onClick={e => e.stopPropagation()}>
+                      <h2 className="resolve-modal__title">Link Ingredient</h2>
+
+                      {/* Source text */}
+                      {resolveModalIngredient.originalText && (
+                        <div className="resolve-modal__source">
+                          <span className="resolve-modal__source-label">From the recipe:</span>
+                          <span className="resolve-modal__source-text">"{resolveModalIngredient.originalText}"</span>
+                        </div>
+                      )}
+
+                      {/* Suggested matches */}
+                      {!resolveCreateMode && (
+                        <div className="resolve-modal__section">
+                          <h3 className="resolve-modal__section-title">We think this might be one of these ingredients</h3>
+                          {resolveModalSuggestions.length > 0 ? (
+                            <div className="resolve-modal__suggestions">
+                              {resolveModalSuggestions.map(ing => (
+                                <button
+                                  key={ing.id}
+                                  className={`resolve-modal__suggestion ${resolveSelectedId === ing.id ? 'resolve-modal__suggestion--selected' : ''}`}
+                                  onClick={() => { setResolveSelectedId(ing.id); setResolveCreateMode(false); }}
+                                >
+                                  <span className="resolve-modal__suggestion-name">{ing.name}</span>
+                                  <span className="resolve-modal__suggestion-meta">{ing.category} &middot; {ing.defaultUnit}</span>
+                                </button>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="resolve-modal__no-suggestions">No suggested ingredients — search below or create a new one.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Search existing */}
+                      {!resolveCreateMode && (
+                        <div className="resolve-modal__section">
+                          <h3 className="resolve-modal__section-title">Search for other ingredients</h3>
+                          <input
+                            className="resolve-modal__search"
+                            placeholder="Type to search..."
+                            value={resolveSearchQuery}
+                            onChange={e => setResolveSearchQuery(e.target.value)}
+                          />
+                          {resolveSearchResults.length > 0 && (
+                            <div className="resolve-modal__search-results">
+                              {resolveSearchResults.slice(0, 8).map(ing => (
+                                <button
+                                  key={ing.id}
+                                  className={`resolve-modal__suggestion ${resolveSelectedId === ing.id ? 'resolve-modal__suggestion--selected' : ''}`}
+                                  onClick={() => { setResolveSelectedId(ing.id); setResolveCreateMode(false); }}
+                                >
+                                  <span className="resolve-modal__suggestion-name">{ing.name}</span>
+                                  <span className="resolve-modal__suggestion-meta">{ing.category} &middot; {ing.defaultUnit}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Create new ingredient */}
+                      <div className="resolve-modal__section">
+                        {!resolveCreateMode ? (
+                          <button
+                            className="resolve-modal__create-toggle"
+                            onClick={() => { setResolveCreateMode(true); setResolveSelectedId(null); }}
+                          >
+                            + Create a new ingredient
+                          </button>
+                        ) : (
+                          <div className="resolve-modal__create-form">
+                            <h3 className="resolve-modal__section-title">Create new ingredient</h3>
+                            <div className="resolve-modal__create-fields">
+                              <div className="recipes-field">
+                                <label className="recipes-label">Name</label>
+                                <input
+                                  className="recipes-input"
+                                  value={newIngName}
+                                  onChange={e => setNewIngName(e.target.value)}
+                                  autoFocus
+                                />
+                              </div>
+                              <div className="resolve-modal__create-row">
+                                <div className="recipes-field">
+                                  <label className="recipes-label">Category</label>
+                                  <select className="recipes-input recipes-select" value={newIngCategory} onChange={e => setNewIngCategory(e.target.value)}>
+                                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                  </select>
+                                </div>
+                                <div className="recipes-field">
+                                  <label className="recipes-label">Default unit</label>
+                                  <select className="recipes-input recipes-select" value={newIngUnit} onChange={e => setNewIngUnit(e.target.value)}>
+                                    {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              className="resolve-modal__create-back"
+                              onClick={() => setResolveCreateMode(false)}
+                            >
+                              ← Back to search
+                            </button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Quantity & Unit */}
+                      <div className="resolve-modal__qty-row">
+                        <label className="resolve-modal__qty-label">Quantity & Unit</label>
+                        <div className="resolve-modal__qty-inputs">
+                          <input
+                            type="number"
+                            className="resolve-modal__qty-input"
+                            value={resolveQty}
+                            onChange={e => setResolveQty(Number(e.target.value) || 0)}
+                            min={0}
+                            step="any"
+                          />
+                          <select
+                            className="resolve-modal__unit-select"
+                            value={resolveUnit}
+                            onChange={e => setResolveUnit(e.target.value)}
+                          >
+                            {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Preview summary */}
+                      <div className="resolve-modal__preview">
+                        {resolveCreateMode && newIngName.trim() ? (
+                          <p>Will create <strong>{newIngName.trim()}</strong> ({newIngCategory}, {newIngUnit}) and link this ingredient to it.</p>
+                        ) : resolvePreviewIngredient ? (
+                          <p>Updating ingredient to <strong>{resolveQty % 1 === 0 ? resolveQty : resolveQty.toFixed(2)} {resolveUnit} {resolvePreviewIngredient.name}</strong></p>
+                        ) : (
+                          <p className="resolve-modal__preview--empty">Select an ingredient or create a new one</p>
+                        )}
+                      </div>
+
+                      {resolveError && <p className="resolve-modal__error">{resolveError}</p>}
+
+                      {/* Actions */}
+                      <div className="resolve-modal__actions">
+                        <button
+                          className="modal-btn modal-btn--danger resolve-modal__remove-btn"
+                          onClick={handleRemoveIngredient}
+                          disabled={resolving}
+                        >
+                          Remove from recipe
+                        </button>
+                        <div className="resolve-modal__actions-right">
+                          <button className="modal-btn modal-btn--secondary" onClick={closeResolveModal} disabled={resolving}>
+                            Cancel
+                          </button>
+                          <button
+                            className="modal-btn"
+                            disabled={resolving || (!resolveSelectedId && !(resolveCreateMode && newIngName.trim()))}
+                            onClick={handleResolveSave}
+                          >
+                            {resolving ? 'Saving...' : 'Save'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
 
@@ -1038,11 +1267,32 @@ export function RecipesPage() {
                 <div className="recipes-form-section">
                   <h3 className="recipes-form-section-title">Ingredients</h3>
 
+                  {/* Added ingredients with editable qty/unit */}
                   {draftIngredients.length > 0 && (
                     <ul className="recipes-draft-ingredients">
                       {draftIngredients.map(d => (
                         <li key={d.ingredientId} className="recipes-draft-ingredient">
-                          <span className="recipes-draft-ingredient__qty">{d.quantity % 1 === 0 ? d.quantity : d.quantity.toFixed(2)} {d.unit}</span>
+                          <input
+                            className="recipes-input recipes-input--inline-qty"
+                            type="number"
+                            min={0.01}
+                            step={0.01}
+                            value={d.quantity}
+                            onChange={e => setDraftIngredients(prev => prev.map(x =>
+                              x.ingredientId === d.ingredientId ? { ...x, quantity: Number(e.target.value) } : x
+                            ))}
+                          />
+                          <select
+                            className="recipes-input recipes-select--inline"
+                            value={d.unit}
+                            onChange={e => setDraftIngredients(prev => prev.map(x =>
+                              x.ingredientId === d.ingredientId ? { ...x, unit: e.target.value } : x
+                            ))}
+                          >
+                            {UNITS.map(u => (
+                              <option key={u} value={u}>{u}</option>
+                            ))}
+                          </select>
                           <span className="recipes-draft-ingredient__name">{d.ingredientName}</span>
                           <button
                             type="button"
@@ -1054,69 +1304,50 @@ export function RecipesPage() {
                     </ul>
                   )}
 
-                  <div className="recipes-add-ingredient">
-                    <div className="recipes-ingredient-search-wrap">
+                  {/* Ingredient pill picker */}
+                  <div className="ingredient-picker">
+                    <div className="ingredient-picker__search-wrap">
+                      <svg width="14" height="14" viewBox="0 0 14 14" className="ingredient-picker__search-icon">
+                        <circle cx="5.5" cy="5.5" r="4" fill="none" stroke="currentColor" strokeWidth="1.3" />
+                        <line x1="8.5" y1="8.5" x2="12" y2="12" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                      </svg>
                       <input
-                        className="recipes-input"
-                        placeholder="Search ingredients..."
-                        value={ingredientSearch}
-                        onFocus={() => setIngredientSearchOpen(true)}
-                        onBlur={() => setTimeout(() => setIngredientSearchOpen(false), 150)}
-                        onChange={e => {
-                          setIngredientSearch(e.target.value);
-                          setPendingIngredient(null);
-                        }}
+                        className="ingredient-picker__search"
+                        placeholder="Filter ingredients..."
+                        value={categorySearch}
+                        onChange={e => setCategorySearch(e.target.value)}
                       />
-                      {ingredientSearchOpen && ingredientSearch.length > 0 && filteredIngredients.length > 0 && !pendingIngredient && (
-                        <ul className="recipes-ingredient-dropdown">
-                          {filteredIngredients.slice(0, 8).map(ing => (
-                            <li
-                              key={ing.id}
-                              className="recipes-ingredient-option"
-                              onMouseDown={() => {
-                                setPendingIngredient(ing);
-                                setIngredientSearch(ing.name);
-                                setPendingUnit(ing.defaultUnit);
-                                setIngredientSearchOpen(false);
-                              }}
-                            >
-                              <span className="recipes-ingredient-option__name">{ing.name}</span>
-                              <span className="recipes-ingredient-option__cat">{ing.category}</span>
-                            </li>
-                          ))}
-                        </ul>
+                      {categorySearch && (
+                        <button type="button" className="ingredient-picker__clear" onClick={() => setCategorySearch('')}>×</button>
                       )}
                     </div>
 
-                    {pendingIngredient && (
-                      <div className="recipes-ingredient-qty-row">
-                        <input
-                          className="recipes-input recipes-input--qty"
-                          type="number"
-                          min={0.01}
-                          step={0.01}
-                          value={pendingQty}
-                          onChange={e => setPendingQty(Number(e.target.value))}
-                          placeholder="Qty"
-                        />
-                        <select
-                          className="recipes-input recipes-select"
-                          value={pendingUnit}
-                          onChange={e => setPendingUnit(e.target.value)}
-                        >
-                          {UNITS.map(u => (
-                            <option key={u} value={u}>{u}</option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          className="recipes-add-ingredient-btn"
-                          onClick={handleAddDraftIngredient}
-                        >
-                          Add
-                        </button>
-                      </div>
-                    )}
+                    <div className="ingredient-picker__categories">
+                      {ingredientsByCategory.length === 0 ? (
+                        <p className="ingredient-picker__empty">
+                          {categorySearch ? 'No ingredients match your search.' : 'All ingredients have been added!'}
+                        </p>
+                      ) : (
+                        ingredientsByCategory.map(({ category, items }) => (
+                          <div key={category} className="ingredient-picker__category">
+                            <h4 className="ingredient-picker__category-title">{category}</h4>
+                            <div className="ingredient-picker__pills">
+                              {items.map(ing => (
+                                <button
+                                  key={ing.id}
+                                  type="button"
+                                  className="ingredient-pill"
+                                  onClick={() => handleAddDraftIngredient(ing)}
+                                >
+                                  <span className="ingredient-pill__name">{ing.name}</span>
+                                  <span className="ingredient-pill__unit">{ing.defaultUnit}</span>
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
 

@@ -87,6 +87,8 @@ internal class ResolveIngredientAction(
         val updatedRecipeIngredient = when (val result = recipeClient.updateIngredient(UpdateRecipeIngredientParam(
             id = recipeIngredient.id,
             ingredientId = resolvedIngredientId,
+            quantity = param.quantity,
+            unit = param.unit,
             status = "approved",
             reviewFlags = emptyList(),
             matchedIngredientId = null,

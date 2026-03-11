@@ -85,6 +85,12 @@ class FakeIngredientClient : IngredientClient {
         return success(results)
     }
 
+    override fun delete(param: DeleteIngredientParam): Result<Unit, AppError> {
+        if (!store.containsKey(param.id)) return failure(NotFoundError("Ingredient", param.id.toString()))
+        store.remove(param.id)
+        return success(Unit)
+    }
+
     fun reset() = store.clear()
 
     fun seed(vararg entities: Ingredient) = entities.forEach { store[it.id] = it }

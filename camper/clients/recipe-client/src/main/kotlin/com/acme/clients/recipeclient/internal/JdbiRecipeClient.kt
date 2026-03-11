@@ -22,6 +22,7 @@ internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
     private val getRecipeIngredients = GetRecipeIngredients(jdbi)
     private val updateRecipeIngredient = UpdateRecipeIngredient(jdbi)
     private val removeRecipeIngredient = RemoveRecipeIngredient(jdbi)
+    private val findRecipeIngredientsByIngredientId = FindRecipeIngredientsByIngredientId(jdbi)
 
     override fun create(param: CreateRecipeParam): Result<Recipe, AppError> = createRecipe.execute(param)
     override fun getById(param: GetByIdParam): Result<Recipe, AppError> = getRecipeById.execute(param)
@@ -35,4 +36,5 @@ internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
     override fun getIngredients(param: GetRecipeIngredientsParam): Result<List<RecipeIngredient>, AppError> = getRecipeIngredients.execute(param)
     override fun updateIngredient(param: UpdateRecipeIngredientParam): Result<RecipeIngredient, AppError> = updateRecipeIngredient.execute(param)
     override fun removeIngredient(param: RemoveRecipeIngredientParam): Result<Unit, AppError> = removeRecipeIngredient.execute(param)
+    override fun findIngredientsByIngredientId(param: FindRecipeIngredientsByIngredientIdParam): Result<List<RecipeIngredient>, AppError> = findRecipeIngredientsByIngredientId.execute(param)
 }

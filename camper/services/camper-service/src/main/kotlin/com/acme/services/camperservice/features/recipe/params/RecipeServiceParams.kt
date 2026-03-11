@@ -11,6 +11,11 @@ data class CreateIngredientParam(
     val defaultUnit: String
 )
 
+data class DeleteIngredientParam(
+    val ingredientId: UUID,
+    val userId: UUID
+)
+
 data class ListIngredientsParam(val userId: UUID)
 
 data class UpdateIngredientParam(
@@ -67,7 +72,9 @@ data class ResolveIngredientParam(
     val userId: UUID,
     val action: String,
     val ingredientId: UUID?,
-    val newIngredient: CreateIngredientRequest?
+    val newIngredient: CreateIngredientRequest?,
+    val quantity: BigDecimal?,
+    val unit: String?
 )
 
 data class ResolveDuplicateParam(
@@ -79,4 +86,18 @@ data class ResolveDuplicateParam(
 data class PublishRecipeParam(
     val recipeId: UUID,
     val userId: UUID
+)
+
+data class RemoveRecipeIngredientParam(
+    val recipeId: UUID,
+    val recipeIngredientId: UUID,
+    val userId: UUID
+)
+
+data class AddRecipeIngredientParam(
+    val recipeId: UUID,
+    val userId: UUID,
+    val ingredientId: UUID,
+    val quantity: BigDecimal,
+    val unit: String
 )

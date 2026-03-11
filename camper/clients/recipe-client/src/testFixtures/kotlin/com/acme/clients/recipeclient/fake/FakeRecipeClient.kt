@@ -171,6 +171,10 @@ class FakeRecipeClient : RecipeClient {
         return success(Unit)
     }
 
+    override fun findIngredientsByIngredientId(param: FindRecipeIngredientsByIngredientIdParam): Result<List<RecipeIngredient>, AppError> {
+        return success(ingredients.values.filter { it.ingredientId == param.ingredientId }.sortedBy { it.createdAt })
+    }
+
     fun reset() {
         recipes.clear()
         ingredients.clear()

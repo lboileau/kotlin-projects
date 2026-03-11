@@ -4,6 +4,7 @@ import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.recipe.dto.CreateIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.UpdateIngredientRequest
 import com.acme.services.camperservice.features.recipe.params.CreateIngredientParam
+import com.acme.services.camperservice.features.recipe.params.DeleteIngredientParam
 import com.acme.services.camperservice.features.recipe.params.ListIngredientsParam
 import com.acme.services.camperservice.features.recipe.params.UpdateIngredientParam
 import com.acme.services.camperservice.features.recipe.service.IngredientService
@@ -57,5 +58,15 @@ class IngredientController(
             defaultUnit = request.defaultUnit
         )
         return ingredientService.update(param).toResponseEntity { it }
+    }
+
+    @DeleteMapping("/{id}")
+    fun delete(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("DELETE /api/ingredients/{}", id)
+        return ingredientService.delete(DeleteIngredientParam(ingredientId = id, userId = userId))
+            .toResponseEntity(successStatus = 204) { }
     }
 }

@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage';
 import { PlanPage } from './pages/PlanPage';
 import { AccountPage } from './pages/AccountPage';
 import { RecipesPage } from './pages/RecipesPage';
+import { IngredientsPage } from './pages/IngredientsPage';
 
 export default function App() {
   return (
@@ -42,6 +43,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <RecipesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ingredients"
+            element={
+              <ProtectedRoute>
+                <IngredientsPage />
               </ProtectedRoute>
             }
           />

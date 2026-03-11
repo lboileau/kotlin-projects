@@ -76,3 +76,6 @@ data class UpdateRecipeIngredientParam(
 
 /** Parameter for removing a recipe ingredient by its unique identifier. */
 data class RemoveRecipeIngredientParam(val id: UUID)
+
+/** Parameter for finding recipe ingredients that reference a given global ingredient. */
+data class FindRecipeIngredientsByIngredientIdParam(val ingredientId: UUID)

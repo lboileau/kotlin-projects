@@ -2,6 +2,7 @@ package com.acme.services.camperservice.features.recipe.controller
 
 import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
+import com.acme.services.camperservice.features.recipe.dto.CreateRecipeIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportRecipeRequest
 import com.acme.services.camperservice.features.recipe.dto.ResolveDuplicateRequest
@@ -113,7 +114,9 @@ class RecipeController(
             userId = userId,
             action = request.action,
             ingredientId = request.ingredientId,
-            newIngredient = request.newIngredient
+            newIngredient = request.newIngredient,
+            quantity = request.quantity,
+            unit = request.unit
         )
         return recipeService.resolveIngredient(param).toResponseEntity { it }
     }
@@ -134,6 +137,34 @@ class RecipeController(
             }
             is Result.Failure -> result.error.toResponseEntity()
         }
+    }
+
+    @PostMapping("/{id}/ingredients")
+    fun addIngredient(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID,
+        @RequestBody request: CreateRecipeIngredientRequest
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/recipes/{}/ingredients", id)
+        val param = AddRecipeIngredientParam(
+            recipeId = id,
+            userId = userId,
+            ingredientId = request.ingredientId,
+            quantity = request.quantity,
+            unit = request.unit
+        )
+        return recipeService.addIngredient(param).toResponseEntity(successStatus = 201) { it }
+    }
+
+    @DeleteMapping("/{id}/ingredients/{ingredientId}")
+    fun removeIngredient(
+        @PathVariable id: UUID,
+        @PathVariable ingredientId: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("DELETE /api/recipes/{}/ingredients/{}", id, ingredientId)
+        val param = RemoveRecipeIngredientParam(recipeId = id, recipeIngredientId = ingredientId, userId = userId)
+        return recipeService.removeIngredient(param).toResponseEntity(successStatus = 204) { }
     }
 
     @PostMapping("/{id}/publish")

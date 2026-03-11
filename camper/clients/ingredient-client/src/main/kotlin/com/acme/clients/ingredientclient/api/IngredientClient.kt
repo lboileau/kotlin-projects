@@ -24,6 +24,9 @@ interface IngredientClient {
     /** Update an existing ingredient. Null fields are left unchanged. */
     fun update(param: UpdateIngredientParam): Result<Ingredient, AppError>
 
+    /** Delete an ingredient by its unique identifier. */
+    fun delete(param: DeleteIngredientParam): Result<Unit, AppError>
+
     /** Find a single ingredient by name (case-insensitive). Returns null if not found. */
     fun findByName(param: FindByNameParam): Result<Ingredient?, AppError>
 

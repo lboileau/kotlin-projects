@@ -48,4 +48,7 @@ interface RecipeClient {
 
     /** Remove a recipe ingredient entry by its unique identifier. */
     fun removeIngredient(param: RemoveRecipeIngredientParam): Result<Unit, AppError>
+
+    /** Find all recipe ingredient entries that reference a given global ingredient. */
+    fun findIngredientsByIngredientId(param: FindRecipeIngredientsByIngredientIdParam): Result<List<RecipeIngredient>, AppError>
 }

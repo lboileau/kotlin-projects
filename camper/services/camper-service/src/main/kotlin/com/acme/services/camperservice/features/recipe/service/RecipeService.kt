@@ -3,6 +3,7 @@ package com.acme.services.camperservice.features.recipe.service
 import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.clients.recipescraperclient.api.RecipeScraperClient
+import com.acme.services.camperservice.features.recipe.actions.AddRecipeIngredientAction
 import com.acme.services.camperservice.features.recipe.actions.CreateRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.DeleteRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.GetRecipeAction
@@ -10,10 +11,12 @@ import com.acme.services.camperservice.features.recipe.actions.HtmlFetcher
 import com.acme.services.camperservice.features.recipe.actions.ImportRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.ListRecipesAction
 import com.acme.services.camperservice.features.recipe.actions.PublishRecipeAction
+import com.acme.services.camperservice.features.recipe.actions.RemoveRecipeIngredientAction
 import com.acme.services.camperservice.features.recipe.actions.ResolveDuplicateAction
 import com.acme.services.camperservice.features.recipe.actions.ResolveIngredientAction
 import com.acme.services.camperservice.features.recipe.actions.UpdateRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.defaultHtmlFetcher
+import com.acme.services.camperservice.features.recipe.params.AddRecipeIngredientParam
 import com.acme.services.camperservice.features.recipe.params.CreateRecipeParam
 import com.acme.services.camperservice.features.recipe.params.DeleteRecipeParam
 import com.acme.services.camperservice.features.recipe.params.GetRecipeParam
@@ -21,6 +24,7 @@ import com.acme.services.camperservice.features.recipe.params.ImportRecipeParam
 import com.acme.services.camperservice.features.recipe.params.ListRecipesParam
 import com.acme.services.camperservice.features.recipe.params.PublishRecipeParam
 import com.acme.services.camperservice.features.recipe.params.ResolveDuplicateParam
+import com.acme.services.camperservice.features.recipe.params.RemoveRecipeIngredientParam
 import com.acme.services.camperservice.features.recipe.params.ResolveIngredientParam
 import com.acme.services.camperservice.features.recipe.params.UpdateRecipeParam
 
@@ -30,6 +34,7 @@ class RecipeService(
     recipeScraperClient: RecipeScraperClient,
     htmlFetcher: HtmlFetcher = defaultHtmlFetcher()
 ) {
+    private val addRecipeIngredient = AddRecipeIngredientAction(recipeClient, ingredientClient)
     private val createRecipe = CreateRecipeAction(recipeClient, ingredientClient)
     private val importRecipe = ImportRecipeAction(recipeClient, ingredientClient, recipeScraperClient, htmlFetcher)
     private val getRecipe = GetRecipeAction(recipeClient, ingredientClient)
@@ -39,6 +44,7 @@ class RecipeService(
     private val resolveIngredient = ResolveIngredientAction(recipeClient, ingredientClient)
     private val resolveDuplicate = ResolveDuplicateAction(recipeClient)
     private val publishRecipe = PublishRecipeAction(recipeClient)
+    private val removeRecipeIngredient = RemoveRecipeIngredientAction(recipeClient)
 
     fun create(param: CreateRecipeParam) = createRecipe.execute(param)
     fun import(param: ImportRecipeParam) = importRecipe.execute(param)
@@ -49,4 +55,6 @@ class RecipeService(
     fun resolveIngredient(param: ResolveIngredientParam) = resolveIngredient.execute(param)
     fun resolveDuplicate(param: ResolveDuplicateParam) = resolveDuplicate.execute(param)
     fun publish(param: PublishRecipeParam) = publishRecipe.execute(param)
+    fun removeIngredient(param: RemoveRecipeIngredientParam) = removeRecipeIngredient.execute(param)
+    fun addIngredient(param: AddRecipeIngredientParam) = addRecipeIngredient.execute(param)
 }

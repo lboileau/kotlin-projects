@@ -20,6 +20,9 @@ data class UpdateIngredientParam(
     val defaultUnit: String? = null
 )
 
+/** Parameter for deleting an ingredient by its unique identifier. */
+data class DeleteIngredientParam(val id: UUID)
+
 /** Parameter for finding an ingredient by name (case-insensitive). */
 data class FindByNameParam(val name: String)
 

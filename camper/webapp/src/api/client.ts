@@ -169,6 +169,8 @@ export interface ResolveIngredientRequest {
   action: string;
   ingredientId?: string;
   newIngredient?: CreateIngredientRequest;
+  quantity?: number;
+  unit?: string;
 }
 
 export interface ResolveDuplicateRequest {
@@ -382,6 +384,12 @@ export const api = {
     });
   },
 
+  deleteIngredient(id: string): Promise<void> {
+    return request(`/api/ingredients/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
   updateIngredient(id: string, data: UpdateIngredientRequest): Promise<IngredientResponse> {
     return request(`/api/ingredients/${id}`, {
       method: 'PUT',
@@ -421,6 +429,19 @@ export const api = {
     return request('/api/recipes/import', {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  },
+
+  addRecipeIngredient(recipeId: string, data: CreateRecipeIngredientRequest): Promise<RecipeIngredientResponse> {
+    return request(`/api/recipes/${recipeId}/ingredients`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  removeRecipeIngredient(recipeId: string, ingredientId: string): Promise<void> {
+    return request(`/api/recipes/${recipeId}/ingredients/${ingredientId}`, {
+      method: 'DELETE',
     });
   },
 
