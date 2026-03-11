@@ -26,7 +26,7 @@ You know and design around these conventions:
 - Parameter objects: all methods take data class params
 - Validation classes: 1:1 with operations in `internal/validations/`
 - Row adapters in `adapters/` directory
-- Factory function: `create<Name>Client()` — no params, reads env vars
+- Factory function: `create<Name>Client()` — can take params if needed, reads env vars for defaults
 - KDoc on all interface methods
 - Interface + fake (testFixtures) for testing
 
@@ -92,8 +92,8 @@ Skip layers that don't apply. Every PR has a single concern.
 ## Scope Check
 
 A feature is too big if it involves:
-- More than 2 new tables with complex relationships
-- More than 2 new client interfaces
+- More than 4 new tables with complex relationships
+- More than 4 new client interfaces
 - More than 10 new API endpoints
 - Cross-service concerns
 
