@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 
 internal class ValidateAddRecipeIngredients {
     private val logger = LoggerFactory.getLogger(ValidateAddRecipeIngredients::class.java)
+    private val validateOne = ValidateAddRecipeIngredient()
 
     fun execute(param: AddRecipeIngredientsParam): Result<Unit, AppError> {
         return validate(param).also { result ->
@@ -16,6 +17,10 @@ internal class ValidateAddRecipeIngredients {
     }
 
     private fun validate(param: AddRecipeIngredientsParam): Result<Unit, AppError> {
+        for (ingredient in param.ingredients) {
+            val result = validateOne.execute(ingredient)
+            if (result is Result.Failure) return result
+        }
         return success(Unit)
     }
 }

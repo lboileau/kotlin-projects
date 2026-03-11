@@ -7,6 +7,7 @@ dependencies {
     api(project(":clients:client-common"))
 
     implementation("org.jdbi:jdbi3-core:3.47.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
     implementation("org.slf4j:slf4j-api:2.0.16")
     runtimeOnly("org.postgresql:postgresql:42.7.4")
 
