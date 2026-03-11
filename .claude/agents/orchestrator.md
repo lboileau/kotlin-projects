@@ -403,6 +403,48 @@ Each developer teammate (kotlin-dev, db-dev, test-engineer) provides a retro rep
 
 ---
 
+## CRITICAL: Graphite Stack Merge Safety
+
+Graphite stacks PRs so each PR targets the branch below it (not `main` directly). This means **merge order matters**. If PRs are merged out of order or without retargeting, GitHub will merge a PR into its parent branch instead of `main`, effectively dropping the changes.
+
+### Merge Rules
+
+1. **Always merge bottom-up.** The lowest unmerged PR in the stack must be merged first. Never merge a PR while a lower PR is still open.
+2. **Use `gt merge` to merge PRs** — not the GitHub merge button. `gt merge` handles retargeting the next PR in the stack to `main` automatically.
+3. **After any merge, run `gt restack`** to ensure all remaining PRs in the stack are correctly retargeted.
+4. **Verify PR base branches after merging.** After merging and restacking, check that the next PR in the stack now targets `main` (not the just-merged branch). Use `gt log` to confirm.
+5. **Never merge the full stack at once from GitHub.** Merge one PR at a time, bottom-up, using `gt merge`.
+
+### Merge Sequence
+
+```bash
+# Merge the bottom PR in the stack
+gt checkout <bottom-branch>
+gt merge --no-interactive
+
+# Restack to retarget remaining PRs
+gt restack
+
+# Verify the stack looks correct
+gt log
+
+# Repeat for the next PR
+gt checkout <next-branch>
+gt merge --no-interactive
+gt restack
+```
+
+### If a PR Gets Merged Into the Wrong Branch
+
+If you notice a PR was merged into its parent branch instead of `main`:
+1. **Stop.** Do not merge any more PRs.
+2. Check `gt log` to understand the current stack state.
+3. Run `gt restack` to attempt automatic repair.
+4. If the stack is still broken, check out each remaining branch and verify its base with `gt info`.
+5. Report the situation to the user before proceeding.
+
+---
+
 ## Graphite Command Reference
 
 ```bash
@@ -424,10 +466,16 @@ gt checkout <branch-name>
 # Restack after changes to a lower branch
 gt restack
 
+# Merge a PR (always use this instead of GitHub merge button)
+gt merge --no-interactive
+
 # Amend current branch (after fixing something)
 git add -A && git commit --amend --no-edit
 gt restack
 gt submit --no-interactive
+
+# Check stack state and PR base branches
+gt info
 ```
 
 ---
