@@ -6,6 +6,7 @@ import {
   type RecipeDetailResponse,
   type IngredientResponse,
   type CreateRecipeIngredientRequest,
+  type CreateIngredientRequest,
 } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
@@ -13,8 +14,10 @@ import './RecipesPage.css';
 import '../components/Modal.css';
 
 const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'] as const;
+const CATEGORIES = ['produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other'] as const;
 
-type View = 'list' | 'detail' | 'create' | 'edit';
+type View = 'list' | 'detail' | 'create' | 'edit' | 'import';
+type ResolveMode = 'choose' | 'create_new' | 'select_existing';
 
 interface DraftIngredient {
   ingredientId: string;
@@ -57,6 +60,23 @@ export function RecipesPage() {
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
 
+  // Import state
+  const [importUrl, setImportUrl] = useState('');
+  const [importing, setImporting] = useState(false);
+  const [importError, setImportError] = useState('');
+
+  // Review / resolve state
+  const [resolvingIngredientId, setResolvingIngredientId] = useState<string | null>(null);
+  const [resolveMode, setResolveMode] = useState<ResolveMode>('choose');
+  const [newIngName, setNewIngName] = useState('');
+  const [newIngCategory, setNewIngCategory] = useState<string>('produce');
+  const [newIngUnit, setNewIngUnit] = useState<string>('pieces');
+  const [resolveSelectSearch, setResolveSelectSearch] = useState('');
+  const [resolveSelectOpen, setResolveSelectOpen] = useState(false);
+  const [resolving, setResolving] = useState(false);
+  const [resolveError, setResolveError] = useState('');
+  const [publishing, setPublishing] = useState(false);
+
   // Delete confirmation
   const [deletingRecipe, setDeletingRecipe] = useState<RecipeDetailResponse | null>(null);
 
@@ -76,6 +96,9 @@ export function RecipesPage() {
     try {
       const detail = await api.getRecipe(recipe.id);
       setSelectedRecipe(detail);
+      setResolvingIngredientId(null);
+      setResolveMode('choose');
+      setResolveError('');
       setView('detail');
     } catch {
       setError('Failed to load recipe details');
@@ -102,6 +125,12 @@ export function RecipesPage() {
     setPendingUnit('pieces');
     setCreateError('');
     setView('create');
+  };
+
+  const handleOpenImport = () => {
+    setImportUrl('');
+    setImportError('');
+    setView('import');
   };
 
   const handleAddDraftIngredient = () => {
@@ -155,6 +184,38 @@ export function RecipesPage() {
     }
   };
 
+  const handleImport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    setImportError('');
+    try {
+      const detail = await api.importRecipe({ url: importUrl.trim() });
+      const recipeEntry: RecipeResponse = {
+        id: detail.id,
+        name: detail.name,
+        description: detail.description,
+        webLink: detail.webLink,
+        baseServings: detail.baseServings,
+        status: detail.status,
+        createdBy: detail.createdBy,
+        duplicateOfId: detail.duplicateOf?.id ?? null,
+        createdAt: detail.createdAt,
+        updatedAt: detail.updatedAt,
+      };
+      setRecipes(prev => [recipeEntry, ...prev]);
+      setSelectedRecipe(detail);
+      setResolvingIngredientId(null);
+      setResolveMode('choose');
+      setResolveError('');
+      setView('detail');
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Failed to import recipe');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   const handleOpenEdit = () => {
     if (!selectedRecipe) return;
     setEditName(selectedRecipe.name);
@@ -203,6 +264,130 @@ export function RecipesPage() {
     }
   };
 
+  const refreshDetail = async (recipeId: string) => {
+    const detail = await api.getRecipe(recipeId);
+    setSelectedRecipe(detail);
+    const entry: RecipeResponse = {
+      id: detail.id,
+      name: detail.name,
+      description: detail.description,
+      webLink: detail.webLink,
+      baseServings: detail.baseServings,
+      status: detail.status,
+      createdBy: detail.createdBy,
+      duplicateOfId: detail.duplicateOf?.id ?? null,
+      createdAt: detail.createdAt,
+      updatedAt: detail.updatedAt,
+    };
+    setRecipes(prev => prev.map(r => r.id === entry.id ? entry : r));
+  };
+
+  const handleStartResolve = (ingredientId: string, suggestedName: string, defaultUnit: string) => {
+    setResolvingIngredientId(ingredientId);
+    setResolveMode('choose');
+    setNewIngName(suggestedName);
+    setNewIngCategory('produce');
+    setNewIngUnit(defaultUnit);
+    setResolveSelectSearch('');
+    setResolveError('');
+  };
+
+  const handleCancelResolve = () => {
+    setResolvingIngredientId(null);
+    setResolveMode('choose');
+    setResolveError('');
+  };
+
+  const handleResolveConfirm = async (ingredientId: string) => {
+    if (!selectedRecipe) return;
+    setResolving(true);
+    setResolveError('');
+    try {
+      await api.resolveIngredient(selectedRecipe.id, ingredientId, { action: 'CONFIRM_MATCH' });
+      await refreshDetail(selectedRecipe.id);
+      setResolvingIngredientId(null);
+    } catch (err) {
+      setResolveError(err instanceof Error ? err.message : 'Failed to resolve ingredient');
+    } finally {
+      setResolving(false);
+    }
+  };
+
+  const handleResolveCreateNew = async (ingredientId: string) => {
+    if (!selectedRecipe) return;
+    if (!newIngName.trim()) { setResolveError('Ingredient name is required'); return; }
+    setResolving(true);
+    setResolveError('');
+    const newIngredient: CreateIngredientRequest = {
+      name: newIngName.trim(),
+      category: newIngCategory,
+      defaultUnit: newIngUnit,
+    };
+    try {
+      await api.resolveIngredient(selectedRecipe.id, ingredientId, { action: 'CREATE_NEW', newIngredient });
+      const newIng = await api.getIngredients();
+      setIngredients(newIng);
+      await refreshDetail(selectedRecipe.id);
+      setResolvingIngredientId(null);
+      setResolveMode('choose');
+    } catch (err) {
+      setResolveError(err instanceof Error ? err.message : 'Failed to create ingredient');
+    } finally {
+      setResolving(false);
+    }
+  };
+
+  const handleResolveSelectExisting = async (ingredientId: string, existingId: string) => {
+    if (!selectedRecipe) return;
+    setResolving(true);
+    setResolveError('');
+    try {
+      await api.resolveIngredient(selectedRecipe.id, ingredientId, { action: 'SELECT_EXISTING', ingredientId: existingId });
+      await refreshDetail(selectedRecipe.id);
+      setResolvingIngredientId(null);
+      setResolveMode('choose');
+    } catch (err) {
+      setResolveError(err instanceof Error ? err.message : 'Failed to link ingredient');
+    } finally {
+      setResolving(false);
+    }
+  };
+
+  const handleResolveDuplicate = async (action: 'NOT_DUPLICATE' | 'USE_EXISTING') => {
+    if (!selectedRecipe) return;
+    setResolving(true);
+    setResolveError('');
+    try {
+      await api.resolveDuplicate(selectedRecipe.id, { action });
+      if (action === 'USE_EXISTING') {
+        setRecipes(prev => prev.filter(r => r.id !== selectedRecipe.id));
+        setSelectedRecipe(null);
+        setView('list');
+      } else {
+        await refreshDetail(selectedRecipe.id);
+      }
+    } catch (err) {
+      setResolveError(err instanceof Error ? err.message : 'Failed to resolve duplicate');
+    } finally {
+      setResolving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    if (!selectedRecipe) return;
+    setPublishing(true);
+    setResolveError('');
+    try {
+      const updated = await api.publishRecipe(selectedRecipe.id);
+      setRecipes(prev => prev.map(r => r.id === updated.id ? updated : r));
+      await refreshDetail(updated.id);
+    } catch (err) {
+      setResolveError(err instanceof Error ? err.message : 'Failed to publish recipe');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const filteredIngredients = ingredients.filter(i =>
     i.name.toLowerCase().includes(ingredientSearch.toLowerCase())
   );
@@ -210,6 +395,18 @@ export function RecipesPage() {
   const filteredRecipes = recipes.filter(r =>
     r.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const resolveSelectFiltered = ingredients.filter(i =>
+    i.name.toLowerCase().includes(resolveSelectSearch.toLowerCase())
+  );
+
+  const pendingCount = selectedRecipe?.ingredients.filter(i => i.status === 'pending_review').length ?? 0;
+  const canPublish = selectedRecipe?.status === 'draft'
+    && selectedRecipe.createdBy === user?.id
+    && pendingCount === 0
+    && !selectedRecipe.duplicateOf;
+
+  const isCreator = selectedRecipe?.createdBy === user?.id;
 
   return (
     <div className="recipes-page">
@@ -254,7 +451,7 @@ export function RecipesPage() {
           </div>
         </header>
 
-        {/* List View */}
+        {/* ── List View ── */}
         {view === 'list' && (
           <div className="recipes-list-view">
             <div className="recipes-hero">
@@ -275,6 +472,14 @@ export function RecipesPage() {
                   onChange={e => setSearch(e.target.value)}
                 />
               </div>
+              <button className="recipes-import-btn" onClick={handleOpenImport}>
+                <svg width="15" height="15" viewBox="0 0 15 15">
+                  <path d="M4,2 L2,2 Q1,2 1,3 L1,12 Q1,13 2,13 L10,13 Q11,13 11,12 L11,9" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                  <path d="M8,1 L14,1 L14,7" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                  <line x1="7" y1="8" x2="14" y2="1" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                </svg>
+                Import URL
+              </button>
               <button className="recipes-create-btn" onClick={handleOpenCreate}>
                 <svg width="16" height="16" viewBox="0 0 16 16">
                   <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -357,7 +562,7 @@ export function RecipesPage() {
           </div>
         )}
 
-        {/* Detail View */}
+        {/* ── Detail View ── */}
         {view === 'detail' && selectedRecipe && (
           <div className="recipes-detail-view">
             <div className="recipes-detail-header">
@@ -367,7 +572,7 @@ export function RecipesPage() {
                 </svg>
                 All Recipes
               </button>
-              {selectedRecipe.createdBy === user?.id && (
+              {isCreator && (
                 <div className="recipes-detail-actions">
                   <button className="recipes-action-btn recipes-action-btn--edit" onClick={handleOpenEdit}>
                     <svg width="15" height="15" viewBox="0 0 15 15">
@@ -389,6 +594,7 @@ export function RecipesPage() {
             </div>
 
             <div className="recipe-detail">
+              {/* Recipe metadata */}
               <div className="recipe-detail__hero">
                 <div className="recipe-detail__title-row">
                   <h1 className="recipe-detail__name">{selectedRecipe.name}</h1>
@@ -426,6 +632,43 @@ export function RecipesPage() {
                 </div>
               </div>
 
+              {/* Duplicate warning */}
+              {selectedRecipe.duplicateOf && isCreator && (
+                <div className="recipe-detail__duplicate-banner">
+                  <div className="recipe-detail__duplicate-banner-icon">
+                    <svg width="20" height="20" viewBox="0 0 20 20">
+                      <path d="M10,3 L18,17 L2,17 Z" fill="none" stroke="var(--ember)" strokeWidth="1.5" strokeLinejoin="round" />
+                      <line x1="10" y1="9" x2="10" y2="13" stroke="var(--ember)" strokeWidth="1.5" strokeLinecap="round" />
+                      <circle cx="10" cy="15.5" r="0.8" fill="var(--ember)" />
+                    </svg>
+                  </div>
+                  <div className="recipe-detail__duplicate-banner-body">
+                    <p className="recipe-detail__duplicate-banner-title">Possible duplicate detected</p>
+                    <p className="recipe-detail__duplicate-banner-text">
+                      This recipe may be a duplicate of <strong>"{selectedRecipe.duplicateOf.name}"</strong>.
+                      Resolve this before publishing.
+                    </p>
+                    <div className="recipe-detail__duplicate-banner-actions">
+                      <button
+                        className="review-btn review-btn--secondary"
+                        disabled={resolving}
+                        onClick={() => handleResolveDuplicate('NOT_DUPLICATE')}
+                      >
+                        Not a duplicate
+                      </button>
+                      <button
+                        className="review-btn review-btn--danger"
+                        disabled={resolving}
+                        onClick={() => handleResolveDuplicate('USE_EXISTING')}
+                      >
+                        Use existing recipe
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Ingredients section */}
               <div className="recipe-detail__ingredients">
                 <h2 className="recipe-detail__section-title">
                   <svg width="18" height="18" viewBox="0 0 18 18">
@@ -434,32 +677,300 @@ export function RecipesPage() {
                     <line x1="7" y1="16" x2="11" y2="16" stroke="var(--sage-deep)" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
                   Ingredients
+                  {pendingCount > 0 && isCreator && (
+                    <span className="recipe-detail__pending-count">{pendingCount} need review</span>
+                  )}
                 </h2>
+
                 {selectedRecipe.ingredients.length === 0 ? (
                   <p className="recipe-detail__no-ingredients">No ingredients listed.</p>
                 ) : (
                   <ul className="recipe-detail__ingredient-list">
-                    {selectedRecipe.ingredients.map(ri => (
-                      <li key={ri.id} className={`recipe-detail__ingredient ${ri.status === 'pending_review' ? 'recipe-detail__ingredient--pending' : ''}`}>
-                        <span className="recipe-detail__ingredient-qty">
-                          {ri.quantity % 1 === 0 ? ri.quantity : ri.quantity.toFixed(2)} {ri.unit}
-                        </span>
-                        <span className="recipe-detail__ingredient-name">
-                          {ri.ingredient?.name ?? ri.suggestedIngredientName ?? ri.originalText ?? '—'}
-                        </span>
-                        {ri.status === 'pending_review' && (
-                          <span className="recipe-detail__ingredient-flag">needs review</span>
-                        )}
-                      </li>
-                    ))}
+                    {selectedRecipe.ingredients.map(ri => {
+                      const isResolving = resolvingIngredientId === ri.id;
+                      const displayName = ri.ingredient?.name ?? ri.suggestedIngredientName ?? ri.originalText ?? '—';
+                      return (
+                        <li key={ri.id} className={`recipe-detail__ingredient ${ri.status === 'pending_review' ? 'recipe-detail__ingredient--pending' : ''}`}>
+                          <div className="recipe-detail__ingredient-row">
+                            <span className="recipe-detail__ingredient-status-icon">
+                              {ri.status === 'approved' ? (
+                                <svg width="14" height="14" viewBox="0 0 14 14">
+                                  <circle cx="7" cy="7" r="6" fill="none" stroke="var(--sage-deep)" strokeWidth="1.3" />
+                                  <path d="M4,7 L6,9 L10,5" fill="none" stroke="var(--sage-deep)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                              ) : (
+                                <svg width="14" height="14" viewBox="0 0 14 14">
+                                  <circle cx="7" cy="7" r="6" fill="none" stroke="var(--ember)" strokeWidth="1.3" />
+                                  <line x1="7" y1="4.5" x2="7" y2="8" stroke="var(--ember)" strokeWidth="1.3" strokeLinecap="round" />
+                                  <circle cx="7" cy="9.5" r="0.7" fill="var(--ember)" />
+                                </svg>
+                              )}
+                            </span>
+                            <span className="recipe-detail__ingredient-qty">
+                              {ri.quantity % 1 === 0 ? ri.quantity : ri.quantity.toFixed(2)} {ri.unit}
+                            </span>
+                            <span className="recipe-detail__ingredient-name">{displayName}</span>
+                            {ri.status === 'pending_review' && isCreator && !isResolving && (
+                              <button
+                                className="review-resolve-btn"
+                                onClick={() => handleStartResolve(
+                                  ri.id,
+                                  ri.suggestedIngredientName ?? displayName,
+                                  ri.matchedIngredient?.defaultUnit ?? 'pieces'
+                                )}
+                              >
+                                Resolve
+                              </button>
+                            )}
+                            {ri.status === 'pending_review' && !isCreator && (
+                              <span className="recipe-detail__ingredient-flag">needs review</span>
+                            )}
+                          </div>
+
+                          {/* Inline resolution panel */}
+                          {isResolving && (
+                            <div className="review-panel">
+                              {ri.originalText && (
+                                <p className="review-panel__original">
+                                  <span className="review-panel__original-label">Original:</span>
+                                  "{ri.originalText}"
+                                </p>
+                              )}
+
+                              {resolveMode === 'choose' && (
+                                <div className="review-panel__actions">
+                                  {ri.matchedIngredient && (
+                                    <button
+                                      className="review-btn review-btn--confirm"
+                                      disabled={resolving}
+                                      onClick={() => handleResolveConfirm(ri.id)}
+                                    >
+                                      <svg width="13" height="13" viewBox="0 0 13 13">
+                                        <circle cx="6.5" cy="6.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
+                                        <path d="M3.5,6.5 L5.5,8.5 L9.5,4.5" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                      Confirm "{ri.matchedIngredient.name}"
+                                    </button>
+                                  )}
+                                  <button
+                                    className="review-btn review-btn--secondary"
+                                    disabled={resolving}
+                                    onClick={() => { setResolveMode('select_existing'); setResolveSelectSearch(''); }}
+                                  >
+                                    Select existing
+                                  </button>
+                                  <button
+                                    className="review-btn review-btn--secondary"
+                                    disabled={resolving}
+                                    onClick={() => setResolveMode('create_new')}
+                                  >
+                                    Create new
+                                  </button>
+                                  <button
+                                    className="review-btn review-btn--cancel"
+                                    onClick={handleCancelResolve}
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              )}
+
+                              {resolveMode === 'select_existing' && (
+                                <div className="review-panel__select">
+                                  <p className="review-panel__mode-label">Select from existing ingredients:</p>
+                                  <div className="recipes-ingredient-search-wrap">
+                                    <input
+                                      className="recipes-input"
+                                      placeholder="Search ingredients..."
+                                      value={resolveSelectSearch}
+                                      autoFocus
+                                      onChange={e => setResolveSelectSearch(e.target.value)}
+                                      onFocus={() => setResolveSelectOpen(true)}
+                                      onBlur={() => setTimeout(() => setResolveSelectOpen(false), 150)}
+                                    />
+                                    {resolveSelectOpen && resolveSelectSearch.length > 0 && resolveSelectFiltered.length > 0 && (
+                                      <ul className="recipes-ingredient-dropdown">
+                                        {resolveSelectFiltered.slice(0, 8).map(ing => (
+                                          <li
+                                            key={ing.id}
+                                            className="recipes-ingredient-option"
+                                            onMouseDown={() => handleResolveSelectExisting(ri.id, ing.id)}
+                                          >
+                                            <span className="recipes-ingredient-option__name">{ing.name}</span>
+                                            <span className="recipes-ingredient-option__cat">{ing.category}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                  <button className="review-btn review-btn--cancel" onClick={() => setResolveMode('choose')}>
+                                    ← Back
+                                  </button>
+                                </div>
+                              )}
+
+                              {resolveMode === 'create_new' && (
+                                <div className="review-panel__create">
+                                  <p className="review-panel__mode-label">Create a new ingredient:</p>
+                                  <div className="review-panel__create-fields">
+                                    <div className="recipes-field">
+                                      <label className="recipes-label">Name</label>
+                                      <input
+                                        className="recipes-input"
+                                        value={newIngName}
+                                        onChange={e => setNewIngName(e.target.value)}
+                                        autoFocus
+                                      />
+                                    </div>
+                                    <div className="review-panel__create-row">
+                                      <div className="recipes-field">
+                                        <label className="recipes-label">Category</label>
+                                        <select
+                                          className="recipes-input recipes-select"
+                                          value={newIngCategory}
+                                          onChange={e => setNewIngCategory(e.target.value)}
+                                        >
+                                          {CATEGORIES.map(c => (
+                                            <option key={c} value={c}>{c}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                      <div className="recipes-field">
+                                        <label className="recipes-label">Default unit</label>
+                                        <select
+                                          className="recipes-input recipes-select"
+                                          value={newIngUnit}
+                                          onChange={e => setNewIngUnit(e.target.value)}
+                                        >
+                                          {UNITS.map(u => (
+                                            <option key={u} value={u}>{u}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="review-panel__create-actions">
+                                    <button className="review-btn review-btn--cancel" onClick={() => setResolveMode('choose')}>
+                                      ← Back
+                                    </button>
+                                    <button
+                                      className="review-btn review-btn--confirm"
+                                      disabled={resolving || !newIngName.trim()}
+                                      onClick={() => handleResolveCreateNew(ri.id)}
+                                    >
+                                      {resolving ? 'Creating...' : 'Create & Link'}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {resolveError && <p className="review-panel__error">{resolveError}</p>}
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
+
+                {/* Global resolve error (shown when not in ingredient resolve mode) */}
+                {resolveError && !resolvingIngredientId && (
+                  <p className="recipes-form-error" style={{ marginTop: 'var(--space-sm)' }}>{resolveError}</p>
+                )}
               </div>
+
+              {/* Publish section */}
+              {selectedRecipe.status === 'draft' && isCreator && (
+                <div className="recipe-detail__publish-section">
+                  {canPublish ? (
+                    <>
+                      <p className="recipe-detail__publish-ready">
+                        All ingredients resolved — ready to publish!
+                      </p>
+                      <button
+                        className="recipe-detail__publish-btn"
+                        disabled={publishing}
+                        onClick={handlePublish}
+                      >
+                        {publishing ? 'Publishing...' : 'Publish to Cookbook'}
+                      </button>
+                    </>
+                  ) : (
+                    <p className="recipe-detail__publish-blocked">
+                      {pendingCount > 0
+                        ? `${pendingCount} ingredient${pendingCount !== 1 ? 's' : ''} still need${pendingCount === 1 ? 's' : ''} review before publishing.`
+                        : selectedRecipe.duplicateOf
+                          ? 'Resolve the duplicate warning before publishing.'
+                          : ''}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* Create View */}
+        {/* ── Import View ── */}
+        {view === 'import' && (
+          <div className="recipes-create-view">
+            <div className="recipes-detail-header">
+              <button className="recipes-back-btn" onClick={handleBackToList}>
+                <svg width="18" height="18" viewBox="0 0 18 18">
+                  <path d="M11,4 L6,9 L11,14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Cancel
+              </button>
+            </div>
+
+            <div className="recipes-form-container">
+              <h1 className="recipes-form-title">Import from URL</h1>
+              <p className="recipes-form-subtitle">Paste a recipe link and let the camp wizard do the rest</p>
+
+              <form className="recipes-form" onSubmit={handleImport}>
+                <div className="recipes-form-section">
+                  <div className="recipes-field">
+                    <label className="recipes-label">Recipe URL</label>
+                    <input
+                      className="recipes-input"
+                      type="url"
+                      placeholder="https://example.com/guacamole-recipe"
+                      value={importUrl}
+                      onChange={e => setImportUrl(e.target.value)}
+                      autoFocus
+                    />
+                    <p className="recipes-field-hint">
+                      The recipe will be scraped and parsed automatically. You'll review and approve each ingredient before publishing.
+                    </p>
+                  </div>
+
+                  {importing && (
+                    <div className="recipes-import-progress">
+                      <div className="recipes-loading-flame" />
+                      <p>The camp wizard is reading the scroll...</p>
+                    </div>
+                  )}
+                </div>
+
+                {importError && <p className="recipes-form-error">{importError}</p>}
+
+                <div className="recipes-form-actions">
+                  <button type="button" className="recipes-cancel-btn" onClick={handleBackToList}>
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="recipes-submit-btn"
+                    disabled={importing || !importUrl.trim()}
+                  >
+                    {importing ? 'Importing...' : 'Import Recipe'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* ── Create View ── */}
         {view === 'create' && (
           <div className="recipes-create-view">
             <div className="recipes-detail-header">
@@ -628,7 +1139,7 @@ export function RecipesPage() {
           </div>
         )}
 
-        {/* Edit View */}
+        {/* ── Edit View ── */}
         {view === 'edit' && selectedRecipe && (
           <div className="recipes-create-view">
             <div className="recipes-detail-header">
