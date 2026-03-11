@@ -42,7 +42,8 @@ webapp/
 │   ├── pages/
 │   │   ├── LoginPage.tsx/css           # Login/register with night-sky parallax
 │   │   ├── HomePage.tsx/css            # Trip list with dusk parallax, flag trail markers
-│   │   └── PlanPage.tsx/css            # THE CENTERPIECE — campsite scene
+│   │   ├── PlanPage.tsx/css            # THE CENTERPIECE — campsite scene
+│   │   └── RecipesPage.tsx/css         # Recipe book — list, detail, create, import, review
 │   └── styles/
 │       ├── theme.css                   # Design tokens (colors, typography, spacing, shadows)
 │       └── animations.css              # All @keyframes (fire, float, twinkle, fade, etc.)
@@ -51,7 +52,7 @@ webapp/
 ## Architecture
 
 ### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`
+- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`
 - `request<T>()` helper auto-injects `X-User-Id` from localStorage
 - All methods return typed promises; throws on non-OK responses
 
@@ -75,6 +76,13 @@ webapp/
   - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists scoped to the current plan, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists.
   - **MealModal** — Plan-only checklist (no personal sections) with day tabs. Categories: breakfast, lunch, dinner, snacks. Everyone can edit the meal plan. Day tabs let users organize meals per day (Day 1, Day 2, etc.) with a "+" button to add more days. Items are stored with day-prefixed categories (e.g. `day1:breakfast`) which the UI parses for display. Empty trailing days are automatically removed when all items are deleted. Opens from the kitchen campsite item. Both modals share a generic `ChecklistModal` component internally.
   - **AssignmentsModal** — Fixed-height modal with two tabs (Tents / Canoes). Cards show assignment name, owner, occupancy bar, and member list with mini SVG avatar heads. Features: "Add Tent" / "Add Canoe" buttons (creator auto-added if not already in a group of that type); join (auto-leaves current group of same type); leave (including owner self-leave); owner/plan-owner "Add Member" panel showing available plan members with greyed-out entries for those already in another group of the same type; inline edit name/max occupancy; delete. Pending adventurers are filtered from the add-member list.
+- **RecipesPage** — Standalone page at `/recipes` with dusk parallax background. Multi-view single-page flow: `list`, `detail`, `create`, `edit`, `import`.
+  - **List view:** Searchable recipe cards (filter by name). Shows published and own draft recipes. "New Recipe" and "Import Recipe" buttons. Each card shows name, status badge (draft/published), base servings, and description snippet. Click to view detail.
+  - **Create view:** Form with name, description, optional web link, base servings, and ingredient picker. Ingredient picker is a search-as-you-type dropdown over the global ingredients list; each selected ingredient gets a quantity + unit row. Submits to `POST /api/recipes`.
+  - **Import view:** Single URL input. Submits to `POST /api/recipes/import` which scrapes the page and creates a draft recipe via Claude API. Redirects to detail view of the created draft.
+  - **Detail view:** Shows full recipe info. For draft recipes, the creator sees a review panel for any `pending_review` ingredients. Each pending ingredient shows `originalText`, suggested match info, and three resolve actions: confirm match, select existing ingredient (search dropdown), or create new ingredient (name + category + unit form). After all ingredients are resolved and no duplicate flag, a "Publish" button appears. Duplicate recipes show a banner with "Not a duplicate" / "Use existing" resolve options.
+  - **Edit view:** Form to update name, description, base servings. Submits to `PUT /api/recipes/{id}`.
+  - Loads all ingredients on mount alongside recipe list (`GET /api/ingredients`) so the ingredient picker is immediately available.
 
 ### Visual Design System
 - **Palette:** Defined in `theme.css` as CSS variables (`--lavender`, `--sage`, `--tan`, `--rose`, `--mint`, `--ember`, `--flame`, `--night-sky`, `--parchment`, etc.)
@@ -110,6 +118,16 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | POST | `/api/plans/:id/assignments/:assignmentId/members` | X-User-Id | AssignmentsModal (add member) |
 | DELETE | `/api/plans/:id/assignments/:assignmentId/members/:userId` | X-User-Id | AssignmentsModal (remove member) |
 | PUT | `/api/plans/:id/assignments/:assignmentId/owner` | X-User-Id | AssignmentsModal (transfer ownership) |
+| GET | `/api/ingredients` | X-User-Id | RecipesPage (ingredient picker) |
+| GET | `/api/recipes` | X-User-Id | RecipesPage (list) |
+| POST | `/api/recipes` | X-User-Id | RecipesPage (create) |
+| POST | `/api/recipes/import` | X-User-Id | RecipesPage (import from URL) |
+| GET | `/api/recipes/:id` | X-User-Id | RecipesPage (detail) |
+| PUT | `/api/recipes/:id` | X-User-Id | RecipesPage (edit) |
+| DELETE | `/api/recipes/:id` | X-User-Id | RecipesPage (delete) |
+| PUT | `/api/recipes/:id/ingredients/:ingredientId` | X-User-Id | RecipesPage (resolve pending ingredient) |
+| PUT | `/api/recipes/:id/resolve-duplicate` | X-User-Id | RecipesPage (resolve duplicate flag) |
+| POST | `/api/recipes/:id/publish` | X-User-Id | RecipesPage (publish draft) |
 
 ## Running
 
