@@ -206,6 +206,79 @@ CREATE INDEX idx_assignment_members_plan_id ON assignment_members (plan_id);
 CREATE INDEX idx_assignment_members_assignment_id ON assignment_members (assignment_id);
 ```
 
+### ingredients
+
+```sql
+CREATE TABLE IF NOT EXISTS ingredients (
+    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    name         VARCHAR(255) NOT NULL,
+    category     VARCHAR(50)  NOT NULL,
+    default_unit VARCHAR(20)  NOT NULL,
+    created_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    CONSTRAINT uq_ingredients_name UNIQUE (name),
+    CONSTRAINT ck_ingredients_category CHECK (category IN ('produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other')),
+    CONSTRAINT ck_ingredients_default_unit CHECK (default_unit IN ('g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'))
+);
+CREATE INDEX IF NOT EXISTS idx_ingredients_name ON ingredients (name);
+```
+
+### recipes
+
+```sql
+CREATE TABLE IF NOT EXISTS recipes (
+    id             UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    name           VARCHAR(255) NOT NULL,
+    description    TEXT,
+    web_link       TEXT,
+    base_servings  INT          NOT NULL,
+    status         VARCHAR(20)  NOT NULL DEFAULT 'draft',
+    created_by     UUID         NOT NULL,
+    duplicate_of_id UUID,
+    created_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_recipes_base_servings CHECK (base_servings > 0),
+    CONSTRAINT ck_recipes_status CHECK (status IN ('draft', 'published')),
+    CONSTRAINT fk_recipes_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_recipes_duplicate_of FOREIGN KEY (duplicate_of_id) REFERENCES recipes (id) ON DELETE SET NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_recipes_web_link ON recipes (web_link) WHERE web_link IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_recipes_status ON recipes (status);
+CREATE INDEX IF NOT EXISTS idx_recipes_created_by ON recipes (created_by);
+CREATE INDEX IF NOT EXISTS idx_recipes_duplicate_of_id ON recipes (duplicate_of_id);
+```
+
+### recipe_ingredients
+
+```sql
+CREATE TABLE IF NOT EXISTS recipe_ingredients (
+    id                       UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipe_id                UUID         NOT NULL,
+    ingredient_id            UUID,
+    original_text            TEXT,
+    quantity                 NUMERIC      NOT NULL,
+    unit                     VARCHAR(20)  NOT NULL,
+    status                   VARCHAR(20)  NOT NULL DEFAULT 'approved',
+    matched_ingredient_id    UUID,
+    suggested_ingredient_name TEXT,
+    review_flags             JSONB        NOT NULL DEFAULT '[]',
+    created_at               TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at               TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_recipe_ingredients_quantity CHECK (quantity > 0),
+    CONSTRAINT ck_recipe_ingredients_status CHECK (status IN ('pending_review', 'approved')),
+    CONSTRAINT fk_recipe_ingredients_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE,
+    CONSTRAINT fk_recipe_ingredients_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE RESTRICT,
+    CONSTRAINT fk_recipe_ingredients_matched_ingredient FOREIGN KEY (matched_ingredient_id) REFERENCES ingredients (id) ON DELETE SET NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_recipe_ingredients_recipe_id_ingredient_id ON recipe_ingredients (recipe_id, ingredient_id) WHERE ingredient_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_recipe_id ON recipe_ingredients (recipe_id);
+CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_ingredient_id ON recipe_ingredients (ingredient_id);
+CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_matched_ingredient_id ON recipe_ingredients (matched_ingredient_id);
+```
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -220,6 +293,11 @@ CREATE INDEX idx_assignment_members_assignment_id ON assignment_members (assignm
 - `assignment_members.assignment_id` → `assignments.id` (FK, CASCADE on delete)
 - `assignment_members.user_id` → `users.id` (FK, CASCADE on delete)
 - `assignment_members.plan_id` → `plans.id` (FK, CASCADE on delete)
+- `recipes.created_by` → `users.id` (FK, RESTRICT on delete)
+- `recipes.duplicate_of_id` → `recipes.id` (FK, SET NULL on delete — self-referential)
+- `recipe_ingredients.recipe_id` → `recipes.id` (FK, CASCADE on delete)
+- `recipe_ingredients.ingredient_id` → `ingredients.id` (FK, RESTRICT on delete — nullable)
+- `recipe_ingredients.matched_ingredient_id` → `ingredients.id` (FK, SET NULL on delete — nullable)
 
 ## Invariants
 
@@ -240,3 +318,10 @@ CREATE INDEX idx_assignment_members_assignment_id ON assignment_members (assignm
 - A user can belong to only one assignment of each type per plan (enforced by `uq_assignment_members_plan_id_user_id_type`).
 - Deleting an assignment cascades to its assignment_members.
 - Deleting a user cascades to their assignment_members and transfers ownership of their assignments to the plan owner.
+- Ingredient names must be unique globally (enforced by `uq_ingredients_name`).
+- Recipe `web_link` must be unique when set (partial unique index `uq_recipes_web_link`).
+- Recipe `base_servings` must be > 0 (enforced by `ck_recipes_base_servings`).
+- Recipe status must be 'draft' or 'published' (enforced by `ck_recipes_status`).
+- A recipe_ingredient `(recipe_id, ingredient_id)` pair must be unique when `ingredient_id` is set (partial unique index).
+- Deleting a recipe cascades to its recipe_ingredients.
+- Deleting a user is restricted if they created any recipes.

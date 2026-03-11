@@ -12,6 +12,7 @@ import { GearModal, MealModal } from '../components/GearModal';
 import { ItineraryModal } from '../components/ItineraryModal';
 import { AssignmentsModal } from '../components/AssignmentsModal';
 import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG } from '../components/CampsiteItems';
+import { AppHeader } from '../components/AppHeader';
 import './PlanPage.css';
 
 type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'addMember' | 'managePlan' | null;
@@ -155,44 +156,24 @@ export function PlanPage() {
       </button>
 
       {/* Top nav */}
-      <header className="plan-header">
-        <button className="plan-back" onClick={() => navigate('/')}>
-          <svg width="20" height="20" viewBox="0 0 20 20">
-            <path d="M13,4 L7,10 L13,16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Back to Trails
-        </button>
-        <div className="plan-header-center">
-          <svg width="24" height="24" viewBox="0 0 24 24" className="plan-header-icon">
+      <AppHeader
+        pageTitle={plan?.name || 'Campsite'}
+        pageIcon={
+          <svg width="24" height="24" viewBox="0 0 24 24">
             <polygon points="12,2 4,20 20,20" fill="none" stroke="var(--ember)" strokeWidth="1.5" />
             <path d="M10,16 Q11,12 12,10 Q13,12 14,16" fill="var(--ember)" opacity="0.6" />
           </svg>
-          <span className="plan-header-title">Campsite</span>
-        </div>
-        {isOwner && (
-          <button className="plan-manage-btn" onClick={() => { setEditPlanName(plan?.name || ''); setActiveModal('managePlan'); }}>
+        }
+        actions={isOwner ? (
+          <button className="app-header__action-btn" onClick={() => { setEditPlanName(plan?.name || ''); setActiveModal('managePlan'); }}>
             <svg width="18" height="18" viewBox="0 0 18 18">
               <circle cx="9" cy="9" r="7" fill="none" stroke="currentColor" strokeWidth="1.5" />
               <path d="M9,5 L9,13 M5,9 L13,9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
             </svg>
             Manage Plan
           </button>
-        )}
-        <div className="plan-header-user">
-          <button className="plan-user-btn" onClick={() => navigate('/account')}>
-            <svg width="28" height="28" viewBox="0 0 28 28" className="plan-user-avatar">
-              <defs><clipPath id="avatar-clip-plan"><circle cx="14" cy="14" r="13" /></clipPath></defs>
-              <circle cx="14" cy="14" r="13" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="1.5" />
-              <g clipPath="url(#avatar-clip-plan)">
-                <circle cx="14" cy="11" r="5" fill="var(--parchment)" />
-                <ellipse cx="14" cy="24" rx="8" ry="6" fill="var(--parchment)" />
-              </g>
-            </svg>
-            <span className="plan-user-name">{user?.username || user?.email}</span>
-          </button>
-          <button className="plan-logout" onClick={logout}>Log Out</button>
-        </div>
-      </header>
+        ) : undefined}
+      />
 
       {/* Campsite scene */}
       <div className="campsite-scene">

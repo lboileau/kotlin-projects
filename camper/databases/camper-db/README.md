@@ -73,6 +73,55 @@ PostgreSQL database for the Camper project.
 
 **Indexes:** `idx_itinerary_events_itinerary_id` on `itinerary_id`
 
+### ingredients
+
+| Column        | Type          | Constraints                                                                          |
+|---------------|---------------|--------------------------------------------------------------------------------------|
+| id            | UUID          | PK, DEFAULT gen_random_uuid()                                                        |
+| name          | VARCHAR(255)  | NOT NULL, UNIQUE (uq_ingredients_name)                                               |
+| category      | VARCHAR(50)   | NOT NULL, CHECK IN ('produce','dairy','meat','seafood','pantry','spice','condiment','frozen','bakery','other') |
+| default_unit  | VARCHAR(20)   | NOT NULL, CHECK IN ('g','kg','ml','l','tsp','tbsp','cup','oz','lb','pieces','whole','bunch','can','clove','pinch','slice','sprig') |
+| created_at    | TIMESTAMPTZ   | NOT NULL, DEFAULT now()                                                              |
+| updated_at    | TIMESTAMPTZ   | NOT NULL, DEFAULT now()                                                              |
+
+**Indexes:** `idx_ingredients_name` on `name`
+
+### recipes
+
+| Column          | Type          | Constraints                                                  |
+|-----------------|---------------|--------------------------------------------------------------|
+| id              | UUID          | PK, DEFAULT gen_random_uuid()                                |
+| name            | VARCHAR(255)  | NOT NULL                                                     |
+| description     | TEXT          | nullable                                                     |
+| web_link        | TEXT          | nullable, UNIQUE (uq_recipes_web_link) WHERE NOT NULL        |
+| base_servings   | INT           | NOT NULL, CHECK > 0                                          |
+| status          | VARCHAR(20)   | NOT NULL, DEFAULT 'draft', CHECK IN ('draft','published')    |
+| created_by      | UUID          | NOT NULL, FK -> users(id) ON DELETE RESTRICT                 |
+| duplicate_of_id | UUID          | nullable, FK -> recipes(id) ON DELETE SET NULL               |
+| created_at      | TIMESTAMPTZ   | NOT NULL, DEFAULT now()                                      |
+| updated_at      | TIMESTAMPTZ   | NOT NULL, DEFAULT now()                                      |
+
+**Indexes:** `idx_recipes_status`, `idx_recipes_created_by`, `idx_recipes_duplicate_of_id`
+
+### recipe_ingredients
+
+| Column                   | Type          | Constraints                                                        |
+|--------------------------|---------------|--------------------------------------------------------------------|
+| id                       | UUID          | PK, DEFAULT gen_random_uuid()                                      |
+| recipe_id                | UUID          | NOT NULL, FK -> recipes(id) ON DELETE CASCADE                      |
+| ingredient_id            | UUID          | nullable, FK -> ingredients(id) ON DELETE RESTRICT                 |
+| original_text            | TEXT          | nullable                                                           |
+| quantity                 | NUMERIC       | NOT NULL, CHECK > 0                                                |
+| unit                     | VARCHAR(20)   | NOT NULL                                                           |
+| status                   | VARCHAR(20)   | NOT NULL, DEFAULT 'approved', CHECK IN ('pending_review','approved') |
+| matched_ingredient_id    | UUID          | nullable, FK -> ingredients(id) ON DELETE SET NULL                 |
+| suggested_ingredient_name| TEXT          | nullable                                                           |
+| review_flags             | JSONB         | NOT NULL, DEFAULT '[]'                                             |
+| created_at               | TIMESTAMPTZ   | NOT NULL, DEFAULT now()                                            |
+| updated_at               | TIMESTAMPTZ   | NOT NULL, DEFAULT now()                                            |
+
+**Indexes:** `uq_recipe_ingredients_recipe_id_ingredient_id` (unique WHERE ingredient_id IS NOT NULL), `idx_recipe_ingredients_recipe_id`, `idx_recipe_ingredients_ingredient_id`, `idx_recipe_ingredients_matched_ingredient_id`
+
 ## Local Setup
 
 ### Start the database
