@@ -1,7 +1,11 @@
 package com.acme.services.camperservice.features.recipe.controller
 
+import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.recipe.dto.CreateIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.UpdateIngredientRequest
+import com.acme.services.camperservice.features.recipe.params.CreateIngredientParam
+import com.acme.services.camperservice.features.recipe.params.ListIngredientsParam
+import com.acme.services.camperservice.features.recipe.params.UpdateIngredientParam
 import com.acme.services.camperservice.features.recipe.service.IngredientService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -20,7 +24,7 @@ class IngredientController(
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("GET /api/ingredients")
-        return ResponseEntity.status(501).build()
+        return ingredientService.list(ListIngredientsParam(userId)).toResponseEntity { it }
     }
 
     @PostMapping
@@ -29,7 +33,13 @@ class IngredientController(
         @RequestBody request: CreateIngredientRequest
     ): ResponseEntity<Any> {
         logger.info("POST /api/ingredients")
-        return ResponseEntity.status(501).build()
+        val param = CreateIngredientParam(
+            userId = userId,
+            name = request.name,
+            category = request.category,
+            defaultUnit = request.defaultUnit
+        )
+        return ingredientService.create(param).toResponseEntity(successStatus = 201) { it }
     }
 
     @PutMapping("/{id}")
@@ -39,6 +49,13 @@ class IngredientController(
         @RequestBody request: UpdateIngredientRequest
     ): ResponseEntity<Any> {
         logger.info("PUT /api/ingredients/{}", id)
-        return ResponseEntity.status(501).build()
+        val param = UpdateIngredientParam(
+            ingredientId = id,
+            userId = userId,
+            name = request.name,
+            category = request.category,
+            defaultUnit = request.defaultUnit
+        )
+        return ingredientService.update(param).toResponseEntity { it }
     }
 }
