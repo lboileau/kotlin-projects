@@ -257,20 +257,6 @@ class RecipeAcceptanceTest {
         }
 
         @Test
-        fun `PUT returns 403 when non-creator updates recipe`() {
-            val recipeId = fixture.insertRecipe(name = "Protected Recipe", createdBy = userId)
-
-            val response = restTemplate.exchange(
-                "/api/recipes/$recipeId",
-                HttpMethod.PUT,
-                entityWithUser(UpdateRecipeRequest(name = "Hacked Name", description = null, baseServings = null), otherUserId),
-                Map::class.java
-            )
-
-            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        }
-
-        @Test
         fun `PUT returns 404 when recipe not found`() {
             val response = restTemplate.exchange(
                 "/api/recipes/${UUID.randomUUID()}",
@@ -298,20 +284,6 @@ class RecipeAcceptanceTest {
             )
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
-        }
-
-        @Test
-        fun `DELETE returns 403 when non-creator deletes recipe`() {
-            val recipeId = fixture.insertRecipe(name = "Protected", createdBy = userId)
-
-            val response = restTemplate.exchange(
-                "/api/recipes/$recipeId",
-                HttpMethod.DELETE,
-                entityWithUser(null, otherUserId),
-                Map::class.java
-            )
-
-            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         }
 
         @Test
@@ -406,20 +378,6 @@ class RecipeAcceptanceTest {
         }
 
         @Test
-        fun `POST returns 403 when non-creator publishes`() {
-            val recipeId = fixture.insertRecipe(name = "Not Mine", status = "draft", createdBy = userId)
-
-            val response = restTemplate.exchange(
-                "/api/recipes/$recipeId/publish",
-                HttpMethod.POST,
-                entityWithUser(null, otherUserId),
-                Map::class.java
-            )
-
-            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        }
-
-        @Test
         fun `POST returns 404 when recipe not found`() {
             val response = restTemplate.exchange(
                 "/api/recipes/${UUID.randomUUID()}/publish",
@@ -451,7 +409,7 @@ class RecipeAcceptanceTest {
                 "/api/recipes/$recipeId/ingredients/$recipeIngredientId",
                 HttpMethod.PUT,
                 entityWithUser(
-                    ResolveIngredientRequest(action = "SELECT_EXISTING", ingredientId = ingredientId, newIngredient = null),
+                    ResolveIngredientRequest(action = "SELECT_EXISTING", ingredientId = ingredientId, newIngredient = null, quantity = null, unit = null),
                     userId
                 ),
                 Map::class.java
@@ -477,7 +435,7 @@ class RecipeAcceptanceTest {
                 "/api/recipes/$recipeId/ingredients/$recipeIngredientId",
                 HttpMethod.PUT,
                 entityWithUser(
-                    ResolveIngredientRequest(action = "CONFIRM_MATCH", ingredientId = null, newIngredient = null),
+                    ResolveIngredientRequest(action = "CONFIRM_MATCH", ingredientId = null, newIngredient = null, quantity = null, unit = null),
                     userId
                 ),
                 Map::class.java
@@ -504,7 +462,9 @@ class RecipeAcceptanceTest {
                     ResolveIngredientRequest(
                         action = "CREATE_NEW",
                         ingredientId = null,
-                        newIngredient = CreateIngredientRequest(name = "Dragon Fruit", category = "produce", defaultUnit = "whole")
+                        newIngredient = CreateIngredientRequest(name = "Dragon Fruit", category = "produce", defaultUnit = "whole"),
+                        quantity = null,
+                        unit = null
                     ),
                     userId
                 ),
@@ -515,28 +475,6 @@ class RecipeAcceptanceTest {
         }
 
         @Test
-        fun `PUT returns 403 when non-creator resolves ingredient`() {
-            val recipeId = fixture.insertRecipe(name = "Protected", status = "draft", createdBy = userId)
-            val recipeIngredientId = fixture.insertRecipeIngredient(
-                recipeId = recipeId, quantity = BigDecimal("1"), unit = "pieces", status = "pending_review"
-            )
-
-            val ingredientId = fixture.insertIngredient(name = "Onion", category = "produce", defaultUnit = "whole")
-
-            val response = restTemplate.exchange(
-                "/api/recipes/$recipeId/ingredients/$recipeIngredientId",
-                HttpMethod.PUT,
-                entityWithUser(
-                    ResolveIngredientRequest(action = "SELECT_EXISTING", ingredientId = ingredientId, newIngredient = null),
-                    otherUserId
-                ),
-                Map::class.java
-            )
-
-            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
-        }
-
-        @Test
         fun `PUT returns 404 when recipe not found`() {
             val ingredientId = fixture.insertIngredient(name = "Pepper", category = "spice", defaultUnit = "pinch")
 
@@ -544,7 +482,7 @@ class RecipeAcceptanceTest {
                 "/api/recipes/${UUID.randomUUID()}/ingredients/${UUID.randomUUID()}",
                 HttpMethod.PUT,
                 entityWithUser(
-                    ResolveIngredientRequest(action = "SELECT_EXISTING", ingredientId = ingredientId, newIngredient = null),
+                    ResolveIngredientRequest(action = "SELECT_EXISTING", ingredientId = ingredientId, newIngredient = null, quantity = null, unit = null),
                     userId
                 ),
                 Map::class.java
@@ -596,26 +534,6 @@ class RecipeAcceptanceTest {
             )
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
-        }
-
-        @Test
-        fun `PUT returns 403 when non-creator resolves duplicate`() {
-            val originalId = fixture.insertRecipe(name = "Original", status = "published", createdBy = otherUserId)
-            val recipeId = fixture.insertRecipe(
-                name = "Copy",
-                status = "draft",
-                createdBy = userId,
-                duplicateOfId = originalId
-            )
-
-            val response = restTemplate.exchange(
-                "/api/recipes/$recipeId/resolve-duplicate",
-                HttpMethod.PUT,
-                entityWithUser(ResolveDuplicateRequest(action = "NOT_DUPLICATE"), otherUserId),
-                Map::class.java
-            )
-
-            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         }
 
         @Test

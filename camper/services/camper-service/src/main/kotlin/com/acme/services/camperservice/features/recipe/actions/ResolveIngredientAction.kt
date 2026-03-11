@@ -20,17 +20,13 @@ internal class ResolveIngredientAction(
     private val ingredientClient: IngredientClient
 ) {
     fun execute(param: ResolveIngredientParam): Result<RecipeIngredientResponse, RecipeError> {
-        // Validate recipe exists and user is creator
-        val recipe = when (val result = recipeClient.getById(RecipeGetByIdParam(param.recipeId))) {
+        // Validate recipe exists
+        when (val result = recipeClient.getById(RecipeGetByIdParam(param.recipeId))) {
             is Result.Success -> result.value
             is Result.Failure -> when (result.error) {
                 is NotFoundError -> return Result.Failure(RecipeError.NotFound(param.recipeId))
                 else -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))
             }
-        }
-
-        if (recipe.createdBy != param.userId) {
-            return Result.Failure(RecipeError.NotCreator(param.recipeId, param.userId))
         }
 
         // Find the specific recipe ingredient

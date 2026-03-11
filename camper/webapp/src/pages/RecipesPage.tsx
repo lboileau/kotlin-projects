@@ -49,6 +49,12 @@ export function RecipesPage() {
   const [pendingQty, setPendingQty] = useState<number>(1);
   const [pendingUnit, setPendingUnit] = useState<string>('pieces');
   const [categorySearch, setCategorySearch] = useState('');
+  const [pickerCreateMode, setPickerCreateMode] = useState(false);
+  const [pickerNewName, setPickerNewName] = useState('');
+  const [pickerNewCategory, setPickerNewCategory] = useState<string>('produce');
+  const [pickerNewUnit, setPickerNewUnit] = useState<string>('pieces');
+  const [pickerNewQty, setPickerNewQty] = useState<number>(1);
+  const [pickerCreating, setPickerCreating] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
 
@@ -164,6 +170,31 @@ export function RecipesPage() {
       setPendingUnit('pieces');
     }
     setCreateError('');
+  };
+
+  const handlePickerCreateIngredient = async () => {
+    if (!pickerNewName.trim()) return;
+    setPickerCreating(true);
+    setCreateError('');
+    try {
+      const newIng = await api.createIngredient({ name: pickerNewName.trim(), category: pickerNewCategory, defaultUnit: pickerNewUnit });
+      setIngredients(prev => [...prev, newIng]);
+      setDraftIngredients(prev => [...prev, {
+        ingredientId: newIng.id,
+        ingredientName: newIng.name,
+        quantity: pickerNewQty,
+        unit: pickerNewUnit,
+      }]);
+      setPickerCreateMode(false);
+      setPickerNewName('');
+      setPickerNewCategory('produce');
+      setPickerNewUnit('pieces');
+      setPickerNewQty(1);
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create ingredient');
+    } finally {
+      setPickerCreating(false);
+    }
   };
 
   const handleRemoveDraftIngredient = (ingredientId: string) => {
@@ -475,11 +506,8 @@ export function RecipesPage() {
     ? null
     : ingredients.find(i => i.id === resolveSelectedId) ?? resolveModalSuggestions.find(s => s.id === resolveSelectedId) ?? null;
   const canPublish = selectedRecipe?.status === 'draft'
-    && selectedRecipe.createdBy === user?.id
     && pendingCount === 0
     && !selectedRecipe.duplicateOf;
-
-  const isCreator = selectedRecipe?.createdBy === user?.id;
 
   return (
     <div className="recipes-page">
@@ -619,25 +647,23 @@ export function RecipesPage() {
                 </svg>
                 All Recipes
               </button>
-              {isCreator && (
-                <div className="recipes-detail-actions">
-                  <button className="recipes-action-btn recipes-action-btn--edit" onClick={handleOpenEdit}>
-                    <svg width="15" height="15" viewBox="0 0 15 15">
-                      <path d="M10,2 L13,5 L5,13 L2,13 L2,10 Z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
-                      <line x1="8" y1="4" x2="11" y2="7" stroke="currentColor" strokeWidth="1.3" />
-                    </svg>
-                    Edit
-                  </button>
-                  <button className="recipes-action-btn recipes-action-btn--delete" onClick={() => setDeletingRecipe(selectedRecipe)}>
-                    <svg width="15" height="15" viewBox="0 0 15 15">
-                      <path d="M3,4 L12,4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                      <path d="M6,4 L6,2.5 Q6,2 6.5,2 L8.5,2 Q9,2 9,2.5 L9,4" stroke="currentColor" strokeWidth="1.2" fill="none" />
-                      <path d="M4,4 L4.8,12 Q4.8,13 5.8,13 L9.2,13 Q10.2,13 10.2,12 L11,4" stroke="currentColor" strokeWidth="1.2" fill="none" />
-                    </svg>
-                    Delete
-                  </button>
-                </div>
-              )}
+              <div className="recipes-detail-actions">
+                <button className="recipes-action-btn recipes-action-btn--edit" onClick={handleOpenEdit}>
+                  <svg width="15" height="15" viewBox="0 0 15 15">
+                    <path d="M10,2 L13,5 L5,13 L2,13 L2,10 Z" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+                    <line x1="8" y1="4" x2="11" y2="7" stroke="currentColor" strokeWidth="1.3" />
+                  </svg>
+                  Edit
+                </button>
+                <button className="recipes-action-btn recipes-action-btn--delete" onClick={() => setDeletingRecipe(selectedRecipe)}>
+                  <svg width="15" height="15" viewBox="0 0 15 15">
+                    <path d="M3,4 L12,4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                    <path d="M6,4 L6,2.5 Q6,2 6.5,2 L8.5,2 Q9,2 9,2.5 L9,4" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                    <path d="M4,4 L4.8,12 Q4.8,13 5.8,13 L9.2,13 Q10.2,13 10.2,12 L11,4" stroke="currentColor" strokeWidth="1.2" fill="none" />
+                  </svg>
+                  Delete
+                </button>
+              </div>
             </div>
 
             <div className="recipe-detail">
@@ -680,7 +706,7 @@ export function RecipesPage() {
               </div>
 
               {/* Duplicate warning */}
-              {selectedRecipe.duplicateOf && isCreator && (
+              {selectedRecipe.duplicateOf && (
                 <div className="recipe-detail__duplicate-banner">
                   <div className="recipe-detail__duplicate-banner-icon">
                     <svg width="20" height="20" viewBox="0 0 20 20">
@@ -724,7 +750,7 @@ export function RecipesPage() {
                     <line x1="7" y1="16" x2="11" y2="16" stroke="var(--sage-deep)" strokeWidth="1.5" strokeLinecap="round" />
                   </svg>
                   Ingredients
-                  {pendingCount > 0 && isCreator && (
+                  {pendingCount > 0 && (
                     <span className="recipe-detail__pending-count">{pendingCount} need review</span>
                   )}
                 </h2>
@@ -767,25 +793,18 @@ export function RecipesPage() {
                                 : ''}
                             </span>
                             <span className="recipe-detail__ingredient-action">
-                              {isPending && !isCreator && (
-                                <span className="recipe-detail__ingredient-flag">needs review</span>
-                              )}
-                              {isCreator && (
-                                <>
-                                  <button
-                                    className={isPending ? 'review-resolve-btn' : 'review-edit-btn'}
-                                    onClick={() => openResolveModal(ri)}
-                                  >
-                                    {isPending ? 'Resolve' : 'Edit'}
-                                  </button>
-                                  <button
-                                    className="review-remove-btn"
-                                    onClick={() => handleRemoveIngredient(ri.id)}
-                                  >
-                                    ✕
-                                  </button>
-                                </>
-                              )}
+                              <button
+                                className={isPending ? 'review-resolve-btn' : 'review-edit-btn'}
+                                onClick={() => openResolveModal(ri)}
+                              >
+                                {isPending ? 'Resolve' : 'Edit'}
+                              </button>
+                              <button
+                                className="review-remove-btn"
+                                onClick={() => handleRemoveIngredient(ri.id)}
+                              >
+                                ✕
+                              </button>
                             </span>
                           </div>
                         </li>
@@ -794,8 +813,7 @@ export function RecipesPage() {
                   </ul>
                 )}
 
-                {isCreator && (
-                  <div className="recipe-detail__add-ingredient">
+                <div className="recipe-detail__add-ingredient">
                     {!addIngredientOpen ? (
                       <button
                         className="recipe-detail__add-btn"
@@ -900,8 +918,7 @@ export function RecipesPage() {
                         )}
                       </div>
                     )}
-                  </div>
-                )}
+                </div>
 
                 {resolveError && !resolveModalIngredient && (
                   <p className="recipes-form-error" style={{ marginTop: 'var(--space-sm)' }}>{resolveError}</p>
@@ -1081,7 +1098,7 @@ export function RecipesPage() {
               </div>
 
               {/* Publish section */}
-              {selectedRecipe.status === 'draft' && isCreator && (
+              {selectedRecipe.status === 'draft' && (
                 <div className="recipe-detail__publish-section">
                   {canPublish ? (
                     <>
@@ -1320,6 +1337,57 @@ export function RecipesPage() {
                         ))
                       )}
                     </div>
+
+                    {!pickerCreateMode ? (
+                      <button
+                        type="button"
+                        className="recipe-detail__add-create-btn"
+                        onClick={() => { setPickerCreateMode(true); setPickerNewName(categorySearch); }}
+                      >
+                        + Create new ingredient
+                      </button>
+                    ) : (
+                      <div className="recipe-detail__add-create-form">
+                        <div className="recipe-detail__add-create-row">
+                          <input
+                            type="text"
+                            className="recipes-input"
+                            placeholder="Ingredient name"
+                            value={pickerNewName}
+                            onChange={e => setPickerNewName(e.target.value)}
+                            autoFocus
+                          />
+                        </div>
+                        <div className="recipe-detail__add-create-row">
+                          <select className="recipes-select" value={pickerNewCategory} onChange={e => setPickerNewCategory(e.target.value)}>
+                            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
+                          <input
+                            type="number"
+                            className="recipes-input recipes-input--qty"
+                            placeholder="Qty"
+                            value={pickerNewQty}
+                            onChange={e => setPickerNewQty(Number(e.target.value) || 0)}
+                            min={0}
+                            step="any"
+                          />
+                          <select className="recipes-select" value={pickerNewUnit} onChange={e => setPickerNewUnit(e.target.value)}>
+                            {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                          </select>
+                        </div>
+                        <div className="recipe-detail__add-create-actions">
+                          <button type="button" className="recipe-detail__add-create-cancel" onClick={() => setPickerCreateMode(false)}>Cancel</button>
+                          <button
+                            type="button"
+                            className="recipe-detail__add-create-save"
+                            onClick={handlePickerCreateIngredient}
+                            disabled={pickerCreating || !pickerNewName.trim()}
+                          >
+                            {pickerCreating ? 'Creating...' : 'Create & Add'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

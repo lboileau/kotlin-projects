@@ -32,7 +32,7 @@ class RecipeServiceTest {
     private val recipeService = RecipeService(
         fakeRecipeClient, fakeIngredientClient, fakeScraperClient, fakeHtmlFetcher
     )
-    private val ingredientService = IngredientService(fakeIngredientClient)
+    private val ingredientService = IngredientService(fakeIngredientClient, fakeRecipeClient)
 
     private val userId = UUID.randomUUID()
     private val otherUserId = UUID.randomUUID()
@@ -406,22 +406,6 @@ class RecipeServiceTest {
         }
 
         @Test
-        fun `update returns NotCreator when non-creator updates`() {
-            val recipe = createRecipe()
-
-            val result = recipeService.update(UpdateRecipeParam(
-                recipeId = recipe.id,
-                userId = otherUserId,
-                name = "Hijacked",
-                description = null,
-                baseServings = null
-            ))
-
-            assertThat(result.isFailure).isTrue()
-            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotCreator::class.java)
-        }
-
-        @Test
         fun `update returns NotFound when recipe does not exist`() {
             val result = recipeService.update(UpdateRecipeParam(
                 recipeId = UUID.randomUUID(),
@@ -446,16 +430,6 @@ class RecipeServiceTest {
             val result = recipeService.delete(DeleteRecipeParam(recipe.id, userId))
 
             assertThat(result.isSuccess).isTrue()
-        }
-
-        @Test
-        fun `delete returns NotCreator when non-creator deletes`() {
-            val recipe = createRecipe()
-
-            val result = recipeService.delete(DeleteRecipeParam(recipe.id, otherUserId))
-
-            assertThat(result.isFailure).isTrue()
-            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotCreator::class.java)
         }
 
         @Test
@@ -626,7 +600,9 @@ class RecipeServiceTest {
                 userId = userId,
                 action = "CONFIRM_MATCH",
                 ingredientId = null,
-                newIngredient = null
+                newIngredient = null,
+                quantity = null,
+                unit = null
             ))
 
             assertThat(result.isSuccess).isTrue()
@@ -650,7 +626,9 @@ class RecipeServiceTest {
                     name = "avocado",
                     category = "produce",
                     defaultUnit = "whole"
-                )
+                ),
+                quantity = null,
+                unit = null
             ))
 
             assertThat(result.isSuccess).isTrue()
@@ -670,30 +648,15 @@ class RecipeServiceTest {
                 userId = userId,
                 action = "SELECT_EXISTING",
                 ingredientId = avocado.id,
-                newIngredient = null
+                newIngredient = null,
+                quantity = null,
+                unit = null
             ))
 
             assertThat(result.isSuccess).isTrue()
             val resolved = (result as Result.Success).value
             assertThat(resolved.status).isEqualTo("approved")
             assertThat(resolved.ingredient?.id).isEqualTo(avocado.id)
-        }
-
-        @Test
-        fun `resolveIngredient returns NotCreator when non-creator calls`() {
-            val (recipeId, recipeIngredientId) = setupDraftWithPendingIngredient()
-
-            val result = recipeService.resolveIngredient(ResolveIngredientParam(
-                recipeId = recipeId,
-                recipeIngredientId = recipeIngredientId,
-                userId = otherUserId,
-                action = "SELECT_EXISTING",
-                ingredientId = UUID.randomUUID(),
-                newIngredient = null
-            ))
-
-            assertThat(result.isFailure).isTrue()
-            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotCreator::class.java)
         }
 
         @Test
@@ -704,7 +667,9 @@ class RecipeServiceTest {
                 userId = userId,
                 action = "SELECT_EXISTING",
                 ingredientId = UUID.randomUUID(),
-                newIngredient = null
+                newIngredient = null,
+                quantity = null,
+                unit = null
             ))
 
             assertThat(result.isFailure).isTrue()
@@ -721,7 +686,9 @@ class RecipeServiceTest {
                 userId = userId,
                 action = "INVALID_ACTION",
                 ingredientId = null,
-                newIngredient = null
+                newIngredient = null,
+                quantity = null,
+                unit = null
             ))
 
             assertThat(result.isFailure).isTrue()
@@ -780,20 +747,6 @@ class RecipeServiceTest {
         }
 
         @Test
-        fun `resolveDuplicate returns NotCreator when non-creator calls`() {
-            val imported = importGuacamole()
-
-            val result = recipeService.resolveDuplicate(ResolveDuplicateParam(
-                recipeId = imported.id,
-                userId = otherUserId,
-                action = "NOT_DUPLICATE"
-            ))
-
-            assertThat(result.isFailure).isTrue()
-            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotCreator::class.java)
-        }
-
-        @Test
         fun `resolveDuplicate returns NotFound when recipe does not exist`() {
             val result = recipeService.resolveDuplicate(ResolveDuplicateParam(
                 recipeId = UUID.randomUUID(),
@@ -839,7 +792,9 @@ class RecipeServiceTest {
                     userId = userId,
                     action = "SELECT_EXISTING",
                     ingredientId = ingredient.id,
-                    newIngredient = null
+                    newIngredient = null,
+                    quantity = null,
+                    unit = null
                 ))
             }
             return imported.id
@@ -896,16 +851,6 @@ class RecipeServiceTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.AlreadyPublished::class.java)
-        }
-
-        @Test
-        fun `publish returns NotCreator when non-creator publishes`() {
-            val recipeId = importAndApproveAll()
-
-            val result = recipeService.publish(PublishRecipeParam(recipeId, otherUserId))
-
-            assertThat(result.isFailure).isTrue()
-            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotCreator::class.java)
         }
 
         @Test

@@ -23,10 +23,6 @@ internal class PublishRecipeAction(
             }
         }
 
-        if (recipe.createdBy != param.userId) {
-            return Result.Failure(RecipeError.NotCreator(param.recipeId, param.userId))
-        }
-
         if (recipe.status == "published") {
             return Result.Failure(RecipeError.AlreadyPublished(param.recipeId))
         }

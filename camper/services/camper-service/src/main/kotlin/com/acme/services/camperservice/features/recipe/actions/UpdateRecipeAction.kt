@@ -14,16 +14,12 @@ internal class UpdateRecipeAction(
     private val recipeClient: RecipeClient
 ) {
     fun execute(param: UpdateRecipeParam): Result<RecipeResponse, RecipeError> {
-        val recipe = when (val result = recipeClient.getById(GetByIdParam(param.recipeId))) {
+        when (val result = recipeClient.getById(GetByIdParam(param.recipeId))) {
             is Result.Success -> result.value
             is Result.Failure -> when (result.error) {
                 is NotFoundError -> return Result.Failure(RecipeError.NotFound(param.recipeId))
                 else -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))
             }
-        }
-
-        if (recipe.createdBy != param.userId) {
-            return Result.Failure(RecipeError.NotCreator(param.recipeId, param.userId))
         }
 
         return when (val result = recipeClient.update(ClientUpdateRecipeParam(
