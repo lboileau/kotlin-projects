@@ -24,13 +24,35 @@ import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 
+/** Fetches the HTML content of a URL. Throws on failure. */
+fun interface HtmlFetcher {
+    fun fetch(url: String): String
+}
+
+/** Default implementation using Java's built-in HttpClient. */
+fun defaultHtmlFetcher(): HtmlFetcher {
+    val httpClient = HttpClient.newHttpClient()
+    return HtmlFetcher { url ->
+        val request = HttpRequest.newBuilder()
+            .uri(URI.create(url))
+            .header("User-Agent", "Mozilla/5.0 (compatible; CamperBot/1.0)")
+            .GET()
+            .build()
+        val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
+        if (response.statusCode() !in 200..299) {
+            error("HTTP ${response.statusCode()}")
+        }
+        response.body()
+    }
+}
+
 internal class ImportRecipeAction(
     private val recipeClient: RecipeClient,
     private val ingredientClient: IngredientClient,
-    private val recipeScraperClient: RecipeScraperClient
+    private val recipeScraperClient: RecipeScraperClient,
+    private val htmlFetcher: HtmlFetcher = defaultHtmlFetcher()
 ) {
     private val logger = LoggerFactory.getLogger(ImportRecipeAction::class.java)
-    private val httpClient = HttpClient.newHttpClient()
 
     fun execute(param: ImportRecipeParam): Result<RecipeDetailResponse, RecipeError> {
         if (param.url.isBlank()) {
@@ -47,16 +69,7 @@ internal class ImportRecipeAction(
 
         // Fetch HTML from URL
         val html = try {
-            val request = HttpRequest.newBuilder()
-                .uri(URI.create(param.url))
-                .header("User-Agent", "Mozilla/5.0 (compatible; CamperBot/1.0)")
-                .GET()
-                .build()
-            val response = httpClient.send(request, HttpResponse.BodyHandlers.ofString())
-            if (response.statusCode() !in 200..299) {
-                return Result.Failure(RecipeError.ImportFailed(param.url, "HTTP ${response.statusCode()}"))
-            }
-            response.body()
+            htmlFetcher.fetch(param.url)
         } catch (e: Exception) {
             logger.error("Failed to fetch URL: ${param.url}", e)
             return Result.Failure(RecipeError.ImportFailed(param.url, e.message ?: "Unknown error"))

@@ -6,12 +6,14 @@ import com.acme.clients.recipescraperclient.api.RecipeScraperClient
 import com.acme.services.camperservice.features.recipe.actions.CreateRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.DeleteRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.GetRecipeAction
+import com.acme.services.camperservice.features.recipe.actions.HtmlFetcher
 import com.acme.services.camperservice.features.recipe.actions.ImportRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.ListRecipesAction
 import com.acme.services.camperservice.features.recipe.actions.PublishRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.ResolveDuplicateAction
 import com.acme.services.camperservice.features.recipe.actions.ResolveIngredientAction
 import com.acme.services.camperservice.features.recipe.actions.UpdateRecipeAction
+import com.acme.services.camperservice.features.recipe.actions.defaultHtmlFetcher
 import com.acme.services.camperservice.features.recipe.params.CreateRecipeParam
 import com.acme.services.camperservice.features.recipe.params.DeleteRecipeParam
 import com.acme.services.camperservice.features.recipe.params.GetRecipeParam
@@ -25,10 +27,11 @@ import com.acme.services.camperservice.features.recipe.params.UpdateRecipeParam
 class RecipeService(
     recipeClient: RecipeClient,
     ingredientClient: IngredientClient,
-    recipeScraperClient: RecipeScraperClient
+    recipeScraperClient: RecipeScraperClient,
+    htmlFetcher: HtmlFetcher = defaultHtmlFetcher()
 ) {
     private val createRecipe = CreateRecipeAction(recipeClient, ingredientClient)
-    private val importRecipe = ImportRecipeAction(recipeClient, ingredientClient, recipeScraperClient)
+    private val importRecipe = ImportRecipeAction(recipeClient, ingredientClient, recipeScraperClient, htmlFetcher)
     private val getRecipe = GetRecipeAction(recipeClient, ingredientClient)
     private val listRecipes = ListRecipesAction(recipeClient)
     private val updateRecipe = UpdateRecipeAction(recipeClient)

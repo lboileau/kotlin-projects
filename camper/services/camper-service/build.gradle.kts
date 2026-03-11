@@ -48,6 +48,7 @@ dependencies {
     testImplementation(testFixtures(project(":clients:gear-sync-client")))
     testImplementation(testFixtures(project(":clients:ingredient-client")))
     testImplementation(testFixtures(project(":clients:recipe-client")))
+    testImplementation(testFixtures(project(":clients:recipe-scraper-client")))
 }
 
 tasks.named<Copy>("processResources") {
