@@ -517,6 +517,91 @@ sealed class MealPlanError {
 | 13 | acceptance-tests | feat(meal-plans): acceptance tests | End-to-end API tests |
 | 14 | docs | feat(meal-plans): update documentation and skills | CLAUDE.md, README updates, skill updates |
 
+## Testing Strategy
+
+The calculation logic in this feature — unit conversion, scaling, aggregation, and purchase status derivation — is the core of the shopping list experience. Bugs here directly affect the user's grocery trip. **Testing this layer thoroughly is critical.**
+
+### Lib Tests (meal-plan-calculator) — highest priority
+
+This is where the most complex logic lives and where the most things can go wrong. These tests must be **exhaustive**.
+
+#### UnitConverter
+
+- **Every supported conversion pair**: tsp↔tbsp, tbsp↔cup, cup↔ml, ml↔l, and all reverse directions. Same for weight: g↔kg, g↔oz, oz↔lb, etc.
+- **Incompatible conversions**: volume↔weight returns null, volume↔count returns null, different count types return null (clove↔whole)
+- **areCompatible**: true for all volume pairs, all weight pairs. False across groups. False for count↔count of different types.
+- **bestFit edge cases**:
+  - Clean conversions: 48 tsp → 1 cup, 3 tsp → 1 tbsp, 1000 ml → 1 l
+  - Stays put when conversion isn't clean: 6 tbsp → 6 tbsp (not 0.375 cups)
+  - Clean fractions: 8 tbsp → 0.5 cup, 6 tsp → 2 tbsp
+  - Large quantities: 5000 ml → 5 l
+  - Small quantities: 0.25 tsp → 0.25 tsp (no smaller unit)
+  - Quantities that are already best-fit: 2 cups → 2 cups
+- **Precision**: BigDecimal rounding behavior across all conversions. No floating point drift.
+
+#### ShoppingListCalculator — scaleIngredients
+
+- **Fractional scaling**: 6 servings / 4 base = 1.5x. Verify all ingredient quantities multiplied by 1.5
+- **Round-up scaling**: 6/4 → ceil(1.5) = 2x. Verify quantities doubled.
+- **Round-up exact fit**: 8/4 = 2x exactly. ceil(2) = 2. No unnecessary rounding.
+- **Scale factor < 1**: 2 servings / 4 base = 0.5x fractional, ceil(0.5) = 1x round-up
+- **Scale factor = 1**: no change to quantities
+- **Large scale factors**: 20 servings / 2 base = 10x
+- **Multiple recipes with different base servings**: recipe A (base 4) and recipe B (base 2) in the same meal plan with 6 servings — different scale factors per recipe
+
+#### ShoppingListCalculator — aggregateShoppingList
+
+- **Same ingredient, same unit**: 2 cups flour (recipe A) + 1 cup flour (recipe B) → 3 cups flour
+- **Same ingredient, compatible units**: 1 cup carrots + 2 tbsp carrots → single row in best-fit unit
+- **Same ingredient, incompatible units**: 1 cup carrots + 2 whole carrots → two separate rows
+- **Same ingredient, three unit groups**: 1 cup carrots + 500g carrots + 2 whole carrots → three rows
+- **Single recipe, single ingredient**: simplest case, no aggregation needed
+- **Many recipes, same ingredient**: 5+ recipes all using onions in compatible units → one row with correct total
+- **Empty meal plan**: no recipes → empty shopping list
+- **Recipe with no approved ingredients**: skipped in aggregation
+- **Recipe ingredients with null ingredient_id**: excluded (only approved with resolved ingredient_id)
+
+#### Purchase status derivation
+
+- **Done**: purchased >= required > 0
+- **More needed**: 0 < purchased < required (verify delta = required - purchased)
+- **Not purchased**: purchased = 0, required > 0
+- **No longer needed**: required = 0, purchased > 0 (recipe was removed after purchasing)
+- **Edge: purchased exactly equals required**: status is "done", not "more needed"
+- **Edge: no purchase record exists**: treated as purchased = 0
+
+#### Integration scenarios (end-to-end calculator)
+
+These test the full pipeline: raw recipe ingredients → scale → convert → aggregate → join purchases → statuses.
+
+- **Headcount increase after purchase**: buy 3 cups flour, then servings goes from 4 to 8 → required doubles, status becomes "more needed" with correct delta
+- **Recipe removed after purchase**: buy ingredients, remove recipe → "no longer needed" on those items
+- **Recipe added after partial purchase**: existing purchases still apply to the new totals
+- **Scaling mode change**: switch from fractional to round-up mid-plan — all quantities recompute
+- **Same recipe on multiple days**: Pancakes on day 1 breakfast AND day 3 breakfast — ingredients counted twice
+- **Same recipe on same day, different meals**: Pancakes for breakfast AND snack — ingredients counted twice
+
+### Service Tests
+
+- Each action's happy path and error cases
+- **GetShoppingListAction**: verify it correctly orchestrates data loading from clients, passes to calculator, joins with purchases, returns correct response shape
+- Verify purchase UPSERT behavior (create if not exists, update if exists)
+- Verify cascade behavior: deleting a meal plan clears purchases
+
+### Client Tests
+
+- Standard CRUD operations for meal_plans, meal_plan_days, meal_plan_recipes, shopping_list_purchases
+- UPSERT on `(meal_plan_id, ingredient_id, unit)` conflict
+- CASCADE deletes: delete meal plan → purchases gone. Delete recipe → meal_plan_recipes gone.
+- Foreign key constraints: cannot create meal_plan_recipe with invalid recipe_id
+
+### Acceptance Tests
+
+- Full API workflow: create meal plan → add days → add recipes → get shopping list → update purchases → verify statuses
+- Shopping list reflects live recipe changes (update a recipe's ingredient quantity via recipe API, then re-fetch shopping list)
+- Headcount change flow: update servings → shopping list quantities change → purchase shortfalls visible
+- Template copy: copy template to trip → shopping list computable on new trip plan (no purchases carried over)
+
 ## Open Questions
 
 None — all requirements clarified with user.
