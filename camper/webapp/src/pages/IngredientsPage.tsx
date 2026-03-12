@@ -21,14 +21,23 @@ export function IngredientsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [categoryTab, setCategoryTab] = useState<string | null>(null);
 
   // Create form
+  interface CreateRow { name: string; category: string; unit: string; }
+  const emptyRow = (): CreateRow => ({ name: '', category: 'produce', unit: 'pieces' });
   const [showCreate, setShowCreate] = useState(false);
-  const [createName, setCreateName] = useState('');
-  const [createCategory, setCreateCategory] = useState<string>('produce');
-  const [createUnit, setCreateUnit] = useState<string>('pieces');
+  const [createRows, setCreateRows] = useState<CreateRow[]>([emptyRow()]);
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+
+  const updateCreateRow = (index: number, field: keyof CreateRow, value: string) => {
+    setCreateRows(rows => rows.map((r, i) => i === index ? { ...r, [field]: value } : r));
+  };
+
+  const removeCreateRow = (index: number) => {
+    setCreateRows(rows => rows.length === 1 ? rows : rows.filter((_, i) => i !== index));
+  };
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -59,18 +68,20 @@ export function IngredientsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!createName.trim()) return;
+    const validRows = createRows.filter(r => r.name.trim());
+    if (validRows.length === 0) return;
     setCreating(true);
     setCreateError('');
     try {
-      await api.createIngredient({ name: createName.trim(), category: createCategory, defaultUnit: createUnit });
-      setCreateName('');
-      setCreateCategory('produce');
-      setCreateUnit('pieces');
+      for (const row of validRows) {
+        await api.createIngredient({ name: row.name.trim(), category: row.category, defaultUnit: row.unit });
+      }
+      setCreateRows([emptyRow()]);
       setShowCreate(false);
       await loadIngredients();
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Failed to create ingredient');
+      await loadIngredients();
     } finally {
       setCreating(false);
     }
@@ -121,8 +132,12 @@ export function IngredientsPage() {
 
   const filtered = ingredients.filter(ing => {
     const q = search.toLowerCase();
-    return !q || ing.name.toLowerCase().includes(q) || ing.category.toLowerCase().includes(q);
+    const matchesSearch = !q || ing.name.toLowerCase().includes(q) || ing.category.toLowerCase().includes(q);
+    const matchesCategory = categoryTab === null || ing.category === categoryTab;
+    return matchesSearch && matchesCategory;
   });
+
+  const availableCategories = [...new Set(ingredients.map(i => i.category))].sort();
 
   const grouped = filtered.reduce<Record<string, IngredientResponse[]>>((acc, ing) => {
     (acc[ing.category] = acc[ing.category] || []).push(ing);
@@ -159,59 +174,131 @@ export function IngredientsPage() {
           <button className="recipes-section-nav__tab recipes-section-nav__tab--active">Ingredients</button>
         </div>
 
-        <div className="ingredients-toolbar">
-          <input
-            type="text"
-            className="ingredients-search"
-            placeholder="Search ingredients..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          <button className="ingredients-create-btn" onClick={() => setShowCreate(true)}>
-            + New Ingredient
+        <div className="recipes-hero">
+          <h1 className="recipes-title">Ingredient Pantry</h1>
+          <p className="recipes-subtitle">All known ingredients across your recipes</p>
+        </div>
+
+        <div className="recipes-toolbar">
+          <div className="recipes-search-wrap">
+            <svg width="16" height="16" viewBox="0 0 16 16" className="recipes-search-icon">
+              <circle cx="6.5" cy="6.5" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.5" />
+              <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            <input
+              className="recipes-search"
+              placeholder="Search ingredients..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <button className="recipes-create-btn" onClick={() => setShowCreate(true)}>
+            <svg width="16" height="16" viewBox="0 0 16 16">
+              <line x1="8" y1="2" x2="8" y2="14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            New Ingredients
           </button>
         </div>
+
+        {availableCategories.length > 1 && (
+          <div className="recipes-meal-tabs">
+            <button
+              className={`recipes-meal-tab ${categoryTab === null ? 'recipes-meal-tab--active' : ''}`}
+              onClick={() => setCategoryTab(null)}
+            >All</button>
+            {availableCategories.map(c => (
+              <button
+                key={c}
+                className={`recipes-meal-tab ${categoryTab === c ? 'recipes-meal-tab--active' : ''}`}
+                onClick={() => setCategoryTab(categoryTab === c ? null : c)}
+              >{c}</button>
+            ))}
+          </div>
+        )}
 
         {error && <p className="ingredients-error">{error}</p>}
 
         {/* Create form */}
         {showCreate && (
+          <div className="ingredients-create-wrap">
           <div className="ingredients-create-form">
-            <h3 className="ingredients-create-title">New Ingredient</h3>
+            <h3 className="ingredients-create-title">New Ingredients</h3>
             <form onSubmit={handleCreate}>
-              <div className="ingredients-form-row">
-                <div className="ingredients-form-field">
-                  <label className="ingredients-form-label">name</label>
-                  <input
-                    type="text"
-                    className="ingredients-input"
-                    placeholder="e.g. garlic"
-                    value={createName}
-                    onChange={e => setCreateName(e.target.value)}
-                    autoFocus
-                  />
+              {createRows.map((row, i) => (
+                <div key={i} className="ingredients-form-row">
+                  {i === 0 ? (
+                    <>
+                      <div className="ingredients-form-field ingredients-form-field--grow">
+                        <label className="ingredients-form-label">name</label>
+                        <input
+                          type="text"
+                          className="ingredients-input"
+                          placeholder="e.g. garlic"
+                          value={row.name}
+                          onChange={e => updateCreateRow(i, 'name', e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <div className="ingredients-form-field">
+                        <label className="ingredients-form-label">category</label>
+                        <select className="ingredients-select" value={row.category} onChange={e => updateCreateRow(i, 'category', e.target.value)}>
+                          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div className="ingredients-form-field">
+                        <label className="ingredients-form-label">default unit</label>
+                        <select className="ingredients-select" value={row.unit} onChange={e => updateCreateRow(i, 'unit', e.target.value)}>
+                          {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="ingredients-form-field ingredients-form-field--grow">
+                        <input
+                          type="text"
+                          className="ingredients-input"
+                          placeholder="e.g. garlic"
+                          value={row.name}
+                          onChange={e => updateCreateRow(i, 'name', e.target.value)}
+                          autoFocus
+                        />
+                      </div>
+                      <div className="ingredients-form-field">
+                        <select className="ingredients-select" value={row.category} onChange={e => updateCreateRow(i, 'category', e.target.value)}>
+                          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div className="ingredients-form-field">
+                        <select className="ingredients-select" value={row.unit} onChange={e => updateCreateRow(i, 'unit', e.target.value)}>
+                          {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                        </select>
+                      </div>
+                      <button type="button" className="ingredients-btn-remove-row" onClick={() => removeCreateRow(i)}>
+                        <svg width="14" height="14" viewBox="0 0 14 14">
+                          <line x1="3" y1="3" x2="11" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          <line x1="11" y1="3" x2="3" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
                 </div>
-                <div className="ingredients-form-field">
-                  <label className="ingredients-form-label">category</label>
-                  <select className="ingredients-select" value={createCategory} onChange={e => setCreateCategory(e.target.value)}>
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div className="ingredients-form-field">
-                  <label className="ingredients-form-label">default unit</label>
-                  <select className="ingredients-select" value={createUnit} onChange={e => setCreateUnit(e.target.value)}>
-                    {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
-                </div>
-              </div>
+              ))}
+              <button
+                type="button"
+                className="ingredients-add-row-btn"
+                onClick={() => setCreateRows(rows => [...rows, emptyRow()])}
+              >+ Add another</button>
               {createError && <p className="ingredients-error">{createError}</p>}
               <div className="ingredients-form-actions">
-                <button type="button" className="ingredients-btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button>
-                <button type="submit" className="ingredients-btn-primary" disabled={creating || !createName.trim()}>
-                  {creating ? 'Creating...' : 'Create'}
+                <button type="button" className="ingredients-btn-secondary" onClick={() => { setShowCreate(false); setCreateRows([emptyRow()]); }}>Cancel</button>
+                <button type="submit" className="ingredients-btn-primary" disabled={creating || !createRows.some(r => r.name.trim())}>
+                  {creating ? 'Creating...' : `Create ${createRows.filter(r => r.name.trim()).length || ''}`}
                 </button>
               </div>
             </form>
+          </div>
           </div>
         )}
 
