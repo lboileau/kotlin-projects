@@ -45,6 +45,8 @@ class FakeRecipeClient : RecipeClient {
             status = param.status,
             createdBy = param.createdBy,
             duplicateOfId = null,
+            meal = param.meal,
+            theme = param.theme,
             createdAt = Instant.now(),
             updatedAt = Instant.now()
         )
@@ -79,6 +81,8 @@ class FakeRecipeClient : RecipeClient {
                 param.duplicateOfId != null -> param.duplicateOfId
                 else -> existing.duplicateOfId
             },
+            meal = param.meal ?: existing.meal,
+            theme = param.theme ?: existing.theme,
             updatedAt = Instant.now()
         )
         recipes[param.id] = updated
@@ -115,6 +119,8 @@ class FakeRecipeClient : RecipeClient {
             status = param.status,
             matchedIngredientId = param.matchedIngredientId,
             suggestedIngredientName = param.suggestedIngredientName,
+            suggestedCategory = param.suggestedCategory,
+            suggestedUnit = param.suggestedUnit,
             reviewFlags = param.reviewFlags,
             createdAt = Instant.now(),
             updatedAt = Instant.now()

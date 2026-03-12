@@ -23,6 +23,8 @@ internal object RecipeIngredientRowAdapter {
             status = rs.getString("status"),
             matchedIngredientId = rs.getObject("matched_ingredient_id", UUID::class.java),
             suggestedIngredientName = rs.getString("suggested_ingredient_name"),
+            suggestedCategory = rs.getString("suggested_category"),
+            suggestedUnit = rs.getString("suggested_unit"),
             reviewFlags = reviewFlags,
             createdAt = rs.getTimestamp("created_at").toInstant(),
             updatedAt = rs.getTimestamp("updated_at").toInstant()

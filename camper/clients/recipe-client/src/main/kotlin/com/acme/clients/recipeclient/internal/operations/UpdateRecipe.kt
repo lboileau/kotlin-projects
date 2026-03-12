@@ -38,6 +38,8 @@ internal class UpdateRecipe(
                 param.clearDuplicateOf -> sets.add("duplicate_of_id = NULL")
                 param.duplicateOfId != null -> sets.add("duplicate_of_id = :duplicateOfId")
             }
+            if (param.meal != null) sets.add("meal = :meal")
+            if (param.theme != null) sets.add("theme = :theme")
             sets.add("updated_at = :updatedAt")
 
             val entity = jdbi.withHandle<Recipe, Exception> { handle ->
@@ -49,11 +51,13 @@ internal class UpdateRecipe(
                     .also { q -> if (param.baseServings != null) q.bind("baseServings", param.baseServings) }
                     .also { q -> if (param.status != null) q.bind("status", param.status) }
                     .also { q -> if (param.duplicateOfId != null && !param.clearDuplicateOf) q.bind("duplicateOfId", param.duplicateOfId) }
+                    .also { q -> if (param.meal != null) q.bind("meal", param.meal) }
+                    .also { q -> if (param.theme != null) q.bind("theme", param.theme) }
                     .bind("updatedAt", now)
                     .execute()
 
                 handle.createQuery(
-                    "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, created_at, updated_at FROM recipes WHERE id = :id"
+                    "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, meal, theme, created_at, updated_at FROM recipes WHERE id = :id"
                 )
                     .bind("id", param.id)
                     .map { rs, _ -> RecipeRowAdapter.fromResultSet(rs) }

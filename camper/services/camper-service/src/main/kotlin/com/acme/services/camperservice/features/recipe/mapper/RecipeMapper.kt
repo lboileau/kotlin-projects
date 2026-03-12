@@ -28,6 +28,8 @@ object RecipeMapper {
         status = recipe.status,
         createdBy = recipe.createdBy,
         duplicateOfId = recipe.duplicateOfId,
+        meal = recipe.meal,
+        theme = recipe.theme,
         createdAt = recipe.createdAt,
         updatedAt = recipe.updatedAt
     )
@@ -46,6 +48,8 @@ object RecipeMapper {
         status = recipeIngredient.status,
         matchedIngredient = matchedIngredient,
         suggestedIngredientName = recipeIngredient.suggestedIngredientName,
+        suggestedCategory = recipeIngredient.suggestedCategory,
+        suggestedUnit = recipeIngredient.suggestedUnit,
         reviewFlags = recipeIngredient.reviewFlags,
         createdAt = recipeIngredient.createdAt,
         updatedAt = recipeIngredient.updatedAt
@@ -65,6 +69,8 @@ object RecipeMapper {
         createdBy = recipe.createdBy,
         duplicateOf = duplicateOf,
         ingredients = ingredients,
+        meal = recipe.meal,
+        theme = recipe.theme,
         createdAt = recipe.createdAt,
         updatedAt = recipe.updatedAt
     )

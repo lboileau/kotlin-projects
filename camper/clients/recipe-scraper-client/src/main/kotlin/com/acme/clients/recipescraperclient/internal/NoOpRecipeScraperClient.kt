@@ -19,6 +19,8 @@ internal class NoOpRecipeScraperClient : RecipeScraperClient {
             name = "Classic Guacamole",
             description = "A simple and delicious guacamole recipe.",
             baseServings = 4,
+            meal = "snack",
+            theme = "vegetarian",
             ingredients = listOf(
                 ScrapedIngredient(
                     originalText = "3 ripe avocados",
@@ -26,6 +28,8 @@ internal class NoOpRecipeScraperClient : RecipeScraperClient {
                     unit = "whole",
                     matchedIngredientId = null,
                     suggestedIngredientName = "avocado",
+                    suggestedCategory = "produce",
+                    suggestedUnit = "whole",
                     confidence = "HIGH",
                     reviewFlags = listOf("NEW_INGREDIENT")
                 ),
@@ -35,6 +39,8 @@ internal class NoOpRecipeScraperClient : RecipeScraperClient {
                     unit = "cup",
                     matchedIngredientId = null,
                     suggestedIngredientName = "red onion",
+                    suggestedCategory = "produce",
+                    suggestedUnit = "whole",
                     confidence = "LOW",
                     reviewFlags = listOf("NEW_INGREDIENT", "INGREDIENT_MATCH_UNCERTAIN")
                 )

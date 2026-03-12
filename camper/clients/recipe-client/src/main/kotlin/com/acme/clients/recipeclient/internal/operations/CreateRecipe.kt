@@ -28,8 +28,8 @@ internal class CreateRecipe(private val jdbi: Jdbi) {
                 val now = Instant.now()
                 handle.createUpdate(
                     """
-                    INSERT INTO recipes (id, name, description, web_link, base_servings, status, created_by, created_at, updated_at)
-                    VALUES (:id, :name, :description, :webLink, :baseServings, :status, :createdBy, :createdAt, :updatedAt)
+                    INSERT INTO recipes (id, name, description, web_link, base_servings, status, created_by, meal, theme, created_at, updated_at)
+                    VALUES (:id, :name, :description, :webLink, :baseServings, :status, :createdBy, :meal, :theme, :createdAt, :updatedAt)
                     """.trimIndent()
                 )
                     .bind("id", id)
@@ -39,6 +39,8 @@ internal class CreateRecipe(private val jdbi: Jdbi) {
                     .bind("baseServings", param.baseServings)
                     .bind("status", param.status)
                     .bind("createdBy", param.createdBy)
+                    .bind("meal", param.meal)
+                    .bind("theme", param.theme)
                     .bind("createdAt", now)
                     .bind("updatedAt", now)
                     .execute()
@@ -51,6 +53,8 @@ internal class CreateRecipe(private val jdbi: Jdbi) {
                     status = param.status,
                     createdBy = param.createdBy,
                     duplicateOfId = null,
+                    meal = param.meal,
+                    theme = param.theme,
                     createdAt = now,
                     updatedAt = now
                 )

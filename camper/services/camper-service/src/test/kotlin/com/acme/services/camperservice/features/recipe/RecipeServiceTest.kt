@@ -220,7 +220,7 @@ class RecipeServiceTest {
 
         @Test
         fun `create returns Invalid when name is blank`() {
-            val result = recipeService.create(CreateRecipeParam(userId, "", null, null, 2, emptyList()))
+            val result = recipeService.create(CreateRecipeParam(userId, "", null, null, 2, ingredients = emptyList()))
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
@@ -228,7 +228,7 @@ class RecipeServiceTest {
 
         @Test
         fun `create returns Invalid when baseServings is zero`() {
-            val result = recipeService.create(CreateRecipeParam(userId, "Soup", null, null, 0, emptyList()))
+            val result = recipeService.create(CreateRecipeParam(userId, "Soup", null, null, 0, ingredients = emptyList()))
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
@@ -251,7 +251,7 @@ class RecipeServiceTest {
 
         @Test
         fun `create with no ingredients succeeds`() {
-            val result = recipeService.create(CreateRecipeParam(userId, "Simple", null, null, 1, emptyList()))
+            val result = recipeService.create(CreateRecipeParam(userId, "Simple", null, null, 1, ingredients = emptyList()))
 
             assertThat(result.isSuccess).isTrue()
         }

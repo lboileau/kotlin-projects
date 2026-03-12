@@ -13,6 +13,8 @@ data class RecipeResponse(
     val status: String,
     val createdBy: UUID,
     val duplicateOfId: UUID?,
+    val meal: String?,
+    val theme: String?,
     val createdAt: Instant,
     val updatedAt: Instant
 )
@@ -27,6 +29,8 @@ data class RecipeDetailResponse(
     val createdBy: UUID,
     val duplicateOf: RecipeResponse?,
     val ingredients: List<RecipeIngredientResponse>,
+    val meal: String?,
+    val theme: String?,
     val createdAt: Instant,
     val updatedAt: Instant
 )
@@ -41,6 +45,8 @@ data class RecipeIngredientResponse(
     val status: String,
     val matchedIngredient: IngredientResponse?,
     val suggestedIngredientName: String?,
+    val suggestedCategory: String?,
+    val suggestedUnit: String?,
     val reviewFlags: List<String>,
     val createdAt: Instant,
     val updatedAt: Instant

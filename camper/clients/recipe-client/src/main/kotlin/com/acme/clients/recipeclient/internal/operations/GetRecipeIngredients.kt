@@ -23,7 +23,7 @@ internal class GetRecipeIngredients(private val jdbi: Jdbi) {
             handle.createQuery(
                 """
                 SELECT id, recipe_id, ingredient_id, original_text, quantity, unit, status,
-                       matched_ingredient_id, suggested_ingredient_name, review_flags, created_at, updated_at
+                       matched_ingredient_id, suggested_ingredient_name, suggested_category, suggested_unit, review_flags, created_at, updated_at
                 FROM recipe_ingredients
                 WHERE recipe_id = :recipeId
                 ORDER BY created_at

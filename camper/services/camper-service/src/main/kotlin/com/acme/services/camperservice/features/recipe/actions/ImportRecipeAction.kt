@@ -72,7 +72,7 @@ internal class ImportRecipeAction(
             htmlFetcher.fetch(param.url)
         } catch (e: Exception) {
             logger.error("Failed to fetch URL: ${param.url}", e)
-            return Result.Failure(RecipeError.ImportFailed(param.url, e.message ?: "Unknown error"))
+            return Result.Failure(RecipeError.ImportFailed(param.url, "Could not fetch the recipe page — check that the URL is valid and accessible"))
         }
 
         // Load all global ingredients
@@ -109,7 +109,9 @@ internal class ImportRecipeAction(
             webLink = param.url,
             baseServings = scraped.baseServings,
             status = "draft",
-            createdBy = param.userId
+            createdBy = param.userId,
+            meal = scraped.meal,
+            theme = scraped.theme
         ))) {
             is Result.Success -> result.value
             is Result.Failure -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))
@@ -139,6 +141,8 @@ internal class ImportRecipeAction(
                 status = if (ing.reviewFlags.isEmpty() && ing.matchedIngredientId != null) "approved" else "pending_review",
                 matchedIngredientId = ing.matchedIngredientId,
                 suggestedIngredientName = ing.suggestedIngredientName,
+                suggestedCategory = ing.suggestedCategory,
+                suggestedUnit = ing.suggestedUnit,
                 reviewFlags = ing.reviewFlags
             )
         }

@@ -38,7 +38,9 @@ internal class CreateRecipeAction(
             webLink = param.webLink,
             baseServings = param.baseServings,
             status = "published",
-            createdBy = param.userId
+            createdBy = param.userId,
+            meal = param.meal,
+            theme = param.theme
         ))) {
             is Result.Success -> result.value
             is Result.Failure -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))

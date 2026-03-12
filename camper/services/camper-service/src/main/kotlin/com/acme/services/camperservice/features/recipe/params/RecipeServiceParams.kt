@@ -38,6 +38,8 @@ data class CreateRecipeParam(
     val description: String?,
     val webLink: String?,
     val baseServings: Int,
+    val meal: String? = null,
+    val theme: String? = null,
     val ingredients: List<CreateRecipeIngredientParam>
 )
 
@@ -58,7 +60,9 @@ data class UpdateRecipeParam(
     val userId: UUID,
     val name: String?,
     val description: String?,
-    val baseServings: Int?
+    val baseServings: Int?,
+    val meal: String? = null,
+    val theme: String? = null
 )
 
 data class DeleteRecipeParam(

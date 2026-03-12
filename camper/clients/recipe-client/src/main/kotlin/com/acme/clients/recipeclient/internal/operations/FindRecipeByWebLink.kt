@@ -21,7 +21,7 @@ internal class FindRecipeByWebLink(private val jdbi: Jdbi) {
         logger.debug("Finding recipe by webLink={}", param.webLink)
         val entity = jdbi.withHandle<Recipe?, Exception> { handle ->
             handle.createQuery(
-                "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, created_at, updated_at FROM recipes WHERE web_link = :webLink"
+                "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, meal, theme, created_at, updated_at FROM recipes WHERE web_link = :webLink"
             )
                 .bind("webLink", param.webLink)
                 .map { rs, _ -> RecipeRowAdapter.fromResultSet(rs) }

@@ -28,6 +28,8 @@ class FakeRecipeScraperClient : RecipeScraperClient {
         name = "Classic Guacamole",
         description = "A simple and delicious guacamole recipe.",
         baseServings = 4,
+        meal = "snack",
+        theme = "vegetarian",
         ingredients = listOf(
             ScrapedIngredient(
                 originalText = "3 ripe avocados",
@@ -35,6 +37,8 @@ class FakeRecipeScraperClient : RecipeScraperClient {
                 unit = "whole",
                 matchedIngredientId = null,
                 suggestedIngredientName = "avocado",
+                suggestedCategory = "produce",
+                suggestedUnit = "whole",
                 confidence = "HIGH",
                 reviewFlags = listOf("NEW_INGREDIENT")
             )

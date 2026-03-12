@@ -20,7 +20,7 @@ internal class GetAllRecipes(private val jdbi: Jdbi) {
             if (param.createdBy != null) conditions.add("created_by = :createdBy")
             val where = if (conditions.isEmpty()) "" else "WHERE ${conditions.joinToString(" AND ")}"
             val query = handle.createQuery(
-                "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, created_at, updated_at FROM recipes $where ORDER BY name"
+                "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, meal, theme, created_at, updated_at FROM recipes $where ORDER BY name"
             )
             if (param.status != null) query.bind("status", param.status)
             if (param.createdBy != null) query.bind("createdBy", param.createdBy)
