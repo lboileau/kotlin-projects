@@ -20,6 +20,7 @@ include(":clients:gear-sync-client")
 include(":clients:ingredient-client")
 include(":clients:recipe-client")
 include(":clients:recipe-scraper-client")
+include(":clients:meal-plan-client")
 include(":services:common")
 project(":services:common").name = "service-common"
 include(":services:camper-service")
