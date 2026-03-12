@@ -8,7 +8,7 @@ import {
   type CreateRecipeIngredientRequest,
   type CreateIngredientRequest,
 } from '../api/client';
-import { useAuth } from '../context/AuthContext';
+
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
 import './RecipesPage.css';
@@ -29,7 +29,6 @@ interface DraftIngredient {
 }
 
 export function RecipesPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [view, setView] = useState<View>('list');
@@ -50,8 +49,7 @@ export function RecipesPage() {
   const [createMeal, setCreateMeal] = useState('');
   const [createTheme, setCreateTheme] = useState('');
   const [draftIngredients, setDraftIngredients] = useState<DraftIngredient[]>([]);
-  const [ingredientSearch, setIngredientSearch] = useState('');
-  const [ingredientSearchOpen, setIngredientSearchOpen] = useState(false);
+
   const [pendingIngredient, setPendingIngredient] = useState<IngredientResponse | null>(null);
   const [pendingQty, setPendingQty] = useState<number>(1);
   const [pendingUnit, setPendingUnit] = useState<string>('pieces');
@@ -145,7 +143,7 @@ export function RecipesPage() {
     setCreateLink('');
     setCreateServings(4);
     setDraftIngredients([]);
-    setIngredientSearch('');
+    setAddIngredientSearch('');
     setPendingIngredient(null);
     setPendingQty(1);
     setPendingUnit('pieces');
@@ -174,7 +172,7 @@ export function RecipesPage() {
     }]);
     if (!ing) {
       setPendingIngredient(null);
-      setIngredientSearch('');
+      setAddIngredientSearch('');
       setPendingQty(1);
       setPendingUnit('pieces');
     }
@@ -256,6 +254,8 @@ export function RecipesPage() {
         status: detail.status,
         createdBy: detail.createdBy,
         duplicateOfId: detail.duplicateOf?.id ?? null,
+        meal: detail.meal,
+        theme: detail.theme,
         createdAt: detail.createdAt,
         updatedAt: detail.updatedAt,
       };
@@ -335,6 +335,8 @@ export function RecipesPage() {
       status: detail.status,
       createdBy: detail.createdBy,
       duplicateOfId: detail.duplicateOf?.id ?? null,
+      meal: detail.meal,
+      theme: detail.theme,
       createdAt: detail.createdAt,
       updatedAt: detail.updatedAt,
     };
@@ -434,14 +436,7 @@ export function RecipesPage() {
     };
   };
 
-  const updatePendingEdit = (riId: string, patch: Partial<PendingEdit>) => {
-    setPendingEdits(prev => {
-      const current = prev[riId];
-      // If no current entry, we need the default — but we can't access ri here,
-      // so the caller should pass the full default on first edit
-      return { ...prev, [riId]: { ...current!, ...patch } };
-    });
-  };
+
 
   const initPendingEdit = (ri: RecipeDetailResponse['ingredients'][0], patch: Partial<PendingEdit>) => {
     setPendingEdits(prev => {
@@ -592,10 +587,6 @@ export function RecipesPage() {
       setPublishing(false);
     }
   };
-
-  const filteredIngredients = ingredients.filter(i =>
-    i.name.toLowerCase().includes(ingredientSearch.toLowerCase())
-  );
 
   // Group ingredients by category for the pill picker
   const ingredientsByCategory = CATEGORIES.reduce((acc, cat) => {
@@ -1348,7 +1339,7 @@ export function RecipesPage() {
                       <div className="resolve-modal__actions">
                         <button
                           className="modal-btn modal-btn--danger resolve-modal__remove-btn"
-                          onClick={handleRemoveIngredient}
+                          onClick={() => handleRemoveIngredient()}
                           disabled={resolving}
                         >
                           Remove from recipe

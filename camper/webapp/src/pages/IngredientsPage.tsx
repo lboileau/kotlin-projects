@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   api,
   type IngredientResponse,
-  type CreateIngredientRequest,
-  type UpdateIngredientRequest,
 } from '../api/client';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
