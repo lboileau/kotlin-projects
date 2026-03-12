@@ -108,6 +108,8 @@ export interface RecipeResponse {
   status: string;
   createdBy: string;
   duplicateOfId: string | null;
+  meal: string | null;
+  theme: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -122,6 +124,8 @@ export interface RecipeIngredientResponse {
   status: string;
   matchedIngredient: IngredientResponse | null;
   suggestedIngredientName: string | null;
+  suggestedCategory: string | null;
+  suggestedUnit: string | null;
   reviewFlags: string[];
   createdAt: string;
   updatedAt: string;
@@ -137,6 +141,8 @@ export interface RecipeDetailResponse {
   createdBy: string;
   duplicateOf: RecipeResponse | null;
   ingredients: RecipeIngredientResponse[];
+  meal: string | null;
+  theme: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -152,6 +158,8 @@ export interface CreateRecipeRequest {
   description?: string;
   webLink?: string;
   baseServings: number;
+  meal?: string;
+  theme?: string;
   ingredients: CreateRecipeIngredientRequest[];
 }
 
@@ -163,6 +171,8 @@ export interface UpdateRecipeRequest {
   name?: string;
   description?: string;
   baseServings?: number;
+  meal?: string;
+  theme?: string;
 }
 
 export interface ResolveIngredientRequest {

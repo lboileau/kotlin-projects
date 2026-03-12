@@ -8,6 +8,8 @@ data class CreateRecipeRequest(
     val description: String?,
     val webLink: String?,
     val baseServings: Int,
+    val meal: String? = null,
+    val theme: String? = null,
     val ingredients: List<CreateRecipeIngredientRequest>
 )
 
@@ -19,7 +21,7 @@ data class CreateRecipeIngredientRequest(
 
 data class ImportRecipeRequest(val url: String)
 
-data class UpdateRecipeRequest(val name: String?, val description: String?, val baseServings: Int?)
+data class UpdateRecipeRequest(val name: String?, val description: String?, val baseServings: Int?, val meal: String? = null, val theme: String? = null)
 
 data class ResolveIngredientRequest(
     val action: String,

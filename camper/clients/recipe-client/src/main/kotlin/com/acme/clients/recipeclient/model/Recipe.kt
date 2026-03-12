@@ -12,6 +12,8 @@ data class Recipe(
     val status: String,
     val createdBy: UUID,
     val duplicateOfId: UUID?,
+    val meal: String? = null,
+    val theme: String? = null,
     val createdAt: Instant,
     val updatedAt: Instant
 )

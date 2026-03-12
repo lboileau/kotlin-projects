@@ -69,6 +69,8 @@ internal class AddRecipeIngredientAction(
             status = recipeIngredient.status,
             matchedIngredient = null,
             suggestedIngredientName = null,
+            suggestedCategory = null,
+            suggestedUnit = null,
             reviewFlags = recipeIngredient.reviewFlags,
             createdAt = recipeIngredient.createdAt,
             updatedAt = recipeIngredient.updatedAt

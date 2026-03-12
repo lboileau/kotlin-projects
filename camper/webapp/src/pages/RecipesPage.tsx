@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   api,
   type RecipeResponse,
@@ -15,6 +16,8 @@ import '../components/Modal.css';
 
 const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'] as const;
 const CATEGORIES = ['produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other'] as const;
+const MEALS = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'appetizer', 'side', 'drink'] as const;
+const THEMES = ['chicken', 'beef', 'pork', 'fish', 'seafood', 'vegetarian', 'vegan', 'pasta', 'soup', 'salad', 'other'] as const;
 
 type View = 'list' | 'detail' | 'create' | 'edit' | 'import';
 
@@ -27,6 +30,7 @@ interface DraftIngredient {
 
 export function RecipesPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [view, setView] = useState<View>('list');
   const [recipes, setRecipes] = useState<RecipeResponse[]>([]);
@@ -36,12 +40,15 @@ export function RecipesPage() {
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
+  const [mealTab, setMealTab] = useState<string | null>(null);
 
   // Create form state
   const [createName, setCreateName] = useState('');
   const [createDesc, setCreateDesc] = useState('');
   const [createLink, setCreateLink] = useState('');
   const [createServings, setCreateServings] = useState(4);
+  const [createMeal, setCreateMeal] = useState('');
+  const [createTheme, setCreateTheme] = useState('');
   const [draftIngredients, setDraftIngredients] = useState<DraftIngredient[]>([]);
   const [ingredientSearch, setIngredientSearch] = useState('');
   const [ingredientSearchOpen, setIngredientSearchOpen] = useState(false);
@@ -62,6 +69,8 @@ export function RecipesPage() {
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editServings, setEditServings] = useState(4);
+  const [editMeal, setEditMeal] = useState('');
+  const [editTheme, setEditTheme] = useState('');
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
 
@@ -218,6 +227,8 @@ export function RecipesPage() {
         description: createDesc.trim() || undefined,
         webLink: createLink.trim() || undefined,
         baseServings: createServings,
+        meal: createMeal || undefined,
+        theme: createTheme || undefined,
         ingredients: ingredientsList,
       });
       setRecipes(prev => [recipe, ...prev]);
@@ -265,6 +276,8 @@ export function RecipesPage() {
     setEditName(selectedRecipe.name);
     setEditDesc(selectedRecipe.description || '');
     setEditServings(selectedRecipe.baseServings);
+    setEditMeal(selectedRecipe.meal || '');
+    setEditTheme(selectedRecipe.theme || '');
     setEditError('');
     setView('edit');
   };
@@ -280,6 +293,8 @@ export function RecipesPage() {
         name: editName.trim(),
         description: editDesc.trim() || undefined,
         baseServings: editServings,
+        meal: editMeal || undefined,
+        theme: editTheme || undefined,
       });
       setRecipes(prev => prev.map(r => r.id === updated.id ? updated : r));
       const detail = await api.getRecipe(updated.id);
@@ -332,8 +347,8 @@ export function RecipesPage() {
     setResolveSearchQuery('');
     setResolveCreateMode(false);
     setNewIngName(ri.suggestedIngredientName ?? '');
-    setNewIngCategory('produce');
-    setNewIngUnit(ri.matchedIngredient?.defaultUnit ?? ri.ingredient?.defaultUnit ?? 'pieces');
+    setNewIngCategory(ri.suggestedCategory ?? 'produce');
+    setNewIngUnit(ri.suggestedUnit ?? ri.matchedIngredient?.defaultUnit ?? ri.ingredient?.defaultUnit ?? 'pieces');
     setResolveQty(ri.quantity);
     setResolveUnit(ri.unit);
     setResolveError('');
@@ -394,6 +409,112 @@ export function RecipesPage() {
       setResolveError(err instanceof Error ? err.message : 'Failed to remove ingredient');
     } finally {
       setResolving(false);
+    }
+  };
+
+  const [acceptingId, setAcceptingId] = useState<string | null>(null);
+
+  // Per-ingredient inline edit state for pending items
+  interface PendingEdit {
+    qty: number;
+    unit: string;
+    name: string;
+    category: string;
+  }
+  const [pendingEdits, setPendingEdits] = useState<Record<string, PendingEdit>>({});
+
+  const getPendingEdit = (ri: RecipeDetailResponse['ingredients'][0]): PendingEdit => {
+    if (pendingEdits[ri.id]) return pendingEdits[ri.id];
+    const matchedName = ri.matchedIngredient?.name ?? ri.suggestedIngredientName ?? '';
+    return {
+      qty: ri.quantity,
+      unit: ri.unit,
+      name: matchedName,
+      category: ri.matchedIngredient?.category ?? ri.suggestedCategory ?? 'other',
+    };
+  };
+
+  const updatePendingEdit = (riId: string, patch: Partial<PendingEdit>) => {
+    setPendingEdits(prev => {
+      const current = prev[riId];
+      // If no current entry, we need the default — but we can't access ri here,
+      // so the caller should pass the full default on first edit
+      return { ...prev, [riId]: { ...current!, ...patch } };
+    });
+  };
+
+  const initPendingEdit = (ri: RecipeDetailResponse['ingredients'][0], patch: Partial<PendingEdit>) => {
+    setPendingEdits(prev => {
+      const current = prev[ri.id] ?? getPendingEdit(ri);
+      return { ...prev, [ri.id]: { ...current, ...patch } };
+    });
+  };
+
+  // Determine if the edited name still matches the original suggestion
+  const isStillExistingMatch = (ri: RecipeDetailResponse['ingredients'][0], edit: PendingEdit): boolean => {
+    if (!ri.matchedIngredient) return false;
+    return edit.name.trim().toLowerCase() === ri.matchedIngredient.name.toLowerCase();
+  };
+
+  const handleAcceptPending = async (ri: RecipeDetailResponse['ingredients'][0]) => {
+    if (!selectedRecipe || acceptingId) return;
+    setAcceptingId(ri.id);
+    const edit = getPendingEdit(ri);
+    try {
+      if (ri.matchedIngredient && isStillExistingMatch(ri, edit)) {
+        await api.resolveIngredient(selectedRecipe.id, ri.id, {
+          action: 'CONFIRM_MATCH',
+          quantity: edit.qty,
+          unit: edit.unit,
+        });
+      } else {
+        // Check if an ingredient with this name already exists
+        const latestIngredients = await api.getIngredients();
+        setIngredients(latestIngredients);
+        const existingIng = latestIngredients.find(i => i.name.trim().toLowerCase() === edit.name.trim().toLowerCase());
+
+        if (existingIng) {
+          await api.resolveIngredient(selectedRecipe.id, ri.id, {
+            action: 'SELECT_EXISTING',
+            ingredientId: existingIng.id,
+            quantity: edit.qty,
+            unit: edit.unit,
+          });
+        } else {
+          const newIngredient: CreateIngredientRequest = {
+            name: edit.name.trim(),
+            category: edit.category,
+            defaultUnit: edit.unit,
+          };
+          await api.resolveIngredient(selectedRecipe.id, ri.id, {
+            action: 'CREATE_NEW',
+            newIngredient,
+            quantity: edit.qty,
+            unit: edit.unit,
+          });
+          const updatedIngredients = await api.getIngredients();
+          setIngredients(updatedIngredients);
+        }
+      }
+      // Clean up edit state
+      setPendingEdits(prev => {
+        const next = { ...prev };
+        delete next[ri.id];
+        return next;
+      });
+      await refreshDetail(selectedRecipe.id);
+    } catch (err) {
+      setResolveError(err instanceof Error ? err.message : 'Failed to resolve ingredient');
+    } finally {
+      setAcceptingId(null);
+    }
+  };
+
+  const handleAcceptAllSuggestions = async () => {
+    if (!selectedRecipe) return;
+    const pending = selectedRecipe.ingredients.filter(ri => ri.status === 'pending_review' && (ri.matchedIngredient || ri.suggestedIngredientName));
+    for (const ri of pending) {
+      await handleAcceptPending(ri);
     }
   };
 
@@ -488,8 +609,19 @@ export function RecipesPage() {
   }, [] as { category: string; items: IngredientResponse[] }[]);
 
   const filteredRecipes = recipes.filter(r =>
+    r.name.toLowerCase().includes(search.toLowerCase()) &&
+    (mealTab === null || (r.meal ?? 'uncategorized') === mealTab)
+  );
+
+  // Compute which meal tabs exist in the current recipe set (respecting search filter)
+  const searchFilteredRecipes = recipes.filter(r =>
     r.name.toLowerCase().includes(search.toLowerCase())
   );
+  const availableMealTabs = (() => {
+    const mealOrder = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'appetizer', 'side', 'drink', 'uncategorized'];
+    const meals = new Set(searchFilteredRecipes.map(r => r.meal ?? 'uncategorized'));
+    return mealOrder.filter(m => meals.has(m));
+  })();
 
   const pendingCount = selectedRecipe?.ingredients.filter(i => i.status === 'pending_review').length ?? 0;
 
@@ -525,6 +657,19 @@ export function RecipesPage() {
             </svg>
           }
         />
+
+        {/* ── Section Nav ── */}
+        <div className="recipes-section-nav">
+          <button className="recipes-section-nav__tab recipes-section-nav__tab--active">
+            Recipes
+          </button>
+          <button
+            className="recipes-section-nav__tab"
+            onClick={() => navigate('/ingredients')}
+          >
+            Ingredients
+          </button>
+        </div>
 
         {/* ── List View ── */}
         {view === 'list' && (
@@ -574,6 +719,26 @@ export function RecipesPage() {
                 {error && <p className="recipes-error">{error}</p>}
                 {detailLoading && <p className="recipes-loading-inline">Loading recipe...</p>}
 
+                {availableMealTabs.length > 1 && (
+                  <div className="recipes-meal-tabs">
+                    <button
+                      className={`recipes-meal-tab ${mealTab === null ? 'recipes-meal-tab--active' : ''}`}
+                      onClick={() => setMealTab(null)}
+                    >
+                      All
+                    </button>
+                    {availableMealTabs.map(m => (
+                      <button
+                        key={m}
+                        className={`recipes-meal-tab ${mealTab === m ? 'recipes-meal-tab--active' : ''}`}
+                        onClick={() => setMealTab(m)}
+                      >
+                        {m === 'uncategorized' ? 'Other' : m}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {filteredRecipes.length === 0 ? (
                   <div className="recipes-empty">
                     <svg width="72" height="72" viewBox="0 0 72 72" className="recipes-empty-icon">
@@ -583,12 +748,12 @@ export function RecipesPage() {
                       <line x1="22" y1="42" x2="38" y2="42" stroke="var(--tan-deep)" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
                     </svg>
                     <p className="recipes-empty-text">
-                      {search ? 'No provisions match your search.' : 'No recipes yet. Add the first one!'}
+                      {search || mealTab ? 'No provisions match your filter.' : 'No recipes yet. Add the first one!'}
                     </p>
                   </div>
                 ) : (
                   <div className="recipes-grid">
-                    {filteredRecipes.map((recipe, i) => (
+                    {[...filteredRecipes].sort((a, b) => (a.theme ?? '').localeCompare(b.theme ?? '')).map((recipe, i) => (
                       <button
                         key={recipe.id}
                         className={`recipe-card ${recipe.status === 'draft' ? 'recipe-card--draft' : ''}`}
@@ -610,7 +775,7 @@ export function RecipesPage() {
                               <circle cx="6.5" cy="4" r="2.5" fill="none" stroke="currentColor" strokeWidth="1.2" />
                               <path d="M1.5,11.5 Q1.5,8 6.5,8 Q11.5,8 11.5,11.5" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
                             </svg>
-                            Serves {recipe.baseServings}
+                            Serves&nbsp;{recipe.baseServings}
                           </span>
                           {recipe.webLink && (
                             <span className="recipe-card__imported">
@@ -623,6 +788,12 @@ export function RecipesPage() {
                             </span>
                           )}
                         </div>
+                        {(recipe.meal || recipe.theme) && (
+                          <div className="recipe-card__tags">
+                            {recipe.meal && <span className="recipe-card__tag">{recipe.meal}</span>}
+                            {recipe.theme && <span className="recipe-card__tag">{recipe.theme}</span>}
+                          </div>
+                        )}
                         <div className="recipe-card__arrow">
                           <svg width="16" height="16" viewBox="0 0 16 16">
                             <path d="M5,3 L11,8 L5,13" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -702,6 +873,16 @@ export function RecipesPage() {
                       View source
                     </a>
                   )}
+                  {selectedRecipe.meal && (
+                    <div className="recipe-detail__attr">
+                      <span className="recipe-detail__tag">{selectedRecipe.meal}</span>
+                    </div>
+                  )}
+                  {selectedRecipe.theme && (
+                    <div className="recipe-detail__attr">
+                      <span className="recipe-detail__tag">{selectedRecipe.theme}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -758,59 +939,152 @@ export function RecipesPage() {
                 {selectedRecipe.ingredients.length === 0 ? (
                   <p className="recipe-detail__no-ingredients">No ingredients listed.</p>
                 ) : (
+                  <>
                   <ul className="recipe-detail__ingredient-list">
                     {selectedRecipe.ingredients.map(ri => {
                       const globalName = ri.ingredient?.name;
-                      const displayName = globalName ?? ri.suggestedIngredientName ?? ri.originalText ?? '—';
                       const isPending = ri.status === 'pending_review';
+
                       return (
                         <li key={ri.id} className={`recipe-detail__ingredient ${isPending ? 'recipe-detail__ingredient--pending' : ''}`}>
-                          <div className="recipe-detail__ingredient-row">
-                            <span className="recipe-detail__ingredient-status-icon">
-                              {!isPending ? (
+                          {/* Approved ingredient row */}
+                          {!isPending && (
+                            <div className="recipe-detail__ingredient-row">
+                              <span className="recipe-detail__ingredient-status-icon">
                                 <svg width="14" height="14" viewBox="0 0 14 14">
                                   <circle cx="7" cy="7" r="6" fill="none" stroke="var(--sage-deep)" strokeWidth="1.3" />
                                   <path d="M4,7 L6,9 L10,5" fill="none" stroke="var(--sage-deep)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
-                              ) : (
-                                <svg width="14" height="14" viewBox="0 0 14 14">
-                                  <circle cx="7" cy="7" r="6" fill="none" stroke="var(--ember)" strokeWidth="1.3" />
-                                  <line x1="7" y1="4.5" x2="7" y2="8" stroke="var(--ember)" strokeWidth="1.3" strokeLinecap="round" />
-                                  <circle cx="7" cy="9.5" r="0.7" fill="var(--ember)" />
-                                </svg>
-                              )}
-                            </span>
-                            <span className="recipe-detail__ingredient-qty">
-                              {ri.quantity % 1 === 0 ? ri.quantity : ri.quantity.toFixed(2)} {ri.unit}
-                            </span>
-                            <span className="recipe-detail__ingredient-name">{displayName}</span>
-                            <span className="recipe-detail__ingredient-category">
-                              {ri.ingredient?.category ?? ri.matchedIngredient?.category ?? ''}
-                            </span>
-                            <span className="recipe-detail__ingredient-source">
-                              {globalName && ri.originalText && ri.originalText !== globalName
-                                ? `"${ri.originalText}"`
-                                : ''}
-                            </span>
-                            <span className="recipe-detail__ingredient-action">
-                              <button
-                                className={isPending ? 'review-resolve-btn' : 'review-edit-btn'}
-                                onClick={() => openResolveModal(ri)}
-                              >
-                                {isPending ? 'Resolve' : 'Edit'}
-                              </button>
-                              <button
-                                className="review-remove-btn"
-                                onClick={() => handleRemoveIngredient(ri.id)}
-                              >
-                                ✕
-                              </button>
-                            </span>
-                          </div>
+                              </span>
+                              <span className="recipe-detail__ingredient-qty">
+                                {ri.quantity % 1 === 0 ? ri.quantity : ri.quantity.toFixed(2)} {ri.unit}
+                              </span>
+                              <span className="recipe-detail__ingredient-name">{globalName ?? '—'}</span>
+                              <span className="recipe-detail__ingredient-category">{ri.ingredient?.category ?? ''}</span>
+                              <span className="recipe-detail__ingredient-source">
+                                {globalName && ri.originalText && ri.originalText !== globalName ? `"${ri.originalText}"` : ''}
+                              </span>
+                              <span className="recipe-detail__ingredient-action">
+                                <button className="review-edit-btn" onClick={() => openResolveModal(ri)}>Edit</button>
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Pending ingredient — inline editable */}
+                          {isPending && (() => {
+                            const edit = getPendingEdit(ri);
+                            const matchFromServer = isStillExistingMatch(ri, edit);
+                            // Also check if ingredient exists in the global list (e.g. created by resolving another pending item)
+                            const matchFromList = !matchFromServer
+                              ? ingredients.find(i => i.name.trim().toLowerCase() === edit.name.trim().toLowerCase()) ?? null
+                              : null;
+                            const matchStillValid = matchFromServer || !!matchFromList;
+                            const isCreateMode = !matchStillValid;
+                            const hasSuggestion = !!(ri.matchedIngredient || ri.suggestedIngredientName);
+
+                            return (
+                              <div className="recipe-detail__pending-card">
+                                {/* Source text */}
+                                {ri.originalText && (
+                                  <div className="recipe-detail__pending-source-line">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" className="recipe-detail__pending-icon">
+                                      <circle cx="7" cy="7" r="6" fill="none" stroke="var(--ember)" strokeWidth="1.3" />
+                                      <line x1="7" y1="4.5" x2="7" y2="8" stroke="var(--ember)" strokeWidth="1.3" strokeLinecap="round" />
+                                      <circle cx="7" cy="9.5" r="0.7" fill="var(--ember)" />
+                                    </svg>
+                                    <span className="recipe-detail__pending-source">&ldquo;{ri.originalText}&rdquo;</span>
+                                  </div>
+                                )}
+
+                                {/* Editable fields row */}
+                                <div className="recipe-detail__pending-fields">
+                                  <input
+                                    type="number"
+                                    className="pending-field pending-field--qty"
+                                    value={edit.qty}
+                                    min={0}
+                                    step="any"
+                                    onChange={e => initPendingEdit(ri, { qty: parseFloat(e.target.value) || 0 })}
+                                  />
+                                  <div className="pending-field-group">
+                                    <div className={`pending-field-group__fields ${isCreateMode && edit.name.trim() ? 'pending-field-group__fields--bordered' : ''}`}>
+                                      <select
+                                        className="pending-field pending-field--unit"
+                                        value={edit.unit}
+                                        onChange={e => initPendingEdit(ri, { unit: e.target.value })}
+                                      >
+                                        {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                                      </select>
+                                      <input
+                                        type="text"
+                                        className="pending-field pending-field--name"
+                                        value={edit.name}
+                                        placeholder="Ingredient name"
+                                        onChange={e => initPendingEdit(ri, { name: e.target.value })}
+                                      />
+                                      {isCreateMode && edit.name.trim() && (
+                                        <select
+                                          className="pending-field pending-field--category"
+                                          value={edit.category}
+                                          onChange={e => initPendingEdit(ri, { category: e.target.value })}
+                                        >
+                                          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                                        </select>
+                                      )}
+                                    </div>
+                                    {isCreateMode && edit.name.trim() && (
+                                      <span className="pending-status__label pending-status__label--create">create new ingredient</span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Status line — existing match info */}
+                                <div className="recipe-detail__pending-status">
+                                  {matchStillValid ? (() => {
+                                    const matched = ri.matchedIngredient ?? matchFromList;
+                                    return (
+                                      <>
+                                        <span className="pending-status__label pending-status__label--match">using existing</span>
+                                        <span className="pending-status__value">{matched?.name ?? edit.name}</span>
+                                        <span className="recipe-detail__ingredient-category">{matched?.category ?? ''}</span>
+                                      </>
+                                    );
+                                  })() : !edit.name.trim() ? (
+                                    <span className="pending-status__label">enter a name to resolve</span>
+                                  ) : null}
+                                </div>
+
+                                {/* Actions */}
+                                <div className="recipe-detail__pending-actions">
+                                  {(hasSuggestion || edit.name.trim()) && (
+                                    <button
+                                      className="review-accept-btn"
+                                      disabled={acceptingId === ri.id || !edit.name.trim()}
+                                      onClick={() => handleAcceptPending(ri)}
+                                    >
+                                      {acceptingId === ri.id ? 'Saving…' : matchStillValid ? '✓ Accept' : '+ Create & Accept'}
+                                    </button>
+                                  )}
+                                  <button className="review-remove-btn review-remove-btn--labeled" onClick={() => handleRemoveIngredient(ri.id)}>Remove from recipe</button>
+                                </div>
+                              </div>
+                            );
+                          })()}
                         </li>
                       );
                     })}
                   </ul>
+
+                  {pendingCount > 1 && selectedRecipe.ingredients.some(ri => ri.status === 'pending_review' && (ri.matchedIngredient || ri.suggestedIngredientName)) && (
+                    <button
+                      className="recipe-detail__accept-all-btn"
+                      onClick={handleAcceptAllSuggestions}
+                      disabled={!!acceptingId}
+                    >
+                      ✓ Accept All Suggestions
+                    </button>
+                  )}
+                  </>
                 )}
 
                 <div className="recipe-detail__add-ingredient">
@@ -1251,6 +1525,31 @@ export function RecipesPage() {
                       />
                     </div>
                   </div>
+
+                  <div className="recipes-row">
+                    <div className="recipes-field recipes-field--half">
+                      <label className="recipes-label">Meal</label>
+                      <select
+                        className="recipes-select"
+                        value={createMeal}
+                        onChange={e => setCreateMeal(e.target.value)}
+                      >
+                        <option value="">—</option>
+                        {MEALS.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    <div className="recipes-field recipes-field--half">
+                      <label className="recipes-label">Theme</label>
+                      <select
+                        className="recipes-select"
+                        value={createTheme}
+                        onChange={e => setCreateTheme(e.target.value)}
+                      >
+                        <option value="">—</option>
+                        {THEMES.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="recipes-form-section">
@@ -1272,7 +1571,7 @@ export function RecipesPage() {
                             ))}
                           />
                           <select
-                            className="recipes-input recipes-select--inline"
+                            className="recipes-select--inline"
                             value={d.unit}
                             onChange={e => setDraftIngredients(prev => prev.map(x =>
                               x.ingredientId === d.ingredientId ? { ...x, unit: e.target.value } : x
@@ -1454,6 +1753,30 @@ export function RecipesPage() {
                       value={editServings}
                       onChange={e => setEditServings(Number(e.target.value))}
                     />
+                  </div>
+                  <div className="recipes-row">
+                    <div className="recipes-field recipes-field--half">
+                      <label className="recipes-label">Meal</label>
+                      <select
+                        className="recipes-select"
+                        value={editMeal}
+                        onChange={e => setEditMeal(e.target.value)}
+                      >
+                        <option value="">—</option>
+                        {MEALS.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    <div className="recipes-field recipes-field--half">
+                      <label className="recipes-label">Theme</label>
+                      <select
+                        className="recipes-select"
+                        value={editTheme}
+                        onChange={e => setEditTheme(e.target.value)}
+                      >
+                        <option value="">—</option>
+                        {THEMES.map(t => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                    </div>
                   </div>
                 </div>
 

@@ -14,6 +14,8 @@ internal object RecipeRowAdapter {
         status = rs.getString("status"),
         createdBy = rs.getObject("created_by", UUID::class.java),
         duplicateOfId = rs.getObject("duplicate_of_id", UUID::class.java),
+        meal = rs.getString("meal"),
+        theme = rs.getString("theme"),
         createdAt = rs.getTimestamp("created_at").toInstant(),
         updatedAt = rs.getTimestamp("updated_at").toInstant()
     )

@@ -22,7 +22,7 @@ internal class FindSimilarRecipes(private val jdbi: Jdbi) {
         val entities = jdbi.withHandle<List<Recipe>, Exception> { handle ->
             handle.createQuery(
                 """
-                SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, created_at, updated_at
+                SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, meal, theme, created_at, updated_at
                 FROM recipes
                 WHERE LOWER(name) LIKE LOWER('%' || :name || '%')
                 ORDER BY name

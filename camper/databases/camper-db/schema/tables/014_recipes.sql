@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS recipes (
     status         VARCHAR(20)  NOT NULL DEFAULT 'draft',
     created_by     UUID         NOT NULL,
     duplicate_of_id UUID,
+    meal           VARCHAR(20),
+    theme          VARCHAR(20),
     created_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
 

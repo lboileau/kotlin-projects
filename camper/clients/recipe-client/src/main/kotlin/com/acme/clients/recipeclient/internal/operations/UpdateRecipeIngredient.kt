@@ -54,7 +54,7 @@ internal class UpdateRecipeIngredient(private val jdbi: Jdbi) {
             if (updated == 0) return@withHandle null
 
             handle.createQuery(
-                "SELECT id, recipe_id, ingredient_id, original_text, quantity, unit, status, matched_ingredient_id, suggested_ingredient_name, review_flags, created_at, updated_at FROM recipe_ingredients WHERE id = :id"
+                "SELECT id, recipe_id, ingredient_id, original_text, quantity, unit, status, matched_ingredient_id, suggested_ingredient_name, suggested_category, suggested_unit, review_flags, created_at, updated_at FROM recipe_ingredients WHERE id = :id"
             )
                 .bind("id", param.id)
                 .map { rs, _ -> RecipeIngredientRowAdapter.fromResultSet(rs) }

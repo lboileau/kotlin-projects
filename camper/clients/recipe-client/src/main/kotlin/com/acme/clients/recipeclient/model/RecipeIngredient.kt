@@ -14,6 +14,8 @@ data class RecipeIngredient(
     val status: String,
     val matchedIngredientId: UUID?,
     val suggestedIngredientName: String?,
+    val suggestedCategory: String? = null,
+    val suggestedUnit: String? = null,
     val reviewFlags: List<String>,
     val createdAt: Instant,
     val updatedAt: Instant

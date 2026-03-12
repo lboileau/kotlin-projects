@@ -10,7 +10,9 @@ data class CreateRecipeParam(
     val webLink: String?,
     val baseServings: Int,
     val status: String,
-    val createdBy: UUID
+    val createdBy: UUID,
+    val meal: String? = null,
+    val theme: String? = null
 )
 
 /** Parameter for retrieving a recipe by its unique identifier. */
@@ -30,7 +32,9 @@ data class UpdateRecipeParam(
     val baseServings: Int? = null,
     val status: String? = null,
     val duplicateOfId: UUID? = null,
-    val clearDuplicateOf: Boolean = false
+    val clearDuplicateOf: Boolean = false,
+    val meal: String? = null,
+    val theme: String? = null
 )
 
 /** Parameter for deleting a recipe by its unique identifier. */
@@ -52,6 +56,8 @@ data class AddRecipeIngredientParam(
     val status: String,
     val matchedIngredientId: UUID?,
     val suggestedIngredientName: String?,
+    val suggestedCategory: String? = null,
+    val suggestedUnit: String? = null,
     val reviewFlags: List<String>
 )
 

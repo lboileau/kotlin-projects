@@ -33,9 +33,9 @@ internal class AddRecipeIngredients(private val jdbi: Jdbi) {
                 handle.createUpdate(
                     """
                     INSERT INTO recipe_ingredients
-                        (id, recipe_id, ingredient_id, original_text, quantity, unit, status, matched_ingredient_id, suggested_ingredient_name, review_flags, created_at, updated_at)
+                        (id, recipe_id, ingredient_id, original_text, quantity, unit, status, matched_ingredient_id, suggested_ingredient_name, suggested_category, suggested_unit, review_flags, created_at, updated_at)
                     VALUES
-                        (:id, :recipeId, CAST(:ingredientId AS uuid), :originalText, :quantity, :unit, :status, CAST(:matchedIngredientId AS uuid), :suggestedIngredientName, :reviewFlags::jsonb, :createdAt, :updatedAt)
+                        (:id, :recipeId, CAST(:ingredientId AS uuid), :originalText, :quantity, :unit, :status, CAST(:matchedIngredientId AS uuid), :suggestedIngredientName, :suggestedCategory, :suggestedUnit, :reviewFlags::jsonb, :createdAt, :updatedAt)
                     """.trimIndent()
                 )
                     .bind("id", id)
@@ -47,13 +47,15 @@ internal class AddRecipeIngredients(private val jdbi: Jdbi) {
                     .bind("status", ing.status)
                     .bind("matchedIngredientId", ing.matchedIngredientId?.toString())
                     .bind("suggestedIngredientName", ing.suggestedIngredientName)
+                    .bind("suggestedCategory", ing.suggestedCategory)
+                    .bind("suggestedUnit", ing.suggestedUnit)
                     .bind("reviewFlags", flagsJson)
                     .bind("createdAt", now)
                     .bind("updatedAt", now)
                     .execute()
 
                 handle.createQuery(
-                    "SELECT id, recipe_id, ingredient_id, original_text, quantity, unit, status, matched_ingredient_id, suggested_ingredient_name, review_flags, created_at, updated_at FROM recipe_ingredients WHERE id = :id"
+                    "SELECT id, recipe_id, ingredient_id, original_text, quantity, unit, status, matched_ingredient_id, suggested_ingredient_name, suggested_category, suggested_unit, review_flags, created_at, updated_at FROM recipe_ingredients WHERE id = :id"
                 )
                     .bind("id", id)
                     .map { rs, _ -> RecipeIngredientRowAdapter.fromResultSet(rs) }

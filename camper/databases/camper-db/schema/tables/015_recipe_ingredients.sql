@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS recipe_ingredients (
     status                   VARCHAR(20)  NOT NULL DEFAULT 'approved',
     matched_ingredient_id    UUID,
     suggested_ingredient_name TEXT,
+    suggested_category       VARCHAR(50),
+    suggested_unit           VARCHAR(20),
     review_flags             JSONB        NOT NULL DEFAULT '[]',
     created_at               TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at               TIMESTAMPTZ  NOT NULL DEFAULT now(),

@@ -7,9 +7,10 @@
 .ingredients-content {
   position: relative;
   z-index: 1;
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 56px var(--space-xl) var(--space-2xl);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 56px;
 }
 
 .ingredients-header {
@@ -108,6 +109,11 @@
   color: var(--ember);
   font-size: 0.85rem;
   margin-bottom: var(--space-md);
+  max-width: 760px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--space-xl);
 }
 
 .ingredients-loading {
@@ -125,26 +131,58 @@
   font-style: italic;
 }
 
-/* Create form */
+/* Create form wrapper — matches .ingredients-list padding so form aligns with category groups */
+.ingredients-create-wrap {
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto var(--space-xl);
+  padding: 0 var(--space-xl);
+  box-sizing: border-box;
+}
+
 .ingredients-create-form {
   background: rgba(250, 245, 235, 0.94);
   border: 1px solid rgba(168, 139, 91, 0.2);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
-  margin-bottom: var(--space-xl);
 }
 
 .ingredients-create-title {
   font-family: var(--font-heading);
-  font-size: 1rem;
+  font-size: 1.05rem;
   color: var(--charcoal);
   margin: 0 0 var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid rgba(168, 139, 91, 0.25);
+  letter-spacing: 0.03em;
 }
 
 .ingredients-form-row {
   display: flex;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
+  align-items: flex-end;
+}
+
+.ingredients-form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.ingredients-form-field--grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.ingredients-form-label {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--charcoal-light);
+  opacity: 0.55;
+  padding-left: 2px;
+  margin-bottom: 4px;
 }
 
 .ingredients-input {
@@ -187,6 +225,38 @@
 .ingredients-select--sm {
   padding: 5px 8px;
   font-size: 0.8rem;
+}
+
+.ingredients-add-row-btn {
+  background: none;
+  border: none;
+  color: var(--charcoal-light);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0 0 var(--space-md);
+  transition: opacity 0.2s;
+}
+
+.ingredients-add-row-btn:hover {
+  opacity: 1;
+}
+
+.ingredients-btn-remove-row {
+  background: none;
+  border: none;
+  color: var(--charcoal-light);
+  cursor: pointer;
+  opacity: 0.4;
+  padding: 4px;
+  transition: opacity 0.2s;
+  align-self: center;
+}
+
+.ingredients-btn-remove-row:hover {
+  opacity: 0.8;
+  color: rgba(180, 60, 60, 0.8);
 }
 
 .ingredients-form-actions {
@@ -255,6 +325,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--space-xl) var(--space-2xl);
 }
 
 .ingredients-category-group {
@@ -266,11 +340,13 @@
 
 .ingredients-category-title {
   font-family: var(--font-heading);
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   color: var(--charcoal);
   text-transform: capitalize;
-  margin: 0 0 var(--space-sm);
-  opacity: 0.7;
+  margin: 0 0 var(--space-md);
+  padding-bottom: var(--space-sm);
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid rgba(168, 139, 91, 0.25);
 }
 
 .ingredients-category-items {

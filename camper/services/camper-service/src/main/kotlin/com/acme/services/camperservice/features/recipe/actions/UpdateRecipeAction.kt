@@ -26,7 +26,9 @@ internal class UpdateRecipeAction(
             id = param.recipeId,
             name = param.name,
             description = param.description,
-            baseServings = param.baseServings
+            baseServings = param.baseServings,
+            meal = param.meal,
+            theme = param.theme
         ))) {
             is Result.Success -> Result.Success(RecipeMapper.toRecipeResponse(result.value))
             is Result.Failure -> Result.Failure(RecipeError.Invalid("recipe", result.error.message))

@@ -23,7 +23,7 @@ internal class GetRecipeById(private val jdbi: Jdbi) {
         logger.debug("Finding recipe by id={}", param.id)
         val entity = jdbi.withHandle<Recipe?, Exception> { handle ->
             handle.createQuery(
-                "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, created_at, updated_at FROM recipes WHERE id = :id"
+                "SELECT id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, meal, theme, created_at, updated_at FROM recipes WHERE id = :id"
             )
                 .bind("id", param.id)
                 .map { rs, _ -> RecipeRowAdapter.fromResultSet(rs) }

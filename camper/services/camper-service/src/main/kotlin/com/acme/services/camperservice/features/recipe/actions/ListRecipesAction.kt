@@ -12,20 +12,11 @@ internal class ListRecipesAction(
     private val recipeClient: RecipeClient
 ) {
     fun execute(param: ListRecipesParam): Result<List<RecipeResponse>, RecipeError> {
-        val published = when (val result = recipeClient.getAll(GetAllParam(status = "published"))) {
+        val all = when (val result = recipeClient.getAll(GetAllParam())) {
             is Result.Success -> result.value
             is Result.Failure -> return Result.Failure(RecipeError.Invalid("recipes", result.error.message))
         }
 
-        val ownDrafts = when (val result = recipeClient.getAll(GetAllParam(status = "draft", createdBy = param.userId))) {
-            is Result.Success -> result.value
-            is Result.Failure -> return Result.Failure(RecipeError.Invalid("recipes", result.error.message))
-        }
-
-        val combined = (published + ownDrafts)
-            .distinctBy { it.id }
-            .map { RecipeMapper.toRecipeResponse(it) }
-
-        return Result.Success(combined)
+        return Result.Success(all.map { RecipeMapper.toRecipeResponse(it) })
     }
 }

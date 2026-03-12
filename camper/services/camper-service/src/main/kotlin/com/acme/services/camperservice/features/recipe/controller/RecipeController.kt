@@ -35,6 +35,8 @@ class RecipeController(
             description = request.description,
             webLink = request.webLink,
             baseServings = request.baseServings,
+            meal = request.meal,
+            theme = request.theme,
             ingredients = request.ingredients.map {
                 CreateRecipeIngredientParam(
                     ingredientId = it.ingredientId,
@@ -85,7 +87,9 @@ class RecipeController(
             userId = userId,
             name = request.name,
             description = request.description,
-            baseServings = request.baseServings
+            baseServings = request.baseServings,
+            meal = request.meal,
+            theme = request.theme
         )
         return recipeService.update(param).toResponseEntity { it }
     }
