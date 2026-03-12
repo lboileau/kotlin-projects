@@ -15,3 +15,8 @@ build/
 
 # Kotlin
 *.class
+
+# Secrets / environment
+.env
+.env.*
+!.env.example

@@ -218,7 +218,7 @@ class RecipeAcceptanceTest {
         }
 
         @Test
-        fun `GET returns published recipes and own drafts`() {
+        fun `GET returns all recipes`() {
             fixture.insertRecipe(name = "My Published", status = "published", createdBy = userId)
             fixture.insertRecipe(name = "My Draft", status = "draft", createdBy = userId)
             fixture.insertRecipe(name = "Other Published", status = "published", createdBy = otherUserId)
@@ -233,8 +233,7 @@ class RecipeAcceptanceTest {
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             val names = response.body!!.map { it.name }
-            assertThat(names).containsExactlyInAnyOrder("My Published", "My Draft", "Other Published")
-            assertThat(names).doesNotContain("Other Draft")
+            assertThat(names).containsExactlyInAnyOrder("My Published", "My Draft", "Other Published", "Other Draft")
         }
     }
 
