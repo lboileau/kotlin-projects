@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { api, type Plan, type PlanMember } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { usePlanUpdates } from '../hooks/usePlanUpdates';
@@ -19,8 +19,7 @@ type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'addMem
 
 export function PlanPage() {
   const { planId } = useParams<{ planId: string }>();
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [members, setMembers] = useState<PlanMember[]>([]);
   const [loading, setLoading] = useState(true);
