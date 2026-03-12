@@ -19,6 +19,8 @@ dependencies {
     implementation(project(":clients:ingredient-client"))
     implementation(project(":clients:recipe-client"))
     implementation(project(":clients:recipe-scraper-client"))
+    implementation(project(":clients:meal-plan-client"))
+    implementation(project(":libs:meal-plan-calculator"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -49,6 +51,7 @@ dependencies {
     testImplementation(testFixtures(project(":clients:ingredient-client")))
     testImplementation(testFixtures(project(":clients:recipe-client")))
     testImplementation(testFixtures(project(":clients:recipe-scraper-client")))
+    testImplementation(testFixtures(project(":clients:meal-plan-client")))
 }
 
 tasks.named<Copy>("processResources") {

@@ -11,4 +11,5 @@ sealed class MealPlanError(override val message: String) : AppError {
     data class PlanAlreadyHasMealPlan(val planId: UUID) : MealPlanError("Plan already has a meal plan: $planId")
     data class NotATemplate(val id: UUID) : MealPlanError("Meal plan is not a template: $id")
     data class IsATemplate(val id: UUID) : MealPlanError("Meal plan is a template: $id")
+    data class Invalid(val field: String, val reason: String) : MealPlanError("Invalid $field: $reason")
 }

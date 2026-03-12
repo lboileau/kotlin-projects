@@ -1,5 +1,8 @@
 package com.acme.services.camperservice.features.mealplan.service
 
+import com.acme.clients.ingredientclient.api.IngredientClient
+import com.acme.clients.mealplanclient.api.MealPlanClient
+import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.services.camperservice.features.mealplan.actions.AddDayAction
 import com.acme.services.camperservice.features.mealplan.actions.AddRecipeToMealAction
 import com.acme.services.camperservice.features.mealplan.actions.CopyToTripAction
@@ -17,22 +20,26 @@ import com.acme.services.camperservice.features.mealplan.actions.UpdateMealPlanA
 import com.acme.services.camperservice.features.mealplan.actions.UpdatePurchaseAction
 import com.acme.services.camperservice.features.mealplan.params.*
 
-class MealPlanService {
-    private val createMealPlan = CreateMealPlanAction()
-    private val getMealPlanDetail = GetMealPlanDetailAction()
-    private val getMealPlanByPlanId = GetMealPlanByPlanIdAction()
-    private val getTemplatesAction = GetTemplatesAction()
-    private val updateMealPlan = UpdateMealPlanAction()
-    private val deleteMealPlan = DeleteMealPlanAction()
-    private val copyToTrip = CopyToTripAction()
-    private val saveAsTemplate = SaveAsTemplateAction()
-    private val addDay = AddDayAction()
-    private val removeDay = RemoveDayAction()
-    private val addRecipeToMeal = AddRecipeToMealAction()
-    private val removeRecipeFromMeal = RemoveRecipeFromMealAction()
-    private val getShoppingList = GetShoppingListAction()
-    private val updatePurchase = UpdatePurchaseAction()
-    private val resetPurchases = ResetPurchasesAction()
+class MealPlanService(
+    mealPlanClient: MealPlanClient,
+    recipeClient: RecipeClient,
+    ingredientClient: IngredientClient,
+) {
+    private val createMealPlan = CreateMealPlanAction(mealPlanClient)
+    private val getMealPlanDetail = GetMealPlanDetailAction(mealPlanClient, recipeClient, ingredientClient)
+    private val getMealPlanByPlanId = GetMealPlanByPlanIdAction(mealPlanClient, recipeClient, ingredientClient)
+    private val getTemplatesAction = GetTemplatesAction(mealPlanClient)
+    private val updateMealPlan = UpdateMealPlanAction(mealPlanClient)
+    private val deleteMealPlan = DeleteMealPlanAction(mealPlanClient)
+    private val copyToTrip = CopyToTripAction(mealPlanClient, recipeClient, ingredientClient)
+    private val saveAsTemplate = SaveAsTemplateAction(mealPlanClient)
+    private val addDay = AddDayAction(mealPlanClient)
+    private val removeDay = RemoveDayAction(mealPlanClient)
+    private val addRecipeToMeal = AddRecipeToMealAction(mealPlanClient, recipeClient, ingredientClient)
+    private val removeRecipeFromMeal = RemoveRecipeFromMealAction(mealPlanClient)
+    private val getShoppingList = GetShoppingListAction(mealPlanClient, recipeClient, ingredientClient)
+    private val updatePurchase = UpdatePurchaseAction(mealPlanClient)
+    private val resetPurchases = ResetPurchasesAction(mealPlanClient)
 
     fun create(param: CreateMealPlanParam) = createMealPlan.execute(param)
     fun getDetail(param: GetMealPlanDetailParam) = getMealPlanDetail.execute(param)
