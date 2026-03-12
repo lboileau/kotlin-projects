@@ -2,7 +2,11 @@
 
 ## Summary
 
-Add meal planning to trips using the existing recipe catalog. A meal plan organizes recipes into numbered days and meal types (breakfast, lunch, dinner, snack). Meal plans can exist as reusable templates or be bound to a specific trip. Trip meal plans can be created from templates, and trip meal plans can be saved back as new templates. The system computes a shopping list by aggregating all recipe ingredients (scaled by servings), grouped by category. Users can mark ingredients as purchased, and recipe completion status is derived from whether all of a recipe's ingredients have been purchased.
+Add meal planning to trips using the existing recipe catalog. A meal plan organizes recipes into numbered days and meal types (breakfast, lunch, dinner, snack). Meal plans can exist as reusable templates or be bound to a specific trip. Trip meal plans can be created from templates, and trip meal plans can be saved back as new templates.
+
+Recipes are **referenced, not copied** — a meal plan stores pointers to recipes and their servings information. Ingredient data is always read live from the recipe catalog, so updating a recipe automatically reflects in any meal plan that uses it.
+
+Shopping lists are **generated on explicit user request**. When generated, the system aggregates all recipe ingredients (scaled by servings), grouped by category, and creates shopping list items with quantity tracking. If recipes in the meal plan change after generation, the shopping list is marked stale — prompting the user to regenerate (but never auto-regenerating).
 
 ## Entities
 
@@ -19,6 +23,7 @@ The top-level container. Can be a **template** (no trip association) or **trip-b
 | scaling_mode | VARCHAR(20) | NOT NULL, CHECK IN ('fractional', 'round_up'). Default 'round_up' |
 | is_template | BOOLEAN | NOT NULL, DEFAULT false |
 | source_template_id | UUID? | FK → meal_plans.id SET NULL. Tracks which template this was copied from |
+| shopping_list_stale | BOOLEAN | NOT NULL, DEFAULT false. Set true when recipes are added/removed after shopping list generation |
 | created_by | UUID | FK → users.id RESTRICT |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
 | updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
@@ -45,67 +50,77 @@ A numbered day within a meal plan.
 
 ### MealPlanRecipe
 
-A recipe placed into a specific meal slot on a specific day. Duplicate recipes (same recipe on different meals or days) are distinct records.
+A recipe placed into a specific meal slot on a specific day. Duplicate recipes (same recipe on different meals or days) are distinct records. References the recipe by ID — ingredient data is always loaded live from the recipe catalog.
 
 | Field | Type | Constraints |
 |-------|------|-------------|
 | id | UUID | PK, auto-generated |
 | meal_plan_day_id | UUID | FK → meal_plan_days.id CASCADE |
 | meal_type | VARCHAR(20) | NOT NULL, CHECK IN ('breakfast', 'lunch', 'dinner', 'snack') |
-| recipe_id | UUID | FK → recipes.id RESTRICT |
-| base_servings | INT | NOT NULL, CHECK > 0. Snapshot of recipe.base_servings at time of addition |
-| created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
-| updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
-
-### MealPlanRecipeIngredient
-
-A copy of a recipe's ingredients at the time the recipe was added to the meal plan. Quantities are stored unscaled (original recipe quantities). Scaling is computed at read time.
-
-| Field | Type | Constraints |
-|-------|------|-------------|
-| id | UUID | PK, auto-generated |
-| meal_plan_recipe_id | UUID | FK → meal_plan_recipes.id CASCADE |
-| ingredient_id | UUID | FK → ingredients.id RESTRICT |
-| quantity | NUMERIC | NOT NULL, CHECK > 0 |
-| unit | VARCHAR(20) | NOT NULL |
+| recipe_id | UUID | FK → recipes.id CASCADE |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
 | updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
 
 **Notes:**
-- Only approved recipe_ingredients with a resolved ingredient_id are copied
-- Quantities are the original recipe quantities — scaling is applied at read time using `meal_plan.servings / meal_plan_recipe.base_servings`
+- No `base_servings` snapshot — always read live from `recipes.base_servings`
+- Deleting a recipe cascades to remove it from all meal plans
 
 ### ShoppingListItem
 
-Tracks purchase status per ingredient per meal plan.
+Tracks quantity and purchase status per recipe ingredient per meal plan. Generated on explicit user request via the generate endpoint — not auto-created when recipes are added.
 
 | Field | Type | Constraints |
 |-------|------|-------------|
 | id | UUID | PK, auto-generated |
 | meal_plan_id | UUID | FK → meal_plans.id CASCADE |
-| ingredient_id | UUID | FK → ingredients.id RESTRICT |
-| purchased | BOOLEAN | NOT NULL, DEFAULT false |
+| recipe_ingredient_id | UUID | FK → recipe_ingredients.id CASCADE |
+| quantity_required | NUMERIC | NOT NULL, CHECK >= 0. Scaled quantity at time of generation |
+| quantity_purchased | NUMERIC | NOT NULL, DEFAULT 0, CHECK >= 0 |
 | created_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
 | updated_at | TIMESTAMPTZ | NOT NULL, DEFAULT now() |
 
 **Invariants:**
-- UNIQUE(meal_plan_id, ingredient_id) — one purchase status per ingredient per meal plan
+- UNIQUE(meal_plan_id, recipe_ingredient_id) — one entry per recipe ingredient per meal plan
+
+**Notes:**
+- `quantity_required` is computed during generation: `recipe_ingredient.quantity * scale_factor`, summed across all meal plan recipes that use the same recipe ingredient
+- `quantity_purchased` defaults to 0. The UI sets it to `quantity_required` on "check" (but the API accepts any value)
+- An item is considered fully purchased when `quantity_purchased >= quantity_required`
+- When headcount changes and the user regenerates, `quantity_required` updates and the UI can flag items where `quantity_purchased < quantity_required`
 
 ## Scaling Logic
 
-Scaling is applied at **read time** (service layer), not stored in the DB.
+Scaling is applied at **read time** (service layer) for display, and at **generation time** for shopping list quantities.
 
-- **Scale factor** = `meal_plan.servings / meal_plan_recipe.base_servings`
-- **Fractional mode**: `scaled_quantity = quantity * scale_factor` (exact, may produce decimals)
-- **Round-up mode**: `scaled_quantity = quantity * ceil(scale_factor)` (round the multiplier up to nearest whole number, then multiply)
+- **Scale factor** = `meal_plan.servings / recipe.base_servings` (read live from the recipe)
+- **Fractional mode**: `scale_factor` used as-is (exact ratio, may produce decimals). E.g., 6 people / 4-serving recipe = 1.5x multiplier
+- **Round-up mode**: `ceil(scale_factor)` rounded up to the nearest whole number. This means quantities are always a whole-number multiple of the recipe's base. E.g., 6 people / 4-serving recipe → ceil(1.5) = 2x multiplier (scales to 8 servings worth)
 
-Shopping list totals are computed by summing all scaled `meal_plan_recipe_ingredients` grouped by `ingredient_id`.
+Scaled quantity for a single recipe ingredient:
+- **Fractional**: `quantity * (meal_plan.servings / recipe.base_servings)`
+- **Round-up**: `quantity * ceil(meal_plan.servings / recipe.base_servings)`
+
+Shopping list totals are computed by summing scaled quantities across all meal plan recipes, grouped by `recipe_ingredient_id`.
 
 ## Recipe Completion
 
-A `MealPlanRecipe` is considered **fully purchased** when every one of its `meal_plan_recipe_ingredients` has its `ingredient_id` marked as `purchased = true` in the `shopping_list_items` table for that meal plan.
+A `MealPlanRecipe` is considered **fully purchased** when every one of its recipe's approved ingredients (with a resolved `ingredient_id`) has a corresponding `shopping_list_items` entry where `quantity_purchased >= quantity_required`.
 
-This is computed at read time — no stored field.
+This is computed at read time — no stored field. Only meaningful when a shopping list has been generated.
+
+## Shopping List Lifecycle
+
+1. User adds recipes to meal plan days (no shopping list yet)
+2. User explicitly hits **"Generate Shopping List"** → `POST /api/meal-plans/{id}/shopping-list/generate`
+   - System reads all recipes in the meal plan, scales ingredients, aggregates by `recipe_ingredient_id`
+   - Creates/replaces `shopping_list_items` with computed `quantity_required`, resets `quantity_purchased` to 0
+   - Sets `shopping_list_stale = false` on the meal plan
+3. User checks off items (PATCH updates `quantity_purchased`)
+4. If recipes are added/removed from the meal plan, or servings/scaling mode changes:
+   - Set `meal_plan.shopping_list_stale = true`
+   - UI shows a prompt: "Shopping list is out of date. Regenerate?"
+   - System does **NOT** auto-regenerate
+5. User hits "Regenerate" → same as step 2 (replaces all items, resets purchases)
 
 ## API Surface
 
@@ -114,7 +129,7 @@ This is computed at read time — no stored field.
 | Method | Path | Description | Request Body | Response |
 |--------|------|-------------|--------------|----------|
 | POST | /api/meal-plans | Create meal plan | `{ name, servings, scalingMode, isTemplate, planId? }` | 201 MealPlan |
-| GET | /api/meal-plans/{id} | Get meal plan with full details (days, meals, recipes, ingredients) | — | 200 MealPlanDetail |
+| GET | /api/meal-plans/{id} | Get meal plan with full details (days, meals, recipes, live ingredients) | — | 200 MealPlanDetail |
 | GET | /api/meal-plans?planId={planId} | Get meal plan for a trip | — | 200 MealPlanDetail? |
 | GET | /api/meal-plans/templates | List template meal plans | — | 200 List\<MealPlan\> |
 | PUT | /api/meal-plans/{id} | Update meal plan settings | `{ name?, servings?, scalingMode? }` | 200 MealPlan |
@@ -127,7 +142,7 @@ This is computed at read time — no stored field.
 | Method | Path | Description | Request Body | Response |
 |--------|------|-------------|--------------|----------|
 | POST | /api/meal-plans/{id}/days | Add a day | `{ dayNumber }` | 201 MealPlanDay |
-| DELETE | /api/meal-plans/{mealPlanId}/days/{dayId} | Remove a day (cascades recipes & ingredients) | — | 204 |
+| DELETE | /api/meal-plans/{mealPlanId}/days/{dayId} | Remove a day (cascades recipes) | — | 204 |
 
 ### Recipes on Meals
 
@@ -140,11 +155,12 @@ This is computed at read time — no stored field.
 
 | Method | Path | Description | Request Body | Response |
 |--------|------|-------------|--------------|----------|
+| POST | /api/meal-plans/{id}/shopping-list/generate | Generate (or regenerate) shopping list | — | 201 ShoppingList |
 | GET | /api/meal-plans/{id}/shopping-list | Get aggregated shopping list | — | 200 ShoppingList |
-| PATCH | /api/meal-plans/{id}/shopping-list/{ingredientId} | Toggle purchased status | `{ purchased }` | 200 ShoppingListItem |
-| DELETE | /api/meal-plans/{id}/shopping-list | Reset all purchased statuses | — | 204 |
+| PATCH | /api/meal-plans/{id}/shopping-list/{recipeIngredientId} | Update purchased quantity | `{ quantityPurchased }` | 200 ShoppingListItem |
+| DELETE | /api/meal-plans/{id}/shopping-list | Delete all shopping list items | — | 204 |
 
-**Total: 14 endpoints**
+**Total: 15 endpoints**
 
 ### Response Shapes
 
@@ -158,6 +174,7 @@ This is computed at read time — no stored field.
   "scalingMode": "round_up",
   "isTemplate": false,
   "sourceTemplateId": "uuid | null",
+  "shoppingListStale": false,
   "createdBy": "uuid",
   "createdAt": "instant",
   "updatedAt": "instant"
@@ -174,6 +191,7 @@ This is computed at read time — no stored field.
   "scalingMode": "round_up",
   "isTemplate": false,
   "sourceTemplateId": "uuid | null",
+  "shoppingListStale": false,
   "createdBy": "uuid",
   "days": [
     {
@@ -186,17 +204,17 @@ This is computed at read time — no stored field.
             "recipeId": "uuid",
             "recipeName": "Pancakes",
             "baseServings": 4,
+            "scaleFactor": 1.0,
             "isFullyPurchased": true,
             "ingredients": [
               {
-                "id": "uuid",
+                "recipeIngredientId": "uuid",
                 "ingredientId": "uuid",
                 "ingredientName": "Flour",
                 "category": "pantry",
                 "quantity": 2.0,
                 "scaledQuantity": 2.0,
-                "unit": "cup",
-                "purchased": true
+                "unit": "cup"
               }
             ]
           }
@@ -218,18 +236,21 @@ This is computed at read time — no stored field.
   "mealPlanId": "uuid",
   "servings": 4,
   "scalingMode": "round_up",
-  "totalIngredients": 12,
-  "purchasedCount": 5,
+  "isStale": false,
+  "totalItems": 12,
+  "fullyPurchasedCount": 5,
   "categories": [
     {
       "category": "produce",
       "items": [
         {
+          "recipeIngredientId": "uuid",
           "ingredientId": "uuid",
           "ingredientName": "Onion",
-          "totalQuantity": 6.0,
+          "quantityRequired": 6.0,
+          "quantityPurchased": 6.0,
           "unit": "whole",
-          "purchased": false,
+          "isFullyPurchased": true,
           "usedInRecipes": ["Chili", "Pasta Sauce"]
         }
       ]
@@ -240,21 +261,19 @@ This is computed at read time — no stored field.
 
 ## Database Changes
 
-### New Tables (5)
+### New Tables (4)
 
-1. **meal_plans** — meal plan container (template or trip-bound)
+1. **meal_plans** — meal plan container (template or trip-bound), includes `shopping_list_stale` flag
 2. **meal_plan_days** — numbered days within a meal plan
-3. **meal_plan_recipes** — recipe instances placed on a day/meal
-4. **meal_plan_recipe_ingredients** — copied ingredients per recipe instance
-5. **shopping_list_items** — purchase tracking per ingredient per meal plan
+3. **meal_plan_recipes** — recipe references placed on a day/meal (no ingredient copies)
+4. **shopping_list_items** — quantity tracking per recipe ingredient per meal plan (generated on request)
 
 ### Migrations
 
 - `V018__create_meal_plans.sql`
 - `V019__create_meal_plan_days.sql`
 - `V020__create_meal_plan_recipes.sql`
-- `V021__create_meal_plan_recipe_ingredients.sql`
-- `V022__create_shopping_list_items.sql`
+- `V021__create_shopping_list_items.sql`
 
 ### Indexes
 
@@ -262,8 +281,9 @@ This is computed at read time — no stored field.
 - `meal_plans(is_template)` — filter templates
 - `meal_plan_days(meal_plan_id)` — list days for a plan
 - `meal_plan_recipes(meal_plan_day_id)` — list recipes for a day
-- `meal_plan_recipe_ingredients(meal_plan_recipe_id)` — list ingredients for a recipe
+- `meal_plan_recipes(recipe_id)` — find meal plan recipes by recipe
 - `shopping_list_items(meal_plan_id)` — list items for a plan
+- `shopping_list_items(recipe_ingredient_id)` — lookup by recipe ingredient
 
 ## Client Interface
 
@@ -275,11 +295,10 @@ Package: `com.acme.clients.mealplanclient`
 #### Models
 
 ```kotlin
-data class MealPlan(id, planId?, name, servings, scalingMode, isTemplate, sourceTemplateId?, createdBy, createdAt, updatedAt)
+data class MealPlan(id, planId?, name, servings, scalingMode, isTemplate, sourceTemplateId?, shoppingListStale, createdBy, createdAt, updatedAt)
 data class MealPlanDay(id, mealPlanId, dayNumber, createdAt, updatedAt)
-data class MealPlanRecipe(id, mealPlanDayId, mealType, recipeId, baseServings, createdAt, updatedAt)
-data class MealPlanRecipeIngredient(id, mealPlanRecipeId, ingredientId, quantity: BigDecimal, unit, createdAt, updatedAt)
-data class ShoppingListItem(id, mealPlanId, ingredientId, purchased, createdAt, updatedAt)
+data class MealPlanRecipe(id, mealPlanDayId, mealType, recipeId, createdAt, updatedAt)
+data class ShoppingListItem(id, mealPlanId, recipeIngredientId, quantityRequired: BigDecimal, quantityPurchased: BigDecimal, createdAt, updatedAt)
 ```
 
 #### Interface
@@ -305,17 +324,18 @@ interface MealPlanClient {
     fun getRecipesByMealPlanId(param: GetRecipesByMealPlanIdParam): Result<List<MealPlanRecipe>, AppError>
     fun removeRecipe(param: RemoveRecipeParam): Result<Unit, AppError>
 
-    // Recipe ingredients
-    fun addRecipeIngredients(param: AddRecipeIngredientsParam): Result<List<MealPlanRecipeIngredient>, AppError>
-    fun getRecipeIngredients(param: GetRecipeIngredientsParam): Result<List<MealPlanRecipeIngredient>, AppError>
-    fun getRecipeIngredientsByMealPlanId(param: GetRecipeIngredientsByMealPlanIdParam): Result<List<MealPlanRecipeIngredient>, AppError>
-
     // Shopping list
     fun getShoppingListItems(param: GetShoppingListItemsParam): Result<List<ShoppingListItem>, AppError>
-    fun upsertShoppingListItem(param: UpsertShoppingListItemParam): Result<ShoppingListItem, AppError>
+    fun upsertShoppingListItems(param: UpsertShoppingListItemsParam): Result<List<ShoppingListItem>, AppError>
+    fun updateShoppingListItem(param: UpdateShoppingListItemParam): Result<ShoppingListItem, AppError>
     fun deleteShoppingListItems(param: DeleteShoppingListItemsParam): Result<Unit, AppError>
 }
 ```
+
+**Notes:**
+- No recipe ingredient operations on this client — ingredient data is read from the existing `RecipeClient`
+- `upsertShoppingListItems` is used by the generate action to bulk create/replace items
+- `updateShoppingListItem` is used for updating `quantity_purchased`
 
 ## Service Layer
 
@@ -328,20 +348,21 @@ Package: `com.acme.services.camperservice.features.mealplan`
 | Action | Description |
 |--------|-------------|
 | CreateMealPlanAction | Validate and create a new meal plan (template or trip-bound) |
-| GetMealPlanDetailAction | Fetch meal plan with all days, recipes, ingredients, compute scaling and purchase status |
+| GetMealPlanDetailAction | Fetch meal plan with all days, recipes, live ingredients from recipe catalog, compute scaling and purchase status |
 | GetMealPlanByPlanIdAction | Get the meal plan for a specific trip |
 | GetTemplatesAction | List all template meal plans |
-| UpdateMealPlanAction | Update name, servings, scaling mode |
-| DeleteMealPlanAction | Delete a meal plan |
-| CopyToTripAction | Deep-copy a template meal plan to a trip (days, recipes, ingredients, shopping list) |
-| SaveAsTemplateAction | Deep-copy a trip meal plan as a new template |
+| UpdateMealPlanAction | Update name, servings, scaling mode. Marks shopping list stale if servings or scaling mode changed. |
+| DeleteMealPlanAction | Delete a meal plan (cascades everything) |
+| CopyToTripAction | Deep-copy a template meal plan to a trip (days, recipes — no shopping list, user generates separately) |
+| SaveAsTemplateAction | Deep-copy a trip meal plan as a new template (days, recipes — no shopping list) |
 | AddDayAction | Add a numbered day to a meal plan |
-| RemoveDayAction | Remove a day (cascade deletes recipes, ingredients) |
-| AddRecipeToMealAction | Add a recipe to a day/meal, copy its ingredients, upsert shopping list items |
-| RemoveRecipeFromMealAction | Remove a recipe from a meal, clean up orphaned shopping list items |
-| GetShoppingListAction | Aggregate all ingredients with scaling, group by category, include purchase status and recipe references |
-| TogglePurchasedAction | Toggle purchased status for an ingredient in the shopping list |
-| ResetShoppingListAction | Reset all purchased statuses to false |
+| RemoveDayAction | Remove a day (cascade deletes recipes). Marks shopping list stale. |
+| AddRecipeToMealAction | Add a recipe reference to a day/meal. Marks shopping list stale. |
+| RemoveRecipeFromMealAction | Remove a recipe from a meal. Marks shopping list stale. |
+| GenerateShoppingListAction | Read all recipes in meal plan, scale ingredients, aggregate by recipe_ingredient_id, upsert shopping list items. Resets stale flag. |
+| GetShoppingListAction | Read shopping list items, join with ingredient names/categories, group by category, include recipe references |
+| UpdatePurchasedQuantityAction | Update quantity_purchased for a shopping list item |
+| DeleteShoppingListAction | Delete all shopping list items for a meal plan |
 
 #### Error Types
 
@@ -354,7 +375,8 @@ sealed class MealPlanError {
     data class PlanAlreadyHasMealPlan(val planId: UUID) : MealPlanError()
     data class NotATemplate(val id: UUID) : MealPlanError()
     data class IsATemplate(val id: UUID) : MealPlanError()
-    data class IngredientNotFound(val id: UUID) : MealPlanError()
+    data class ShoppingListItemNotFound(val recipeIngredientId: UUID) : MealPlanError()
+    data class NoRecipesInMealPlan(val mealPlanId: UUID) : MealPlanError()
 }
 ```
 
@@ -363,7 +385,7 @@ sealed class MealPlanError {
 | # | Branch Suffix | Title | Description |
 |---|--------------|-------|-------------|
 | 1 | plan | feat(meal-plans): plan | This document |
-| 2 | db-contracts | feat(meal-plans): db contracts | Schema files + migration SQL for 5 tables |
+| 2 | db-contracts | feat(meal-plans): db contracts | Schema files + migration SQL for 4 tables |
 | 3 | client-contracts | feat(meal-plans): client contracts | MealPlanClient interface, param objects, model types, fake stubs |
 | 4 | service-contracts | feat(meal-plans): service contracts | DTOs, error types, action signatures, controller routes (501s) |
 | 5 | db-impl | feat(meal-plans): db implementation | Seed data, verify migrations |
