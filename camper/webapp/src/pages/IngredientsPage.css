@@ -145,6 +145,28 @@
   display: flex;
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
+  align-items: flex-end;
+}
+
+.ingredients-form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.ingredients-form-field:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.ingredients-form-label {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--charcoal-light);
+  opacity: 0.55;
+  padding-left: 2px;
+  margin-bottom: 4px;
 }
 
 .ingredients-input {

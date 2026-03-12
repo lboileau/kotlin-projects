@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   api,
   type IngredientResponse,
@@ -8,12 +9,14 @@ import {
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
 import './IngredientsPage.css';
+import './RecipesPage.css';
 import '../components/Modal.css';
 
 const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'] as const;
 const CATEGORIES = ['produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other'] as const;
 
 export function IngredientsPage() {
+  const navigate = useNavigate();
   const [ingredients, setIngredients] = useState<IngredientResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -151,6 +154,11 @@ export function IngredientsPage() {
           }
         />
 
+        <div className="recipes-section-nav">
+          <button className="recipes-section-nav__tab" onClick={() => navigate('/recipes')}>Recipes</button>
+          <button className="recipes-section-nav__tab recipes-section-nav__tab--active">Ingredients</button>
+        </div>
+
         <div className="ingredients-toolbar">
           <input
             type="text"
@@ -172,20 +180,29 @@ export function IngredientsPage() {
             <h3 className="ingredients-create-title">New Ingredient</h3>
             <form onSubmit={handleCreate}>
               <div className="ingredients-form-row">
-                <input
-                  type="text"
-                  className="ingredients-input"
-                  placeholder="Name"
-                  value={createName}
-                  onChange={e => setCreateName(e.target.value)}
-                  autoFocus
-                />
-                <select className="ingredients-select" value={createCategory} onChange={e => setCreateCategory(e.target.value)}>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <select className="ingredients-select" value={createUnit} onChange={e => setCreateUnit(e.target.value)}>
-                  {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
-                </select>
+                <div className="ingredients-form-field">
+                  <label className="ingredients-form-label">name</label>
+                  <input
+                    type="text"
+                    className="ingredients-input"
+                    placeholder="e.g. garlic"
+                    value={createName}
+                    onChange={e => setCreateName(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+                <div className="ingredients-form-field">
+                  <label className="ingredients-form-label">category</label>
+                  <select className="ingredients-select" value={createCategory} onChange={e => setCreateCategory(e.target.value)}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="ingredients-form-field">
+                  <label className="ingredients-form-label">default unit</label>
+                  <select className="ingredients-select" value={createUnit} onChange={e => setCreateUnit(e.target.value)}>
+                    {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                  </select>
+                </div>
               </div>
               {createError && <p className="ingredients-error">{createError}</p>}
               <div className="ingredients-form-actions">

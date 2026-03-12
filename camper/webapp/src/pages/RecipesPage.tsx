@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   api,
   type RecipeResponse,
@@ -29,6 +30,7 @@ interface DraftIngredient {
 
 export function RecipesPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [view, setView] = useState<View>('list');
   const [recipes, setRecipes] = useState<RecipeResponse[]>([]);
@@ -466,19 +468,33 @@ export function RecipesPage() {
           unit: edit.unit,
         });
       } else {
-        const newIngredient: CreateIngredientRequest = {
-          name: edit.name.trim(),
-          category: edit.category,
-          defaultUnit: edit.unit,
-        };
-        await api.resolveIngredient(selectedRecipe.id, ri.id, {
-          action: 'CREATE_NEW',
-          newIngredient,
-          quantity: edit.qty,
-          unit: edit.unit,
-        });
-        const updatedIngredients = await api.getIngredients();
-        setIngredients(updatedIngredients);
+        // Check if an ingredient with this name already exists
+        const latestIngredients = await api.getIngredients();
+        setIngredients(latestIngredients);
+        const existingIng = latestIngredients.find(i => i.name.trim().toLowerCase() === edit.name.trim().toLowerCase());
+
+        if (existingIng) {
+          await api.resolveIngredient(selectedRecipe.id, ri.id, {
+            action: 'SELECT_EXISTING',
+            ingredientId: existingIng.id,
+            quantity: edit.qty,
+            unit: edit.unit,
+          });
+        } else {
+          const newIngredient: CreateIngredientRequest = {
+            name: edit.name.trim(),
+            category: edit.category,
+            defaultUnit: edit.unit,
+          };
+          await api.resolveIngredient(selectedRecipe.id, ri.id, {
+            action: 'CREATE_NEW',
+            newIngredient,
+            quantity: edit.qty,
+            unit: edit.unit,
+          });
+          const updatedIngredients = await api.getIngredients();
+          setIngredients(updatedIngredients);
+        }
       }
       // Clean up edit state
       setPendingEdits(prev => {
@@ -641,6 +657,19 @@ export function RecipesPage() {
             </svg>
           }
         />
+
+        {/* ── Section Nav ── */}
+        <div className="recipes-section-nav">
+          <button className="recipes-section-nav__tab recipes-section-nav__tab--active">
+            Recipes
+          </button>
+          <button
+            className="recipes-section-nav__tab"
+            onClick={() => navigate('/ingredients')}
+          >
+            Ingredients
+          </button>
+        </div>
 
         {/* ── List View ── */}
         {view === 'list' && (
@@ -944,7 +973,12 @@ export function RecipesPage() {
                           {/* Pending ingredient — inline editable */}
                           {isPending && (() => {
                             const edit = getPendingEdit(ri);
-                            const matchStillValid = isStillExistingMatch(ri, edit);
+                            const matchFromServer = isStillExistingMatch(ri, edit);
+                            // Also check if ingredient exists in the global list (e.g. created by resolving another pending item)
+                            const matchFromList = !matchFromServer
+                              ? ingredients.find(i => i.name.trim().toLowerCase() === edit.name.trim().toLowerCase()) ?? null
+                              : null;
+                            const matchStillValid = matchFromServer || !!matchFromList;
                             const isCreateMode = !matchStillValid;
                             const hasSuggestion = !!(ri.matchedIngredient || ri.suggestedIngredientName);
 
@@ -1006,13 +1040,16 @@ export function RecipesPage() {
 
                                 {/* Status line — existing match info */}
                                 <div className="recipe-detail__pending-status">
-                                  {matchStillValid ? (
-                                    <>
-                                      <span className="pending-status__label pending-status__label--match">using existing</span>
-                                      <span className="pending-status__value">{ri.matchedIngredient!.name}</span>
-                                      <span className="recipe-detail__ingredient-category">{ri.matchedIngredient!.category}</span>
-                                    </>
-                                  ) : !edit.name.trim() ? (
+                                  {matchStillValid ? (() => {
+                                    const matched = ri.matchedIngredient ?? matchFromList;
+                                    return (
+                                      <>
+                                        <span className="pending-status__label pending-status__label--match">using existing</span>
+                                        <span className="pending-status__value">{matched?.name ?? edit.name}</span>
+                                        <span className="recipe-detail__ingredient-category">{matched?.category ?? ''}</span>
+                                      </>
+                                    );
+                                  })() : !edit.name.trim() ? (
                                     <span className="pending-status__label">enter a name to resolve</span>
                                   ) : null}
                                 </div>
@@ -1028,6 +1065,7 @@ export function RecipesPage() {
                                       {acceptingId === ri.id ? 'Saving…' : matchStillValid ? '✓ Accept' : '+ Create & Accept'}
                                     </button>
                                   )}
+                                  <button className="review-remove-btn review-remove-btn--labeled" onClick={() => handleRemoveIngredient(ri.id)}>Remove from recipe</button>
                                 </div>
                               </div>
                             );
