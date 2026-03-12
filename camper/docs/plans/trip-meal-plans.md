@@ -20,7 +20,7 @@ The top-level container. Can be a **template** (no trip association) or **trip-b
 | plan_id | UUID? | FK → plans.id CASCADE, UNIQUE when not null. Null = template |
 | name | VARCHAR(255) | NOT NULL |
 | servings | INT | NOT NULL, CHECK > 0. Target servings for scaling |
-| scaling_mode | VARCHAR(20) | NOT NULL, CHECK IN ('fractional', 'round_up'). Default 'round_up' |
+| scaling_mode | VARCHAR(20) | NOT NULL, CHECK IN ('fractional', 'round_up'). Default 'fractional' |
 | is_template | BOOLEAN | NOT NULL, DEFAULT false |
 | source_template_id | UUID? | FK → meal_plans.id SET NULL. Tracks which template this was copied from |
 | created_by | UUID | FK → users.id RESTRICT |
@@ -94,24 +94,25 @@ A pure-logic library (`libs/meal-plan-calculator`) handles unit conversion and s
 
 Units fall into three categories:
 
-| Category | Units | Canonical Unit |
-|----------|-------|----------------|
-| **Volume** | tsp, tbsp, cup, ml, l | ml (for computation), displayed in best-fit unit |
-| **Weight** | g, kg, oz, lb | g (for computation), displayed in best-fit unit |
-| **Count** | pieces, whole, bunch, can, clove, pinch, slice, sprig | Not convertible between each other |
+| Group | Units | Compatible? |
+|-------|-------|-------------|
+| **Volume** | tsp, tbsp, cup, ml, l | Yes — all convertible to each other |
+| **Weight** | g, kg, oz, lb | Yes — all convertible to each other |
+| **Count** | pieces, whole, bunch, can, clove, pinch, slice, sprig | No — each is its own type |
 
 ### Conversion Rules
 
-- **Within the same category** (volume or weight): convert to canonical unit, sum, then convert back to a human-friendly display unit (e.g., don't show 768 ml, show 3.25 cups)
-- **Across categories**: cannot convert. If the same ingredient appears in volume and weight (or volume and count), they remain as separate shopping list rows. E.g., "1.5 cups carrots" + "2 whole carrots" = two rows
+- **Compatible units** (volume↔volume, weight↔weight): convert to a common unit, sum, then use `bestFit` to find a clean display unit
+- **Incompatible units**: cannot convert. Same ingredient in volume + weight (or volume + count) → separate shopping list rows. E.g., "1.5 cups carrots" + "2 whole carrots" = two rows
 - **Count units**: each count unit is its own type. "2 cloves garlic" + "1 whole garlic" = two rows (clove ≠ whole)
 
 ### Best-Fit Display Unit
 
-When displaying a converted total, pick the unit that produces the most readable number:
-- Prefer units that produce values between 0.25 and 100
-- Prefer common units (cups over ml for US recipes, but this can be a later enhancement)
-- For the initial implementation: display in the most common unit used across the contributing recipe ingredients (e.g., if 3 recipes use "cup" and 1 uses "tbsp", display in cups)
+`bestFit(quantity, unit)` scales up through compatible units until reaching the smallest whole number or clean fraction (1/4, 1/2, 3/4):
+- 48 tsp → 1 cup
+- 6 tbsp → 6 tbsp (0.375 cups isn't a clean fraction, so stay at tbsp)
+- 1500 ml → 1.5 l
+- 750 g → 750 g (0.75 kg is a clean fraction → could go either way, prefer the more readable one)
 
 ## Scaling Logic
 
@@ -132,10 +133,10 @@ The shopping list is **fully computed at read time**. The flow:
 1. Load all `meal_plan_recipes` → get distinct `recipe_id`s
 2. Load `recipe_ingredients` for each recipe (only approved, with resolved `ingredient_id`)
 3. Scale each ingredient quantity using the meal plan's servings and scaling mode
-4. Group by `(ingredient_id, unit_category)`:
-   - Convert all quantities within a group to the canonical unit for that category
-   - Sum the converted quantities
-   - Convert back to a best-fit display unit
+4. Group by `ingredient_id`, then within each group:
+   - Partition into compatible unit subgroups (e.g., volume vs count)
+   - Within each subgroup, convert all to a common unit, sum, then `bestFit` the total
+   - Each subgroup becomes one shopping list row
 5. For each `(ingredient_id, resolved_unit)`, look up the corresponding `shopping_list_purchases` row
 6. Compute status per row:
    - `quantity_purchased >= quantity_required > 0` → **Done** (green)
@@ -353,16 +354,23 @@ Pure logic — no I/O, no Spring dependencies.
 #### Unit Conversion
 
 ```kotlin
-enum class UnitCategory { VOLUME, WEIGHT, COUNT }
-
 object UnitConverter {
-    fun category(unit: String): UnitCategory
-    fun toCanonical(quantity: BigDecimal, unit: String): Pair<BigDecimal, String>  // converts to ml/g
-    fun fromCanonical(quantity: BigDecimal, canonicalUnit: String, preferredUnit: String): Pair<BigDecimal, String>
-    fun bestFitUnit(quantity: BigDecimal, category: UnitCategory): String
+    /** Convert a quantity from one unit to another. Returns null if units are incompatible. */
+    fun convert(quantity: BigDecimal, sourceUnit: String, targetUnit: String): BigDecimal?
+
+    /** Check if two units can be converted between each other. */
     fun areCompatible(unitA: String, unitB: String): Boolean
+
+    /**
+     * Find the best-fit unit for a quantity — scales up through compatible units
+     * until reaching the smallest whole number or clean fraction (1/4, 1/2, 3/4).
+     * E.g., 48 tsp → 1 cup, 6 tbsp → 6 tbsp (0.375 cups isn't clean).
+     */
+    fun bestFit(quantity: BigDecimal, unit: String): Pair<BigDecimal, String>
 }
 ```
+
+Internally backed by a map of unit→unit conversion factors and sets of compatible units. Volume units (tsp, tbsp, cup, ml, l) are compatible with each other. Weight units (g, kg, oz, lb) are compatible with each other. Count units (pieces, whole, bunch, can, clove, pinch, slice, sprig) are each their own type — not convertible.
 
 #### Shopping List Calculator
 
