@@ -221,3 +221,65 @@ VALUES
     ('aa150000-0026-4000-8000-000000000000', 'aa140000-0003-4000-8000-000000000000', 'aa130000-0033-4000-8000-000000000000', 1,   'tsp',   'approved', now(), now()),  -- salt
     ('aa150000-0027-4000-8000-000000000000', 'aa140000-0003-4000-8000-000000000000', 'aa130000-0034-4000-8000-000000000000', 0.5, 'tsp',   'approved', now(), now())   -- pepper
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Meal plans
+-- ============================================================
+
+INSERT INTO meal_plans (id, plan_id, name, servings, scaling_mode, is_template, source_template_id, created_by, created_at, updated_at)
+VALUES
+    -- Template: Weekend Classic (no trip association)
+    ('aa180000-0001-4000-8000-000000000000', NULL, 'Weekend Classic', 4, 'fractional', true, NULL, 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now(), now()),
+    -- Trip meal plan for Summer Camping Trip (copied from Weekend Classic template)
+    ('aa180000-0002-4000-8000-000000000000', '10aabb00-1111-2222-3333-444455556666', 'Summer Camping Meals', 6, 'round_up', false, 'aa180000-0001-4000-8000-000000000000', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now(), now()),
+    -- Template: Simple Getaway (no trip association)
+    ('aa180000-0003-4000-8000-000000000000', NULL, 'Simple Getaway', 2, 'fractional', true, NULL, 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now(), now())
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Meal plan days
+-- ============================================================
+
+INSERT INTO meal_plan_days (id, meal_plan_id, day_number, created_at, updated_at)
+VALUES
+    -- Weekend Classic template: 2 days
+    ('aa190000-0001-4000-8000-000000000000', 'aa180000-0001-4000-8000-000000000000', 1, now(), now()),
+    ('aa190000-0002-4000-8000-000000000000', 'aa180000-0001-4000-8000-000000000000', 2, now(), now()),
+    -- Summer Camping Meals: 2 days
+    ('aa190000-0003-4000-8000-000000000000', 'aa180000-0002-4000-8000-000000000000', 1, now(), now()),
+    ('aa190000-0004-4000-8000-000000000000', 'aa180000-0002-4000-8000-000000000000', 2, now(), now()),
+    -- Simple Getaway template: 1 day
+    ('aa190000-0005-4000-8000-000000000000', 'aa180000-0003-4000-8000-000000000000', 1, now(), now())
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Meal plan recipes
+-- ============================================================
+
+INSERT INTO meal_plan_recipes (id, meal_plan_day_id, meal_type, recipe_id, created_at, updated_at)
+VALUES
+    -- Weekend Classic template, Day 1
+    ('aa200000-0001-4000-8000-000000000000', 'aa190000-0001-4000-8000-000000000000', 'lunch',  'aa140000-0001-4000-8000-000000000000', now(), now()),  -- Camp Guacamole
+    ('aa200000-0002-4000-8000-000000000000', 'aa190000-0001-4000-8000-000000000000', 'dinner', 'aa140000-0003-4000-8000-000000000000', now(), now()),  -- Campfire Chili
+    -- Weekend Classic template, Day 2
+    ('aa200000-0003-4000-8000-000000000000', 'aa190000-0002-4000-8000-000000000000', 'lunch',  'aa140000-0002-4000-8000-000000000000', now(), now()),  -- Trail Tacos
+    -- Summer Camping Meals, Day 1
+    ('aa200000-0004-4000-8000-000000000000', 'aa190000-0003-4000-8000-000000000000', 'lunch',  'aa140000-0001-4000-8000-000000000000', now(), now()),  -- Camp Guacamole
+    ('aa200000-0005-4000-8000-000000000000', 'aa190000-0003-4000-8000-000000000000', 'dinner', 'aa140000-0003-4000-8000-000000000000', now(), now()),  -- Campfire Chili
+    -- Summer Camping Meals, Day 2
+    ('aa200000-0006-4000-8000-000000000000', 'aa190000-0004-4000-8000-000000000000', 'lunch',  'aa140000-0002-4000-8000-000000000000', now(), now()),  -- Trail Tacos
+    -- Simple Getaway template, Day 1
+    ('aa200000-0007-4000-8000-000000000000', 'aa190000-0005-4000-8000-000000000000', 'dinner', 'aa140000-0002-4000-8000-000000000000', now(), now())   -- Trail Tacos
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Shopping list purchases (only for the trip meal plan)
+-- ============================================================
+
+INSERT INTO shopping_list_purchases (id, meal_plan_id, ingredient_id, unit, quantity_purchased, created_at, updated_at)
+VALUES
+    -- Summer Camping Meals: Alice bought some ingredients
+    ('aa210000-0001-4000-8000-000000000000', 'aa180000-0002-4000-8000-000000000000', 'aa130000-0006-4000-8000-000000000000', 'whole', 6,   now(), now()),  -- avocado: bought 6
+    ('aa210000-0002-4000-8000-000000000000', 'aa180000-0002-4000-8000-000000000000', 'aa130000-0018-4000-8000-000000000000', 'lb',    2,   now(), now()),  -- ground beef: bought 2 lb
+    ('aa210000-0003-4000-8000-000000000000', 'aa180000-0002-4000-8000-000000000000', 'aa130000-0031-4000-8000-000000000000', 'can',   2,   now(), now())   -- canned beans: bought 2 cans
+ON CONFLICT (id) DO NOTHING;
