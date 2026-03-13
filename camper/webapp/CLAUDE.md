@@ -34,6 +34,7 @@ webapp/
 │   │   ├── CampsiteItems.tsx           # SVG art: TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG
 │   │   ├── InteractableItem.tsx/css    # Hoverable/clickable campsite object with glow + tooltip
 │   │   ├── GearModal.tsx/css            # Equipment & gear management modal (checklist per owner)
+│   │   ├── MealPlanModal.tsx/css       # Meal plan modal — overview, recipe book, shopping list
 │   │   ├── AssignmentsModal.tsx/css    # Tent & canoe group assignments modal
 │   │   ├── ComingSoonModal.tsx         # Themed "not ready" modal with flavor text
 │   │   ├── AddMemberModal.tsx          # Form modal to invite member by email
@@ -52,7 +53,7 @@ webapp/
 ## Architecture
 
 ### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`
+- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse`, `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
 - `request<T>()` helper auto-injects `X-User-Id` from localStorage
 - All methods return typed promises; throws on non-OK responses
 
@@ -72,9 +73,13 @@ webapp/
 ### Pages
 - **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`. If sign-in fails because user has no username, auto-switches to Register tab with error message.
 - **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
-- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (edit plan name + toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others. Pending (invited but not registered) members show their email address. Campfire circle radius scales dynamically with member count to prevent avatar overlap.
+- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealPlanModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (edit plan name + toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others. Pending (invited but not registered) members show their email address. Campfire circle radius scales dynamically with member count to prevent avatar overlap.
   - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists scoped to the current plan, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists.
-  - **MealModal** — Plan-only checklist (no personal sections) with day tabs. Categories: breakfast, lunch, dinner, snacks. Everyone can edit the meal plan. Day tabs let users organize meals per day (Day 1, Day 2, etc.) with a "+" button to add more days. Items are stored with day-prefixed categories (e.g. `day1:breakfast`) which the UI parses for display. Empty trailing days are automatically removed when all items are deleted. Opens from the kitchen campsite item. Both modals share a generic `ChecklistModal` component internally.
+  - **MealPlanModal** — Fixed-height (88vh) three-view modal opened from the kitchen campsite item. Three tab views:
+    - **Overview:** Editable meal plan name (blur-to-save), servings-per-recipe stepper, save-as-template / load-from-template links. Day tabs (add/remove days). Four meal type sections (Breakfast ☀, Lunch ◐, Dinner ☽, Snacks ✦) each with inline recipe search-and-add and remove buttons. Empty state shows a create form with name input, servings stepper, and optional template loader with preview.
+    - **Recipe Book:** Open-book layout (left page: search + filter pills + scrollable recipe list; spine; right page: selected recipe detail with ingredients). "Add to Meal Plan" button pinned at bottom with day + meal type popover (pre-selects active day). Left and right pages scroll independently.
+    - **Shopping List:** Progress bar (X of Y purchased). Items grouped by ingredient category. Each row: checkbox toggle, ingredient name, quantity display, status badge (done/more needed/needed/removed). Merges multi-unit entries per ingredient. Reset purchases with confirmation.
+    - **Templates:** Save current meal plan as template. Load from template with day-by-day preview (grouped by meal type with icons). Loading a template replaces all days/recipes but preserves the existing meal plan name.
   - **AssignmentsModal** — Fixed-height modal with two tabs (Tents / Canoes). Cards show assignment name, owner, occupancy bar, and member list with mini SVG avatar heads. Features: "Add Tent" / "Add Canoe" buttons (creator auto-added if not already in a group of that type); join (auto-leaves current group of same type); leave (including owner self-leave); owner/plan-owner "Add Member" panel showing available plan members with greyed-out entries for those already in another group of the same type; inline edit name/max occupancy; delete. Pending adventurers are filtered from the add-member list.
 - **RecipesPage** — Standalone page at `/recipes` with dusk parallax background. Multi-view single-page flow: `list`, `detail`, `create`, `edit`, `import`.
   - **List view:** Searchable recipe cards (filter by name). Shows published and own draft recipes. "New Recipe" and "Import Recipe" buttons. Each card shows name, status badge (draft/published), base servings, and description snippet. Click to view detail.
@@ -128,6 +133,21 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | PUT | `/api/recipes/:id/ingredients/:ingredientId` | X-User-Id | RecipesPage (resolve pending ingredient) |
 | PUT | `/api/recipes/:id/resolve-duplicate` | X-User-Id | RecipesPage (resolve duplicate flag) |
 | POST | `/api/recipes/:id/publish` | X-User-Id | RecipesPage (publish draft) |
+| GET | `/api/meal-plans?planId=` | X-User-Id | MealPlanModal (get meal plan for trip) |
+| GET | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (detail / template preview) |
+| POST | `/api/meal-plans` | X-User-Id | MealPlanModal (create) |
+| PUT | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (update name/servings) |
+| DELETE | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (delete) |
+| POST | `/api/meal-plans/:id/days` | X-User-Id | MealPlanModal (add day) |
+| DELETE | `/api/meal-plans/:id/days/:dayId` | X-User-Id | MealPlanModal (remove day) |
+| POST | `/api/meal-plans/:id/days/:dayId/recipes` | X-User-Id | MealPlanModal (add recipe to meal) |
+| DELETE | `/api/meal-plan-recipes/:id` | X-User-Id | MealPlanModal (remove recipe from meal) |
+| GET | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (shopping list) |
+| PATCH | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (update purchase) |
+| DELETE | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (reset purchases) |
+| GET | `/api/meal-plans/templates` | X-User-Id | MealPlanModal (list templates) |
+| POST | `/api/meal-plans/:id/save-as-template` | X-User-Id | MealPlanModal (save as template) |
+| POST | `/api/meal-plans/:id/copy-to-trip` | X-User-Id | MealPlanModal (load template) |
 
 ## Running
 
