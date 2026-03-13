@@ -7,6 +7,7 @@ import {
   type RecipeResponse,
   type RecipeDetailResponse,
   type ShoppingListResponse,
+  type ShoppingListItemResponse,
   type MealsByTypeResponse,
 } from '../api/client';
 import './MealPlanModal.css';
@@ -60,7 +61,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   const [savingTemplate, setSavingTemplate] = useState(false);
   const [showLoadTemplate, setShowLoadTemplate] = useState(false);
   const [loadingTemplate, setLoadingTemplate] = useState(false);
-  const [replaceTemplateId, setReplaceTemplateId] = useState<string | null>(null);
+  const [, setReplaceTemplateId] = useState<string | null>(null);
   const [templatePreview, setTemplatePreview] = useState<MealPlanDetailResponse | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
@@ -398,7 +399,6 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
               onPreviewTemplate={handlePreviewTemplate}
               templatePreview={templatePreview}
               loadingPreview={loadingPreview}
-              replaceTemplateId={replaceTemplateId}
               setReplaceTemplateId={setReplaceTemplateId}
               setTemplatePreview={setTemplatePreview}
               showSaveTemplate={showSaveTemplate}
@@ -476,7 +476,6 @@ interface OverviewProps {
   onPreviewTemplate: (templateId: string) => void;
   templatePreview: MealPlanDetailResponse | null;
   loadingPreview: boolean;
-  replaceTemplateId: string | null;
   setReplaceTemplateId: (v: string | null) => void;
   setTemplatePreview: (v: MealPlanDetailResponse | null) => void;
   showSaveTemplate: boolean;
@@ -496,7 +495,7 @@ function OverviewView({
   creating, onCreate, error,
   templates, showLoadTemplate, setShowLoadTemplate, loadingTemplate, onLoadTemplate,
   onPreviewTemplate, templatePreview, loadingPreview,
-  replaceTemplateId, setReplaceTemplateId, setTemplatePreview,
+  setReplaceTemplateId, setTemplatePreview,
   showSaveTemplate, setShowSaveTemplate, templateName, setTemplateName, savingTemplate, onSaveAsTemplate,
   recipes, onAddRecipeInline,
 }: OverviewProps) {
