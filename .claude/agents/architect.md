@@ -58,7 +58,7 @@ You know and design around these conventions:
 
 ## Plan Document Structure
 
-When creating a plan, write it to `docs/plans/<feature>.md` with:
+When creating a plan, write it to `docs/<feature>/plan.md` with:
 
 1. **Feature summary** — one paragraph
 2. **Entities** — names, fields, relationships

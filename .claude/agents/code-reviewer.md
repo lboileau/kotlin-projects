@@ -94,4 +94,4 @@ Structure your review as:
 - **Be specific.** Vague feedback wastes everyone's time. Point to exact locations.
 - **Be actionable.** Every issue must include how to fix it.
 - **Don't nitpick style.** Focus on correctness, plan adherence, and pattern adherence. Don't flag formatting preferences.
-- **Read the plan first.** Always read `docs/plans/<feature>.md` before reviewing any code.
+- **Read the plan first.** Always read `docs/<feature>/plan.md` before reviewing any code.

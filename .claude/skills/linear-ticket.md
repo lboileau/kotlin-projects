@@ -1,13 +1,13 @@
 # Linear Ticket
 
-You take a Linear ticket link or identifier, fetch its details, and then route to the appropriate workflow skill (`/build-feature` or `/fix-bug`).
+You take a Linear ticket link or identifier, fetch its details, and produce a handoff file for the orchestrator — routing to the appropriate workflow (feature build or bug fix).
 
 ## Critical Rules
 
 1. **Always fetch the ticket first.** Use the `mcp__linear-server__get_issue` tool to retrieve full ticket details before proceeding.
 2. **Include relations.** Set `includeRelations: true` to get blocking/related context.
 3. **Route correctly.** Use ticket labels, title, and description to determine whether this is a feature or a bug fix.
-4. **Pre-fill requirements.** Extract as much information as possible from the ticket so the downstream skill has context without re-asking the user.
+4. **Pre-fill the handoff.** Extract as much information as possible from the ticket so the orchestrator has full context without re-asking the user.
 
 ---
 
@@ -40,12 +40,12 @@ Extract from the response:
 
 Determine the workflow based on these signals (in priority order):
 
-**Route to `/fix-bug`** if ANY of:
+**Route to `bug-fix`** if ANY of:
 - A label contains "bug" (case-insensitive)
 - The title starts with "fix", "bug", or "broken" (case-insensitive)
 - The description explicitly describes incorrect/broken behavior
 
-**Route to `/build-feature`** if ANY of:
+**Route to `feature-build`** if ANY of:
 - A label contains "feature", "enhancement", or "improvement" (case-insensitive)
 - The title starts with "add", "implement", "create", or "support" (case-insensitive)
 - The description describes new functionality to build
@@ -54,22 +54,100 @@ Determine the workflow based on these signals (in priority order):
 
 ---
 
-## Step 4: Hand Off to the Downstream Skill
+## Step 4: Gather Additional Context
 
-Present the ticket summary to the user, confirm the routing decision, then invoke the chosen skill.
+Present the ticket summary to the user and confirm the routing decision. Ask if there's any additional context not in the ticket that the orchestrator should know about (e.g., related code areas, past attempts, urgency).
 
-### For `/build-feature`, pre-fill:
-- **Feature description** — from ticket title + description
-- **Entities/resources** — any mentioned in the description
-- **API endpoints** — any mentioned in the description
-- **Database changes** — any mentioned in the description
-- **Special considerations** — from labels, priority, related issues
+---
 
-### For `/fix-bug`, pre-fill:
-- **Bug description** — from ticket title + description
-- **Expected behavior** — extract from description if present
-- **Reproduction steps** — extract from description if present
-- **Logs/stack traces** — extract from description or comments if present
-- **Context** — from related issues, priority, labels
+## Step 5: Write Handoff File
 
-After presenting the extracted information, ask the user to confirm or supplement before handing off. The downstream skill (`/build-feature` or `/fix-bug`) handles the orchestrator handoff — invoke it with the pre-filled context so it can validate scope, check for overlaps, and spawn the orchestrator using Claude agent teams in tmux panes.
+Write a handoff file to `docs/<feature-or-area>/handoff.md` inside the project directory.
+
+### For feature-build:
+
+```markdown
+# Orchestrator Handoff
+
+## Workflow
+feature-build
+
+## Project Path
+<absolute path to project root>
+
+## Feature Name
+<feature-name derived from ticket>
+
+## Linear Ticket
+<ticket identifier> — <ticket title>
+
+## Plan
+<path to plan doc if it already exists, or "to be created by architect">
+
+## Feature Description
+<from ticket title + description + any user-provided context>
+
+## Entities
+<any mentioned in the description, or "to be determined by architect">
+
+## API Surface
+<any mentioned in the description, or "to be determined by architect">
+
+## Database Changes
+<any mentioned in the description, or "to be determined by architect">
+
+## Special Considerations
+<from labels, priority, related issues, user context>
+
+## Notes
+<any additional context>
+```
+
+### For bug-fix:
+
+```markdown
+# Orchestrator Handoff
+
+## Workflow
+bug-fix
+
+## Project Path
+<absolute path to project root>
+
+## Bug Area
+<affected feature or area>
+
+## Linear Ticket
+<ticket identifier> — <ticket title>
+
+## Bug Description
+<from ticket title + description>
+
+## Expected Behavior
+<extracted from description if present>
+
+## Reproduction Steps
+<extracted from description if present>
+
+## Logs / Stack Traces
+<extracted from description or comments if present>
+
+## Context
+<from related issues, priority, labels, user context>
+
+## Notes
+<any additional context>
+```
+
+---
+
+## Step 6: Tell the User to Continue
+
+After writing the handoff file, tell the user:
+
+> The handoff file is ready at `docs/<name>/handoff.md`. To start:
+>
+> 1. Run `/compact` or `/clear` to free up context
+> 2. Then say: **"Start the orchestrator for `<name>` using the handoff at `docs/<name>/handoff.md`"**
+>
+> The orchestrator will read the handoff, create the agent team, and drive the workflow from there.

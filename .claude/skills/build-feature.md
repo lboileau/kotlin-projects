@@ -1,12 +1,12 @@
 # Build Feature
 
-Gather requirements from the user, then hand off to the **orchestrator** to execute the build using Claude agent teams in tmux panes. You do NOT write code, manage PRs, or run the build yourself.
+Gather requirements from the user, write a handoff file, then tell the user to clear context and start the orchestrator. You do NOT write code, manage PRs, or run the build yourself.
 
 ## Critical Rules
 
-1. **You are the intake.** Your only job is to gather requirements and prompt the orchestrator with complete context.
-2. **Gate on plan approval.** The orchestrator will present a plan — do not let it proceed until the user explicitly approves.
-3. **Gather complete requirements.** The orchestrator cannot ask the user questions, so you must provide everything it needs upfront.
+1. **You are the intake.** Your only job is to gather requirements and produce a handoff file for the orchestrator.
+2. **Gather complete requirements.** The orchestrator cannot ask the user questions, so you must provide everything it needs upfront.
+3. **Write the handoff file.** The handoff file is the single artifact that bridges this conversation and the orchestrator's fresh context.
 
 ---
 
@@ -49,16 +49,55 @@ If overlap is found, present it to the user and ask whether to extend, reuse, or
 
 ---
 
-## Step 4: Hand Off to the Orchestrator
+## Step 4: Write Handoff File
 
-Once requirements are gathered and scope is confirmed, spawn the `orchestrator` using Claude agent teams. Provide it with:
+Once requirements are gathered and scope is confirmed, write a handoff file to `docs/<feature>/handoff.md` inside the project directory.
 
-- **Workflow type** — Feature build
-- **Project path** — Full path to the project root
-- **Feature description** — Complete description with all gathered details
-- **Entities** — All entity names, fields, and relationships
-- **API surface** — All endpoints with methods, paths, and shapes
-- **Database changes** — All table/column changes
-- **Special considerations** — Any constraints or requirements that affect the build
+**Handoff file format:**
 
-The orchestrator takes it from here — it will use Claude agent teams to spawn specialized teammates (architect, db-dev, kotlin-dev, test-engineer, reviewers, doc-updater) in tmux panes, manage the PR stack, run review cycles, and present the retro for user approval before submitting.
+```markdown
+# Orchestrator Handoff
+
+## Workflow
+feature-build
+
+## Project Path
+<absolute path to project root>
+
+## Feature Name
+<feature-name>
+
+## Plan
+<path to plan doc if it already exists, or "to be created by architect">
+
+## Feature Description
+<complete description of the feature with all gathered details>
+
+## Entities
+<all entity names, fields, and relationships>
+
+## API Surface
+<all endpoints with methods, paths, and shapes>
+
+## Database Changes
+<all table/column changes>
+
+## Special Considerations
+<any constraints, permissions, real-time requirements, integrations>
+
+## Notes
+<any additional context — e.g., "plan already exists and was reviewed", "resuming from phase X">
+```
+
+---
+
+## Step 5: Tell the User to Continue
+
+After writing the handoff file, tell the user:
+
+> The handoff file is ready at `docs/<feature>/handoff.md`. To start the build:
+>
+> 1. Run `/compact` or `/clear` to free up context
+> 2. Then say: **"Start the orchestrator for `<feature>` using the handoff at `docs/<feature>/handoff.md`"**
+>
+> The orchestrator will read the handoff, create the agent team, and drive the build from there.
