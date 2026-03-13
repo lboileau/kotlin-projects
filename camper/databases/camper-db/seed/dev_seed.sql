@@ -18,11 +18,11 @@ VALUES
     ('20bbcc00-2222-3333-4444-555566667777', 'Fall Retreat', 'public', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now(), now())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO plan_members (plan_id, user_id, created_at)
+INSERT INTO plan_members (plan_id, user_id, role, created_at)
 VALUES
-    ('10aabb00-1111-2222-3333-444455556666', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now()),
-    ('10aabb00-1111-2222-3333-444455556666', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now()),
-    ('20bbcc00-2222-3333-4444-555566667777', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now())
+    ('10aabb00-1111-2222-3333-444455556666', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'member',  now()),  -- Alice (owner role derived from plans.owner_id)
+    ('10aabb00-1111-2222-3333-444455556666', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'manager', now()),  -- Bob promoted to manager (non-owner)
+    ('20bbcc00-2222-3333-4444-555566667777', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'member',  now())   -- Bob (owner role derived from plans.owner_id)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO items (id, plan_id, user_id, name, category, quantity, packed, created_at, updated_at)
