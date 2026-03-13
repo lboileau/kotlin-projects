@@ -70,7 +70,7 @@ export interface PlanMember {
 | `PATCH` | `/api/plans/{planId}/members/{userId}/role` | `X-User-Id` (owner only) | Promote/demote a member | `{ "role": "manager" \| "member" }` | `PlanMemberResponse` (200) |
 | `GET` | `/api/plans/{planId}/members` | `X-User-Id` | List members (existing) | — | Now includes `role` field |
 
-No other endpoint changes. The shared gear permission check is frontend-only today (checking `currentUserId === planOwnerId`). We update this to also allow managers.
+No other endpoint changes. The shared gear permission check is frontend-only today (checking `currentUserId === planOwnerId`). We enforce this at both the API and frontend layers — the backend must verify the requesting user is the plan owner OR a manager before allowing shared gear mutations.
 
 ## Database Changes
 
@@ -146,11 +146,11 @@ ORDER BY created_at
 ```
 
 ### Modified: `AddPlanMember` operation
-Update INSERT to include `role` (default 'member'):
+Update INSERT to include `role` (default 'member') and keep explicit `created_at`:
 ```sql
-INSERT INTO plan_members (plan_id, user_id, role) VALUES (:planId, :userId, 'member')
+INSERT INTO plan_members (plan_id, user_id, role, created_at) VALUES (:planId, :userId, 'member', :createdAt)
 ```
-(The default is also handled by the DB, but be explicit.)
+(The default is also handled by the DB, but be explicit. `created_at` matches the existing pattern of using `Instant.now()`.)
 
 ### New operation: `UpdateMemberRole`
 ```sql
@@ -209,9 +209,9 @@ fun updateMemberRole(param: UpdateMemberRoleParam) = updateMemberRole.execute(pa
 ### Modified: `PlanError`
 Add:
 ```kotlin
-data class NotMemberOrOwner(val planId: String, val userId: String) : PlanError("...")
-data class CannotChangeOwnerRole(val planId: String) : PlanError("...")
+data class CannotChangeOwnerRole(val planId: String) : PlanError("Cannot change the owner's role for plan $planId")
 ```
+Note: Reuse the existing `NotMember(planId, userId)` error for the case where the target user is not a member. No new `NotMemberOrOwner` type needed.
 
 ### Modified: `PlanController`
 Add endpoint:
@@ -259,10 +259,129 @@ Wire the new action and validation.
   ```
 - Pass `canEditShared` instead of `currentUserId === planOwnerId` on line 532
 
-### Role Management UI (PlanPage.tsx — Manage Plan modal or inline)
-- Owner sees a role badge/dropdown next to each member in the campfire circle or in a dedicated panel
-- Simple approach: Add a small crown/badge icon on each CamperAvatar that the owner can click to toggle manager status
-- Or: Add role management to the existing "Manage Plan" modal with a members list
+### Role Management UI (Manage Plan modal)
+- Add a **new members list section** to the existing Manage Plan modal (there is no members list today — this is new UI)
+- Each row shows the member's username/email and their role
+- Owner sees a role dropdown or toggle next to each non-owner member (options: "member" / "manager")
+- Changing the dropdown calls `updateMemberRole(planId, userId, role)` and refreshes the members list
+- Owner's own row shows "Owner" as a static label (not editable)
+- Non-owner users see the members list as read-only (no dropdown)
+
+## Plan Role Authorization
+
+Currently, authorization checks are done inline in each action (e.g., `UpdatePlanAction` checks `plan.ownerId != param.userId`). With the introduction of roles, we need a reusable authorization pattern that can be extended to other endpoints in the future.
+
+### Design: `PlanRoleAuthorizer`
+
+A shared utility in `common/auth/` that resolves a user's effective role in a plan and checks it against required roles. This is not a one-off helper — it's the pattern all plan-scoped authorization will use going forward.
+
+**Location:** `com.acme.services.camperservice.common.auth`
+
+```kotlin
+/** The effective role a user has within a plan. */
+enum class PlanRole { OWNER, MANAGER, MEMBER }
+
+/** Context returned on successful authorization — actions can inspect the resolved role if needed. */
+data class PlanRoleContext(
+    val planId: UUID,
+    val userId: UUID,
+    val role: PlanRole
+)
+
+/** Authorization failed. */
+data class PlanRoleAuthorizationError(
+    val planId: UUID,
+    val userId: UUID,
+    val requiredRoles: Set<PlanRole>,
+    val actualRole: PlanRole?
+)
+
+/**
+ * Resolves a user's effective role in a plan and checks it against required roles.
+ *
+ * Role resolution:
+ * 1. If userId == plan.ownerId → OWNER
+ * 2. Else look up plan_members row → role "manager" maps to MANAGER, "member" maps to MEMBER
+ * 3. If not found in plan_members and not owner → null (not a member)
+ */
+class PlanRoleAuthorizer(private val planClient: PlanClient) {
+
+    /**
+     * Authorize a user for a plan resource.
+     * Returns Success(PlanRoleContext) if the user has one of the required roles,
+     * or Failure(PlanRoleAuthorizationError) if not.
+     */
+    fun authorize(
+        planId: UUID,
+        userId: UUID,
+        requiredRoles: Set<PlanRole>
+    ): Result<PlanRoleContext, PlanRoleAuthorizationError>
+}
+```
+
+**Key design decisions:**
+- Returns `Result` — consistent with the codebase error handling pattern
+- Returns a `PlanRoleContext` on success so actions can branch on the resolved role if needed
+- `PlanRoleAuthorizationError` is a standalone data class (not part of any feature's sealed hierarchy) — each feature maps it to its own error type
+- The authorizer only resolves and checks roles — it doesn't know about items, assignments, or any other domain concept
+- Owner is always resolved from `plan.ownerId`, never from the `plan_members` table
+
+### Wiring
+
+```kotlin
+// In common/auth/ config or PlanRoleAuthorizerConfig.kt
+@Configuration
+class PlanRoleAuthorizerConfig {
+    @Bean
+    fun planRoleAuthorizer(planClient: PlanClient) = PlanRoleAuthorizer(planClient)
+}
+```
+
+### Usage in item actions (this PR)
+
+Currently, the item actions (`CreateItemAction`, `UpdateItemAction`, `DeleteItemAction`) perform no authorization checks for shared gear items (where `ownerType=plan` / `userId` is null). This must be enforced at the API layer.
+
+**Modified: `ItemService` dependencies**
+- `ItemService` now also takes `PlanRoleAuthorizer`
+
+**Modified: `ItemServiceConfig`**
+- Wire `PlanRoleAuthorizer` into `ItemService`
+
+**Modified: `CreateItemAction`**
+- Takes `PlanRoleAuthorizer` as a constructor dependency
+- When `ownerType == "plan"` (shared gear), call `authorizer.authorize(planId, userId, setOf(OWNER, MANAGER))`
+- On failure, map to `ItemError.Forbidden`
+- Personal gear (`ownerType == "user"`) is unaffected
+
+**Modified: `UpdateItemAction`**
+- Takes `PlanRoleAuthorizer` as a constructor dependency
+- Fetch the item first. If `item.userId == null` (shared gear), call `authorizer.authorize(item.planId, userId, setOf(OWNER, MANAGER))`
+- On failure, map to `ItemError.Forbidden`
+- Personal gear is unaffected
+
+**Modified: `DeleteItemAction`**
+- Takes `PlanRoleAuthorizer` as a constructor dependency
+- Fetch the item first. If `item.userId == null` (shared gear), call `authorizer.authorize(item.planId, userId, setOf(OWNER, MANAGER))`
+- On failure, map to `ItemError.Forbidden`
+- Personal gear is unaffected
+
+**Modified: `ItemError`**
+Add:
+```kotlin
+data class Forbidden(val planId: String, val userId: String) : ItemError("User $userId is not authorized to modify shared gear in plan $planId")
+```
+
+**Modified: `ResultExtensions.kt`**
+Add `ItemError.Forbidden` → 403 mapping.
+
+### Future extensibility
+
+The same `PlanRoleAuthorizer` can be used for any plan-scoped authorization:
+- `authorizer.authorize(planId, userId, setOf(OWNER))` — owner-only operations (replaces inline checks in `UpdatePlanAction`, `DeletePlanAction`)
+- `authorizer.authorize(planId, userId, setOf(OWNER, MANAGER))` — shared gear, or any future manager-level operations
+- `authorizer.authorize(planId, userId, setOf(OWNER, MANAGER, MEMBER))` — any plan member
+
+Existing inline owner checks (e.g., in `UpdatePlanAction`) are **not** migrated in this PR to keep scope contained, but they can be refactored to use `PlanRoleAuthorizer` in a follow-up.
 
 ## PR Stack
 
@@ -273,7 +392,7 @@ Wire the new action and validation.
 4.  [service]      feat(avatar-flair): service contracts — UpdateMemberRoleAction signature, DTOs, error types
 5.  [db-impl]      feat(avatar-flair): db implementation — migration, rollback, schema, seed
 6.  [client-impl]  feat(avatar-flair): client implementation — UpdateMemberRole operation, updated queries, fake
-7.  [service-impl] feat(avatar-flair): service implementation — action, validation, controller, config
+7.  [service-impl] feat(avatar-flair): service implementation — action, validation, controller, config, PlanRoleAuthorizer + shared gear authorization
 8.  [webapp]       feat(avatar-flair): webapp — avatar flair SVG, role management UI, gear permissions
 9.  [client-test]  feat(avatar-flair): client tests — integration tests for updateMemberRole + role field
 10. [service-test] feat(avatar-flair): service tests — unit tests for UpdateMemberRoleAction
