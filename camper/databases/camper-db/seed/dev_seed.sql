@@ -283,3 +283,68 @@ VALUES
     ('aa210000-0002-4000-8000-000000000000', 'aa180000-0002-4000-8000-000000000000', 'aa130000-0018-4000-8000-000000000000', 'lb',    2,   now(), now()),  -- ground beef: bought 2 lb
     ('aa210000-0003-4000-8000-000000000000', 'aa180000-0002-4000-8000-000000000000', 'aa130000-0031-4000-8000-000000000000', 'can',   2,   now(), now())   -- canned beans: bought 2 cans
 ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Log book FAQs
+-- ============================================================
+
+INSERT INTO log_book_faqs (id, plan_id, question, asked_by_id, answer, answered_by_id, created_at, updated_at)
+VALUES
+    -- Summer Camping Trip: answered FAQ
+    ('aa250000-0001-4000-8000-000000000000', '10aabb00-1111-2222-3333-444455556666',
+     'What time should we arrive at the campsite?',
+     'e4ccf033-d04f-8c3c-ffa1-affd007c4e55',  -- asked by Bob
+     'Check-in is at 3 PM at the ranger station. Try to arrive by 2:30 so we can set up before dark.',
+     'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44',  -- answered by Alice (owner)
+     now(), now()),
+    -- Summer Camping Trip: answered FAQ
+    ('aa250000-0002-4000-8000-000000000000', '10aabb00-1111-2222-3333-444455556666',
+     'Do we need to bring our own firewood?',
+     'e4ccf033-d04f-8c3c-ffa1-affd007c4e55',  -- asked by Bob
+     'The campground sells bundles at the entrance, but I already packed two. We should be fine for the first night.',
+     'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44',  -- answered by Alice (owner)
+     now(), now()),
+    -- Summer Camping Trip: unanswered FAQ
+    ('aa250000-0003-4000-8000-000000000000', '10aabb00-1111-2222-3333-444455556666',
+     'Is there cell service at the campsite?',
+     'e4ccf033-d04f-8c3c-ffa1-affd007c4e55',  -- asked by Bob
+     NULL, NULL,
+     now(), now()),
+    -- Fall Retreat: answered FAQ
+    ('aa250000-0004-4000-8000-000000000000', '20bbcc00-2222-3333-4444-555566667777',
+     'Are dogs allowed on site?',
+     'e4ccf033-d04f-8c3c-ffa1-affd007c4e55',  -- asked by Bob (owner)
+     'Yes, but they must be leashed at all times in the common areas.',
+     'e4ccf033-d04f-8c3c-ffa1-affd007c4e55',  -- answered by Bob (owner)
+     now(), now())
+ON CONFLICT (id) DO NOTHING;
+
+-- ============================================================
+-- Log book journal entries
+-- ============================================================
+
+INSERT INTO log_book_journal_entries (id, plan_id, user_id, page_number, content, created_at, updated_at)
+VALUES
+    -- Summer Camping Trip: 3 journal entries
+    ('aa260000-0001-4000-8000-000000000000', '10aabb00-1111-2222-3333-444455556666',
+     'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44',  -- Alice
+     1,
+     'Day 1: We arrived at Pine Ridge around 2:45 PM. The weather was perfect — clear skies and a light breeze. Set up camp in about an hour. Bob''s tent is lopsided but he insists it adds character.',
+     now(), now()),
+    ('aa260000-0002-4000-8000-000000000000', '10aabb00-1111-2222-3333-444455556666',
+     'e4ccf033-d04f-8c3c-ffa1-affd007c4e55',  -- Bob
+     2,
+     'Morning hike to Eagle Peak was incredible. The trail was well-marked and we spotted a bald eagle near the summit. Took about 3 hours round trip. My tent is fine, Alice.',
+     now(), now()),
+    ('aa260000-0003-4000-8000-000000000000', '10aabb00-1111-2222-3333-444455556666',
+     'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44',  -- Alice
+     3,
+     'Last evening campfire was the highlight. The chili turned out amazing and we had enough for seconds. Already planning the next trip!',
+     now(), now()),
+    -- Fall Retreat: 1 journal entry
+    ('aa260000-0004-4000-8000-000000000000', '20bbcc00-2222-3333-4444-555566667777',
+     'e4ccf033-d04f-8c3c-ffa1-affd007c4e55',  -- Bob
+     1,
+     'Scouted the Fall Retreat location today. The lake is gorgeous and there are several flat spots perfect for tents. Will need to book site #7 or #8 — they have the best views.',
+     now(), now())
+ON CONFLICT (id) DO NOTHING;
