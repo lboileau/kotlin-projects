@@ -366,6 +366,45 @@ CREATE INDEX IF NOT EXISTS idx_shopping_list_purchases_meal_plan_id ON shopping_
 CREATE INDEX IF NOT EXISTS idx_shopping_list_purchases_ingredient_id ON shopping_list_purchases (ingredient_id);
 ```
 
+### log_book_faqs
+
+```sql
+CREATE TABLE IF NOT EXISTS log_book_faqs (
+    id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id        UUID        NOT NULL,
+    question       TEXT        NOT NULL,
+    asked_by_id    UUID        NOT NULL,
+    answer         TEXT,
+    answered_by_id UUID,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT fk_log_book_faqs_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
+    CONSTRAINT fk_log_book_faqs_asked_by FOREIGN KEY (asked_by_id) REFERENCES users (id),
+    CONSTRAINT fk_log_book_faqs_answered_by FOREIGN KEY (answered_by_id) REFERENCES users (id)
+);
+CREATE INDEX IF NOT EXISTS idx_log_book_faqs_plan_id ON log_book_faqs (plan_id);
+```
+
+### log_book_journal_entries
+
+```sql
+CREATE TABLE IF NOT EXISTS log_book_journal_entries (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id     UUID        NOT NULL,
+    user_id     UUID        NOT NULL,
+    page_number INTEGER     NOT NULL,
+    content     TEXT        NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT fk_log_book_journal_entries_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
+    CONSTRAINT fk_log_book_journal_entries_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
+CREATE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_id ON log_book_journal_entries (plan_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_book_journal_entries (plan_id, page_number);
+```
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -393,6 +432,11 @@ CREATE INDEX IF NOT EXISTS idx_shopping_list_purchases_ingredient_id ON shopping
 - `meal_plan_recipes.recipe_id` → `recipes.id` (FK, CASCADE on delete)
 - `shopping_list_purchases.meal_plan_id` → `meal_plans.id` (FK, CASCADE on delete)
 - `shopping_list_purchases.ingredient_id` → `ingredients.id` (FK, CASCADE on delete)
+- `log_book_faqs.plan_id` → `plans.id` (FK, CASCADE on delete)
+- `log_book_faqs.asked_by_id` → `users.id` (FK)
+- `log_book_faqs.answered_by_id` → `users.id` (FK, nullable)
+- `log_book_journal_entries.plan_id` → `plans.id` (FK, CASCADE on delete)
+- `log_book_journal_entries.user_id` → `users.id` (FK)
 
 ## Invariants
 
@@ -433,3 +477,7 @@ CREATE INDEX IF NOT EXISTS idx_shopping_list_purchases_ingredient_id ON shopping
 - Shopping list purchase `quantity_purchased` must be >= 0 (enforced by `ck_shopping_list_purchases_quantity`).
 - Shopping list purchases are unique per `(meal_plan_id, ingredient_id, unit)` (enforced by `uq_shopping_list_purchases_meal_plan_ingredient_unit`).
 - Deleting a user is restricted if they created any meal plans.
+- Deleting a plan cascades to log_book_faqs and log_book_journal_entries.
+- `answer` and `answered_by_id` in log_book_faqs are nullable (unanswered until a manager replies).
+- Journal entry page numbers are unique per plan (enforced by unique index `idx_log_book_journal_entries_plan_page`).
+- Page numbers are not renumbered on deletion — gaps are expected.
