@@ -105,7 +105,7 @@ class PlanServiceTest {
                 )
             )
             fakePlanClient.seedMember(
-                com.acme.clients.planclient.model.PlanMember(planId = publicPlanId, userId = ownerId, createdAt = Instant.now())
+                com.acme.clients.planclient.model.PlanMember(planId = publicPlanId, userId = ownerId, role = "member", createdAt = Instant.now())
             )
 
             val result = planService.getPlans(GetPlansParam(userId = ownerId))

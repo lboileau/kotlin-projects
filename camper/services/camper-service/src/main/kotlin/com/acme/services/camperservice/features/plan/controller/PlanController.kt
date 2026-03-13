@@ -4,6 +4,7 @@ import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.plan.dto.AddMemberRequest
 import com.acme.services.camperservice.features.plan.dto.CreatePlanRequest
+import com.acme.services.camperservice.features.plan.dto.UpdateMemberRoleRequest
 import com.acme.services.camperservice.features.plan.dto.UpdatePlanRequest
 import com.acme.services.camperservice.features.plan.mapper.PlanMapper
 import com.acme.services.camperservice.features.plan.params.*
@@ -85,6 +86,20 @@ class PlanController(
         val result = planService.addMember(param)
         if (result is Result.Success) eventPublisher.publishUpdate(planId, "members", "updated")
         return result.toResponseEntity(successStatus = 201) { PlanMapper.toResponse(it) }
+    }
+
+    @PatchMapping("/{planId}/members/{userId}/role")
+    fun updateMemberRole(
+        @PathVariable planId: UUID,
+        @PathVariable userId: UUID,
+        @RequestHeader("X-User-Id") requestingUserId: UUID,
+        @RequestBody request: UpdateMemberRoleRequest
+    ): ResponseEntity<Any> {
+        logger.info("PATCH /api/plans/{}/members/{}/role", planId, userId)
+        val param = UpdateMemberRoleParam(planId = planId, userId = userId, role = request.role, requestingUserId = requestingUserId)
+        val result = planService.updateMemberRole(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(planId, "members", "updated")
+        return result.toResponseEntity { PlanMapper.toResponse(it) }
     }
 
     @DeleteMapping("/{planId}/members/{memberId}")
