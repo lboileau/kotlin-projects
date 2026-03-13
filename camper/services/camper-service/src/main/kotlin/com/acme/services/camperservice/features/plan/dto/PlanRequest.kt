@@ -5,3 +5,5 @@ data class CreatePlanRequest(val name: String)
 data class UpdatePlanRequest(val name: String, val visibility: String? = null)
 
 data class AddMemberRequest(val email: String)
+
+data class UpdateMemberRoleRequest(val role: String)

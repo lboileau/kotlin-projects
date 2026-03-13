@@ -24,6 +24,7 @@ object PlanMapper {
         username = username,
         email = email,
         invitationStatus = invitationStatus,
+        role = clientMember.role,
         createdAt = clientMember.createdAt
     )
 
@@ -43,6 +44,7 @@ object PlanMapper {
         username = member.username,
         email = member.email,
         invitationStatus = member.invitationStatus,
+        role = member.role,
         createdAt = member.createdAt
     )
 }

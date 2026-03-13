@@ -19,5 +19,6 @@ data class PlanMemberResponse(
     val username: String?,
     val email: String?,
     val invitationStatus: String?,
+    val role: String,
     val createdAt: Instant
 )
