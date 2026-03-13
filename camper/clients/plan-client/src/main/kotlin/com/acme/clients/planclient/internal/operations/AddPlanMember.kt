@@ -26,8 +26,8 @@ internal class AddPlanMember(private val jdbi: Jdbi) {
             jdbi.withHandle<Unit, Exception> { handle ->
                 handle.createUpdate(
                     """
-                    INSERT INTO plan_members (plan_id, user_id, created_at)
-                    VALUES (:planId, :userId, :createdAt)
+                    INSERT INTO plan_members (plan_id, user_id, role, created_at)
+                    VALUES (:planId, :userId, 'member', :createdAt)
                     """.trimIndent()
                 )
                     .bind("planId", param.planId)
