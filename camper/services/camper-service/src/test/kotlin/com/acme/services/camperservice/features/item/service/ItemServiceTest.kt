@@ -3,6 +3,10 @@ package com.acme.services.camperservice.features.item.service
 import com.acme.clients.common.Result
 import com.acme.clients.itemclient.fake.FakeItemClient
 import com.acme.clients.itemclient.model.Item as ClientItem
+import com.acme.clients.planclient.fake.FakePlanClient
+import com.acme.clients.planclient.model.Plan
+import com.acme.clients.planclient.model.PlanMember
+import com.acme.services.camperservice.common.auth.PlanRoleAuthorizer
 import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.item.params.*
 import org.assertj.core.api.Assertions.assertThat
@@ -15,7 +19,9 @@ import java.util.UUID
 class ItemServiceTest {
 
     private val fakeItemClient = FakeItemClient()
-    private val itemService = ItemService(fakeItemClient)
+    private val fakePlanClient = FakePlanClient()
+    private val planRoleAuthorizer = PlanRoleAuthorizer(fakePlanClient)
+    private val itemService = ItemService(fakeItemClient, planRoleAuthorizer)
 
     private val planId = UUID.randomUUID()
     private val userId = UUID.randomUUID()
@@ -24,6 +30,10 @@ class ItemServiceTest {
     @BeforeEach
     fun setUp() {
         fakeItemClient.reset()
+        fakePlanClient.reset()
+        // Seed a plan where requestingUserId is the owner, so shared gear auth passes
+        fakePlanClient.seedPlan(Plan(id = planId, name = "Test Plan", visibility = "private", ownerId = requestingUserId, createdAt = Instant.now(), updatedAt = Instant.now()))
+        fakePlanClient.seedMember(PlanMember(planId = planId, userId = requestingUserId, role = "member", createdAt = Instant.now()))
     }
 
     @Nested
