@@ -1,13 +1,12 @@
 # Fix Bug
 
-Gather bug details from the user, then hand off to the **orchestrator** to diagnose, fix, and verify the bug using Claude agent teams in tmux panes. You do NOT write code, manage PRs, or run the build yourself.
+Gather bug details from the user, write a handoff file, then tell the user to clear context and start the orchestrator. You do NOT write code, manage PRs, or run the build yourself.
 
 ## Critical Rules
 
-1. **You are the intake.** Your only job is to gather bug details and prompt the orchestrator with complete context.
-2. **Gate on diagnosis approval.** The orchestrator will present a diagnosis — do not let it proceed until the user explicitly approves.
-3. **Regression test required.** Every bug fix must include a test that fails before the fix and passes after.
-4. **Minimal change.** Fix the bug, nothing else. No refactoring, no "while I'm here" improvements.
+1. **You are the intake.** Your only job is to gather bug details and produce a handoff file for the orchestrator.
+2. **Gather complete details.** The orchestrator cannot ask the user questions, so you must provide everything it needs upfront.
+3. **Write the handoff file.** The handoff file is the single artifact that bridges this conversation and the orchestrator's fresh context.
 
 ---
 
@@ -26,16 +25,52 @@ Keep asking until you have enough detail for the orchestrator to diagnose effect
 
 ---
 
-## Step 2: Hand Off to the Orchestrator
+## Step 2: Write Handoff File
 
-Once bug details are gathered, spawn the `orchestrator` using Claude agent teams. Provide it with:
+Once bug details are gathered, write a handoff file to `docs/<feature-or-area>/handoff.md` inside the project directory. Use the bug area or affected feature as the directory name.
 
-- **Workflow type** — Bug fix
-- **Project path** — Full path to the project root
-- **Bug description** — Complete description of the incorrect behavior
-- **Expected behavior** — What should happen
-- **Reproduction steps** — How to trigger the bug
-- **Logs/stack traces** — Any error output
-- **Context** — When it started, recent changes, suspected area
+**Handoff file format:**
 
-The orchestrator takes it from here — it will use Claude agent teams to spawn the architect for diagnosis, developers for the fix, test-engineer for regression tests, and reviewers for quality checks, all in tmux panes. It manages the PR stack, collects retros, and presents the final report for user approval before submitting.
+```markdown
+# Orchestrator Handoff
+
+## Workflow
+bug-fix
+
+## Project Path
+<absolute path to project root>
+
+## Bug Area
+<affected feature or area name>
+
+## Bug Description
+<complete description of the incorrect behavior>
+
+## Expected Behavior
+<what should happen instead>
+
+## Reproduction Steps
+<step-by-step instructions to trigger the bug>
+
+## Logs / Stack Traces
+<any error output, or "none provided">
+
+## Context
+<when it started, recent changes, suspected area of code>
+
+## Notes
+<any additional context>
+```
+
+---
+
+## Step 3: Tell the User to Continue
+
+After writing the handoff file, tell the user:
+
+> The handoff file is ready at `docs/<area>/handoff.md`. To start the fix:
+>
+> 1. Run `/compact` or `/clear` to free up context
+> 2. Then say: **"Start the orchestrator for `<area>` using the handoff at `docs/<area>/handoff.md`"**
+>
+> The orchestrator will read the handoff, create the agent team, diagnose the bug, and drive the fix from there.

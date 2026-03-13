@@ -83,7 +83,7 @@ For each test, ask:
 ## Rules
 
 - **Never approve weak tests.** A test suite that gives false confidence is worse than no tests.
-- **Check against the plan.** Every endpoint and error case in `docs/plans/<feature>.md` must have test coverage.
+- **Check against the plan.** Every endpoint and error case in `docs/<feature>/plan.md` must have test coverage.
 - **Prioritize missing coverage.** A missing test for an error path is more important than a style nit.
 - **Be specific about fixes.** Don't just say "add more assertions" — say what to assert and what value to expect.
 - **Verify tests actually run.** Check that test classes have the right annotations (`@SpringBootTest`, `@Import`, etc.) and will be picked up by the test runner.
