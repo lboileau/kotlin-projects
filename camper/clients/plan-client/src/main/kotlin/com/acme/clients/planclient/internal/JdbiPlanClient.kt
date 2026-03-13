@@ -29,4 +29,6 @@ internal class JdbiPlanClient(jdbi: Jdbi) : PlanClient {
     override fun getMembers(param: GetMembersParam): Result<List<PlanMember>, AppError> = getPlanMembers.execute(param)
     override fun addMember(param: AddMemberParam): Result<PlanMember, AppError> = addPlanMember.execute(param)
     override fun removeMember(param: RemoveMemberParam): Result<Unit, AppError> = removePlanMember.execute(param)
+    override fun updateMemberRole(param: UpdateMemberRoleParam): Result<PlanMember, AppError> =
+        throw NotImplementedError("updateMemberRole operation not yet implemented")
 }

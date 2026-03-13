@@ -96,7 +96,7 @@ class FakePlanClient : PlanClient {
         if (memberStore.any { it.planId == param.planId && it.userId == param.userId }) {
             return failure(ConflictError("PlanMember", "user is already a member of this plan"))
         }
-        val member = PlanMember(planId = param.planId, userId = param.userId, createdAt = Instant.now())
+        val member = PlanMember(planId = param.planId, userId = param.userId, role = "member", createdAt = Instant.now())
         memberStore.add(member)
         return success(member)
     }
@@ -104,6 +104,10 @@ class FakePlanClient : PlanClient {
     override fun removeMember(param: RemoveMemberParam): Result<Unit, AppError> {
         val removed = memberStore.removeAll { it.planId == param.planId && it.userId == param.userId }
         return if (removed) success(Unit) else failure(NotFoundError("PlanMember", "${param.planId}/${param.userId}"))
+    }
+
+    override fun updateMemberRole(param: UpdateMemberRoleParam): Result<PlanMember, AppError> {
+        throw NotImplementedError("updateMemberRole is not yet implemented in FakePlanClient")
     }
 
     fun reset() {

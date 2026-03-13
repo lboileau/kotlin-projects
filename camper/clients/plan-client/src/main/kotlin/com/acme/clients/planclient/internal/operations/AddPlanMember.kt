@@ -35,7 +35,7 @@ internal class AddPlanMember(private val jdbi: Jdbi) {
                     .bind("createdAt", now)
                     .execute()
             }
-            success(PlanMember(planId = param.planId, userId = param.userId, createdAt = now))
+            success(PlanMember(planId = param.planId, userId = param.userId, role = "member", createdAt = now))
         } catch (e: Exception) {
             if (e.message?.contains("duplicate key") == true || e.message?.contains("plan_members_pkey") == true) {
                 failure(ConflictError("PlanMember", "user is already a member of this plan"))
