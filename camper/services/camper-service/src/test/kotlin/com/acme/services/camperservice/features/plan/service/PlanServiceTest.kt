@@ -418,4 +418,124 @@ class PlanServiceTest {
             assertThat(invited.email).isEqualTo("other@example.com")
         }
     }
+
+    @Nested
+    inner class UpdateMemberRole {
+        @Test
+        fun `updateMemberRole promotes member to manager`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val member = (result as Result.Success).value
+            assertThat(member.role).isEqualTo("manager")
+            assertThat(member.userId).isEqualTo(otherUserId)
+            assertThat(member.planId).isEqualTo(plan.id)
+            assertThat(member.username).isEqualTo("other")
+            assertThat(member.email).isEqualTo("other@example.com")
+        }
+
+        @Test
+        fun `updateMemberRole demotes manager back to member`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+            planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager", requestingUserId = ownerId)
+            )
+
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "member", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val member = (result as Result.Success).value
+            assertThat(member.role).isEqualTo("member")
+        }
+
+        @Test
+        fun `updateMemberRole returns NotOwner when non-owner requests`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager", requestingUserId = otherUserId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(PlanError.NotOwner::class.java)
+        }
+
+        @Test
+        fun `updateMemberRole returns CannotChangeOwnerRole when target is owner`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = ownerId, role = "manager", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(PlanError.CannotChangeOwnerRole::class.java)
+        }
+
+        @Test
+        fun `updateMemberRole returns NotMember when target is not a member`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+            val nonMemberId = UUID.randomUUID()
+            fakeUserClient.seed(
+                User(id = nonMemberId, email = "nonmember@example.com", username = "nonmember", createdAt = Instant.now(), updatedAt = Instant.now())
+            )
+
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = nonMemberId, role = "manager", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(PlanError.NotMember::class.java)
+        }
+
+        @Test
+        fun `updateMemberRole returns Invalid for invalid role value`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "admin", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(PlanError.Invalid::class.java)
+            assertThat((error as PlanError.Invalid).field).isEqualTo("role")
+        }
+
+        @Test
+        fun `updateMemberRole returns NotFound when plan does not exist`() {
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = UUID.randomUUID(), userId = otherUserId, role = "manager", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(PlanError.NotFound::class.java)
+        }
+
+        @Test
+        fun `updateMemberRole enriches result with username and email`() {
+            val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
+            planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
+
+            val result = planService.updateMemberRole(
+                UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val member = (result as Result.Success).value
+            assertThat(member.username).isEqualTo("other")
+            assertThat(member.email).isEqualTo("other@example.com")
+            assertThat(member.invitationStatus).isEqualTo("sent")
+        }
+    }
 }
