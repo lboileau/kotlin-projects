@@ -7,6 +7,7 @@
 - /create-project: .claude/skills/create-project.md
 - /db-manager: .claude/skills/db-manager.md
 - /service-manager: .claude/skills/service-manager.md
+- /linear-ticket: .claude/skills/linear-ticket.md
 
 ## Agent Team
 Specialized agents in `.claude/agents/` power the build workflow:
