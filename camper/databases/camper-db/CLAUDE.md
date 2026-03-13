@@ -101,10 +101,12 @@ CREATE TABLE plans (
 CREATE TABLE plan_members (
     plan_id    UUID        NOT NULL,
     user_id    UUID        NOT NULL,
+    role       VARCHAR(20) NOT NULL DEFAULT 'member',
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     PRIMARY KEY (plan_id, user_id),
     CONSTRAINT fk_plan_members_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
-    CONSTRAINT fk_plan_members_user FOREIGN KEY (user_id) REFERENCES users (id)
+    CONSTRAINT fk_plan_members_user FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT ck_plan_members_role CHECK (role IN ('member', 'manager'))
 );
 CREATE INDEX idx_plan_members_user_id ON plan_members (user_id);
 ```
@@ -398,6 +400,7 @@ CREATE INDEX IF NOT EXISTS idx_shopping_list_purchases_ingredient_id ON shopping
 - User emails must be unique (enforced by `uq_users_email`).
 - Plan visibility must be 'public' or 'private' (enforced by `ck_plans_visibility`).
 - Plan members are unique per plan (composite PK `plan_id, user_id`).
+- Plan member role must be 'member' or 'manager' (enforced by `ck_plan_members_role`). Defaults to 'member'.
 - Deleting a plan cascades to plan_members, items, itineraries, assignments, and assignment_members.
 - Deleting a user cascades to items and assignment_members.
 - `username` in users is nullable (auto-created users may not have one).
