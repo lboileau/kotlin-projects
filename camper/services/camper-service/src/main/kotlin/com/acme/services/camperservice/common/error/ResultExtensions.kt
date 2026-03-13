@@ -7,6 +7,7 @@ import com.acme.services.camperservice.features.gearsync.error.GearSyncError
 import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.itinerary.error.ItineraryError
 import com.acme.services.camperservice.features.plan.error.PlanError
+import com.acme.services.camperservice.features.mealplan.error.MealPlanError
 import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.world.error.WorldError
@@ -145,6 +146,32 @@ fun AssignmentError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 
 @JvmName("assignmentResultToResponseEntity")
 fun <T> Result<T, AssignmentError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun MealPlanError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is MealPlanError.MealPlanNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is MealPlanError.DayNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is MealPlanError.RecipeNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is MealPlanError.DuplicateDayNumber -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is MealPlanError.PlanAlreadyHasMealPlan -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is MealPlanError.NotATemplate -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is MealPlanError.IsATemplate -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+}
+
+@JvmName("mealPlanResultToResponseEntity")
+fun <T> Result<T, MealPlanError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
 ): ResponseEntity<Any> = when (this) {
