@@ -6,5 +6,6 @@ import java.util.UUID
 data class PlanMember(
     val planId: UUID,
     val userId: UUID,
+    val role: String,
     val createdAt: Instant
 )

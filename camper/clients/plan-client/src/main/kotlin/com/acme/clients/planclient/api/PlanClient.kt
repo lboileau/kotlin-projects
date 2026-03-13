@@ -38,4 +38,7 @@ interface PlanClient {
 
     /** Remove a user from a plan. */
     fun removeMember(param: RemoveMemberParam): Result<Unit, AppError>
+
+    /** Update a member's role in a plan. */
+    fun updateMemberRole(param: UpdateMemberRoleParam): Result<PlanMember, AppError>
 }
