@@ -279,6 +279,91 @@ CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_ingredient_id ON recipe_ingred
 CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_matched_ingredient_id ON recipe_ingredients (matched_ingredient_id);
 ```
 
+### meal_plans
+
+```sql
+CREATE TABLE IF NOT EXISTS meal_plans (
+    id                 UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id            UUID,
+    name               VARCHAR(255) NOT NULL,
+    servings           INT          NOT NULL,
+    scaling_mode       VARCHAR(20)  NOT NULL DEFAULT 'fractional',
+    is_template        BOOLEAN      NOT NULL DEFAULT false,
+    source_template_id UUID,
+    created_by         UUID         NOT NULL,
+    created_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at         TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_meal_plans_servings CHECK (servings > 0),
+    CONSTRAINT ck_meal_plans_scaling_mode CHECK (scaling_mode IN ('fractional', 'round_up')),
+    CONSTRAINT fk_meal_plans_plan FOREIGN KEY (plan_id) REFERENCES plans (id) ON DELETE CASCADE,
+    CONSTRAINT fk_meal_plans_source_template FOREIGN KEY (source_template_id) REFERENCES meal_plans (id) ON DELETE SET NULL,
+    CONSTRAINT fk_meal_plans_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_meal_plans_plan_id ON meal_plans (plan_id) WHERE plan_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_meal_plans_plan_id ON meal_plans (plan_id);
+CREATE INDEX IF NOT EXISTS idx_meal_plans_is_template ON meal_plans (is_template);
+CREATE INDEX IF NOT EXISTS idx_meal_plans_source_template_id ON meal_plans (source_template_id);
+CREATE INDEX IF NOT EXISTS idx_meal_plans_created_by ON meal_plans (created_by);
+```
+
+### meal_plan_days
+
+```sql
+CREATE TABLE IF NOT EXISTS meal_plan_days (
+    id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    meal_plan_id UUID        NOT NULL,
+    day_number   INT         NOT NULL,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_meal_plan_days_day_number CHECK (day_number > 0),
+    CONSTRAINT uq_meal_plan_days_meal_plan_id_day_number UNIQUE (meal_plan_id, day_number),
+    CONSTRAINT fk_meal_plan_days_meal_plan FOREIGN KEY (meal_plan_id) REFERENCES meal_plans (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_meal_plan_days_meal_plan_id ON meal_plan_days (meal_plan_id);
+```
+
+### meal_plan_recipes
+
+```sql
+CREATE TABLE IF NOT EXISTS meal_plan_recipes (
+    id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    meal_plan_day_id UUID        NOT NULL,
+    meal_type        VARCHAR(20) NOT NULL,
+    recipe_id        UUID        NOT NULL,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_meal_plan_recipes_meal_type CHECK (meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
+    CONSTRAINT fk_meal_plan_recipes_meal_plan_day FOREIGN KEY (meal_plan_day_id) REFERENCES meal_plan_days (id) ON DELETE CASCADE,
+    CONSTRAINT fk_meal_plan_recipes_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_meal_plan_recipes_meal_plan_day_id ON meal_plan_recipes (meal_plan_day_id);
+CREATE INDEX IF NOT EXISTS idx_meal_plan_recipes_recipe_id ON meal_plan_recipes (recipe_id);
+```
+
+### shopping_list_purchases
+
+```sql
+CREATE TABLE IF NOT EXISTS shopping_list_purchases (
+    id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    meal_plan_id       UUID        NOT NULL,
+    ingredient_id      UUID        NOT NULL,
+    unit               VARCHAR(20) NOT NULL,
+    quantity_purchased NUMERIC     NOT NULL,
+    created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_shopping_list_purchases_quantity CHECK (quantity_purchased >= 0),
+    CONSTRAINT uq_shopping_list_purchases_meal_plan_ingredient_unit UNIQUE (meal_plan_id, ingredient_id, unit),
+    CONSTRAINT fk_shopping_list_purchases_meal_plan FOREIGN KEY (meal_plan_id) REFERENCES meal_plans (id) ON DELETE CASCADE,
+    CONSTRAINT fk_shopping_list_purchases_ingredient FOREIGN KEY (ingredient_id) REFERENCES ingredients (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_shopping_list_purchases_meal_plan_id ON shopping_list_purchases (meal_plan_id);
+CREATE INDEX IF NOT EXISTS idx_shopping_list_purchases_ingredient_id ON shopping_list_purchases (ingredient_id);
+```
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -298,6 +383,14 @@ CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_matched_ingredient_id ON recip
 - `recipe_ingredients.recipe_id` → `recipes.id` (FK, CASCADE on delete)
 - `recipe_ingredients.ingredient_id` → `ingredients.id` (FK, RESTRICT on delete — nullable)
 - `recipe_ingredients.matched_ingredient_id` → `ingredients.id` (FK, SET NULL on delete — nullable)
+- `meal_plans.plan_id` → `plans.id` (FK, CASCADE on delete — nullable, UNIQUE when not null)
+- `meal_plans.source_template_id` → `meal_plans.id` (FK, SET NULL on delete — self-referential, nullable)
+- `meal_plans.created_by` → `users.id` (FK, RESTRICT on delete)
+- `meal_plan_days.meal_plan_id` → `meal_plans.id` (FK, CASCADE on delete)
+- `meal_plan_recipes.meal_plan_day_id` → `meal_plan_days.id` (FK, CASCADE on delete)
+- `meal_plan_recipes.recipe_id` → `recipes.id` (FK, CASCADE on delete)
+- `shopping_list_purchases.meal_plan_id` → `meal_plans.id` (FK, CASCADE on delete)
+- `shopping_list_purchases.ingredient_id` → `ingredients.id` (FK, CASCADE on delete)
 
 ## Invariants
 
@@ -325,3 +418,15 @@ CREATE INDEX IF NOT EXISTS idx_recipe_ingredients_matched_ingredient_id ON recip
 - A recipe_ingredient `(recipe_id, ingredient_id)` pair must be unique when `ingredient_id` is set (partial unique index).
 - Deleting a recipe cascades to its recipe_ingredients.
 - Deleting a user is restricted if they created any recipes.
+- Meal plan `servings` must be > 0 (enforced by `ck_meal_plans_servings`).
+- Meal plan `scaling_mode` must be 'fractional' or 'round_up' (enforced by `ck_meal_plans_scaling_mode`).
+- A plan can have at most one meal plan (enforced by partial unique index `uq_meal_plans_plan_id` WHERE plan_id IS NOT NULL).
+- If `is_template = true`, `plan_id` should be null (application-enforced invariant).
+- Meal plan day numbers must be > 0 (enforced by `ck_meal_plan_days_day_number`).
+- Day numbers are unique within a meal plan (enforced by `uq_meal_plan_days_meal_plan_id_day_number`).
+- Meal type must be 'breakfast', 'lunch', 'dinner', or 'snack' (enforced by `ck_meal_plan_recipes_meal_type`).
+- Deleting a meal plan cascades to meal_plan_days, meal_plan_recipes (via days), and shopping_list_purchases.
+- Deleting a recipe cascades to meal_plan_recipes referencing it.
+- Shopping list purchase `quantity_purchased` must be >= 0 (enforced by `ck_shopping_list_purchases_quantity`).
+- Shopping list purchases are unique per `(meal_plan_id, ingredient_id, unit)` (enforced by `uq_shopping_list_purchases_meal_plan_ingredient_unit`).
+- Deleting a user is restricted if they created any meal plans.
