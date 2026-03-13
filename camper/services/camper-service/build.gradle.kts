@@ -20,6 +20,7 @@ dependencies {
     implementation(project(":clients:recipe-client"))
     implementation(project(":clients:recipe-scraper-client"))
     implementation(project(":clients:meal-plan-client"))
+    implementation(project(":clients:log-book-client"))
     implementation(project(":libs:meal-plan-calculator"))
     implementation(project(":services:service-common"))
 
@@ -52,6 +53,7 @@ dependencies {
     testImplementation(testFixtures(project(":clients:recipe-client")))
     testImplementation(testFixtures(project(":clients:recipe-scraper-client")))
     testImplementation(testFixtures(project(":clients:meal-plan-client")))
+    testImplementation(testFixtures(project(":clients:log-book-client")))
 }
 
 tasks.named<Copy>("processResources") {
