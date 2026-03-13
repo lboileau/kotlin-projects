@@ -168,6 +168,8 @@ fun MealPlanError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
     is MealPlanError.IsATemplate -> ResponseEntity.status(400)
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is MealPlanError.Invalid -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
 }
 
 @JvmName("mealPlanResultToResponseEntity")
