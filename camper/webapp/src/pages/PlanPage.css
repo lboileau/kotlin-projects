@@ -388,6 +388,61 @@
   min-width: 50px;
 }
 
+/* Members list in Manage Plan modal */
+.manage-plan-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-sm);
+  width: 100%;
+}
+
+.manage-plan-member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.manage-plan-member-name {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--charcoal);
+  font-weight: 500;
+}
+
+.manage-plan-role-label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal-light);
+  font-weight: 600;
+  font-style: italic;
+}
+
+.manage-plan-role-select {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 3px 8px;
+  border: 1px solid var(--tan-deep);
+  border-radius: var(--radius-md);
+  background: var(--parchment);
+  color: var(--charcoal);
+  cursor: pointer;
+}
+
+.manage-plan-role-select:focus {
+  outline: none;
+  border-color: var(--sage-deep);
+  box-shadow: 0 0 0 2px rgba(90, 122, 86, 0.15);
+}
+
+.manage-plan-role-select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Loading */
 .campsite-loading {
   text-align: center;

@@ -84,6 +84,18 @@ export function PlanPage() {
   const [updatingVisibility, setUpdatingVisibility] = useState(false);
   const [editPlanName, setEditPlanName] = useState('');
   const [savingName, setSavingName] = useState(false);
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null);
+
+  const handleUpdateRole = async (userId: string, role: string) => {
+    if (!planId) return;
+    setUpdatingRole(userId);
+    try {
+      await api.updateMemberRole(planId, userId, role);
+      await loadData();
+    } finally {
+      setUpdatingRole(null);
+    }
+  };
 
   const handleSavePlanName = async () => {
     if (!planId || !plan || !editPlanName.trim() || editPlanName.trim() === plan.name) return;
@@ -218,6 +230,7 @@ export function PlanPage() {
                     name={member.username || null}
                     email={member.email}
                     invitationStatus={member.invitationStatus}
+                    role={plan?.ownerId === member.userId ? 'owner' : member.role === 'manager' ? 'manager' : 'member'}
                     index={i}
                     total={memberCount}
                     timeOfDay={timeOfDay}
@@ -336,6 +349,40 @@ export function PlanPage() {
                 </span>
               </button>
             </div>
+            <div className="manage-plan-setting" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
+              <span className="manage-plan-setting-label">Members</span>
+              <div className="manage-plan-members-list">
+                {members.filter(m => m.username).map(member => {
+                  const memberIsOwner = plan.ownerId === member.userId;
+                  const effectiveRole = memberIsOwner ? 'owner' : member.role;
+                  return (
+                    <div key={member.userId} className="manage-plan-member-row">
+                      <span className="manage-plan-member-name">
+                        {member.username}{member.userId === user?.id ? ' (You)' : ''}
+                      </span>
+                      {memberIsOwner ? (
+                        <span className="manage-plan-role-label">Owner</span>
+                      ) : isOwner ? (
+                        <select
+                          className="manage-plan-role-select"
+                          value={effectiveRole}
+                          onChange={e => handleUpdateRole(member.userId, e.target.value)}
+                          disabled={updatingRole === member.userId}
+                        >
+                          <option value="member">Member</option>
+                          <option value="manager">Manager</option>
+                        </select>
+                      ) : (
+                        <span className="manage-plan-role-label">
+                          {effectiveRole === 'manager' ? 'Manager' : 'Member'}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="modal-actions" style={{ marginTop: 'var(--space-lg)' }}>
               <button className="modal-btn" onClick={() => setActiveModal(null)}>
                 Done

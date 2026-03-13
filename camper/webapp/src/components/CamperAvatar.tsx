@@ -9,6 +9,7 @@ interface Props {
   name: string | null;
   email?: string | null;
   invitationStatus?: string | null;
+  role?: 'owner' | 'manager' | 'member';
   index: number;
   total: number;
   isAddButton?: boolean;
@@ -28,7 +29,7 @@ const AVATAR_COLORS = [
   { body: '#4A5A4A', accent: '#6A7A5A', hood: '#3A4A3A', skin: '#C8986A' },
 ];
 
-export function CamperAvatar({ name, email, invitationStatus, index, total, isAddButton, timeOfDay, onClick, onRemove }: Props) {
+export function CamperAvatar({ name, email, invitationStatus, role, index, total, isAddButton, timeOfDay, onClick, onRemove }: Props) {
   // Arc above fire — pad edges so outermost avatars don't overlap inner ones
   const avatarWidth = 80; // approximate width of avatar + label
   const arcPad = Math.PI * 0.12; // 22° padding on each side
@@ -166,6 +167,28 @@ export function CamperAvatar({ name, email, invitationStatus, index, total, isAd
             {/* Boot sole detail */}
             <line x1="14" y1="59" x2="23" y2="59" stroke="#2A1A0A" strokeWidth="1" strokeLinecap="round" />
             <line x1="25" y1="59" x2="34" y2="59" stroke="#2A1A0A" strokeWidth="1" strokeLinecap="round" />
+            {/* Role flair */}
+            {role === 'owner' && <>
+              {/* Ranger hat — wide brim over the hood */}
+              <ellipse cx="24" cy="5" rx="16" ry="3" fill={timeOfDay === 'night' ? '#3A2A1A' : '#5A3A1A'} />
+              <path d="M12,5 Q18,0 24,-2 Q30,0 36,5" fill={timeOfDay === 'night' ? '#4A3A2A' : '#6B4A2A'} />
+              <path d="M16,5 L18,2 L24,0 L30,2 L32,5" fill={timeOfDay === 'night' ? '#5A4A3A' : '#7B5A3A'} />
+              {/* Hat band */}
+              <rect x="16" y="4" width="16" height="2" rx="1" fill={timeOfDay === 'night' ? '#8B6B3A' : '#C49A4A'} />
+              {/* Compass at belt */}
+              <circle cx="30" cy="36" r="3.5" fill="none" stroke={timeOfDay === 'night' ? '#C8A860' : '#D4B870'} strokeWidth="1" />
+              <circle cx="30" cy="36" r="1.5" fill={timeOfDay === 'night' ? '#C8A860' : '#D4B870'} />
+              <line x1="30" y1="33" x2="30" y2="34" stroke={timeOfDay === 'night' ? '#E8C870' : '#E8D080'} strokeWidth="0.8" strokeLinecap="round" />
+            </>}
+            {role === 'manager' && <>
+              {/* Compass badge on chest */}
+              <circle cx="28" cy="32" r="3" fill="none" stroke={timeOfDay === 'night' ? '#A08850' : '#B8A060'} strokeWidth="1" />
+              <circle cx="28" cy="32" r="1.2" fill={timeOfDay === 'night' ? '#A08850' : '#B8A060'} />
+              <line x1="28" y1="29.5" x2="28" y2="30.5" stroke={timeOfDay === 'night' ? '#C0A860' : '#D0B870'} strokeWidth="0.7" strokeLinecap="round" />
+              <line x1="28" y1="33.5" x2="28" y2="34.5" stroke={timeOfDay === 'night' ? '#C0A860' : '#D0B870'} strokeWidth="0.7" strokeLinecap="round" />
+              <line x1="25.5" y1="32" x2="26.5" y2="32" stroke={timeOfDay === 'night' ? '#C0A860' : '#D0B870'} strokeWidth="0.7" strokeLinecap="round" />
+              <line x1="29.5" y1="32" x2="30.5" y2="32" stroke={timeOfDay === 'night' ? '#C0A860' : '#D0B870'} strokeWidth="0.7" strokeLinecap="round" />
+            </>}
           </>}
         </svg>
       </div>
