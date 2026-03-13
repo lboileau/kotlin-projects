@@ -13,6 +13,7 @@ import com.acme.clients.planclient.api.GetMembersParam
 import com.acme.clients.planclient.api.GetPublicPlansParam
 import com.acme.clients.planclient.api.PlanClient
 import com.acme.clients.planclient.api.RemoveMemberParam
+import com.acme.clients.planclient.api.UpdateMemberRoleParam
 import com.acme.clients.planclient.api.UpdatePlanParam
 import com.acme.clients.planclient.test.PlanTestDb
 import org.assertj.core.api.Assertions.assertThat
@@ -297,6 +298,117 @@ class JdbiPlanClientTest {
             val result = client.getMembers(GetMembersParam(plan.id))
             assertThat(result).isInstanceOf(Result.Success::class.java)
             assertThat((result as Result.Success).value).isEmpty()
+        }
+
+        @Test
+        fun `addMember sets role to member by default`() {
+            val plan = (client.create(CreatePlanParam(name = "Default Role", visibility = "private", ownerId = ownerId)) as Result.Success).value
+
+            val addResult = client.addMember(AddMemberParam(planId = plan.id, userId = ownerId))
+            assertThat(addResult).isInstanceOf(Result.Success::class.java)
+            val member = (addResult as Result.Success).value
+            assertThat(member.role).isEqualTo("member")
+
+            val membersResult = client.getMembers(GetMembersParam(plan.id))
+            val members = (membersResult as Result.Success).value
+            assertThat(members).hasSize(1)
+            assertThat(members[0].role).isEqualTo("member")
+        }
+
+        @Test
+        fun `getMembers includes role field with correct values for mixed roles`() {
+            val plan = (client.create(CreatePlanParam(name = "Mixed Roles", visibility = "private", ownerId = ownerId)) as Result.Success).value
+            client.addMember(AddMemberParam(planId = plan.id, userId = ownerId))
+            client.addMember(AddMemberParam(planId = plan.id, userId = otherUserId))
+            client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager"))
+
+            val membersResult = client.getMembers(GetMembersParam(plan.id))
+            assertThat(membersResult).isInstanceOf(Result.Success::class.java)
+            val members = (membersResult as Result.Success).value
+            assertThat(members).hasSize(2)
+
+            val memberByUserId = members.associateBy { it.userId }
+            assertThat(memberByUserId[ownerId]!!.role).isEqualTo("member")
+            assertThat(memberByUserId[otherUserId]!!.role).isEqualTo("manager")
+        }
+    }
+
+    @Nested
+    inner class UpdateMemberRole {
+        @Test
+        fun `updateMemberRole promotes member to manager`() {
+            val plan = (client.create(CreatePlanParam(name = "Promote", visibility = "private", ownerId = ownerId)) as Result.Success).value
+            client.addMember(AddMemberParam(planId = plan.id, userId = otherUserId))
+
+            val result = client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager"))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val updated = (result as Result.Success).value
+            assertThat(updated.planId).isEqualTo(plan.id)
+            assertThat(updated.userId).isEqualTo(otherUserId)
+            assertThat(updated.role).isEqualTo("manager")
+            assertThat(updated.createdAt).isNotNull()
+        }
+
+        @Test
+        fun `updateMemberRole demotes manager back to member`() {
+            val plan = (client.create(CreatePlanParam(name = "Demote", visibility = "private", ownerId = ownerId)) as Result.Success).value
+            client.addMember(AddMemberParam(planId = plan.id, userId = otherUserId))
+            client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager"))
+
+            val result = client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "member"))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val updated = (result as Result.Success).value
+            assertThat(updated.role).isEqualTo("member")
+
+            // Verify persisted via getMembers
+            val membersResult = client.getMembers(GetMembersParam(plan.id))
+            val members = (membersResult as Result.Success).value
+            assertThat(members).hasSize(1)
+            assertThat(members[0].role).isEqualTo("member")
+        }
+
+        @Test
+        fun `updateMemberRole returns ValidationError for invalid role`() {
+            val plan = (client.create(CreatePlanParam(name = "Invalid", visibility = "private", ownerId = ownerId)) as Result.Success).value
+            client.addMember(AddMemberParam(planId = plan.id, userId = otherUserId))
+
+            val result = client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "admin"))
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+            assertThat((error as ValidationError).field).isEqualTo("role")
+        }
+
+        @Test
+        fun `updateMemberRole returns NotFoundError for non-existent member`() {
+            val plan = (client.create(CreatePlanParam(name = "No Member", visibility = "private", ownerId = ownerId)) as Result.Success).value
+
+            val result = client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager"))
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(NotFoundError::class.java)
+        }
+
+        @Test
+        fun `updateMemberRole returns NotFoundError for non-existent plan`() {
+            val result = client.updateMemberRole(UpdateMemberRoleParam(planId = UUID.randomUUID(), userId = otherUserId, role = "manager"))
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(NotFoundError::class.java)
+        }
+
+        @Test
+        fun `updateMemberRole is idempotent when setting same role`() {
+            val plan = (client.create(CreatePlanParam(name = "Idempotent", visibility = "private", ownerId = ownerId)) as Result.Success).value
+            client.addMember(AddMemberParam(planId = plan.id, userId = otherUserId))
+
+            val first = client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager"))
+            assertThat(first).isInstanceOf(Result.Success::class.java)
+            assertThat((first as Result.Success).value.role).isEqualTo("manager")
+
+            val second = client.updateMemberRole(UpdateMemberRoleParam(planId = plan.id, userId = otherUserId, role = "manager"))
+            assertThat(second).isInstanceOf(Result.Success::class.java)
+            assertThat((second as Result.Success).value.role).isEqualTo("manager")
         }
     }
 }
