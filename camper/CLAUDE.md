@@ -26,10 +26,11 @@ camper/
 │   ├── ingredient-client/    # JDBI data access for ingredients table
 │   ├── recipe-client/        # JDBI data access for recipes & recipe_ingredients tables
 │   ├── recipe-scraper-client/ # Recipe scraping via Claude API (+ NoOp stub)
-│   └── meal-plan-client/     # JDBI data access for meal_plans, meal_plan_days, meal_plan_recipes, shopping_list_purchases
+│   ├── meal-plan-client/     # JDBI data access for meal_plans, meal_plan_days, meal_plan_recipes, shopping_list_purchases
+│   └── log-book-client/      # JDBI data access for log_book_faqs & log_book_journal_entries tables
 ├── services/
 │   ├── common/               # ApiResponse shared type
-│   └── camper-service/       # Spring Boot REST API (features: user, plan, item, itinerary, assignment, mealplan, gearsync, webhook)
+│   └── camper-service/       # Spring Boot REST API (features: user, plan, item, itinerary, assignment, mealplan, gearsync, webhook, logbook)
 └── databases/
     └── camper-db/            # Schema, migrations, seeds, docker-compose
 ```
