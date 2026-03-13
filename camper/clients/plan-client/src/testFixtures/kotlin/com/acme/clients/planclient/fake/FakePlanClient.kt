@@ -10,6 +10,7 @@ import com.acme.clients.planclient.api.*
 import com.acme.clients.planclient.internal.validations.ValidateCreatePlan
 import com.acme.clients.planclient.internal.validations.ValidateDeletePlan
 import com.acme.clients.planclient.internal.validations.ValidateGetPlanById
+import com.acme.clients.planclient.internal.validations.ValidateUpdateMemberRole
 import com.acme.clients.planclient.internal.validations.ValidateUpdatePlan
 import com.acme.clients.planclient.model.Plan
 import com.acme.clients.planclient.model.PlanMember
@@ -25,6 +26,7 @@ class FakePlanClient : PlanClient {
     private val validateCreate = ValidateCreatePlan()
     private val validateUpdate = ValidateUpdatePlan()
     private val validateDelete = ValidateDeletePlan()
+    private val validateUpdateMemberRole = ValidateUpdateMemberRole()
 
     override fun getById(param: GetByIdParam): Result<Plan, AppError> {
         val validation = validateGetById.execute(param)
@@ -107,7 +109,16 @@ class FakePlanClient : PlanClient {
     }
 
     override fun updateMemberRole(param: UpdateMemberRoleParam): Result<PlanMember, AppError> {
-        throw NotImplementedError("updateMemberRole is not yet implemented in FakePlanClient")
+        val validation = validateUpdateMemberRole.execute(param)
+        if (validation is Result.Failure) return validation
+
+        val index = memberStore.indexOfFirst { it.planId == param.planId && it.userId == param.userId }
+        if (index == -1) {
+            return failure(NotFoundError("PlanMember", "${param.planId}/${param.userId}"))
+        }
+        val updated = memberStore[index].copy(role = param.role)
+        memberStore[index] = updated
+        return success(updated)
     }
 
     fun reset() {
