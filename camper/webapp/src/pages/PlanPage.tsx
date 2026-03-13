@@ -8,7 +8,8 @@ import { Campfire } from '../components/Campfire';
 import { CamperAvatar } from '../components/CamperAvatar';
 import { InteractableItem } from '../components/InteractableItem';
 import { AddMemberModal } from '../components/AddMemberModal';
-import { GearModal, MealModal } from '../components/GearModal';
+import { GearModal } from '../components/GearModal';
+import { MealPlanModal } from '../components/MealPlanModal';
 import { ItineraryModal } from '../components/ItineraryModal';
 import { AssignmentsModal } from '../components/AssignmentsModal';
 import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG } from '../components/CampsiteItems';
@@ -355,14 +356,11 @@ export function PlanPage() {
         />
       )}
 
-      {activeModal === 'kitchen' && planId && user && plan && (
-        <MealModal
+      {activeModal === 'kitchen' && planId && (
+        <MealPlanModal
           isOpen
           onClose={() => setActiveModal(null)}
           planId={planId}
-          planOwnerId={plan.ownerId}
-          members={members}
-          currentUserId={user.id}
         />
       )}
 

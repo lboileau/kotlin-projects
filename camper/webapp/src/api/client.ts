@@ -187,6 +187,126 @@ export interface ResolveDuplicateRequest {
   action: string;
 }
 
+// ── Meal Plan Types ──────────────────────────
+
+export interface MealPlanResponse {
+  id: string;
+  planId: string | null;
+  name: string;
+  servings: number;
+  scalingMode: string;
+  isTemplate: boolean;
+  sourceTemplateId: string | null;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MealPlanDetailResponse {
+  id: string;
+  planId: string | null;
+  name: string;
+  servings: number;
+  scalingMode: string;
+  isTemplate: boolean;
+  sourceTemplateId: string | null;
+  createdBy: string;
+  days: MealPlanDayResponse[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MealPlanDayResponse {
+  id: string;
+  dayNumber: number;
+  meals: MealsByTypeResponse;
+}
+
+export interface MealsByTypeResponse {
+  breakfast: MealPlanRecipeDetailResponse[];
+  lunch: MealPlanRecipeDetailResponse[];
+  dinner: MealPlanRecipeDetailResponse[];
+  snack: MealPlanRecipeDetailResponse[];
+}
+
+export interface MealPlanRecipeDetailResponse {
+  id: string;
+  recipeId: string;
+  recipeName: string;
+  baseServings: number;
+  scaleFactor: number;
+  isFullyPurchased: boolean;
+  ingredients: MealPlanIngredientResponse[];
+}
+
+export interface MealPlanIngredientResponse {
+  recipeIngredientId: string;
+  ingredientId: string;
+  ingredientName: string;
+  category: string;
+  quantity: number;
+  scaledQuantity: number;
+  unit: string;
+}
+
+export interface ShoppingListResponse {
+  mealPlanId: string;
+  servings: number;
+  scalingMode: string;
+  totalItems: number;
+  fullyPurchasedCount: number;
+  categories: ShoppingListCategoryResponse[];
+}
+
+export interface ShoppingListCategoryResponse {
+  category: string;
+  items: ShoppingListItemResponse[];
+}
+
+export interface ShoppingListItemResponse {
+  ingredientId: string;
+  ingredientName: string;
+  quantityRequired: number;
+  quantityPurchased: number;
+  unit: string;
+  status: string;
+  usedInRecipes: string[];
+}
+
+export interface CreateMealPlanRequest {
+  name: string;
+  servings: number;
+  scalingMode?: string;
+  isTemplate?: boolean;
+  planId?: string;
+}
+
+export interface UpdateMealPlanRequest {
+  name?: string;
+  servings?: number;
+  scalingMode?: string;
+}
+
+export interface AddRecipeToMealRequest {
+  mealType: string;
+  recipeId: string;
+}
+
+export interface UpdatePurchaseRequest {
+  ingredientId: string;
+  unit: string;
+  quantityPurchased: number;
+}
+
+export interface SaveAsTemplateRequest {
+  name: string;
+}
+
+export interface CopyToTripRequest {
+  planId: string;
+  servings?: number;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -472,6 +592,99 @@ export const api = {
   publishRecipe(recipeId: string): Promise<RecipeResponse> {
     return request(`/api/recipes/${recipeId}/publish`, {
       method: 'POST',
+    });
+  },
+
+  // ── Meal Plans ──────────────────────────
+
+  getMealPlanForTrip(planId: string): Promise<MealPlanDetailResponse | null> {
+    return request(`/api/meal-plans?planId=${planId}`);
+  },
+
+  getMealPlanDetail(id: string): Promise<MealPlanDetailResponse> {
+    return request(`/api/meal-plans/${id}`);
+  },
+
+  createMealPlan(data: CreateMealPlanRequest): Promise<MealPlanResponse> {
+    return request('/api/meal-plans', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateMealPlan(id: string, data: UpdateMealPlanRequest): Promise<MealPlanResponse> {
+    return request(`/api/meal-plans/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteMealPlan(id: string): Promise<void> {
+    return request(`/api/meal-plans/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  addMealPlanDay(mealPlanId: string, dayNumber: number): Promise<MealPlanDayResponse> {
+    return request(`/api/meal-plans/${mealPlanId}/days`, {
+      method: 'POST',
+      body: JSON.stringify({ dayNumber }),
+    });
+  },
+
+  removeMealPlanDay(mealPlanId: string, dayId: string): Promise<void> {
+    return request(`/api/meal-plans/${mealPlanId}/days/${dayId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  addRecipeToMeal(mealPlanId: string, dayId: string, data: AddRecipeToMealRequest): Promise<MealPlanRecipeDetailResponse> {
+    return request(`/api/meal-plans/${mealPlanId}/days/${dayId}/recipes`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  removeRecipeFromMeal(mealPlanRecipeId: string): Promise<void> {
+    return request(`/api/meal-plan-recipes/${mealPlanRecipeId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  getShoppingList(mealPlanId: string): Promise<ShoppingListResponse> {
+    return request(`/api/meal-plans/${mealPlanId}/shopping-list`);
+  },
+
+  updatePurchase(mealPlanId: string, data: UpdatePurchaseRequest): Promise<void> {
+    return request(`/api/meal-plans/${mealPlanId}/shopping-list`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  resetPurchases(mealPlanId: string): Promise<void> {
+    return request(`/api/meal-plans/${mealPlanId}/shopping-list`, {
+      method: 'DELETE',
+    });
+  },
+
+  // ── Templates ──────────────────────────
+
+  getTemplates(): Promise<MealPlanResponse[]> {
+    return request('/api/meal-plans/templates');
+  },
+
+  saveAsTemplate(mealPlanId: string, data: SaveAsTemplateRequest): Promise<MealPlanResponse> {
+    return request(`/api/meal-plans/${mealPlanId}/save-as-template`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  copyTemplateToTrip(templateId: string, data: CopyToTripRequest): Promise<MealPlanDetailResponse> {
+    return request(`/api/meal-plans/${templateId}/copy-to-trip`, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 };
