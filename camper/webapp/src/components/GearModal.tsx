@@ -622,37 +622,3 @@ export function GearModal(props: ModalProps) {
   return <ChecklistModal {...props} config={GEAR_CONFIG} />;
 }
 
-// ── Meal Modal ──────────────────────────────
-
-const MEAL_CATEGORIES: CategoryDef[] = [
-  { value: 'breakfast', label: 'Breakfast', icon: '☀' },
-  { value: 'lunch', label: 'Lunch', icon: '◐' },
-  { value: 'dinner', label: 'Dinner', icon: '☽' },
-  { value: 'snacks', label: 'Snacks', icon: '✦' },
-];
-
-const MEAL_CONFIG: ChecklistModalConfig = {
-  title: 'Camp Kitchen & Meals',
-  icon: (
-    <svg width="36" height="36" viewBox="0 0 48 48">
-      <ellipse cx="24" cy="28" rx="16" ry="5" fill="var(--charcoal-light)" />
-      <path d="M8,28 Q8,42 24,42 Q40,42 40,28" fill="var(--charcoal-light)" />
-      <path d="M18,18 Q16,10 20,4" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" />
-      <path d="M24,16 Q22,8 26,2" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="2" strokeLinecap="round" />
-      <path d="M30,18 Q28,10 32,6" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  ),
-  emptyText: 'No items yet — plan some meals below.',
-  loadingText: 'Opening the recipe book...',
-  addPlaceholder: 'Add food item...',
-  sharedTitle: 'Group Meal Plan',
-  sharedSubtitle: 'Shared provisions',
-  personalDividerLabel: 'Personal Provisions',
-  categories: MEAL_CATEGORIES,
-  planOnly: true,
-  dayTabs: true,
-};
-
-export function MealModal(props: ModalProps) {
-  return <ChecklistModal {...props} config={MEAL_CONFIG} />;
-}

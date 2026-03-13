@@ -11,6 +11,7 @@ import com.acme.clients.recipeclient.api.GetRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.libs.mealplancalculator.ShoppingListCalculator
 import com.acme.libs.mealplancalculator.model.IngredientInfo
+import com.acme.libs.mealplancalculator.UnitConverter
 import com.acme.libs.mealplancalculator.model.PurchaseStatus
 import com.acme.libs.mealplancalculator.model.RecipeIngredientWithMeta
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListCategoryResponse
@@ -136,12 +137,35 @@ internal class GetShoppingListAction(
             is Result.Success -> result.value
             is Result.Failure -> return Result.Failure(MealPlanError.Invalid("purchases", result.error.message))
         }
-        val purchaseMap = purchases.associateBy { "${it.ingredientId}:${it.unit}" }
 
-        // Build items with purchase status
+        // Build a map from ingredientId to all its shopping list row units, so we can
+        // convert orphaned purchases (unit changed due to bestFit) into the current unit.
+        val rowUnitsByIngredient = shoppingListRows
+            .groupBy { it.ingredientId }
+            .mapValues { (_, rows) -> rows.map { it.unit } }
+
+        // For each shopping list row, sum up purchased quantities from ALL purchase records
+        // for that ingredient, converting compatible units into the row's unit.
+        val purchasesByIngredient = purchases.groupBy { it.ingredientId }
+
         val items = shoppingListRows.map { row ->
-            val purchase = purchaseMap["${row.ingredientId}:${row.unit}"]
-            val quantityPurchased = purchase?.quantityPurchased ?: BigDecimal.ZERO
+            val allPurchasesForIngredient = purchasesByIngredient[row.ingredientId] ?: emptyList()
+
+            var quantityPurchased = BigDecimal.ZERO
+            for (purchase in allPurchasesForIngredient) {
+                if (purchase.unit == row.unit) {
+                    // Exact unit match
+                    quantityPurchased = quantityPurchased.add(purchase.quantityPurchased)
+                } else {
+                    // Try to convert the purchase's unit into the row's unit
+                    val converted = UnitConverter.convert(purchase.quantityPurchased, purchase.unit, row.unit)
+                    if (converted != null) {
+                        quantityPurchased = quantityPurchased.add(converted)
+                    }
+                    // If not convertible, this purchase belongs to a different subgroup row — skip
+                }
+            }
+
             val status = PurchaseStatus.derive(row.quantityRequired, quantityPurchased).name.lowercase()
 
             ShoppingListItemResponse(
@@ -155,31 +179,47 @@ internal class GetShoppingListAction(
             )
         }
 
-        // Add "no longer needed" items — purchases that have no matching shopping list row
-        val shoppingListKeys = shoppingListRows.map { "${it.ingredientId}:${it.unit}" }.toSet()
-        val orphanedPurchases = purchases.filter { "${it.ingredientId}:${it.unit}" !in shoppingListKeys }
-        val orphanedItems = orphanedPurchases.mapNotNull { purchase ->
-            val ingredientInfo = ingredientInfoMap[purchase.ingredientId]
-                ?: when (val result = ingredientClient.getById(IngredientGetByIdParam(purchase.ingredientId))) {
-                    is Result.Success -> IngredientInfo(
-                        ingredientId = result.value.id,
-                        name = result.value.name,
-                        category = result.value.category,
-                    ).also { ingredientInfoMap[purchase.ingredientId] = it }
-                    is Result.Failure -> null
+        // Only show "no longer needed" for purchases whose ingredient has been entirely
+        // removed from the meal plan (no shopping list rows at all for that ingredient),
+        // or whose unit is not convertible to any current row unit for that ingredient.
+        val ingredientIdsInRows = shoppingListRows.map { it.ingredientId }.toSet()
+        val orphanedItems = purchases
+            .filter { purchase ->
+                if (purchase.ingredientId !in ingredientIdsInRows) {
+                    // Ingredient fully removed from meal plan
+                    true
+                } else {
+                    // Check if this purchase's unit is convertible to any current row unit
+                    val currentUnits = rowUnitsByIngredient[purchase.ingredientId] ?: emptyList()
+                    val isConvertible = currentUnits.any { rowUnit ->
+                        rowUnit == purchase.unit || UnitConverter.convert(BigDecimal.ONE, purchase.unit, rowUnit) != null
+                    }
+                    !isConvertible
                 }
-                ?: return@mapNotNull null
+            }
+            .filter { it.quantityPurchased.compareTo(BigDecimal.ZERO) > 0 }
+            .mapNotNull { purchase ->
+                val ingredientInfo = ingredientInfoMap[purchase.ingredientId]
+                    ?: when (val result = ingredientClient.getById(IngredientGetByIdParam(purchase.ingredientId))) {
+                        is Result.Success -> IngredientInfo(
+                            ingredientId = result.value.id,
+                            name = result.value.name,
+                            category = result.value.category,
+                        ).also { ingredientInfoMap[purchase.ingredientId] = it }
+                        is Result.Failure -> null
+                    }
+                    ?: return@mapNotNull null
 
-            ShoppingListItemResponse(
-                ingredientId = purchase.ingredientId,
-                ingredientName = ingredientInfo.name,
-                quantityRequired = BigDecimal.ZERO,
-                quantityPurchased = purchase.quantityPurchased,
-                unit = purchase.unit,
-                status = PurchaseStatus.NO_LONGER_NEEDED.name.lowercase(),
-                usedInRecipes = emptyList(),
-            )
-        }
+                ShoppingListItemResponse(
+                    ingredientId = purchase.ingredientId,
+                    ingredientName = ingredientInfo.name,
+                    quantityRequired = BigDecimal.ZERO,
+                    quantityPurchased = purchase.quantityPurchased,
+                    unit = purchase.unit,
+                    status = PurchaseStatus.NO_LONGER_NEEDED.name.lowercase(),
+                    usedInRecipes = emptyList(),
+                )
+            }
 
         val allItems = items + orphanedItems
 
