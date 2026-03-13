@@ -10,6 +10,7 @@ import com.acme.clients.planclient.api.*
 import com.acme.clients.planclient.internal.validations.ValidateCreatePlan
 import com.acme.clients.planclient.internal.validations.ValidateDeletePlan
 import com.acme.clients.planclient.internal.validations.ValidateGetPlanById
+import com.acme.clients.planclient.internal.validations.ValidateUpdateMemberRole
 import com.acme.clients.planclient.internal.validations.ValidateUpdatePlan
 import com.acme.clients.planclient.model.Plan
 import com.acme.clients.planclient.model.PlanMember
@@ -25,6 +26,7 @@ class FakePlanClient : PlanClient {
     private val validateCreate = ValidateCreatePlan()
     private val validateUpdate = ValidateUpdatePlan()
     private val validateDelete = ValidateDeletePlan()
+    private val validateUpdateMemberRole = ValidateUpdateMemberRole()
 
     override fun getById(param: GetByIdParam): Result<Plan, AppError> {
         val validation = validateGetById.execute(param)
@@ -96,7 +98,7 @@ class FakePlanClient : PlanClient {
         if (memberStore.any { it.planId == param.planId && it.userId == param.userId }) {
             return failure(ConflictError("PlanMember", "user is already a member of this plan"))
         }
-        val member = PlanMember(planId = param.planId, userId = param.userId, createdAt = Instant.now())
+        val member = PlanMember(planId = param.planId, userId = param.userId, role = "member", createdAt = Instant.now())
         memberStore.add(member)
         return success(member)
     }
@@ -104,6 +106,19 @@ class FakePlanClient : PlanClient {
     override fun removeMember(param: RemoveMemberParam): Result<Unit, AppError> {
         val removed = memberStore.removeAll { it.planId == param.planId && it.userId == param.userId }
         return if (removed) success(Unit) else failure(NotFoundError("PlanMember", "${param.planId}/${param.userId}"))
+    }
+
+    override fun updateMemberRole(param: UpdateMemberRoleParam): Result<PlanMember, AppError> {
+        val validation = validateUpdateMemberRole.execute(param)
+        if (validation is Result.Failure) return validation
+
+        val index = memberStore.indexOfFirst { it.planId == param.planId && it.userId == param.userId }
+        if (index == -1) {
+            return failure(NotFoundError("PlanMember", "${param.planId}/${param.userId}"))
+        }
+        val updated = memberStore[index].copy(role = param.role)
+        memberStore[index] = updated
+        return success(updated)
     }
 
     fun reset() {

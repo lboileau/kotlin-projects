@@ -20,6 +20,7 @@ class PlanService(
     private val getPlanMembers = GetPlanMembersAction(planClient, userClient, invitationClient)
     private val addPlanMember = AddPlanMemberAction(planClient, userClient, emailClient, invitationClient)
     private val removePlanMember = RemovePlanMemberAction(planClient)
+    private val updateMemberRole = UpdateMemberRoleAction(planClient, userClient, invitationClient)
 
     fun create(param: CreatePlanParam) = createPlan.execute(param)
     fun getPlans(param: GetPlansParam) = getPlans.execute(param)
@@ -28,4 +29,5 @@ class PlanService(
     fun getMembers(param: GetPlanMembersParam) = getPlanMembers.execute(param)
     fun addMember(param: AddPlanMemberParam) = addPlanMember.execute(param)
     fun removeMember(param: RemovePlanMemberParam) = removePlanMember.execute(param)
+    fun updateMemberRole(param: UpdateMemberRoleParam) = updateMemberRole.execute(param)
 }

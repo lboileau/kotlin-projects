@@ -11,6 +11,7 @@ sealed class PlanError(override val message: String) : AppError {
     data class AlreadyMember(val planId: String, val email: String) : PlanError("User $email is already a member of plan $planId")
     data class NotMember(val planId: String, val userId: String) : PlanError("User $userId is not a member of plan $planId")
     data class Invalid(val field: String, val reason: String) : PlanError("Invalid plan $field: $reason")
+    data class CannotChangeOwnerRole(val planId: String) : PlanError("Cannot change the owner's role for plan $planId")
 
     companion object {
         fun fromClientError(error: AppError): PlanError = when (error) {

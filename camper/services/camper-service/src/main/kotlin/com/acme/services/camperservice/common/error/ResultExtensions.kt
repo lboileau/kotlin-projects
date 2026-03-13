@@ -62,6 +62,8 @@ fun PlanError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("NOT_FOUND", message))
     is PlanError.Invalid -> ResponseEntity.status(400)
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is PlanError.CannotChangeOwnerRole -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
 }
 
 @JvmName("planResultToResponseEntity")
@@ -78,6 +80,8 @@ fun ItemError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("NOT_FOUND", message))
     is ItemError.Invalid -> ResponseEntity.status(400)
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is ItemError.Forbidden -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
 }
 
 @JvmName("itemResultToResponseEntity")

@@ -6,6 +6,7 @@ import com.acme.services.camperservice.features.plan.dto.AddMemberRequest
 import com.acme.services.camperservice.features.plan.dto.CreatePlanRequest
 import com.acme.services.camperservice.features.plan.dto.PlanMemberResponse
 import com.acme.services.camperservice.features.plan.dto.PlanResponse
+import com.acme.services.camperservice.features.plan.dto.UpdateMemberRoleRequest
 import com.acme.services.camperservice.features.plan.dto.UpdatePlanRequest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -512,6 +513,187 @@ class PlanAcceptanceTest {
             val memberUserIds = membersResponse.body!!.map { it.userId }
             assertThat(memberUserIds).contains(ownerId)
             assertThat(memberUserIds).contains(otherUserId)
+        }
+
+        @Test
+        fun `PATCH role then GET members reflects the updated role`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = otherUserId)
+
+            val patchResponse = restTemplate.exchange(
+                "/api/plans/$planId/members/$otherUserId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "manager"), ownerId),
+                PlanMemberResponse::class.java
+            )
+            assertThat(patchResponse.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(patchResponse.body!!.role).isEqualTo("manager")
+
+            val membersResponse = restTemplate.exchange(
+                "/api/plans/$planId/members",
+                HttpMethod.GET,
+                entityWithUser(null, ownerId),
+                Array<PlanMemberResponse>::class.java
+            )
+            assertThat(membersResponse.statusCode).isEqualTo(HttpStatus.OK)
+            val promoted = membersResponse.body!!.find { it.userId == otherUserId }
+            assertThat(promoted!!.role).isEqualTo("manager")
+        }
+    }
+
+    @Nested
+    inner class UpdateMemberRole {
+
+        @Test
+        fun `PATCH returns 200 with promoted member`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = otherUserId)
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members/$otherUserId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "manager"), ownerId),
+                PlanMemberResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.role).isEqualTo("manager")
+            assertThat(response.body!!.userId).isEqualTo(otherUserId)
+            assertThat(response.body!!.planId).isEqualTo(planId)
+            assertThat(response.body!!.username).isEqualTo("other")
+        }
+
+        @Test
+        fun `PATCH returns 200 when demoting manager to member`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = otherUserId, role = "manager")
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members/$otherUserId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "member"), ownerId),
+                PlanMemberResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.role).isEqualTo("member")
+        }
+
+        @Test
+        fun `PATCH returns 403 when non-owner requests`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = otherUserId)
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members/$ownerId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "manager"), otherUserId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `PATCH returns 400 when target is the owner`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members/$ownerId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "manager"), ownerId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `PATCH returns 404 when target is not a member`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            val nonMemberId = fixture.insertUser(email = "nonmember@example.com", username = "nonmember")
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members/$nonMemberId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "manager"), ownerId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+
+        @Test
+        fun `PATCH returns 400 for invalid role value`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = otherUserId)
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members/$otherUserId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "admin"), ownerId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `PATCH returns 404 when plan does not exist`() {
+            val response = restTemplate.exchange(
+                "/api/plans/${UUID.randomUUID()}/members/$otherUserId/role",
+                HttpMethod.PATCH,
+                entityWithUser(UpdateMemberRoleRequest(role = "manager"), ownerId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+
+        @Test
+        fun `GET members includes role field with default member value`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = otherUserId)
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members",
+                HttpMethod.GET,
+                entityWithUser(null, ownerId),
+                Array<PlanMemberResponse>::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body).hasSize(2)
+            response.body!!.forEach { member ->
+                assertThat(member.role).isEqualTo("member")
+            }
+        }
+
+        @Test
+        fun `GET members shows mixed roles after promotion`() {
+            val planId = fixture.insertPlan(name = "Trip", ownerId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = ownerId)
+            fixture.insertPlanMember(planId = planId, userId = otherUserId, role = "manager")
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members",
+                HttpMethod.GET,
+                entityWithUser(null, ownerId),
+                Array<PlanMemberResponse>::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            val memberByUserId = response.body!!.associateBy { it.userId }
+            assertThat(memberByUserId[ownerId]!!.role).isEqualTo("member")
+            assertThat(memberByUserId[otherUserId]!!.role).isEqualTo("manager")
         }
     }
 

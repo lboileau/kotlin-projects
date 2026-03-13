@@ -22,6 +22,7 @@ export interface PlanMember {
   username: string | null;
   email: string | null;
   invitationStatus: string | null;
+  role: string;
   createdAt: string;
 }
 
@@ -382,6 +383,13 @@ export const api = {
   removeMember(planId: string, memberId: string): Promise<void> {
     return request(`/api/plans/${planId}/members/${memberId}`, {
       method: 'DELETE',
+    });
+  },
+
+  updateMemberRole(planId: string, userId: string, role: string): Promise<PlanMember> {
+    return request(`/api/plans/${planId}/members/${userId}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
     });
   },
 

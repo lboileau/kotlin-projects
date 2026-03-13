@@ -329,6 +329,181 @@ class ItemAcceptanceTest {
     }
 
     @Nested
+    inner class SharedGearAuthorization {
+
+        private lateinit var managerId: UUID
+        private lateinit var memberId: UUID
+
+        @BeforeEach
+        fun setUpRoles() {
+            managerId = fixture.insertUser(email = "manager@example.com")
+            memberId = fixture.insertUser(email = "member@example.com")
+            fixture.insertPlanMember(planId = planId, userId = userId) // owner as member
+            fixture.insertPlanMember(planId = planId, userId = managerId, role = "manager")
+            fixture.insertPlanMember(planId = planId, userId = memberId, role = "member")
+        }
+
+        @Test
+        fun `POST shared gear returns 403 for regular member`() {
+            val request = CreateItemRequest(
+                name = "Tent", category = "shelter", quantity = 1, packed = false,
+                ownerType = "plan", ownerId = planId,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(request, memberId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `POST shared gear returns 201 for manager`() {
+            val request = CreateItemRequest(
+                name = "Tent", category = "shelter", quantity = 1, packed = false,
+                ownerType = "plan", ownerId = planId,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(request, managerId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            assertThat(response.body!!.name).isEqualTo("Tent")
+        }
+
+        @Test
+        fun `POST shared gear returns 201 for owner`() {
+            val request = CreateItemRequest(
+                name = "Stove", category = "cooking", quantity = 1, packed = false,
+                ownerType = "plan", ownerId = planId,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(request, userId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+        }
+
+        @Test
+        fun `PUT shared gear returns 403 for regular member`() {
+            val itemId = fixture.insertItem(planId = planId, name = "Tent", category = "shelter")
+            val request = UpdateItemRequest(name = "Big Tent", category = "shelter", quantity = 2, packed = false)
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.PUT,
+                entityWithUser(request, memberId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `PUT shared gear returns 200 for manager`() {
+            val itemId = fixture.insertItem(planId = planId, name = "Tent", category = "shelter")
+            val request = UpdateItemRequest(name = "Big Tent", category = "shelter", quantity = 2, packed = false)
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.PUT,
+                entityWithUser(request, managerId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.name).isEqualTo("Big Tent")
+        }
+
+        @Test
+        fun `DELETE shared gear returns 403 for regular member`() {
+            val itemId = fixture.insertItem(planId = planId, name = "Tent", category = "shelter")
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.DELETE,
+                entityWithUser(null, memberId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `DELETE shared gear returns 204 for manager`() {
+            val itemId = fixture.insertItem(planId = planId, name = "Tent", category = "shelter")
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.DELETE,
+                entityWithUser(null, managerId),
+                Void::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+        }
+
+        @Test
+        fun `POST personal gear succeeds for regular member`() {
+            val request = CreateItemRequest(
+                name = "Flashlight", category = "lighting", quantity = 1, packed = false,
+                ownerType = "user", ownerId = memberId, planId = planId,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(request, memberId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            assertThat(response.body!!.userId).isEqualTo(memberId)
+        }
+
+        @Test
+        fun `PUT personal gear succeeds for regular member`() {
+            val itemId = fixture.insertItem(planId = planId, userId = memberId, name = "Flashlight", category = "lighting")
+            val request = UpdateItemRequest(name = "LED Flashlight", category = "lighting", quantity = 1, packed = true)
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.PUT,
+                entityWithUser(request, memberId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.name).isEqualTo("LED Flashlight")
+        }
+
+        @Test
+        fun `DELETE personal gear succeeds for regular member`() {
+            val itemId = fixture.insertItem(planId = planId, userId = memberId, name = "Flashlight", category = "lighting")
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.DELETE,
+                entityWithUser(null, memberId),
+                Void::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+        }
+    }
+
+    @Nested
     inner class ReadYourOwnWrites {
 
         @Test

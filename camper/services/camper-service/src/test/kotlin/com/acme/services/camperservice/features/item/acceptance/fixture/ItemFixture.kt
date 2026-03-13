@@ -51,6 +51,18 @@ class ItemFixture(private val jdbcTemplate: JdbcTemplate) {
         return id
     }
 
+    fun insertPlanMember(
+        planId: UUID,
+        userId: UUID,
+        role: String = "member",
+        createdAt: Instant = Instant.now()
+    ) {
+        jdbcTemplate.update(
+            "INSERT INTO plan_members (plan_id, user_id, role, created_at) VALUES (?, ?, ?, ?)",
+            planId, userId, role, java.sql.Timestamp.from(createdAt)
+        )
+    }
+
     fun truncateAll() {
         jdbcTemplate.execute("TRUNCATE TABLE items, plan_members, plans, users CASCADE")
     }

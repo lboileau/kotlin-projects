@@ -3,6 +3,10 @@ package com.acme.services.camperservice.features.item.service
 import com.acme.clients.common.Result
 import com.acme.clients.itemclient.fake.FakeItemClient
 import com.acme.clients.itemclient.model.Item as ClientItem
+import com.acme.clients.planclient.fake.FakePlanClient
+import com.acme.clients.planclient.model.Plan
+import com.acme.clients.planclient.model.PlanMember
+import com.acme.services.camperservice.common.auth.PlanRoleAuthorizer
 import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.item.params.*
 import org.assertj.core.api.Assertions.assertThat
@@ -15,7 +19,9 @@ import java.util.UUID
 class ItemServiceTest {
 
     private val fakeItemClient = FakeItemClient()
-    private val itemService = ItemService(fakeItemClient)
+    private val fakePlanClient = FakePlanClient()
+    private val planRoleAuthorizer = PlanRoleAuthorizer(fakePlanClient)
+    private val itemService = ItemService(fakeItemClient, planRoleAuthorizer)
 
     private val planId = UUID.randomUUID()
     private val userId = UUID.randomUUID()
@@ -24,6 +30,10 @@ class ItemServiceTest {
     @BeforeEach
     fun setUp() {
         fakeItemClient.reset()
+        fakePlanClient.reset()
+        // Seed a plan where requestingUserId is the owner, so shared gear auth passes
+        fakePlanClient.seedPlan(Plan(id = planId, name = "Test Plan", visibility = "private", ownerId = requestingUserId, createdAt = Instant.now(), updatedAt = Instant.now()))
+        fakePlanClient.seedMember(PlanMember(planId = planId, userId = requestingUserId, role = "member", createdAt = Instant.now()))
     }
 
     @Nested
@@ -369,6 +379,173 @@ class ItemServiceTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(ItemError.NotFound::class.java)
+        }
+    }
+
+    @Nested
+    inner class SharedGearAuthorization {
+
+        private val managerId = UUID.randomUUID()
+        private val memberId = UUID.randomUUID()
+
+        @BeforeEach
+        fun seedRoles() {
+            fakePlanClient.seedMember(PlanMember(planId = planId, userId = managerId, role = "manager", createdAt = Instant.now()))
+            fakePlanClient.seedMember(PlanMember(planId = planId, userId = memberId, role = "member", createdAt = Instant.now()))
+        }
+
+        @Test
+        fun `create shared gear returns Forbidden for regular member`() {
+            val result = itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = memberId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(ItemError.Forbidden::class.java)
+        }
+
+        @Test
+        fun `create shared gear succeeds for manager`() {
+            val result = itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = managerId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat((result as Result.Success).value.name).isEqualTo("Tent")
+        }
+
+        @Test
+        fun `create shared gear succeeds for owner`() {
+            val result = itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = requestingUserId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+        @Test
+        fun `create personal gear is not affected by role authorization`() {
+            val result = itemService.create(
+                CreateItemParam(
+                    name = "Flashlight", category = "Lighting", quantity = 1, packed = false,
+                    ownerType = "user", ownerId = memberId, planId = planId, requestingUserId = memberId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat((result as Result.Success).value.userId).isEqualTo(memberId)
+        }
+
+        @Test
+        fun `update shared gear returns Forbidden for regular member`() {
+            val created = (itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = requestingUserId,
+                )
+            ) as Result.Success).value
+
+            val result = itemService.update(
+                UpdateItemParam(
+                    id = created.id, name = "Big Tent", category = "Shelter",
+                    quantity = 2, packed = false, requestingUserId = memberId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(ItemError.Forbidden::class.java)
+        }
+
+        @Test
+        fun `update shared gear succeeds for manager`() {
+            val created = (itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = requestingUserId,
+                )
+            ) as Result.Success).value
+
+            val result = itemService.update(
+                UpdateItemParam(
+                    id = created.id, name = "Big Tent", category = "Shelter",
+                    quantity = 2, packed = false, requestingUserId = managerId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat((result as Result.Success).value.name).isEqualTo("Big Tent")
+        }
+
+        @Test
+        fun `delete shared gear returns Forbidden for regular member`() {
+            val created = (itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = requestingUserId,
+                )
+            ) as Result.Success).value
+
+            val result = itemService.delete(DeleteItemParam(id = created.id, requestingUserId = memberId))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(ItemError.Forbidden::class.java)
+        }
+
+        @Test
+        fun `delete shared gear succeeds for manager`() {
+            val created = (itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = requestingUserId,
+                )
+            ) as Result.Success).value
+
+            val result = itemService.delete(DeleteItemParam(id = created.id, requestingUserId = managerId))
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+        @Test
+        fun `update personal gear is not affected by role authorization`() {
+            val personalItem = (itemService.create(
+                CreateItemParam(
+                    name = "Flashlight", category = "Lighting", quantity = 1, packed = false,
+                    ownerType = "user", ownerId = memberId, planId = planId, requestingUserId = memberId,
+                )
+            ) as Result.Success).value
+
+            val result = itemService.update(
+                UpdateItemParam(
+                    id = personalItem.id, name = "LED Flashlight", category = "Lighting",
+                    quantity = 1, packed = true, requestingUserId = memberId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat((result as Result.Success).value.name).isEqualTo("LED Flashlight")
+        }
+
+        @Test
+        fun `delete personal gear is not affected by role authorization`() {
+            val personalItem = (itemService.create(
+                CreateItemParam(
+                    name = "Flashlight", category = "Lighting", quantity = 1, packed = false,
+                    ownerType = "user", ownerId = memberId, planId = planId, requestingUserId = memberId,
+                )
+            ) as Result.Success).value
+
+            val result = itemService.delete(DeleteItemParam(id = personalItem.id, requestingUserId = memberId))
+
+            assertThat(result.isSuccess).isTrue()
         }
     }
 }

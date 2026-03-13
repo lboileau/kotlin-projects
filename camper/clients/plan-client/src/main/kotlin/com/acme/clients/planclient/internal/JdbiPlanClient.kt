@@ -19,6 +19,7 @@ internal class JdbiPlanClient(jdbi: Jdbi) : PlanClient {
     private val getPlanMembers = GetPlanMembers(jdbi)
     private val addPlanMember = AddPlanMember(jdbi)
     private val removePlanMember = RemovePlanMember(jdbi)
+    private val updateMemberRoleOp = UpdateMemberRole(jdbi)
 
     override fun getById(param: GetByIdParam): Result<Plan, AppError> = getPlanById.execute(param)
     override fun getByUserId(param: GetByUserIdParam): Result<List<Plan>, AppError> = getPlansByUserId.execute(param)
@@ -29,4 +30,5 @@ internal class JdbiPlanClient(jdbi: Jdbi) : PlanClient {
     override fun getMembers(param: GetMembersParam): Result<List<PlanMember>, AppError> = getPlanMembers.execute(param)
     override fun addMember(param: AddMemberParam): Result<PlanMember, AppError> = addPlanMember.execute(param)
     override fun removeMember(param: RemoveMemberParam): Result<Unit, AppError> = removePlanMember.execute(param)
+    override fun updateMemberRole(param: UpdateMemberRoleParam): Result<PlanMember, AppError> = updateMemberRoleOp.execute(param)
 }

@@ -9,6 +9,7 @@ object PlanMemberRowAdapter {
     fun fromResultSet(rs: ResultSet): PlanMember = PlanMember(
         planId = rs.getObject("plan_id", UUID::class.java),
         userId = rs.getObject("user_id", UUID::class.java),
+        role = rs.getString("role"),
         createdAt = rs.getTimestamp("created_at").toInstant()
     )
 }

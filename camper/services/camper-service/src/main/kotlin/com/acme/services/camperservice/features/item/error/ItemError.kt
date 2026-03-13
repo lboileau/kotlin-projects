@@ -8,6 +8,7 @@ import java.util.UUID
 sealed class ItemError(override val message: String) : AppError {
     data class NotFound(val itemId: UUID) : ItemError("Item not found: $itemId")
     data class Invalid(val field: String, val reason: String) : ItemError("Invalid item $field: $reason")
+    data class Forbidden(val planId: String, val userId: String) : ItemError("User $userId is not authorized to modify shared gear in plan $planId")
 
     companion object {
         fun fromClientError(error: AppError): ItemError = when (error) {

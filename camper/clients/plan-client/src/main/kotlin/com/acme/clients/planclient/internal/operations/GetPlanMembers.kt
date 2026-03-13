@@ -17,7 +17,7 @@ internal class GetPlanMembers(private val jdbi: Jdbi) {
         val entities = jdbi.withHandle<List<PlanMember>, Exception> { handle ->
             handle.createQuery(
                 """
-                SELECT plan_id, user_id, created_at
+                SELECT plan_id, user_id, role, created_at
                 FROM plan_members
                 WHERE plan_id = :planId
                 ORDER BY created_at

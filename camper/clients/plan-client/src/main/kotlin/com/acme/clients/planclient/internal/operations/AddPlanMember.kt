@@ -26,8 +26,8 @@ internal class AddPlanMember(private val jdbi: Jdbi) {
             jdbi.withHandle<Unit, Exception> { handle ->
                 handle.createUpdate(
                     """
-                    INSERT INTO plan_members (plan_id, user_id, created_at)
-                    VALUES (:planId, :userId, :createdAt)
+                    INSERT INTO plan_members (plan_id, user_id, role, created_at)
+                    VALUES (:planId, :userId, 'member', :createdAt)
                     """.trimIndent()
                 )
                     .bind("planId", param.planId)
@@ -35,7 +35,7 @@ internal class AddPlanMember(private val jdbi: Jdbi) {
                     .bind("createdAt", now)
                     .execute()
             }
-            success(PlanMember(planId = param.planId, userId = param.userId, createdAt = now))
+            success(PlanMember(planId = param.planId, userId = param.userId, role = "member", createdAt = now))
         } catch (e: Exception) {
             if (e.message?.contains("duplicate key") == true || e.message?.contains("plan_members_pkey") == true) {
                 failure(ConflictError("PlanMember", "user is already a member of this plan"))

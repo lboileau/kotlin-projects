@@ -28,3 +28,6 @@ data class AddMemberParam(val planId: UUID, val userId: UUID)
 
 /** Parameter for removing a member from a plan. */
 data class RemoveMemberParam(val planId: UUID, val userId: UUID)
+
+/** Parameter for updating a member's role in a plan. */
+data class UpdateMemberRoleParam(val planId: UUID, val userId: UUID, val role: String)
