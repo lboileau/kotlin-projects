@@ -72,4 +72,4 @@ Present the ticket summary to the user, confirm the routing decision, then invok
 - **Logs/stack traces** — extract from description or comments if present
 - **Context** — from related issues, priority, labels
 
-After presenting the extracted information, ask the user to confirm or supplement before spawning the orchestrator.
+After presenting the extracted information, ask the user to confirm or supplement before handing off. The downstream skill (`/build-feature` or `/fix-bug`) handles the orchestrator handoff — invoke it with the pre-filled context so it can validate scope, check for overlaps, and spawn the orchestrator using Claude agent teams in tmux panes.

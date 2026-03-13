@@ -1,12 +1,12 @@
-# Build Feature Workflow
+# Build Feature
 
-You gather requirements from the user and then spawn the **orchestrator** agent team to execute the build. You do NOT write code or manage PRs yourself.
+Gather requirements from the user, then hand off to the **orchestrator** to execute the build using Claude agent teams in tmux panes. You do NOT write code, manage PRs, or run the build yourself.
 
 ## Critical Rules
 
-1. **Use agent teams.** All features MUST be built using agent teams via the orchestrator.
-2. **Gate on plan approval.** Never let the orchestrator proceed until the user explicitly approves the plan.
-3. **Gather complete requirements.** The orchestrator needs clear, unambiguous context to work effectively.
+1. **You are the intake.** Your only job is to gather requirements and prompt the orchestrator with complete context.
+2. **Gate on plan approval.** The orchestrator will present a plan — do not let it proceed until the user explicitly approves.
+3. **Gather complete requirements.** The orchestrator cannot ask the user questions, so you must provide everything it needs upfront.
 
 ---
 
@@ -21,19 +21,19 @@ Ask the user:
 5. **What database changes are needed?** New tables, columns, constraints, relationships.
 6. **Any special considerations?** Authentication, permissions, real-time updates, external integrations.
 
-Keep asking until you have enough detail for the orchestrator to produce a complete plan.
+Keep asking until you have enough detail for the orchestrator to produce a complete plan without needing to come back with questions.
 
 ---
 
 ## Step 2: Scope Check
 
-Evaluate the feature size. A feature is **too big** if it involves:
+A feature is **too big** if it involves:
 - More than 4 new tables with complex relationships
 - More than 4 new client interfaces
 - More than 10 new API endpoints
 - Cross-service concerns
 
-If too big, explain why and suggest a breakdown into smaller, independently shippable features. Do not proceed until scope is manageable.
+If too big, suggest a breakdown into smaller, independently shippable features. Do not proceed until scope is manageable.
 
 ---
 
@@ -49,38 +49,16 @@ If overlap is found, present it to the user and ask whether to extend, reuse, or
 
 ---
 
-## Step 4: Spawn the Orchestrator
+## Step 4: Hand Off to the Orchestrator
 
-Once requirements are gathered and scope is confirmed, spawn the `orchestrator` agent team with:
+Once requirements are gathered and scope is confirmed, spawn the `orchestrator` using Claude agent teams. Provide it with:
 
-- **Project path** — The full path to the project root
-- **Feature description** — Complete description of the feature with all gathered details
+- **Workflow type** — Feature build
+- **Project path** — Full path to the project root
+- **Feature description** — Complete description with all gathered details
 - **Entities** — All entity names, fields, and relationships
 - **API surface** — All endpoints with methods, paths, and shapes
 - **Database changes** — All table/column changes
 - **Special considerations** — Any constraints or requirements that affect the build
 
-The orchestrator will:
-1. Spawn the architect to create a plan
-2. Present the plan for user approval
-3. Execute the full PR stack with agent teams (db-dev, kotlin-dev, test-engineer)
-4. Run review cycles after each PR (code-reviewer, test-reviewer)
-5. Collect retros from all developers
-6. Spawn doc-updater for retrospective and final report
-7. Present the retro to the user before submitting
-
----
-
-## Graphite Command Reference
-
-The orchestrator uses these commands (provided here for reference):
-
-```bash
-gt checkout main                                    # Start from trunk
-gt create -m "<commit message>" --no-interactive    # Create stacked branch
-gt submit --no-interactive                          # Submit stack to GitHub
-gt log                                              # View the stack
-gt checkout <branch-name>                           # Move to branch
-gt restack                                          # Restack after changes
-git add -A && git commit --amend --no-edit          # Amend current branch
-```
+The orchestrator takes it from here — it will use Claude agent teams to spawn specialized teammates (architect, db-dev, kotlin-dev, test-engineer, reviewers, doc-updater) in tmux panes, manage the PR stack, run review cycles, and present the retro for user approval before submitting.
