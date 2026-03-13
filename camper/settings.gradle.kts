@@ -5,6 +5,7 @@ plugins {
 rootProject.name = "camper"
 
 include(":libs:common")
+include(":libs:meal-plan-calculator")
 include(":clients:common")
 project(":clients:common").name = "client-common"
 include(":clients:world-client")
