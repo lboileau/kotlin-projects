@@ -397,6 +397,10 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
     filteredMemberItems[userId] = items.filter(i => categoryValues.has(i.category));
   }
 
+  // Check if current user can edit shared gear (owner or manager)
+  const currentMember = members.find(m => m.userId === currentUserId);
+  const canEditShared = currentUserId === planOwnerId || currentMember?.role === 'manager';
+
   // Filter out pending members (no username), sort current user first
   const sortedMembers = [...members].filter(m => m.username || m.userId === currentUserId).sort((a, b) => {
     if (a.userId === currentUserId) return -1;
@@ -529,7 +533,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
                 items={activeDayItems}
                 {...makePlanCrud('plan', planId)}
                 defaultExpanded={true}
-                canEdit={config.planOnly || currentUserId === planOwnerId}
+                canEdit={config.planOnly || canEditShared}
                 categories={config.categories}
                 addPlaceholder={config.addPlaceholder}
                 emptyText={config.emptyText}
