@@ -486,10 +486,12 @@ Graphite stacks PRs so each PR targets the branch below it (not `main` directly)
 ### Merge Rules
 
 1. **Always merge bottom-up.** The lowest unmerged PR in the stack must be merged first. Never merge a PR while a lower PR is still open.
-2. **Use `gt merge` to merge PRs** — not the GitHub merge button. `gt merge` handles retargeting the next PR in the stack to `main` automatically.
+2. **ONLY use `gt merge` to merge PRs.** Never use `gh pr merge`, the GitHub merge button, or any other merge method. `gt merge` handles retargeting the next PR in the stack to `main` automatically. Using `gh pr merge --squash` on stacked PRs will merge each PR into its parent branch (not main), silently dropping changes.
 3. **After any merge, run `gt restack`** to ensure all remaining PRs in the stack are correctly retargeted.
-4. **Verify PR base branches after merging.** After merging and restacking, check that the next PR in the stack now targets `main` (not the just-merged branch). Use `gt log` to confirm.
-5. **Never merge the full stack at once from GitHub.** Merge one PR at a time, bottom-up, using `gt merge`.
+4. **Wait for GitHub to finish rebasing** before merging the next PR. If `gt merge` says "Rebasing...", wait and retry. Do not fall back to `gh pr merge`.
+5. **Verify PR base branches after merging.** After merging and restacking, check that the next PR in the stack now targets `main` (not the just-merged branch). Use `gt log` to confirm.
+6. **Never merge the full stack at once from GitHub.** Merge one PR at a time, bottom-up, using `gt merge`.
+7. **If `gt merge` is blocked** (e.g., draft PRs), use `gh pr ready <number>` to mark PRs as ready, then retry `gt merge`. Do NOT fall back to `gh pr merge`.
 
 ### Merge Sequence
 
