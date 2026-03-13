@@ -208,7 +208,7 @@ API service for camping trip planning — user registration, authentication, pla
   - `RemoveDayAction`: Removes a day from the meal plan
   - `AddRecipeToMealAction`: Adds a recipe to a specific meal type on a day
   - `RemoveRecipeFromMealAction`: Removes a recipe from a meal
-  - `GetShoppingListAction`: Computes shopping list using `ShoppingListCalculator` (scale → convert → aggregate → join purchases); purchase status derived via `PurchaseStatus.derive()`
+  - `GetShoppingListAction`: Computes shopping list using `ShoppingListCalculator` (scale → convert → aggregate → join purchases); purchase status derived via `PurchaseStatus.derive()`. Purchases are matched to shopping list rows by ingredient, with unit conversion via `UnitConverter` when bestFit changes the row's unit (e.g. purchase in `g` matched to a `kg` row). Orphaned purchases only show as `no_longer_needed` when the ingredient is fully removed or the purchase unit is not convertible to any current row unit; zero-quantity orphans are filtered out.
   - `UpdatePurchaseAction`: Creates/updates purchase quantity for an ingredient+unit
   - `ResetPurchasesAction`: Deletes all purchases for a meal plan
   - `MealPlanDetailBuilder`: Shared builder that assembles the nested detail response (days → meals → recipes with scaled ingredients, `isFullyPurchased` flag)

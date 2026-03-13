@@ -1054,6 +1054,81 @@ class MealPlanServiceTest {
         }
 
         @Test
+        fun `purchase in convertible unit is converted when bestFit changes shopping list unit`() {
+            // Purchase recorded in grams, but bestFit converts the shopping list row to kg
+            val mealPlan = seedMealPlan(servings = 4, scalingMode = "fractional")
+            val day1 = seedDay(mealPlan.id, 1)
+
+            val tomato = seedIngredient("Tomato", "produce", "g")
+            val recipe1 = seedRecipe("Salad", baseServings = 4)
+            seedRecipeIngredient(recipe1.id, tomato.id, BigDecimal("200"), "g")
+            seedMealPlanRecipe(day1.id, "lunch", recipe1.id)
+
+            val recipe2 = seedRecipe("Sauce", baseServings = 4)
+            seedRecipeIngredient(recipe2.id, tomato.id, BigDecimal("300"), "g")
+            seedMealPlanRecipe(day1.id, "dinner", recipe2.id)
+
+            // Purchase 200g — the shopping list row will be in kg (0.5 kg) due to bestFit
+            seedPurchase(mealPlan.id, tomato.id, "g", BigDecimal("200"))
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val allItems = (result as Result.Success).value.categories.flatMap { it.items }
+            val tomatoItem = allItems.find { it.ingredientName == "Tomato" }!!
+            // Row is 0.5 kg, purchase of 200g = 0.2 kg → status should be more_needed
+            assertThat(tomatoItem.unit).isEqualTo("kg")
+            assertThat(tomatoItem.quantityRequired.compareTo(BigDecimal("0.5"))).isEqualTo(0)
+            assertThat(tomatoItem.quantityPurchased.compareTo(BigDecimal("0.2"))).isEqualTo(0)
+            assertThat(tomatoItem.status).isEqualTo("more_needed")
+        }
+
+        @Test
+        fun `purchase in convertible unit does not show as no_longer_needed`() {
+            // When bestFit changes the unit, the old purchase should NOT appear as orphaned
+            val mealPlan = seedMealPlan(servings = 4, scalingMode = "fractional")
+            val day1 = seedDay(mealPlan.id, 1)
+
+            val tomato = seedIngredient("Tomato", "produce", "g")
+            val recipe1 = seedRecipe("Salad", baseServings = 4)
+            seedRecipeIngredient(recipe1.id, tomato.id, BigDecimal("200"), "g")
+            seedMealPlanRecipe(day1.id, "lunch", recipe1.id)
+
+            val recipe2 = seedRecipe("Sauce", baseServings = 4)
+            seedRecipeIngredient(recipe2.id, tomato.id, BigDecimal("300"), "g")
+            seedMealPlanRecipe(day1.id, "dinner", recipe2.id)
+
+            // Purchase 500g — the shopping list row will be in kg due to bestFit
+            seedPurchase(mealPlan.id, tomato.id, "g", BigDecimal("500"))
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val allItems = (result as Result.Success).value.categories.flatMap { it.items }
+            // Should be exactly one item (kg row with converted purchase), no orphaned "no_longer_needed"
+            val tomatoItems = allItems.filter { it.ingredientName == "Tomato" }
+            assertThat(tomatoItems).hasSize(1)
+            assertThat(tomatoItems[0].unit).isEqualTo("kg")
+            assertThat(tomatoItems[0].status).isEqualTo("done")
+            assertThat(tomatoItems[0].quantityPurchased.compareTo(BigDecimal("0.5"))).isEqualTo(0)
+        }
+
+        @Test
+        fun `zero quantity orphaned purchases are filtered out`() {
+            val mealPlan = seedMealPlan(servings = 4, scalingMode = "fractional")
+            // No recipes, but there's a zero-quantity leftover purchase
+            val tomato = seedIngredient("Tomato", "produce", "g")
+            seedPurchase(mealPlan.id, tomato.id, "g", BigDecimal.ZERO)
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val allItems = (result as Result.Success).value.categories.flatMap { it.items }
+            // Zero-quantity orphan should be filtered out entirely
+            assertThat(allItems.filter { it.ingredientName == "Tomato" }).isEmpty()
+        }
+
+        @Test
         fun `shopping list returns MealPlanNotFound when meal plan does not exist`() {
             val result = service.getShoppingList(GetShoppingListParam(UUID.randomUUID(), userId))
 
