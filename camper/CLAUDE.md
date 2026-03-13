@@ -11,7 +11,8 @@ camper/
 ├── gradle.properties
 ├── Dockerfile
 ├── libs/
-│   └── common/               # Shared utilities (no I/O)
+│   ├── common/               # Shared utilities (no I/O)
+│   └── meal-plan-calculator/  # Unit conversion & shopping list computation (pure logic)
 ├── clients/
 │   ├── common/               # Result type, error types, ClientContext
 │   ├── world-client/         # JDBI data access for worlds table
@@ -24,10 +25,11 @@ camper/
 │   ├── email-client/         # Email sending via Resend SDK (+ NoOp for local dev)
 │   ├── ingredient-client/    # JDBI data access for ingredients table
 │   ├── recipe-client/        # JDBI data access for recipes & recipe_ingredients tables
-│   └── recipe-scraper-client/ # Recipe scraping via Claude API (+ NoOp stub)
+│   ├── recipe-scraper-client/ # Recipe scraping via Claude API (+ NoOp stub)
+│   └── meal-plan-client/     # JDBI data access for meal_plans, meal_plan_days, meal_plan_recipes, shopping_list_purchases
 ├── services/
 │   ├── common/               # ApiResponse shared type
-│   └── camper-service/       # Spring Boot REST API
+│   └── camper-service/       # Spring Boot REST API (features: user, plan, item, itinerary, assignment, mealplan, gearsync, webhook)
 └── databases/
     └── camper-db/            # Schema, migrations, seeds, docker-compose
 ```
@@ -58,6 +60,7 @@ Rule of thumb: "Does it do I/O? → `clients/`. Pure logic/types? → `libs/`."
 - **Client pattern:** Interface + internal facade + operations + param objects. Factory reads env vars. Fake in testFixtures.
 - **Service pattern:** Actions (validate → convert → call client) composed into a Service facade. Validations are 1:1 with actions.
 - **Live updates:** STOMP-over-WebSocket via `PlanEventPublisher`. Controllers publish `{ resource, action }` messages to `/topic/plans/{planId}` after successful mutations. Frontend subscribes per-plan and refetches on notification (deferred while modals are open).
+- **Computed read-time data:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles unit conversion and aggregation (pure logic, no I/O). Only purchase records are stored.
 - **Testing:** Unit tests with FakeClient, acceptance tests with Testcontainers + @SpringBootTest.
 
 ## Key Conventions

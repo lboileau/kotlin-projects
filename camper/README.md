@@ -69,7 +69,7 @@ Hand-drawn SVG scene with animated campfire, smoke, embers, and mouse-tracked pa
 Two layers: **Shared Camp Gear** (communal, managed by owner) and **Personal Packs** (per-member, scoped to trip). Track quantities and packed/unpacked status with progress bars.
 
 **🍳 Meal Planning**
-Day-by-day meal planner with categories: breakfast, lunch, dinner, and snacks. Add days as needed — everyone contributes.
+Day-by-day meal planner with breakfast, lunch, dinner, and snacks. Build from the recipe catalog, scale by headcount (fractional or round-up), and get an auto-computed shopping list with purchase tracking. Save plans as reusable templates.
 
 **📧 Email Invitations**
 Invite by email via [Resend](https://resend.com). Full delivery lifecycle: pending → sent → delivered (or bounced/failed/complained).
@@ -219,6 +219,7 @@ camper/
 │           ├── item/                  # controller/ · actions/ · service/
 │           ├── itinerary/             # controller/ · actions/ · service/
 │           ├── assignment/            # controller/ · actions/ · service/
+│           ├── mealplan/              # Meal plans, days, recipes, shopping list
 │           ├── gearsync/              # External gear sync endpoint
 │           └── webhook/               # Resend delivery callback
 │
@@ -230,13 +231,18 @@ camper/
 │   ├── itinerary-client/             # JDBI → itineraries + events
 │   ├── assignment-client/            # JDBI → assignments + members
 │   ├── invitation-client/            # JDBI → invitations lifecycle
-│   └── email-client/                 # Resend SDK (+ NoOp for local dev)
+│   ├── email-client/                 # Resend SDK (+ NoOp for local dev)
+│   ├── ingredient-client/            # JDBI → ingredients table
+│   ├── recipe-client/                # JDBI → recipes + recipe_ingredients
+│   ├── recipe-scraper-client/        # Recipe scraping via Claude API (+ NoOp stub)
+│   └── meal-plan-client/             # JDBI → meal_plans, days, recipes, purchases
 │
-├── libs/common/                      # ── SHARED LOGIC ──────────────
-│                                     # Pure utilities, no I/O
+├── libs/                              # ── SHARED LOGIC ──────────────
+│   ├── common/                       # Pure utilities, no I/O
+│   └── meal-plan-calculator/         # Unit conversion & shopping list computation
 │
 ├── databases/camper-db/              # ── DATABASE ──────────────────
-│   ├── migrations/                   # V001–V012 Flyway SQL migrations
+│   ├── migrations/                   # V001–V021 Flyway SQL migrations
 │   ├── seed/dev_seed.sql             # Development seed data
 │   └── docker-compose.yml            # PostgreSQL 16 on port 5433
 │
@@ -247,7 +253,7 @@ camper/
 
 ## Database Schema
 
-12 Flyway migrations produce the following schema:
+21 Flyway migrations produce the following schema:
 
 ```
                     ┌─────────────┐
@@ -294,6 +300,46 @@ camper/
                                     │ plan_id      │
                                     │ type         │
                                     └──────────────┘
+
+  ┌──────────────┐     ┌──────────────┐     ┌──────────────────┐
+  │  meal_plans  │     │ ingredients  │     │     recipes      │
+  │──────────────│     │──────────────│     │─────────────────-│
+  │ id (PK)      │     │ id (PK)      │     │ id (PK)          │
+  │ plan_id (FK) │     │ name (UQ)    │     │ name             │
+  │ name         │     │ category     │     │ base_servings    │
+  │ servings     │     │ default_unit │     │ status           │
+  │ scaling_mode │     └──────┬───────┘     │ created_by (FK)  │
+  │ is_template  │            │             └────────┬─────────┘
+  │ created_by   │            │                      │
+  └──────┬───────┘            │             ┌────────┴─────────┐
+         │                    │             │recipe_ingredients│
+         ▼                    │             │──────────────────│
+  ┌──────────────┐            │             │ recipe_id (FK)   │
+  │meal_plan_days│            │             │ ingredient_id(FK)│
+  │──────────────│            │             │ quantity, unit   │
+  │ meal_plan_id │            │             └──────────────────┘
+  │ day_number   │            │
+  └──────┬───────┘            │
+         │                    │
+         ▼                    │
+  ┌────────────────┐          │
+  │meal_plan_      │          │
+  │  recipes       │          │
+  │────────────────│          │
+  │ meal_plan_day_id│         │
+  │ meal_type      │          │
+  │ recipe_id (FK) │          │
+  └────────────────┘          │
+                              │
+  ┌─────────────────────┐     │
+  │shopping_list_       │     │
+  │  purchases          │     │
+  │─────────────────────│     │
+  │ meal_plan_id (FK)   │     │
+  │ ingredient_id (FK) ─┼─────┘
+  │ unit                │
+  │ quantity_purchased  │
+  └─────────────────────┘
 ```
 
 ### Key Constraints
@@ -306,8 +352,12 @@ camper/
 | One itinerary per plan | `UNIQUE(plan_id)` on itineraries |
 | Items must belong to a plan | `CHECK(plan_id IS NOT NULL)` |
 | Ownership transfer on user deletion | PostgreSQL trigger → assignments transfer to plan owner |
-| Cascade deletes | Deleting a plan removes all children (members, items, assignments, invitations) |
+| Cascade deletes | Deleting a plan removes all children (members, items, assignments, invitations, meal plans) |
 | Normalized emails | Migration V010: lowercase + strip dots from local part |
+| One meal plan per trip | Partial `UNIQUE(plan_id)` WHERE plan_id IS NOT NULL |
+| Unique day numbers per meal plan | `UNIQUE(meal_plan_id, day_number)` |
+| Unique purchase per ingredient/unit | `UNIQUE(meal_plan_id, ingredient_id, unit)` on shopping_list_purchases |
+| Meal plan cascade deletes | Deleting a meal plan removes days, recipes (via days), and purchases |
 
 ---
 
@@ -391,6 +441,35 @@ All endpoints require the `X-User-Id` header unless noted. Responses use standar
 | `PUT` | `/api/plans/{planId}/assignments/{id}/owner` | Transfer ownership | `200` |
 
 > **Rules:** Each member can be in at most one tent and one canoe per trip. Capacity is enforced. Owner cannot be removed (must transfer first).
+
+</details>
+
+<details>
+<summary><strong>🍳 Meal Plans & Shopping List</strong> — 15 endpoints</summary>
+
+| Method | Endpoint | Description | Success |
+|--------|----------|-------------|---------|
+| `POST` | `/api/meal-plans` | Create meal plan (template or trip-bound) | `201` |
+| `GET` | `/api/meal-plans/{id}` | Get meal plan with full detail (days, meals, scaled ingredients) | `200` |
+| `GET` | `/api/meal-plans?planId={planId}` | Get meal plan for a trip | `200` |
+| `GET` | `/api/meal-plans/templates` | List template meal plans | `200` |
+| `PUT` | `/api/meal-plans/{id}` | Update name, servings, or scaling mode | `200` |
+| `DELETE` | `/api/meal-plans/{id}` | Delete meal plan (cascades everything) | `204` |
+| `POST` | `/api/meal-plans/{id}/copy-to-trip` | Copy template to a trip | `201` |
+| `POST` | `/api/meal-plans/{id}/save-as-template` | Save trip meal plan as reusable template | `201` |
+| `POST` | `/api/meal-plans/{id}/days` | Add a numbered day | `201` |
+| `DELETE` | `/api/meal-plans/{mealPlanId}/days/{dayId}` | Remove a day (cascades recipes) | `204` |
+| `POST` | `/api/meal-plans/{mealPlanId}/days/{dayId}/recipes` | Add recipe to a meal slot | `201` |
+| `DELETE` | `/api/meal-plan-recipes/{mealPlanRecipeId}` | Remove recipe from meal | `204` |
+| `GET` | `/api/meal-plans/{id}/shopping-list` | Get computed shopping list with purchase status | `200` |
+| `PATCH` | `/api/meal-plans/{id}/shopping-list` | Update purchased quantity for an ingredient/unit | `200` |
+| `DELETE` | `/api/meal-plans/{id}/shopping-list` | Reset all purchases | `204` |
+
+> **Scaling modes:** `fractional` (exact ratio, may produce decimals) or `round_up` (ceil to nearest whole recipe multiple).
+>
+> **Shopping list:** Computed live from recipe ingredients — quantities are never stored. Only purchase records are persisted. Unit conversion groups compatible units (volume, weight) and keeps count units separate.
+>
+> **Templates:** Meal plans with `isTemplate: true` have no trip association. Copy a template to a trip to start planning.
 
 </details>
 

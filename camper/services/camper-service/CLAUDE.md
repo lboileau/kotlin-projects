@@ -7,7 +7,8 @@ API service for camping trip planning — user registration, authentication, pla
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, and `recipe-scraper-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, and `meal-plan-client` for data access
+- Uses `meal-plan-calculator` lib for shopping list computation and unit conversion
 - Database: `camper-db` (port 5433, database `camper_db`)
 - **WebSocket:** STOMP-over-WebSocket at `/ws` for live updates. `PlanEventPublisher` broadcasts `PlanUpdateMessage(resource, action)` to `/topic/plans/{planId}` after successful mutations.
 
@@ -187,6 +188,49 @@ API service for camping trip planning — user registration, authentication, pla
   - `PUT /api/recipes/{id}/resolve-duplicate` — resolve duplicate flag (creator only; 204 if USE_EXISTING)
   - `POST /api/recipes/{id}/publish` — publish recipe (creator only)
 
+### Meal Plan (`features/mealplan/`)
+- **Models:** Uses `MealPlan`, `MealPlanDay`, `MealPlanRecipe`, `ShoppingListPurchase` from meal-plan-client; `Recipe`, `RecipeIngredient` from recipe-client; `Ingredient` from ingredient-client
+- **DTOs:**
+  - Requests: `CreateMealPlanRequest(name, servings, scalingMode?, isTemplate?, planId?)`, `UpdateMealPlanRequest(name?, servings?, scalingMode?)`, `AddDayRequest(dayNumber)`, `AddRecipeRequest(mealType, recipeId)`, `CopyToTripRequest(planId, servings?)`, `SaveAsTemplateRequest(name)`, `UpdatePurchaseRequest(ingredientId, unit, quantityPurchased)`
+  - Responses: `MealPlanDetailResponse` (nested days → meals → recipes with scaled ingredients), `ShoppingListResponse` (computed categories → items with purchase status)
+- **Error:** `MealPlanError` sealed class — `MealPlanNotFound(id)`, `DayNotFound(id)`, `RecipeNotFound(id)`, `DuplicateDayNumber(dayNumber)`, `PlanAlreadyHasMealPlan(planId)`, `NotATemplate(id)`, `IsATemplate(id)`, `Invalid(field, reason)`
+- **Service params:** `CreateMealPlanParam`, `GetMealPlanDetailParam`, `GetMealPlanByPlanIdParam`, `GetTemplatesParam`, `UpdateMealPlanParam`, `DeleteMealPlanParam`, `CopyToTripParam`, `SaveAsTemplateParam`, `AddDayParam`, `RemoveDayParam`, `AddRecipeToMealParam`, `RemoveRecipeFromMealParam`, `GetShoppingListParam`, `UpdatePurchaseParam`, `ResetPurchasesParam`
+- **Actions:**
+  - `CreateMealPlanAction`: Creates trip or template meal plan; validates plan doesn't already have one
+  - `GetMealPlanDetailAction`: Fetches meal plan with full nested detail via `MealPlanDetailBuilder`
+  - `GetMealPlanByPlanIdAction`: Lookup meal plan by trip planId (returns null if none)
+  - `GetTemplatesAction`: Lists template meal plans for a user
+  - `UpdateMealPlanAction`: Updates name, servings, scaling mode
+  - `DeleteMealPlanAction`: Deletes meal plan (cascades)
+  - `CopyToTripAction`: Deep-copies template to a trip (new days, recipes; no purchases)
+  - `SaveAsTemplateAction`: Deep-copies trip meal plan as a template (new days, recipes; no purchases)
+  - `AddDayAction`: Adds a day to the meal plan (validates unique day number)
+  - `RemoveDayAction`: Removes a day from the meal plan
+  - `AddRecipeToMealAction`: Adds a recipe to a specific meal type on a day
+  - `RemoveRecipeFromMealAction`: Removes a recipe from a meal
+  - `GetShoppingListAction`: Computes shopping list using `ShoppingListCalculator` (scale → convert → aggregate → join purchases); purchase status derived via `PurchaseStatus.derive()`
+  - `UpdatePurchaseAction`: Creates/updates purchase quantity for an ingredient+unit
+  - `ResetPurchasesAction`: Deletes all purchases for a meal plan
+  - `MealPlanDetailBuilder`: Shared builder that assembles the nested detail response (days → meals → recipes with scaled ingredients, `isFullyPurchased` flag)
+- **Service:** `MealPlanService` facade (takes MealPlanClient + RecipeClient + IngredientClient)
+- **Routes:** (all require `X-User-Id` header)
+  - `POST /api/meal-plans` — create meal plan (201)
+  - `GET /api/meal-plans/{id}` — get meal plan detail
+  - `GET /api/meal-plans?planId={planId}` — get meal plan for a trip
+  - `GET /api/meal-plans/templates` — list templates
+  - `PUT /api/meal-plans/{id}` — update meal plan
+  - `DELETE /api/meal-plans/{id}` — delete meal plan (204)
+  - `POST /api/meal-plans/{id}/copy-to-trip` — copy template to trip (201)
+  - `POST /api/meal-plans/{id}/save-as-template` — save trip as template (201)
+  - `POST /api/meal-plans/{id}/days` — add day (201)
+  - `DELETE /api/meal-plans/{mealPlanId}/days/{dayId}` — remove day (204)
+  - `POST /api/meal-plans/{mealPlanId}/days/{dayId}/recipes` — add recipe to meal (201)
+  - `DELETE /api/meal-plan-recipes/{mealPlanRecipeId}` — remove recipe from meal (204, separate controller)
+  - `GET /api/meal-plans/{id}/shopping-list` — get computed shopping list
+  - `PATCH /api/meal-plans/{id}/shopping-list` — update purchase
+  - `DELETE /api/meal-plans/{id}/shopping-list` — reset all purchases (204)
+- **Key design:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles scaling and unit conversion. Only purchase records are stored.
+
 ### Invite Email Flow (cross-cutting: Plan + Webhook)
 - When a member is added to a plan, an invitation email is sent via the `EmailClient`
 - **Dedup logic:** If invitation already has status sent/delivered/delayed/complained, skip re-sending
@@ -227,10 +271,12 @@ API service for camping trip planning — user registration, authentication, pla
 - `RecipeScraperClientConfig` — creates NoOp or Claude-backed scraper client based on `ANTHROPIC_API_KEY` env var
 - `IngredientServiceConfig` — wires IngredientService (takes IngredientClient)
 - `RecipeServiceConfig` — wires RecipeService (takes RecipeClient + IngredientClient + RecipeScraperClient)
+- `MealPlanClientConfig` — creates meal plan client via factory function
+- `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `RecipeFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`
