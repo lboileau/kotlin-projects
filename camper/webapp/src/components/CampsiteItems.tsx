@@ -67,6 +67,44 @@ export function KitchenSVG() {
   );
 }
 
+export function LogBookSVG() {
+  return (
+    <svg width="100" height="100" viewBox="0 0 100 100">
+      {/* Stool legs */}
+      <rect x="25" y="62" width="4" height="28" rx="1" fill="#5A3A1E" />
+      <rect x="71" y="62" width="4" height="28" rx="1" fill="#5A3A1E" />
+      {/* Stool crossbar */}
+      <rect x="28" y="76" width="44" height="3" rx="1" fill="#5A3A1E" opacity="0.7" />
+      {/* Stool seat */}
+      <rect x="18" y="56" width="64" height="8" rx="3" fill="#7A5230" stroke="#5A3A1E" strokeWidth="1" />
+      {/* Book body */}
+      <rect x="24" y="28" width="52" height="32" rx="3" fill="#8B4513" stroke="#5A3210" strokeWidth="1.5" />
+      {/* Book spine */}
+      <rect x="48" y="26" width="4" height="34" rx="1" fill="#5A3210" />
+      {/* Left page area */}
+      <rect x="27" y="31" width="20" height="26" rx="1" fill="#FAF5EB" opacity="0.85" />
+      {/* Right page area */}
+      <rect x="53" y="31" width="20" height="26" rx="1" fill="#FAF5EB" opacity="0.85" />
+      {/* Page lines (left) */}
+      <line x1="30" y1="37" x2="44" y2="37" stroke="var(--tan-deep)" strokeWidth="0.6" opacity="0.4" />
+      <line x1="30" y1="41" x2="43" y2="41" stroke="var(--tan-deep)" strokeWidth="0.6" opacity="0.35" />
+      <line x1="30" y1="45" x2="44" y2="45" stroke="var(--tan-deep)" strokeWidth="0.6" opacity="0.3" />
+      <line x1="30" y1="49" x2="42" y2="49" stroke="var(--tan-deep)" strokeWidth="0.6" opacity="0.25" />
+      {/* Page lines (right) */}
+      <line x1="56" y1="37" x2="70" y2="37" stroke="var(--tan-deep)" strokeWidth="0.6" opacity="0.4" />
+      <line x1="56" y1="41" x2="69" y2="41" stroke="var(--tan-deep)" strokeWidth="0.6" opacity="0.35" />
+      <line x1="56" y1="45" x2="70" y2="45" stroke="var(--tan-deep)" strokeWidth="0.6" opacity="0.3" />
+      {/* Book corner decoration */}
+      <circle cx="35" cy="34" r="1.5" fill="var(--ember)" opacity="0.6" />
+      <circle cx="65" cy="34" r="1.5" fill="var(--ember)" opacity="0.6" />
+      {/* Bookmark ribbon */}
+      <path d="M62,28 L62,22 L65,25 L68,22 L68,28" fill="var(--rose-deep)" stroke="var(--rose-deep)" strokeWidth="0.5" />
+      {/* Ground shadow */}
+      <ellipse cx="50" cy="92" rx="35" ry="5" fill="rgba(0,0,0,0.12)" />
+    </svg>
+  );
+}
+
 export function MapTableSVG() {
   return (
     <svg width="120" height="100" viewBox="0 0 120 100">

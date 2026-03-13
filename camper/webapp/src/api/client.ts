@@ -308,6 +308,45 @@ export interface CopyToTripRequest {
   servings?: number;
 }
 
+// ── Log Book Types ──────────────────────────
+
+export interface LogBookFaqResponse {
+  id: string;
+  planId: string;
+  question: string;
+  askedById: string;
+  answer: string | null;
+  answeredById: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LogBookJournalEntryResponse {
+  id: string;
+  planId: string;
+  userId: string;
+  pageNumber: number;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AskFaqRequest {
+  question: string;
+}
+
+export interface AnswerFaqRequest {
+  answer: string;
+}
+
+export interface CreateJournalEntryRequest {
+  content: string;
+}
+
+export interface UpdateJournalEntryRequest {
+  content: string;
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -693,6 +732,56 @@ export const api = {
     return request(`/api/meal-plans/${templateId}/copy-to-trip`, {
       method: 'POST',
       body: JSON.stringify(data),
+    });
+  },
+
+  // ── Log Book ──────────────────────────
+
+  getLogBookFaqs(planId: string): Promise<LogBookFaqResponse[]> {
+    return request(`/api/plans/${planId}/log-book/faqs`);
+  },
+
+  createLogBookFaq(planId: string, data: AskFaqRequest): Promise<LogBookFaqResponse> {
+    return request(`/api/plans/${planId}/log-book/faqs`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  answerLogBookFaq(planId: string, faqId: string, data: AnswerFaqRequest): Promise<LogBookFaqResponse> {
+    return request(`/api/plans/${planId}/log-book/faqs/${faqId}/answer`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteLogBookFaq(planId: string, faqId: string): Promise<void> {
+    return request(`/api/plans/${planId}/log-book/faqs/${faqId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  getLogBookJournalEntries(planId: string): Promise<LogBookJournalEntryResponse[]> {
+    return request(`/api/plans/${planId}/log-book/journal`);
+  },
+
+  createLogBookJournalEntry(planId: string, data: CreateJournalEntryRequest): Promise<LogBookJournalEntryResponse> {
+    return request(`/api/plans/${planId}/log-book/journal`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateLogBookJournalEntry(planId: string, entryId: string, data: UpdateJournalEntryRequest): Promise<LogBookJournalEntryResponse> {
+    return request(`/api/plans/${planId}/log-book/journal/${entryId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteLogBookJournalEntry(planId: string, entryId: string): Promise<void> {
+    return request(`/api/plans/${planId}/log-book/journal/${entryId}`, {
+      method: 'DELETE',
     });
   },
 };
