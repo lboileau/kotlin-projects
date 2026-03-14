@@ -1,11 +1,8 @@
 .logbook-modal {
-  max-width: 560px;
-  width: 94%;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
   text-align: left;
-  padding: var(--space-lg) var(--space-xl) var(--space-md);
 }
 
 /* Header */
@@ -293,9 +290,6 @@
   flex: 1;
 }
 
-.logbook-ask-form .modal-btn {
-  flex-shrink: 0;
-}
 
 /* ── Journal Section ── */
 

@@ -12,13 +12,12 @@ import './ProfileForm.css';
 interface ProfileFormProps {
   user: User;
   onSave: (updatedUser: User) => void;
-  onAvatarChange?: (updatedUser: User) => void;
   submitLabel?: string;
   showEmail?: boolean;
   markProfileCompleted?: boolean;
 }
 
-export function ProfileForm({ user, onSave, onAvatarChange, submitLabel = 'Save Profile', showEmail, markProfileCompleted }: ProfileFormProps) {
+export function ProfileForm({ user, onSave, submitLabel = 'Save Profile', showEmail, markProfileCompleted }: ProfileFormProps) {
   const [username, setUsername] = useState(user.username || '');
   const [experienceLevel, setExperienceLevel] = useState(user.experienceLevel || '');
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>(user.dietaryRestrictions || []);
@@ -28,7 +27,10 @@ export function ProfileForm({ user, onSave, onAvatarChange, submitLabel = 'Save 
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
+  const [avatarDirty, setAvatarDirty] = useState(false);
+
   const isDirty =
+    avatarDirty ||
     username.trim() !== (user.username || '') ||
     experienceLevel !== (user.experienceLevel || '') ||
     JSON.stringify([...dietaryRestrictions].sort()) !== JSON.stringify([...(user.dietaryRestrictions || [])].sort());
@@ -38,7 +40,7 @@ export function ProfileForm({ user, onSave, onAvatarChange, submitLabel = 'Save 
     try {
       const updated = await api.randomizeAvatar(user.id);
       setAvatar(updated.avatar);
-      onAvatarChange?.(updated);
+      setAvatarDirty(true);
     } catch {
       // silently fail
     } finally {
@@ -59,7 +61,10 @@ export function ProfileForm({ user, onSave, onAvatarChange, submitLabel = 'Save 
         dietaryRestrictions,
         ...(markProfileCompleted ? { profileCompleted: true } : {}),
       });
-      onSave(updated);
+      // Include the latest avatar (may have been randomized locally)
+      const result = avatar !== user.avatar ? { ...updated, avatar } : updated;
+      onSave(result);
+      setAvatarDirty(false);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {

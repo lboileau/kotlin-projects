@@ -89,24 +89,6 @@
   color: var(--lavender-light);
 }
 
-.app-header__logout {
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: var(--font-body);
-  color: var(--rose);
-  background: rgba(232, 180, 184, 0.1);
-  border: 1px solid rgba(232, 180, 184, 0.25);
-  padding: 6px 14px;
-  border-radius: var(--radius-xl);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.app-header__logout:hover {
-  background: rgba(232, 180, 184, 0.2);
-  border-color: rgba(232, 180, 184, 0.4);
-}
-
 /* Action buttons (manage plan, etc.) */
 .app-header__action-btn {
   display: flex;

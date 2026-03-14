@@ -7,7 +7,7 @@ interface ModalProps {
   onClose: () => void;
   title?: string;
   flavor?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   closable?: boolean;
   className?: string;
   children: ReactNode;
@@ -25,7 +25,7 @@ export function Modal({ isOpen, onClose, title, flavor, size = 'md', closable = 
 
   if (!isOpen) return null;
 
-  const sizeClass = size === 'sm' ? 'modal-content--sm' : size === 'lg' ? 'modal-content--lg' : '';
+  const sizeClass = size === 'sm' ? 'modal-content--sm' : size === 'lg' ? 'modal-content--lg' : size === 'xl' ? 'modal-content--xl' : '';
 
   return (
     <div className="modal-overlay" onClick={closable ? onClose : undefined}>
