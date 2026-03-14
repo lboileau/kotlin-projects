@@ -8,6 +8,7 @@ import com.acme.services.camperservice.features.item.error.ItemError
 import com.acme.services.camperservice.features.itinerary.error.ItineraryError
 import com.acme.services.camperservice.features.plan.error.PlanError
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
+import com.acme.services.camperservice.features.logbook.error.LogBookError
 import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.world.error.WorldError
@@ -178,6 +179,24 @@ fun MealPlanError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 
 @JvmName("mealPlanResultToResponseEntity")
 fun <T> Result<T, MealPlanError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun LogBookError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is LogBookError.NotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is LogBookError.Invalid -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is LogBookError.Forbidden -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+}
+
+@JvmName("logBookResultToResponseEntity")
+fun <T> Result<T, LogBookError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
 ): ResponseEntity<Any> = when (this) {
