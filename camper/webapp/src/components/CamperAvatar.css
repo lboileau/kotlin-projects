@@ -87,8 +87,16 @@
   opacity: 1;
 }
 
+.camper-avatar:has(.avatar-remove):hover .avatar-question-mark {
+  display: none;
+}
+
 .avatar-remove:hover {
   transform: translate(-50%, -50%) scale(1.1);
+}
+
+.camper-avatar--pending {
+  cursor: default;
 }
 
 .camper-avatar--pending .avatar-figure {
