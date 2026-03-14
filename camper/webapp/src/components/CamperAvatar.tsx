@@ -1,4 +1,5 @@
 import type { AvatarResponse } from '../api/client';
+import { SKIN_COLORS, HAIR_COLORS, SHIRT_COLORS, PANTS_COLORS } from '../lib/avatarConstants';
 import { AvatarHair } from './AvatarHair';
 import './CamperAvatar.css';
 
@@ -32,23 +33,6 @@ const AVATAR_COLORS = [
   { body: '#4A5A4A', accent: '#6A7A5A', hood: '#3A4A3A', skin: '#C8986A', hairStyle: 'short' },
 ];
 
-// Maps backend avatar enum values to hex colors for the SVG figure
-const SKIN_COLORS: Record<string, string> = {
-  light: '#F5D6B8', fair: '#F0C8A0', medium: '#D4A574', olive: '#C4946A',
-  tan: '#B8845A', brown: '#8B6B4A', dark: '#6A4A2A', deep: '#4A3020',
-};
-const HAIR_COLORS: Record<string, string> = {
-  black: '#1A1A1A', brown: '#4A3020', blonde: '#D4B870', red: '#8B3A1A',
-  gray: '#8A8A8A', white: '#E8E0D0', auburn: '#6A3A20', platinum: '#E8D8C0',
-};
-const SHIRT_COLORS: Record<string, string> = {
-  red: '#B83A2A', blue: '#3A5A8A', green: '#3A6A3A', yellow: '#C4A030',
-  orange: '#C06A20', purple: '#6A3A8A', white: '#E8E0D0', teal: '#2A6A6A',
-};
-const PANTS_COLORS: Record<string, string> = {
-  black: '#2A2A2A', navy: '#2A3A5A', khaki: '#C4B090', olive: '#5A6A3A',
-  brown: '#5A4030', gray: '#7A7A7A', denim: '#4A5A7A', charcoal: '#3A3A3A',
-};
 
 function avatarToColors(av: AvatarResponse, fallback: typeof AVATAR_COLORS[0]) {
   return {

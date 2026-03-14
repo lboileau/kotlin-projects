@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { FormField } from '../components/ui/FormField';
 import './LoginPage.css';
 
 export function LoginPage() {
@@ -83,41 +86,37 @@ export function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
-            <div className="login-field">
-              <label className="login-label">Email</label>
-              <input
+            <FormField label="Email">
+              <Input
                 type="email"
-                className="login-input"
                 placeholder="adventurer@wildlands.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
                 autoFocus
               />
-            </div>
+            </FormField>
 
             {mode === 'register' && (
-              <div className="login-field login-field--appear">
-                <label className="login-label">Trail Name <span className="login-optional">(optional)</span></label>
-                <input
+              <FormField className="login-field--appear" label="Trail Name">
+                <Input
                   type="text"
-                  className="login-input"
                   placeholder="What shall we call you?"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                 />
-              </div>
+              </FormField>
             )}
 
             {error && <p className="login-error">{error}</p>}
 
-            <button type="submit" className="login-submit" disabled={loading || !email.trim()}>
+            <Button type="submit" size="lg" className="login-submit" disabled={loading || !email.trim()}>
               {loading ? (
                 <span className="login-loading">Journeying forth...</span>
               ) : (
                 <span>{mode === 'login' ? 'Begin Adventure' : 'Join the Expedition'}</span>
               )}
-            </button>
+            </Button>
           </form>
 
           <p className="login-footer">

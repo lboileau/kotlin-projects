@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { AvatarHead } from './AvatarHead';
+import { Button } from './ui/Button';
 import './AppHeader.css';
 import type { ReactNode } from 'react';
 
@@ -36,7 +37,7 @@ export function AppHeader({ pageTitle, pageIcon, actions, onProfileClick }: AppH
           <AvatarHead avatar={user?.avatar} size={28} />
           <span className="app-header__user-name">{user?.username || user?.email}</span>
         </button>
-        <button className="app-header__logout" onClick={logout}>Log Out</button>
+        <Button variant="danger" size="sm" onClick={logout}>Log Out</Button>
       </div>
     </header>
   );

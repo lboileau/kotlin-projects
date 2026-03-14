@@ -2,44 +2,16 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api, type AvatarResponse } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { DIETARY_OPTIONS, EXPERIENCE_OPTIONS } from '../lib/profileConstants';
+import { SKIN_COLORS, HAIR_COLORS, SHIRT_COLORS, PANTS_COLORS } from '../lib/avatarConstants';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AvatarHair } from '../components/AvatarHair';
+import { Input } from '../components/ui/Input';
+import { Select } from '../components/ui/Select';
+import { CheckboxGroup } from '../components/ui/CheckboxGroup';
+import { FormField } from '../components/ui/FormField';
+import { Button } from '../components/ui/Button';
 import './AccountPage.css';
-
-const DIETARY_OPTIONS = [
-  { value: 'gluten_free', label: 'Gluten Free' },
-  { value: 'nut_allergy', label: 'Nut Allergy' },
-  { value: 'vegetarian', label: 'Vegetarian' },
-  { value: 'vegan', label: 'Vegan' },
-  { value: 'lactose_intolerant', label: 'Lactose Intolerant' },
-  { value: 'shellfish_allergy', label: 'Shellfish Allergy' },
-  { value: 'halal', label: 'Halal' },
-  { value: 'kosher', label: 'Kosher' },
-];
-
-const EXPERIENCE_OPTIONS = [
-  { value: 'beginner', label: 'Beginner' },
-  { value: 'intermediate', label: 'Intermediate' },
-  { value: 'advanced', label: 'Advanced' },
-  { value: 'expert', label: 'Expert' },
-];
-
-const SKIN_COLORS: Record<string, string> = {
-  light: '#F5D6B8', fair: '#F0C8A0', medium: '#D4A574', olive: '#C4946A',
-  tan: '#B8845A', brown: '#8B6B4A', dark: '#6A4A2A', deep: '#4A3020',
-};
-const HAIR_COLORS: Record<string, string> = {
-  black: '#1A1A1A', brown: '#4A3020', blonde: '#D4B870', red: '#8B3A1A',
-  gray: '#8A8A8A', white: '#E8E0D0', auburn: '#6A3A20', platinum: '#E8D8C0',
-};
-const SHIRT_COLORS: Record<string, string> = {
-  red: '#B83A2A', blue: '#3A5A8A', green: '#3A6A3A', yellow: '#C4A030',
-  orange: '#C06A20', purple: '#6A3A8A', white: '#E8E0D0', teal: '#2A6A6A',
-};
-const PANTS_COLORS: Record<string, string> = {
-  black: '#2A2A2A', navy: '#2A3A5A', khaki: '#C4B090', olive: '#5A6A3A',
-  brown: '#5A4030', gray: '#7A7A7A', denim: '#4A5A7A', charcoal: '#3A3A3A',
-};
 
 function AvatarPreviewSvg({ avatar }: { avatar: AvatarResponse }) {
   const skin = SKIN_COLORS[avatar.skinColor] || '#D4A574';
@@ -83,12 +55,6 @@ export function AccountPage() {
     username.trim() !== (user?.username || '') ||
     experienceLevel !== (user?.experienceLevel || '') ||
     JSON.stringify([...dietaryRestrictions].sort()) !== JSON.stringify([...(user?.dietaryRestrictions || [])].sort());
-
-  const toggleDietary = (value: string) => {
-    setDietaryRestrictions(prev =>
-      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
-    );
-  };
 
   const handleRandomizeAvatar = async () => {
     if (!user) return;
@@ -183,83 +149,65 @@ export function AccountPage() {
             <h1 className="account-title">Your Camp Profile</h1>
 
             <form className="account-form" onSubmit={handleSave}>
-              <div className="account-field">
-                <label className="account-label">Email</label>
-                <input
-                  className="account-input account-input--readonly"
+              <FormField label="Email">
+                <Input
+                  className="account-input--readonly"
                   value={user?.email || ''}
                   readOnly
                 />
-              </div>
+              </FormField>
 
-              <div className="account-field">
-                <label className="account-label">Trail Name</label>
-                <input
-                  className="account-input"
+              <FormField label="Trail Name">
+                <Input
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   placeholder="Choose your trail name..."
                 />
-              </div>
+              </FormField>
 
-              <div className="account-field">
-                <label className="account-label">Experience Level</label>
-                <select
-                  className="account-input account-select"
+              <FormField label="Experience Level">
+                <Select
                   value={experienceLevel}
                   onChange={e => setExperienceLevel(e.target.value)}
-                >
-                  <option value="">Not set</option>
-                  {EXPERIENCE_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
+                  options={[{ value: '', label: 'Not set' }, ...EXPERIENCE_OPTIONS]}
+                />
+              </FormField>
 
-              <div className="account-field">
-                <label className="account-label">Dietary Restrictions</label>
-                <div className="account-checkbox-grid">
-                  {DIETARY_OPTIONS.map(opt => (
-                    <label key={opt.value} className="account-checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={dietaryRestrictions.includes(opt.value)}
-                        onChange={() => toggleDietary(opt.value)}
-                      />
-                      <span className="account-checkbox-label">{opt.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+              <FormField label="Dietary Restrictions">
+                <CheckboxGroup
+                  options={DIETARY_OPTIONS}
+                  selected={dietaryRestrictions}
+                  onChange={setDietaryRestrictions}
+                />
+              </FormField>
 
-              <div className="account-field">
-                <label className="account-label">Your Avatar</label>
+              <FormField label="Your Avatar">
                 {avatar ? (
                   <div className="account-avatar-details">
                     <AvatarPreviewSvg avatar={avatar} />
-                    <button
+                    <Button
                       type="button"
-                      className="account-randomize-btn"
+                      variant="ghost"
+                      size="sm"
                       onClick={handleRandomizeAvatar}
                       disabled={randomizing}
                     >
                       {randomizing ? 'Randomizing...' : 'Randomize Avatar'}
-                    </button>
+                    </Button>
                   </div>
                 ) : (
                   <p className="account-avatar-placeholder">No avatar yet — one will be generated for you.</p>
                 )}
-              </div>
+              </FormField>
 
               {error && <p className="account-error">{error}</p>}
 
-              <button
+              <Button
                 type="submit"
-                className="account-save"
                 disabled={saving || !isDirty || !username.trim()}
               >
                 {saving ? 'Saving...' : saved ? 'Saved!' : 'Update Profile'}
-              </button>
+              </Button>
             </form>
 
             <p className="account-meta">

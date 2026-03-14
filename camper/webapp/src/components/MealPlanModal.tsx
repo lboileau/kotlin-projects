@@ -10,6 +10,7 @@ import {
   type ShoppingListItemResponse,
   type MealsByTypeResponse,
 } from '../api/client';
+import { Button } from './ui/Button';
 import './MealPlanModal.css';
 
 type ViewTab = 'overview' | 'recipes' | 'shopping';
@@ -531,13 +532,13 @@ function OverviewView({
             <button className="mp-stepper-btn" onClick={() => setCreateServings(createServings + 1)} disabled={creating}>+</button>
           </div>
           {error && <p className="mp-error">{error}</p>}
-          <button
-            className="modal-btn mp-create-btn"
+          <Button
+            className="mp-create-btn"
             onClick={onCreate}
             disabled={creating || !createName.trim()}
           >
             {creating ? 'Creating...' : 'Start Cooking'}
-          </button>
+          </Button>
           {templates.length > 0 && (
             <>
               <div className="mp-template-divider">
@@ -571,21 +572,23 @@ function OverviewView({
                         </span>
                       </button>
                     ))}
-                    <button
-                      className="modal-btn modal-btn--secondary mp-template-cancel"
+                    <Button
+                      variant="secondary"
+                      className="mp-template-cancel"
                       onClick={() => setShowLoadTemplate(false)}
                     >
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 )
               ) : (
-                <button
-                  className="modal-btn modal-btn--secondary mp-load-template-btn"
+                <Button
+                  variant="secondary"
+                  className="mp-load-template-btn"
                   onClick={() => setShowLoadTemplate(true)}
                 >
                   Load from Template
-                </button>
+                </Button>
               )}
             </>
           )}
@@ -629,19 +632,20 @@ function OverviewView({
                 placeholder="Template name..."
                 disabled={savingTemplate}
               />
-              <button
-                className="modal-btn mp-save-template-confirm"
+              <Button
+                className="mp-save-template-confirm"
                 onClick={onSaveAsTemplate}
                 disabled={savingTemplate || !templateName.trim()}
               >
                 {savingTemplate ? 'Saving...' : 'Save'}
-              </button>
-              <button
-                className="modal-btn modal-btn--secondary mp-save-template-cancel"
+              </Button>
+              <Button
+                variant="secondary"
+                className="mp-save-template-cancel"
                 onClick={() => { setShowSaveTemplate(false); setTemplateName(''); }}
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           ) : showLoadTemplate ? (
             <div className="mp-replace-template">
@@ -672,12 +676,13 @@ function OverviewView({
                       </span>
                     </button>
                   ))}
-                  <button
-                    className="modal-btn modal-btn--secondary mp-template-cancel"
+                  <Button
+                    variant="secondary"
+                    className="mp-template-cancel"
                     onClick={() => setShowLoadTemplate(false)}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>
@@ -867,20 +872,21 @@ function TemplatePreview({ preview, onConfirm, onBack, loading, isReplace }: Tem
       )}
 
       <div className="mp-template-preview-actions">
-        <button
-          className="modal-btn modal-btn--secondary"
+        <Button
+          variant="secondary"
           onClick={onBack}
           disabled={loading}
         >
           Back
-        </button>
-        <button
-          className={`modal-btn ${isReplace ? 'modal-btn--danger' : 'mp-create-btn'}`}
+        </Button>
+        <Button
+          variant={isReplace ? 'danger' : 'primary'}
+          className={isReplace ? 'mp-reset-yes' : 'mp-create-btn'}
           onClick={onConfirm}
           disabled={loading}
         >
           {loading ? 'Loading...' : isReplace ? 'Replace Meal Plan' : 'Use This Template'}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -1031,17 +1037,17 @@ function RecipeBookView({
                     ))}
                   </select>
                   <div className="mp-add-popover-actions">
-                    <button className="modal-btn mp-add-confirm" onClick={onAddRecipeToMeal} disabled={!addDay}>
+                    <Button className="mp-add-confirm" onClick={onAddRecipeToMeal} disabled={!addDay}>
                       Add
-                    </button>
-                    <button className="modal-btn modal-btn--secondary mp-add-cancel" onClick={() => setAddingToMeal(null)}>
+                    </Button>
+                    <Button variant="secondary" className="mp-add-cancel" onClick={() => setAddingToMeal(null)}>
                       Cancel
-                    </button>
+                    </Button>
                   </div>
                 </div>
               ) : (
-                <button
-                  className="modal-btn mp-add-to-plan-btn"
+                <Button
+                  className="mp-add-to-plan-btn"
                   onClick={() => {
                     setAddingToMeal({ recipeId: selectedRecipe.id, recipeName: selectedRecipe.name });
                     const currentDay = mealPlan.days[activeDay] ?? mealPlan.days[0];
@@ -1049,7 +1055,7 @@ function RecipeBookView({
                   }}
                 >
                   Add to Meal Plan
-                </button>
+                </Button>
               )}
             </div>
           ) : (
@@ -1250,13 +1256,13 @@ function ShoppingListView({
         {resetConfirm ? (
           <div className="mp-reset-confirm">
             <span>Reset all purchases?</span>
-            <button className="modal-btn modal-btn--danger mp-reset-yes" onClick={onResetPurchases}>Yes, Reset</button>
-            <button className="modal-btn modal-btn--secondary mp-reset-no" onClick={() => setResetConfirm(false)}>Cancel</button>
+            <Button variant="danger" className="mp-reset-yes" onClick={onResetPurchases}>Yes, Reset</Button>
+            <Button variant="secondary" className="mp-reset-no" onClick={() => setResetConfirm(false)}>Cancel</Button>
           </div>
         ) : (
-          <button className="modal-btn modal-btn--secondary mp-reset-btn" onClick={() => setResetConfirm(true)}>
+          <Button variant="secondary" className="mp-reset-btn" onClick={() => setResetConfirm(true)}>
             Reset All Purchases
-          </button>
+          </Button>
         )}
       </div>
     </div>

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api, type LogBookFaqResponse, type LogBookJournalEntryResponse } from '../api/client';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import './Modal.css';
 import './LogBookModal.css';
 
@@ -298,19 +300,18 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
                             autoFocus
                           />
                           <div className="logbook-faq-answer-actions">
-                            <button
-                              className="modal-btn modal-btn--secondary"
+                            <Button
+                              variant="secondary"
                               onClick={() => { setAnsweringFaqId(null); setAnswerText(''); }}
                             >
                               Cancel
-                            </button>
-                            <button
-                              className="modal-btn"
+                            </Button>
+                            <Button
                               disabled={savingAnswer || !answerText.trim()}
                               onClick={() => handleAnswerFaq(faq.id)}
                             >
                               {savingAnswer ? 'Saving...' : faq.answer ? 'Save' : 'Answer'}
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -333,15 +334,14 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
 
               {/* Ask new question form */}
               <form className="logbook-ask-form" onSubmit={handleAskFaq}>
-                <input
-                  className="modal-input"
+                <Input
                   placeholder="Ask a question about the trip..."
                   value={newQuestion}
                   onChange={e => setNewQuestion(e.target.value)}
                 />
-                <button className="modal-btn" type="submit" disabled={askingFaq || !newQuestion.trim()}>
+                <Button type="submit" disabled={askingFaq || !newQuestion.trim()}>
                   {askingFaq ? '...' : 'Ask'}
-                </button>
+                </Button>
               </form>
             </div>
           ) : (
@@ -365,16 +365,16 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
                     autoFocus
                   />
                   <div className="modal-actions">
-                    <button
+                    <Button
                       type="button"
-                      className="modal-btn modal-btn--secondary"
+                      variant="secondary"
                       onClick={() => { setShowNewEntry(false); setNewEntryContent(''); }}
                     >
                       Cancel
-                    </button>
-                    <button type="submit" className="modal-btn" disabled={savingEntry || !newEntryContent.trim()}>
+                    </Button>
+                    <Button type="submit" disabled={savingEntry || !newEntryContent.trim()}>
                       {savingEntry ? 'Saving...' : 'Add Entry'}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               ) : totalPages === 0 ? (
@@ -407,19 +407,18 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
                         autoFocus
                       />
                       <div className="modal-actions">
-                        <button
-                          className="modal-btn modal-btn--secondary"
+                        <Button
+                          variant="secondary"
                           onClick={() => { setEditingEntryId(null); setEditContent(''); }}
                         >
                           Cancel
-                        </button>
-                        <button
-                          className="modal-btn"
+                        </Button>
+                        <Button
                           disabled={savingEdit || !editContent.trim()}
                           onClick={() => handleUpdateEntry(currentEntry.id)}
                         >
                           {savingEdit ? 'Saving...' : 'Save'}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ) : (
@@ -493,17 +492,17 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
         {/* Footer */}
         <div className="logbook-footer">
           {section === 'journal' && !showNewEntry && (
-            <button className="modal-btn logbook-add-btn" onClick={() => setShowNewEntry(true)}>
+            <Button className="logbook-add-btn" onClick={() => setShowNewEntry(true)}>
               <svg width="14" height="14" viewBox="0 0 14 14">
                 <line x1="7" y1="2" x2="7" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
               New Entry
-            </button>
+            </Button>
           )}
-          <button className="modal-btn modal-btn--secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

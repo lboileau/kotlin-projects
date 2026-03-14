@@ -1,14 +1,6 @@
 import type { AvatarResponse } from '../api/client';
+import { SKIN_COLORS, HAIR_COLORS } from '../lib/avatarConstants';
 import { AvatarHair } from './AvatarHair';
-
-const SKIN_COLORS: Record<string, string> = {
-  light: '#F5D6B8', fair: '#F0C8A0', medium: '#D4A574', olive: '#C4946A',
-  tan: '#B8845A', brown: '#8B6B4A', dark: '#6A4A2A', deep: '#4A3020',
-};
-const HAIR_COLORS: Record<string, string> = {
-  black: '#1A1A1A', brown: '#4A3020', blonde: '#D4B870', red: '#8B3A1A',
-  gray: '#8A8A8A', white: '#E8E0D0', auburn: '#6A3A20', platinum: '#E8D8C0',
-};
 
 /**
  * Renders a circular avatar head with hair and facial features.
