@@ -61,12 +61,14 @@ class UserController(private val userService: UserService) {
         @RequestHeader("X-User-Id") requestingUserId: UUID
     ): ResponseEntity<Any> {
         logger.info("POST /api/users/{}/randomize-avatar", userId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not Implemented"))
+        val param = RandomizeAvatarParam(userId = userId, requestingUserId = requestingUserId)
+        return userService.randomizeAvatar(param).toResponseEntity { UserMapper.toResponse(it) }
     }
 
     @GetMapping("/api/users/{userId}/avatar")
     fun getAvatar(@PathVariable userId: UUID): ResponseEntity<Any> {
         logger.info("GET /api/users/{}/avatar", userId)
-        return ResponseEntity.status(501).body(mapOf("error" to "Not Implemented"))
+        val param = GetAvatarParam(userId = userId)
+        return userService.getAvatar(param).toResponseEntity { it }
     }
 }
