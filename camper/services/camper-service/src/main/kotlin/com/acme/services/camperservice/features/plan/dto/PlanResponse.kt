@@ -1,5 +1,6 @@
 package com.acme.services.camperservice.features.plan.dto
 
+import com.acme.services.camperservice.features.user.dto.AvatarResponse
 import java.time.Instant
 import java.util.UUID
 
@@ -20,5 +21,7 @@ data class PlanMemberResponse(
     val email: String?,
     val invitationStatus: String?,
     val role: String,
+    val avatarSeed: String?,
+    val avatar: AvatarResponse?,
     val createdAt: Instant
 )
