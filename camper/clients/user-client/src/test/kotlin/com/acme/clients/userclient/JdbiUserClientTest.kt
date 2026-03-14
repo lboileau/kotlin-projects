@@ -7,7 +7,9 @@ import com.acme.clients.common.error.ValidationError
 import com.acme.clients.userclient.api.CreateUserParam
 import com.acme.clients.userclient.api.GetByEmailParam
 import com.acme.clients.userclient.api.GetByIdParam
+import com.acme.clients.userclient.api.GetDietaryRestrictionsParam
 import com.acme.clients.userclient.api.GetOrCreateUserParam
+import com.acme.clients.userclient.api.SetDietaryRestrictionsParam
 import com.acme.clients.userclient.api.UpdateUserParam
 import com.acme.clients.userclient.api.UserClient
 import com.acme.clients.userclient.test.UserTestDb
@@ -242,6 +244,76 @@ class JdbiUserClientTest {
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(ValidationError::class.java)
             assertThat((error as ValidationError).field).isEqualTo("username")
+        }
+
+        @Test
+        fun `update persists avatarSeed`() {
+            val created = (client.create(CreateUserParam(email = "grace@example.com", username = "grace")) as Result.Success).value
+
+            val result = client.update(UpdateUserParam(id = created.id, username = "grace", avatarSeed = "test-seed-123"))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val updated = (result as Result.Success).value
+            assertThat(updated.avatarSeed).isEqualTo("test-seed-123")
+
+            val fetched = (client.getById(GetByIdParam(created.id)) as Result.Success).value
+            assertThat(fetched.avatarSeed).isEqualTo("test-seed-123")
+        }
+    }
+
+    @Nested
+    inner class DietaryRestrictions {
+        @Test
+        fun `setDietaryRestrictions stores restrictions for user`() {
+            val created = (client.create(CreateUserParam(email = "hank@example.com", username = "hank")) as Result.Success).value
+
+            val result = client.setDietaryRestrictions(SetDietaryRestrictionsParam(userId = created.id, restrictions = listOf("vegetarian", "gluten_free")))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val restrictions = (result as Result.Success).value
+            assertThat(restrictions).containsExactlyInAnyOrder("vegetarian", "gluten_free")
+        }
+
+        @Test
+        fun `getDietaryRestrictions returns stored restrictions`() {
+            val created = (client.create(CreateUserParam(email = "iris@example.com", username = "iris")) as Result.Success).value
+            client.setDietaryRestrictions(SetDietaryRestrictionsParam(userId = created.id, restrictions = listOf("vegan", "nut_allergy")))
+
+            val result = client.getDietaryRestrictions(GetDietaryRestrictionsParam(userId = created.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val fetchedRestrictions = (result as Result.Success).value
+            assertThat(fetchedRestrictions).containsExactlyInAnyOrder("nut_allergy", "vegan")
+        }
+
+        @Test
+        fun `getDietaryRestrictions returns empty list when none set`() {
+            val created = (client.create(CreateUserParam(email = "jack@example.com", username = "jack")) as Result.Success).value
+
+            val result = client.getDietaryRestrictions(GetDietaryRestrictionsParam(userId = created.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val fetchedRestrictions = (result as Result.Success).value
+            assertThat(fetchedRestrictions).isEmpty()
+        }
+
+        @Test
+        fun `setDietaryRestrictions replaces existing restrictions`() {
+            val created = (client.create(CreateUserParam(email = "kate@example.com", username = "kate")) as Result.Success).value
+            client.setDietaryRestrictions(SetDietaryRestrictionsParam(userId = created.id, restrictions = listOf("vegetarian")))
+
+            client.setDietaryRestrictions(SetDietaryRestrictionsParam(userId = created.id, restrictions = listOf("vegan", "lactose_intolerant")))
+            val result = client.getDietaryRestrictions(GetDietaryRestrictionsParam(userId = created.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val fetchedRestrictions = (result as Result.Success).value
+            assertThat(fetchedRestrictions).containsExactlyInAnyOrder("lactose_intolerant", "vegan")
+        }
+
+        @Test
+        fun `getById enriches user with dietary restrictions`() {
+            val created = (client.create(CreateUserParam(email = "leo@example.com", username = "leo")) as Result.Success).value
+            client.setDietaryRestrictions(SetDietaryRestrictionsParam(userId = created.id, restrictions = listOf("kosher")))
+
+            val result = client.getById(GetByIdParam(created.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val user = (result as Result.Success).value
+            assertThat(user.dietaryRestrictions).containsExactly("kosher")
         }
     }
 }
