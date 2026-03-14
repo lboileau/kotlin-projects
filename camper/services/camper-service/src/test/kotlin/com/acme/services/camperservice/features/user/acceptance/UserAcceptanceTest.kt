@@ -1,9 +1,11 @@
 package com.acme.services.camperservice.features.user.acceptance
 
 import com.acme.services.camperservice.config.TestContainerConfig
+import com.acme.services.camperservice.features.plan.dto.PlanMemberResponse
 import com.acme.services.camperservice.features.user.acceptance.fixture.UserFixture
 import com.acme.services.camperservice.features.user.dto.AuthRequest
 import com.acme.services.camperservice.features.user.dto.AuthResponse
+import com.acme.services.camperservice.features.user.dto.AvatarResponse
 import com.acme.services.camperservice.features.user.dto.CreateUserRequest
 import com.acme.services.camperservice.features.user.dto.UpdateUserRequest
 import com.acme.services.camperservice.features.user.dto.UserResponse
@@ -56,6 +58,48 @@ class UserAcceptanceTest {
         }
 
         @Test
+        fun `GET returns 200 with profile fields when set`() {
+            val userId = fixture.insertUser(
+                email = "profile@example.com",
+                username = "profile-user",
+                experienceLevel = "intermediate",
+                avatarSeed = "abc123",
+                profileCompleted = true
+            )
+            fixture.insertDietaryRestriction(userId, "vegetarian")
+            fixture.insertDietaryRestriction(userId, "gluten_free")
+
+            val response = restTemplate.getForEntity("/api/users/$userId", UserResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.experienceLevel).isEqualTo("intermediate")
+            assertThat(response.body!!.avatarSeed).isEqualTo("abc123")
+            assertThat(response.body!!.profileCompleted).isTrue()
+            assertThat(response.body!!.dietaryRestrictions).containsExactlyInAnyOrder("vegetarian", "gluten_free")
+            assertThat(response.body!!.avatar).isNotNull
+            assertThat(response.body!!.avatar!!.hairStyle).isNotBlank()
+            assertThat(response.body!!.avatar!!.hairColor).isNotBlank()
+            assertThat(response.body!!.avatar!!.skinColor).isNotBlank()
+            assertThat(response.body!!.avatar!!.clothingStyle).isNotBlank()
+            assertThat(response.body!!.avatar!!.pantsColor).isNotBlank()
+            assertThat(response.body!!.avatar!!.shirtColor).isNotBlank()
+        }
+
+        @Test
+        fun `GET returns 200 with default profile fields when not set`() {
+            val userId = fixture.insertUser(email = "default@example.com", username = "default-user")
+
+            val response = restTemplate.getForEntity("/api/users/$userId", UserResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.experienceLevel).isNull()
+            assertThat(response.body!!.avatarSeed).isNull()
+            assertThat(response.body!!.profileCompleted).isFalse()
+            assertThat(response.body!!.dietaryRestrictions).isEmpty()
+            assertThat(response.body!!.avatar).isNull()
+        }
+
+        @Test
         fun `GET returns 404 when user does not exist`() {
             val response = restTemplate.getForEntity("/api/users/${UUID.randomUUID()}", Map::class.java)
 
@@ -75,6 +119,17 @@ class UserAcceptanceTest {
             assertThat(response.body!!.email).isEqualTo("alice@example.com")
             assertThat(response.body!!.username).isEqualTo("alice")
             assertThat(response.body!!.id).isNotNull()
+        }
+
+        @Test
+        fun `POST generates avatarSeed on creation`() {
+            val request = CreateUserRequest(email = "seed-test@example.com", username = "seeduser")
+            val response = restTemplate.postForEntity("/api/users", request, UserResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            assertThat(response.body!!.avatarSeed).isNotNull()
+            assertThat(response.body!!.avatarSeed).isNotBlank()
+            assertThat(response.body!!.avatar).isNotNull
         }
 
         @Test
@@ -108,6 +163,7 @@ class UserAcceptanceTest {
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
             assertThat(response.body!!.username).isEqualTo("now-registered")
+            assertThat(response.body!!.avatarSeed).isNotNull()
         }
 
         @Test
@@ -170,6 +226,37 @@ class UserAcceptanceTest {
         }
 
         @Test
+        fun `POST returns auth response with profile fields`() {
+            val userId = fixture.insertUser(
+                email = "auth-profile@example.com",
+                username = "auth-user",
+                avatarSeed = "seed123",
+                profileCompleted = true
+            )
+
+            val request = AuthRequest(email = "auth-profile@example.com")
+            val response = restTemplate.postForEntity("/api/auth", request, AuthResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.avatarSeed).isEqualTo("seed123")
+            assertThat(response.body!!.profileCompleted).isTrue()
+            assertThat(response.body!!.avatar).isNotNull
+        }
+
+        @Test
+        fun `POST returns auth response with profileCompleted false by default`() {
+            fixture.insertUser(email = "new-auth@example.com", username = "new-auth")
+
+            val request = AuthRequest(email = "new-auth@example.com")
+            val response = restTemplate.postForEntity("/api/auth", request, AuthResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.profileCompleted).isFalse()
+            assertThat(response.body!!.avatarSeed).isNull()
+            assertThat(response.body!!.avatar).isNull()
+        }
+
+        @Test
         fun `POST returns 404 when user does not exist`() {
             val request = AuthRequest(email = "nobody@example.com")
             val response = restTemplate.postForEntity("/api/auth", request, Map::class.java)
@@ -203,11 +290,12 @@ class UserAcceptanceTest {
         fun `PUT returns 200 with updated user`() {
             val userId = fixture.insertUser(email = "dave@example.com", username = "dave")
 
-            val headers = HttpHeaders()
-            headers.set("X-User-Id", userId.toString())
-            val request = HttpEntity(UpdateUserRequest(username = "david"), headers)
-
-            val response = restTemplate.exchange("/api/users/$userId", HttpMethod.PUT, request, UserResponse::class.java)
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(UpdateUserRequest(username = "david"), userId),
+                UserResponse::class.java
+            )
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.username).isEqualTo("david")
@@ -215,15 +303,170 @@ class UserAcceptanceTest {
         }
 
         @Test
+        fun `PUT updates experienceLevel and returns it in response`() {
+            val userId = fixture.insertUser(email = "exp@example.com", username = "exp-user")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(username = "exp-user", experienceLevel = "advanced"),
+                    userId
+                ),
+                UserResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.experienceLevel).isEqualTo("advanced")
+        }
+
+        @Test
+        fun `PUT returns 400 for invalid experienceLevel`() {
+            val userId = fixture.insertUser(email = "bad-exp@example.com", username = "bad-exp")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(username = "bad-exp", experienceLevel = "godlike"),
+                    userId
+                ),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `PUT updates dietaryRestrictions and returns them in response`() {
+            val userId = fixture.insertUser(email = "diet@example.com", username = "diet-user")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(
+                        username = "diet-user",
+                        dietaryRestrictions = listOf("vegetarian", "gluten_free")
+                    ),
+                    userId
+                ),
+                UserResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.dietaryRestrictions).containsExactlyInAnyOrder("vegetarian", "gluten_free")
+        }
+
+        @Test
+        fun `PUT clears dietary restrictions with empty list`() {
+            val userId = fixture.insertUser(email = "clear-diet@example.com", username = "clear-diet")
+            fixture.insertDietaryRestriction(userId, "vegetarian")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(username = "clear-diet", dietaryRestrictions = emptyList()),
+                    userId
+                ),
+                UserResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.dietaryRestrictions).isEmpty()
+        }
+
+        @Test
+        fun `PUT with null dietary restrictions preserves existing`() {
+            val userId = fixture.insertUser(email = "keep-diet@example.com", username = "keep-diet")
+            fixture.insertDietaryRestriction(userId, "vegetarian")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(username = "keep-diet"),
+                    userId
+                ),
+                UserResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.dietaryRestrictions).containsExactly("vegetarian")
+        }
+
+        @Test
+        fun `PUT returns 400 for invalid dietary restriction`() {
+            val userId = fixture.insertUser(email = "bad-diet@example.com", username = "bad-diet")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(
+                        username = "bad-diet",
+                        dietaryRestrictions = listOf("vegetarian", "paleo")
+                    ),
+                    userId
+                ),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `PUT sets profileCompleted to true`() {
+            val userId = fixture.insertUser(email = "complete@example.com", username = "complete")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(username = "complete", profileCompleted = true),
+                    userId
+                ),
+                UserResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.profileCompleted).isTrue()
+        }
+
+        @Test
+        fun `PUT profileCompleted is one-way - cannot go back to false`() {
+            val userId = fixture.insertUser(
+                email = "oneway@example.com",
+                username = "oneway",
+                profileCompleted = true
+            )
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(username = "oneway", profileCompleted = false),
+                    userId
+                ),
+                UserResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.profileCompleted).isTrue()
+        }
+
+        @Test
         fun `PUT returns 403 when requesting user is different from target`() {
             val userId = fixture.insertUser(email = "eve@example.com", username = "eve")
             val otherUserId = UUID.randomUUID()
 
-            val headers = HttpHeaders()
-            headers.set("X-User-Id", otherUserId.toString())
-            val request = HttpEntity(UpdateUserRequest(username = "evelyn"), headers)
-
-            val response = restTemplate.exchange("/api/users/$userId", HttpMethod.PUT, request, Map::class.java)
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(UpdateUserRequest(username = "evelyn"), otherUserId),
+                Map::class.java
+            )
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
         }
@@ -232,13 +475,185 @@ class UserAcceptanceTest {
         fun `PUT returns 400 when username is blank`() {
             val userId = fixture.insertUser(email = "frank@example.com", username = "frank")
 
-            val headers = HttpHeaders()
-            headers.set("X-User-Id", userId.toString())
-            val request = HttpEntity(UpdateUserRequest(username = ""), headers)
-
-            val response = restTemplate.exchange("/api/users/$userId", HttpMethod.PUT, request, Map::class.java)
+            val response = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(UpdateUserRequest(username = ""), userId),
+                Map::class.java
+            )
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    @Nested
+    inner class RandomizeAvatar {
+
+        @Test
+        fun `POST returns 200 with user with new avatar seed`() {
+            val userId = fixture.insertUser(
+                email = "randomize@example.com",
+                username = "randomize",
+                avatarSeed = "old-seed"
+            )
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId/randomize-avatar",
+                HttpMethod.POST,
+                jsonEntityWithUserId(null, userId),
+                UserResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.avatarSeed).isNotNull()
+            assertThat(response.body!!.avatarSeed).isNotEqualTo("old-seed")
+            assertThat(response.body!!.avatar).isNotNull
+        }
+
+        @Test
+        fun `POST returns 403 when requesting user is different from target`() {
+            val userId = fixture.insertUser(email = "target@example.com", username = "target")
+            val otherUserId = fixture.insertUser(email = "other@example.com", username = "other")
+
+            val response = restTemplate.exchange(
+                "/api/users/$userId/randomize-avatar",
+                HttpMethod.POST,
+                jsonEntityWithUserId(null, otherUserId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        }
+
+        @Test
+        fun `POST returns 404 when user does not exist`() {
+            val nonexistentId = UUID.randomUUID()
+
+            val response = restTemplate.exchange(
+                "/api/users/$nonexistentId/randomize-avatar",
+                HttpMethod.POST,
+                jsonEntityWithUserId(null, nonexistentId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @Nested
+    inner class GetAvatar {
+
+        @Test
+        fun `GET returns 200 with all avatar fields`() {
+            val userId = fixture.insertUser(
+                email = "avatar@example.com",
+                username = "avatar-user",
+                avatarSeed = "test-seed-123"
+            )
+
+            val response = restTemplate.getForEntity("/api/users/$userId/avatar", AvatarResponse::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.hairStyle).isNotBlank()
+            assertThat(response.body!!.hairColor).isNotBlank()
+            assertThat(response.body!!.skinColor).isNotBlank()
+            assertThat(response.body!!.clothingStyle).isNotBlank()
+            assertThat(response.body!!.pantsColor).isNotBlank()
+            assertThat(response.body!!.shirtColor).isNotBlank()
+        }
+
+        @Test
+        fun `GET returns deterministic avatar for same seed`() {
+            val userId = fixture.insertUser(
+                email = "deterministic@example.com",
+                username = "deterministic",
+                avatarSeed = "fixed-seed"
+            )
+
+            val response1 = restTemplate.getForEntity("/api/users/$userId/avatar", AvatarResponse::class.java)
+            val response2 = restTemplate.getForEntity("/api/users/$userId/avatar", AvatarResponse::class.java)
+
+            assertThat(response1.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response2.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response1.body).isEqualTo(response2.body)
+        }
+
+        @Test
+        fun `GET returns 400 when user has no avatar seed`() {
+            val userId = fixture.insertUser(
+                email = "no-seed@example.com",
+                username = "no-seed",
+                avatarSeed = null
+            )
+
+            val response = restTemplate.getForEntity("/api/users/$userId/avatar", Map::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `GET returns 404 when user does not exist`() {
+            val response = restTemplate.getForEntity("/api/users/${UUID.randomUUID()}/avatar", Map::class.java)
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @Nested
+    inner class PlanMemberAvatar {
+
+        @Test
+        fun `GET plan members includes avatarSeed and avatar for member with seed`() {
+            val userId = fixture.insertUser(
+                email = "member-avatar@example.com",
+                username = "member-avatar",
+                avatarSeed = "member-seed-123"
+            )
+            val planId = fixture.insertPlan(name = "Avatar Trip", ownerId = userId)
+            fixture.insertPlanMember(planId = planId, userId = userId)
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members",
+                HttpMethod.GET,
+                jsonEntityWithUserId(null, userId),
+                Array<PlanMemberResponse>::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body).hasSize(1)
+            val member = response.body!![0]
+            assertThat(member.avatarSeed).isEqualTo("member-seed-123")
+            assertThat(member.avatar).isNotNull
+            assertThat(member.avatar!!.hairStyle).isNotBlank()
+            assertThat(member.avatar!!.hairColor).isNotBlank()
+            assertThat(member.avatar!!.skinColor).isNotBlank()
+            assertThat(member.avatar!!.clothingStyle).isNotBlank()
+            assertThat(member.avatar!!.pantsColor).isNotBlank()
+            assertThat(member.avatar!!.shirtColor).isNotBlank()
+        }
+
+        @Test
+        fun `GET plan members returns null avatar for member without seed`() {
+            val userId = fixture.insertUser(
+                email = "no-avatar@example.com",
+                username = "no-avatar",
+                avatarSeed = null
+            )
+            val planId = fixture.insertPlan(name = "No Avatar Trip", ownerId = userId)
+            fixture.insertPlanMember(planId = planId, userId = userId)
+
+            val response = restTemplate.exchange(
+                "/api/plans/$planId/members",
+                HttpMethod.GET,
+                jsonEntityWithUserId(null, userId),
+                Array<PlanMemberResponse>::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body).hasSize(1)
+            val member = response.body!![0]
+            assertThat(member.avatarSeed).isNull()
+            assertThat(member.avatar).isNull()
         }
     }
 
@@ -281,12 +696,10 @@ class UserAcceptanceTest {
             assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
             val userId = createResponse.body!!.id
 
-            val headers = HttpHeaders()
-            headers.set("X-User-Id", userId.toString())
             val updateResponse = restTemplate.exchange(
                 "/api/users/$userId",
                 HttpMethod.PUT,
-                HttpEntity(UpdateUserRequest(username = "new"), headers),
+                jsonEntityWithUserId(UpdateUserRequest(username = "new"), userId),
                 UserResponse::class.java
             )
             assertThat(updateResponse.statusCode).isEqualTo(HttpStatus.OK)
@@ -299,9 +712,45 @@ class UserAcceptanceTest {
             assertThat(authResponse.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(authResponse.body!!.username).isEqualTo("new")
         }
+
+        @Test
+        fun `POST user then PUT with profile fields then GET returns all profile fields`() {
+            val createResponse = restTemplate.postForEntity(
+                "/api/users",
+                CreateUserRequest(email = "profile-ryw@example.com", username = "profile-ryw"),
+                UserResponse::class.java
+            )
+            assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+            val userId = createResponse.body!!.id
+
+            val updateResponse = restTemplate.exchange(
+                "/api/users/$userId",
+                HttpMethod.PUT,
+                jsonEntityWithUserId(
+                    UpdateUserRequest(
+                        username = "profile-ryw",
+                        experienceLevel = "expert",
+                        dietaryRestrictions = listOf("vegan", "nut_allergy"),
+                        profileCompleted = true
+                    ),
+                    userId
+                ),
+                UserResponse::class.java
+            )
+            assertThat(updateResponse.statusCode).isEqualTo(HttpStatus.OK)
+
+            val getResponse = restTemplate.getForEntity("/api/users/$userId", UserResponse::class.java)
+            assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(getResponse.body!!.username).isEqualTo("profile-ryw")
+            assertThat(getResponse.body!!.experienceLevel).isEqualTo("expert")
+            assertThat(getResponse.body!!.dietaryRestrictions).containsExactlyInAnyOrder("vegan", "nut_allergy")
+            assertThat(getResponse.body!!.profileCompleted).isTrue()
+            assertThat(getResponse.body!!.avatarSeed).isNotNull()
+            assertThat(getResponse.body!!.avatar).isNotNull
+        }
     }
 
-    private fun jsonEntityWithUserId(body: Any, userId: UUID): HttpEntity<Any> {
+    private fun jsonEntityWithUserId(body: Any?, userId: UUID): HttpEntity<Any?> {
         val headers = HttpHeaders()
         headers.set("X-User-Id", userId.toString())
         return HttpEntity(body, headers)
