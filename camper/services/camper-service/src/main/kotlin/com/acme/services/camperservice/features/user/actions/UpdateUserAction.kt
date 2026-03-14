@@ -1,7 +1,9 @@
 package com.acme.services.camperservice.features.user.actions
 
 import com.acme.clients.common.Result
+import com.acme.clients.userclient.api.SetDietaryRestrictionsParam
 import com.acme.clients.userclient.api.UserClient
+import com.acme.clients.userclient.api.GetByIdParam
 import com.acme.clients.userclient.api.UpdateUserParam as ClientUpdateUserParam
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.user.mapper.UserMapper
@@ -23,14 +25,23 @@ internal class UpdateUserAction(private val userClient: UserClient) {
         }
 
         logger.debug("Updating user id={}", param.userId)
-        // TODO: Handle dietary restrictions via userClient.setDietaryRestrictions()
-        // TODO: Pass experienceLevel and profileCompleted to client update
-        return when (val result = userClient.update(ClientUpdateUserParam(
+        val updateResult = userClient.update(ClientUpdateUserParam(
             id = param.userId,
             username = param.username,
             experienceLevel = param.experienceLevel,
             profileCompleted = param.profileCompleted
-        ))) {
+        ))
+        if (updateResult is Result.Failure) return Result.Failure(UserError.fromClientError(updateResult.error))
+
+        if (param.dietaryRestrictions != null) {
+            val dietaryResult = userClient.setDietaryRestrictions(
+                SetDietaryRestrictionsParam(userId = param.userId, restrictions = param.dietaryRestrictions)
+            )
+            if (dietaryResult is Result.Failure) return Result.Failure(UserError.fromClientError(dietaryResult.error))
+        }
+
+        // Re-fetch user to get enriched data (includes dietary restrictions)
+        return when (val result = userClient.getById(GetByIdParam(param.userId))) {
             is Result.Success -> Result.Success(UserMapper.fromClient(result.value))
             is Result.Failure -> Result.Failure(UserError.fromClientError(result.error))
         }
