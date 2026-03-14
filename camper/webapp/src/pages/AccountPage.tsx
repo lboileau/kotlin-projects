@@ -5,15 +5,62 @@ import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import './AccountPage.css';
 
+const DIETARY_OPTIONS = [
+  { value: 'gluten_free', label: 'Gluten Free' },
+  { value: 'nut_allergy', label: 'Nut Allergy' },
+  { value: 'vegetarian', label: 'Vegetarian' },
+  { value: 'vegan', label: 'Vegan' },
+  { value: 'lactose_intolerant', label: 'Lactose Intolerant' },
+  { value: 'shellfish_allergy', label: 'Shellfish Allergy' },
+  { value: 'halal', label: 'Halal' },
+  { value: 'kosher', label: 'Kosher' },
+];
+
+const EXPERIENCE_OPTIONS = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' },
+  { value: 'expert', label: 'Expert' },
+];
+
+function formatAvatarProp(value: string): string {
+  return value.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export function AccountPage() {
   const { user, login, logout } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState(user?.username || '');
+  const [experienceLevel, setExperienceLevel] = useState(user?.experienceLevel || '');
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>(user?.dietaryRestrictions || []);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
+  const [randomizing, setRandomizing] = useState(false);
 
-  const isDirty = username.trim() !== (user?.username || '');
+  const isDirty =
+    username.trim() !== (user?.username || '') ||
+    experienceLevel !== (user?.experienceLevel || '') ||
+    JSON.stringify([...dietaryRestrictions].sort()) !== JSON.stringify([...(user?.dietaryRestrictions || [])].sort());
+
+  const toggleDietary = (value: string) => {
+    setDietaryRestrictions(prev =>
+      prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value]
+    );
+  };
+
+  const handleRandomizeAvatar = async () => {
+    if (!user) return;
+    setRandomizing(true);
+    try {
+      const updated = await api.randomizeAvatar(user.id);
+      login(updated);
+    } catch {
+      // silently fail
+    } finally {
+      setRandomizing(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +69,11 @@ export function AccountPage() {
     setError('');
     setSaved(false);
     try {
-      const updated = await api.updateUser(user.id, username.trim());
+      const updated = await api.updateUser(user.id, {
+        username: username.trim(),
+        experienceLevel: experienceLevel || null,
+        dietaryRestrictions,
+      });
       login(updated);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
@@ -32,6 +83,8 @@ export function AccountPage() {
       setSaving(false);
     }
   };
+
+  const avatar = user?.avatar;
 
   return (
     <div className="account-page">
@@ -106,6 +159,61 @@ export function AccountPage() {
                   onChange={e => setUsername(e.target.value)}
                   placeholder="Choose your trail name..."
                 />
+              </div>
+
+              <div className="account-field">
+                <label className="account-label">Experience Level</label>
+                <select
+                  className="account-input account-select"
+                  value={experienceLevel}
+                  onChange={e => setExperienceLevel(e.target.value)}
+                >
+                  <option value="">Not set</option>
+                  {EXPERIENCE_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="account-field">
+                <label className="account-label">Dietary Restrictions</label>
+                <div className="account-checkbox-grid">
+                  {DIETARY_OPTIONS.map(opt => (
+                    <label key={opt.value} className="account-checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={dietaryRestrictions.includes(opt.value)}
+                        onChange={() => toggleDietary(opt.value)}
+                      />
+                      <span className="account-checkbox-label">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="account-field">
+                <label className="account-label">Your Avatar</label>
+                {avatar ? (
+                  <div className="account-avatar-details">
+                    <div className="account-avatar-props">
+                      <span className="account-avatar-prop">Hair: {formatAvatarProp(avatar.hairStyle)}, {formatAvatarProp(avatar.hairColor)}</span>
+                      <span className="account-avatar-prop">Skin: {formatAvatarProp(avatar.skinColor)}</span>
+                      <span className="account-avatar-prop">Style: {formatAvatarProp(avatar.clothingStyle)}</span>
+                      <span className="account-avatar-prop">Shirt: {formatAvatarProp(avatar.shirtColor)}</span>
+                      <span className="account-avatar-prop">Pants: {formatAvatarProp(avatar.pantsColor)}</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="account-randomize-btn"
+                      onClick={handleRandomizeAvatar}
+                      disabled={randomizing}
+                    >
+                      {randomizing ? 'Randomizing...' : 'Randomize Avatar'}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="account-avatar-placeholder">No avatar yet — one will be generated for you.</p>
+                )}
               </div>
 
               {error && <p className="account-error">{error}</p>}
