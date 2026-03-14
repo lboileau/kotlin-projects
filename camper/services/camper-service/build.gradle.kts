@@ -22,6 +22,7 @@ dependencies {
     implementation(project(":clients:meal-plan-client"))
     implementation(project(":clients:log-book-client"))
     implementation(project(":libs:meal-plan-calculator"))
+    implementation(project(":libs:avatar-generator"))
     implementation(project(":services:service-common"))
 
     implementation("org.springframework.boot:spring-boot-starter-web")
