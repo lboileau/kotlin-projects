@@ -106,7 +106,6 @@ class FakeUserClient : UserClient {
         val validation = validateGetDietaryRestrictions.execute(param)
         if (validation is Result.Failure) return validation
 
-        if (!store.containsKey(param.userId)) return failure(NotFoundError("User", param.userId.toString()))
         return success(dietaryRestrictionsStore[param.userId] ?: emptyList())
     }
 
