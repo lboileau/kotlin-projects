@@ -50,6 +50,20 @@ Flag any test that:
 - [ ] Assertions use AssertJ (`assertThat`) not JUnit (`assertEquals`)
 - [ ] Response parsing extracts and verifies individual fields
 
+### Fake/JDBI Behavioral Divergence
+When reviewing client tests or service tests that use FakeClient, check for behavioral differences between the Fake and the real JDBI implementation:
+- **Nonexistent entity queries** — Does the Fake return the same thing as the JDBI client? (e.g., empty list vs NotFoundError)
+- **Null handling** — Does the Fake handle null params the same way?
+- **Edge cases** — Does the Fake enforce the same constraints (CHECK constraints, FK violations, uniqueness)?
+- Flag any test that would pass with the Fake but fail with the real client (or vice versa).
+
+### Acceptance Test Completeness
+Review acceptance tests against the **full API surface diff**, not just the feature description:
+- Every **new endpoint** must have acceptance tests (success + error paths)
+- Every **new field** on existing endpoint responses must be asserted in at least one test
+- Every **new field** on existing endpoint requests must be tested (valid + invalid values)
+- null-vs-empty semantics must be tested separately (e.g., `null` = no change vs `[]` = clear all)
+
 ### Real Scenario Validation
 For each test, ask:
 - "Could this scenario happen in production?" — If no, the test is pointless.

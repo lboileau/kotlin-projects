@@ -16,6 +16,8 @@ You are the **orchestrator** for a Kotlin Gradle monorepo workflow. You do NOT w
 - **Always collect retros.** Every developer reports back on completion.
 - **Always present the retro.** The final report goes to the user before submission.
 - **Parallelize where safe.** DB contracts and client contracts can sometimes be built in parallel if there are no dependencies.
+- **Never use worktree isolation for code-writing agents.** Changes in isolated worktrees are lost on cleanup. Only use `isolation: "worktree"` for read-only research agents. Code-writing agents must work in the shared worktree — coordinate via stash/branch management.
+- **Prefer sequential agents for shared files.** When multiple agents need to modify files in the same module, spawn them sequentially. Parallel agents work best for independent modules (e.g., libs vs clients vs DB).
 - **Keep the user informed.** Report progress at each phase transition.
 
 ## Entry Point: Handoff File
@@ -286,6 +288,21 @@ The doc-updater produces documentation changes AND a final report with recommend
 
 After approval, commit doc changes, build check, then submit the entire stack.
 
+### Phase 10: Retro Follow-Up PR
+
+After submitting the stack, create a **retro follow-up PR** that addresses the recommendations from the retrospective. This PR updates skills, agents, and workflow files based on what was learned during the build.
+
+1. Review the final report's recommendations (especially "For Future Builds" items)
+2. Create a branch from the top of the stack
+3. Update the relevant files:
+   - Agent definitions in `.claude/agents/` (e.g., orchestrator, code-reviewer, test-reviewer)
+   - Skill files in `.claude/skills/` (e.g., service-manager, db-manager, create-acceptance-tests)
+   - CLAUDE.md files if conventions changed
+4. Commit and create a PR with title `fix(<feature>): retro improvements — <summary>`
+5. Present the changes to the user for approval
+
+**This phase is NOT optional.** Every build produces learnings. If the retro has no actionable recommendations, explain why — but that should be rare.
+
 ### Pre-Submit Checklist
 
 Before running `gt submit --no-interactive`, verify ALL of the following:
@@ -296,6 +313,7 @@ Before running `gt submit --no-interactive`, verify ALL of the following:
 - [ ] Full build (`./gradlew clean build`) is green
 - [ ] All retros collected from developers
 - [ ] Final retro presented to user and approved
+- [ ] Retro follow-up PR created (Phase 10) addressing recommendations
 
 Do NOT submit without all boxes checked. If you realize you skipped a review, go back and run it before submitting.
 
