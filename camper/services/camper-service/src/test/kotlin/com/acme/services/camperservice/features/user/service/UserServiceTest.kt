@@ -2,15 +2,20 @@ package com.acme.services.camperservice.features.user.service
 
 import com.acme.clients.common.Result
 import com.acme.clients.userclient.fake.FakeUserClient
+import com.acme.clients.userclient.model.User as ClientUser
+import com.acme.libs.avatargenerator.AvatarGenerator
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.user.params.AuthenticateUserParam
 import com.acme.services.camperservice.features.user.params.CreateUserParam
+import com.acme.services.camperservice.features.user.params.GetAvatarParam
 import com.acme.services.camperservice.features.user.params.GetUserByIdParam
+import com.acme.services.camperservice.features.user.params.RandomizeAvatarParam
 import com.acme.services.camperservice.features.user.params.UpdateUserParam
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.util.UUID
 
 class UserServiceTest {
@@ -231,6 +236,168 @@ class UserServiceTest {
             assertThat(result.isFailure).isTrue()
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(UserError.Invalid::class.java)
+        }
+
+        @Test
+        fun `update sets dietary restrictions`() {
+            val created = (userService.create(CreateUserParam(email = "grace@example.com", username = "grace")) as Result.Success).value
+
+            val result = userService.update(UpdateUserParam(
+                userId = created.id,
+                username = "grace",
+                dietaryRestrictions = listOf("vegetarian", "gluten_free"),
+                requestingUserId = created.id
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.dietaryRestrictions).containsExactlyInAnyOrder("vegetarian", "gluten_free")
+        }
+
+        @Test
+        fun `update sets experience level`() {
+            val created = (userService.create(CreateUserParam(email = "hank@example.com", username = "hank")) as Result.Success).value
+
+            val result = userService.update(UpdateUserParam(
+                userId = created.id,
+                username = "hank",
+                experienceLevel = "intermediate",
+                requestingUserId = created.id
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.experienceLevel).isEqualTo("intermediate")
+        }
+
+        @Test
+        fun `update sets profileCompleted`() {
+            val created = (userService.create(CreateUserParam(email = "iris@example.com", username = "iris")) as Result.Success).value
+
+            val result = userService.update(UpdateUserParam(
+                userId = created.id,
+                username = "iris",
+                profileCompleted = true,
+                requestingUserId = created.id
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.profileCompleted).isTrue()
+        }
+    }
+
+    @Nested
+    inner class Avatar {
+        @Test
+        fun `create generates avatar seed from username`() {
+            val result = userService.create(CreateUserParam(email = "avatar@example.com", username = "trailblazer"))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.avatarSeed).isEqualTo(AvatarGenerator.seedFromName("trailblazer"))
+        }
+
+        @Test
+        fun `create generates avatar seed from email when no username`() {
+            val result = userService.create(CreateUserParam(email = "nousername@example.com"))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.avatarSeed).isEqualTo(AvatarGenerator.seedFromName("nousername@example.com"))
+        }
+
+        @Test
+        fun `create generates avatar seed for invite-flow user on registration`() {
+            val userId = UUID.randomUUID()
+            val now = Instant.now()
+            fakeUserClient.seed(ClientUser(
+                id = userId,
+                email = "invited@example.com",
+                username = null,
+                avatarSeed = null,
+                createdAt = now,
+                updatedAt = now
+            ))
+
+            val username = "now-registered"
+            val result = userService.create(CreateUserParam(email = "invited@example.com", username = username))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.avatarSeed).isEqualTo(AvatarGenerator.seedFromName(username))
+        }
+
+        @Test
+        fun `getAvatar returns avatar for user with seed`() {
+            val username = "campergirl"
+            val created = (userService.create(CreateUserParam(email = "campergirl@example.com", username = username)) as Result.Success).value
+
+            val result = userService.getAvatar(GetAvatarParam(userId = created.id))
+
+            assertThat(result.isSuccess).isTrue()
+            val avatar = (result as Result.Success).value
+            val expectedAvatar = AvatarGenerator.generate(AvatarGenerator.seedFromName(username))
+            assertThat(avatar.hairStyle).isEqualTo(expectedAvatar.hairStyle.name.lowercase())
+            assertThat(avatar.hairColor).isEqualTo(expectedAvatar.hairColor.name.lowercase())
+            assertThat(avatar.skinColor).isEqualTo(expectedAvatar.skinColor.name.lowercase())
+            assertThat(avatar.clothingStyle).isEqualTo(expectedAvatar.clothingStyle.name.lowercase())
+            assertThat(avatar.pantsColor).isEqualTo(expectedAvatar.pantsColor.name.lowercase())
+            assertThat(avatar.shirtColor).isEqualTo(expectedAvatar.shirtColor.name.lowercase())
+        }
+
+        @Test
+        fun `getAvatar returns Invalid when user has no avatar seed`() {
+            val userId = UUID.randomUUID()
+            val now = Instant.now()
+            fakeUserClient.seed(ClientUser(
+                id = userId,
+                email = "noseed@example.com",
+                username = "noseed",
+                avatarSeed = null,
+                createdAt = now,
+                updatedAt = now
+            ))
+
+            val result = userService.getAvatar(GetAvatarParam(userId = userId))
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(UserError.Invalid::class.java)
+        }
+
+        @Test
+        fun `getAvatar returns NotFound when user does not exist`() {
+            val result = userService.getAvatar(GetAvatarParam(userId = UUID.randomUUID()))
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(UserError.NotFound::class.java)
+        }
+
+        @Test
+        fun `randomizeAvatar updates avatar seed`() {
+            val created = (userService.create(CreateUserParam(email = "random@example.com", username = "randomizer")) as Result.Success).value
+            val originalSeed = created.avatarSeed
+
+            val result = userService.randomizeAvatar(RandomizeAvatarParam(userId = created.id, requestingUserId = created.id))
+
+            assertThat(result.isSuccess).isTrue()
+            val user = (result as Result.Success).value
+            assertThat(user.avatarSeed).isNotNull()
+            assertThat(user.avatarSeed).isNotEqualTo(originalSeed)
+        }
+
+        @Test
+        fun `randomizeAvatar returns Forbidden when requesting user differs`() {
+            val created = (userService.create(CreateUserParam(email = "owned@example.com", username = "owner")) as Result.Success).value
+            val otherId = UUID.randomUUID()
+
+            val result = userService.randomizeAvatar(RandomizeAvatarParam(userId = created.id, requestingUserId = otherId))
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(UserError.Forbidden::class.java)
         }
     }
 }
