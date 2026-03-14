@@ -12,11 +12,12 @@ import { GearModal } from '../components/GearModal';
 import { MealPlanModal } from '../components/MealPlanModal';
 import { ItineraryModal } from '../components/ItineraryModal';
 import { AssignmentsModal } from '../components/AssignmentsModal';
-import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG } from '../components/CampsiteItems';
+import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG, LogBookSVG } from '../components/CampsiteItems';
+import { LogBookModal } from '../components/LogBookModal';
 import { AppHeader } from '../components/AppHeader';
 import './PlanPage.css';
 
-type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'addMember' | 'managePlan' | null;
+type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'logbook' | 'addMember' | 'managePlan' | null;
 
 export function PlanPage() {
   const { planId } = useParams<{ planId: string }>();
@@ -55,6 +56,7 @@ export function PlanPage() {
   // Live updates: resource-aware refetch via WebSocket
   const [assignmentsRefreshKey, setAssignmentsRefreshKey] = useState(0);
   const [itineraryRefreshKey, setItineraryRefreshKey] = useState(0);
+  const [logbookRefreshKey, setLogbookRefreshKey] = useState(0);
 
   usePlanUpdates(planId, useCallback((message) => {
     const { resource } = message;
@@ -66,6 +68,9 @@ export function PlanPage() {
     }
     if (resource === 'itinerary') {
       setItineraryRefreshKey(k => k + 1);
+    }
+    if (resource === 'log-book-faqs' || resource === 'log-book-journal') {
+      setLogbookRefreshKey(k => k + 1);
     }
   }, [loadData]));
 
@@ -211,6 +216,10 @@ export function PlanPage() {
 
             <InteractableItem id="itinerary" label="Trail Map & Itinerary" x={12} y={78} onClick={() => setActiveModal('itinerary')}>
               <MapTableSVG />
+            </InteractableItem>
+
+            <InteractableItem id="logbook" label="Camp Log Book" x={28} y={58} onClick={() => setActiveModal('logbook')}>
+              <LogBookSVG />
             </InteractableItem>
 
             {/* Central campfire area */}
@@ -418,6 +427,26 @@ export function PlanPage() {
           planId={planId}
           isOwner={isOwner}
           refreshKey={itineraryRefreshKey}
+        />
+      )}
+
+      {activeModal === 'logbook' && planId && user && plan && (
+        <LogBookModal
+          isOpen
+          onClose={() => setActiveModal(null)}
+          planId={planId}
+          userId={user.id}
+          userRole={
+            plan.ownerId === user.id
+              ? 'OWNER'
+              : members.find(m => m.userId === user.id)?.role === 'manager'
+                ? 'MANAGER'
+                : 'MEMBER'
+          }
+          members={members
+            .filter(m => m.username)
+            .map(m => ({ id: m.userId, displayName: m.username! }))}
+          refreshKey={logbookRefreshKey}
         />
       )}
 
