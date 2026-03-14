@@ -4,6 +4,7 @@ import { api, type Plan } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
+import { Button } from '../components/ui/Button';
 import './HomePage.css';
 import '../components/Modal.css';
 
@@ -295,12 +296,12 @@ export function HomePage() {
             <h2 className="modal-title">Abandon Expedition?</h2>
             <p className="modal-flavor">"{deletingPlan.name}" will be lost to the wilderness forever.</p>
             <div className="modal-actions">
-              <button className="modal-btn modal-btn--secondary" onClick={() => setDeletingPlan(null)}>
+              <Button variant="secondary" onClick={() => setDeletingPlan(null)}>
                 Keep Camp
-              </button>
-              <button className="modal-btn modal-btn--danger" onClick={handleDeleteConfirm}>
+              </Button>
+              <Button variant="danger" onClick={handleDeleteConfirm}>
                 Break Camp
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -319,12 +320,12 @@ export function HomePage() {
             <h2 className="modal-title">Leave Expedition?</h2>
             <p className="modal-flavor">You'll pack up your gear and leave "{leavingPlan.name}" behind.</p>
             <div className="modal-actions">
-              <button className="modal-btn modal-btn--secondary" onClick={() => setLeavingPlan(null)}>
+              <Button variant="secondary" onClick={() => setLeavingPlan(null)}>
                 Stay at Camp
-              </button>
-              <button className="modal-btn modal-btn--danger" onClick={handleLeaveConfirm}>
+              </Button>
+              <Button variant="danger" onClick={handleLeaveConfirm}>
                 Leave Camp
-              </button>
+              </Button>
             </div>
           </div>
         </div>

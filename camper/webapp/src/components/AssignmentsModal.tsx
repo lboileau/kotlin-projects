@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, type AssignmentDetail, type PlanMember } from '../api/client';
+import { SKIN_COLORS, HAIR_COLORS, FALLBACK_COLORS } from '../lib/avatarConstants';
 import { AvatarHair } from './AvatarHair';
+import { Button } from './ui/Button';
 import './Modal.css';
 import './AssignmentsModal.css';
 
@@ -13,27 +15,6 @@ interface AssignmentsModalProps {
   members: PlanMember[];
   refreshKey?: number;
 }
-
-const FALLBACK_COLORS = [
-  { hood: '#3A5A3A', skin: '#D4A574' },
-  { hood: '#2A3A4A', skin: '#C4946A' },
-  { hood: '#6A3A2A', skin: '#DCAC7C' },
-  { hood: '#3A4A3A', skin: '#C89A6A' },
-  { hood: '#4A3A2A', skin: '#D4A070' },
-  { hood: '#3A3A5A', skin: '#CCA478' },
-  { hood: '#4A5A4A', skin: '#D8AA74' },
-  { hood: '#3A4A3A', skin: '#C8986A' },
-];
-
-// Same color maps as CamperAvatar — ensures mini avatars match the campfire scene
-const SKIN_COLORS: Record<string, string> = {
-  light: '#F5D6B8', fair: '#F0C8A0', medium: '#D4A574', olive: '#C4946A',
-  tan: '#B8845A', brown: '#8B6B4A', dark: '#6A4A2A', deep: '#4A3020',
-};
-const HAIR_COLORS: Record<string, string> = {
-  black: '#1A1A1A', brown: '#4A3020', blonde: '#D4B870', red: '#8B3A1A',
-  gray: '#8A8A8A', white: '#E8E0D0', auburn: '#6A3A20', platinum: '#E8D8C0',
-};
 
 function getMemberColors(userId: string, allMembers: PlanMember[]): { hood: string; skin: string; hairStyle: string } {
   const member = allMembers.find(m => m.userId === userId);
@@ -691,17 +672,17 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
                     </div>
                   </div>
                   <div className="assign-create-actions">
-                    <button
+                    <Button
                       type="button"
-                      className="modal-btn modal-btn--secondary"
+                      variant="secondary"
                       onClick={() => { setShowCreateForm(false); setCreateForm({ name: '', maxOccupancy: activeTab === 'tent' ? 4 : 2 }); }}
                       disabled={creating}
                     >
                       Cancel
-                    </button>
-                    <button type="submit" className="modal-btn" disabled={creating || !createForm.name.trim()}>
+                    </Button>
+                    <Button type="submit" disabled={creating || !createForm.name.trim()}>
                       {creating ? 'Creating...' : 'Create'}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}
@@ -712,17 +693,17 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
         {/* Footer */}
         <div className="assign-modal-footer">
           {!showCreateForm && !loading && (
-            <button className="modal-btn assign-create-btn" onClick={() => setShowCreateForm(true)}>
+            <Button className="assign-create-btn" onClick={() => setShowCreateForm(true)}>
               <svg width="14" height="14" viewBox="0 0 14 14">
                 <line x1="7" y1="2" x2="7" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
               Add {activeTab === 'tent' ? 'Tent' : 'Canoe'}
-            </button>
+            </Button>
           )}
-          <button className="modal-btn modal-btn--secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>
