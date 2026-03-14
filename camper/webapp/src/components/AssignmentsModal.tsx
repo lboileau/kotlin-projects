@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, type AssignmentDetail, type PlanMember } from '../api/client';
+import { AvatarHair } from './AvatarHair';
 import './Modal.css';
 import './AssignmentsModal.css';
 
@@ -34,7 +35,7 @@ const HAIR_COLORS: Record<string, string> = {
   gray: '#8A8A8A', white: '#E8E0D0', auburn: '#6A3A20', platinum: '#E8D8C0',
 };
 
-function getMemberColors(userId: string, allMembers: PlanMember[]): { hood: string; skin: string } {
+function getMemberColors(userId: string, allMembers: PlanMember[]): { hood: string; skin: string; hairStyle: string } {
   const member = allMembers.find(m => m.userId === userId);
   const idx = allMembers.indexOf(member!);
   const fallback = FALLBACK_COLORS[(idx === -1 ? 0 : idx) % FALLBACK_COLORS.length];
@@ -43,20 +44,30 @@ function getMemberColors(userId: string, allMembers: PlanMember[]): { hood: stri
     return {
       skin: SKIN_COLORS[member.avatar.skinColor] || fallback.skin,
       hood: HAIR_COLORS[member.avatar.hairColor] || fallback.hood,
+      hairStyle: member.avatar.hairStyle,
     };
   }
-  return fallback;
+  return { ...fallback, hairStyle: 'short' };
 }
 
-function MiniAvatar({ userId, allMembers, size = 22, scared = false }: { userId: string; allMembers: PlanMember[]; size?: number; scared?: boolean }) {
+function MiniAvatar({ userId, allMembers, size = 22, scared = false, isOwner = false }: { userId: string; allMembers: PlanMember[]; size?: number; scared?: boolean; isOwner?: boolean }) {
   const color = getMemberColors(userId, allMembers);
   return (
     <svg width={size} height={size} viewBox="0 0 28 28" className="assign-mini-avatar">
       {/* Face */}
       <circle cx="14" cy="16" r="11" fill={color.skin} />
-      {/* Hood */}
-      <path d="M3,16 Q3,4 14,3 Q25,4 25,16" fill={color.hood} />
-      <ellipse cx="14" cy="16" rx="12" ry="3" fill={color.hood} opacity="0.6" />
+      {/* Hair — scale from big avatar coords (cx=24,cy=14) to mini (cx=14,cy=16) */}
+      <g transform="translate(-13.5, 1) scale(1.15)">
+        <AvatarHair style={color.hairStyle} color={color.hood} />
+      </g>
+      {isOwner && (
+        <>
+          {/* Owner hat — ranger/wide-brim */}
+          <ellipse cx="14" cy="8" rx="13" ry="2.5" fill="#5C4033" />
+          <path d="M5,8 Q5,3 14,2 Q23,3 23,8" fill="#6B4E37" />
+          <ellipse cx="14" cy="8" rx="8" ry="1.2" fill="#5C4033" />
+        </>
+      )}
       {scared ? (
         <>
           {/* Scared brows — raised and angled */}
@@ -282,7 +293,7 @@ function AssignmentCard({
           const canRemove = canManage && !isOwnerMember && !isMe;
           return (
             <div key={member.userId} className="assign-member">
-              <MiniAvatar userId={member.userId} allMembers={planMembers} />
+              <MiniAvatar userId={member.userId} allMembers={planMembers} isOwner={isOwnerMember} />
               <span className="assign-member-name">{name}{isMe ? ' (You)' : ''}</span>
               {isOwnerMember && <span className="assign-member-badge">owner</span>}
               {canRemove && (

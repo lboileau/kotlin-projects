@@ -36,6 +36,7 @@ export interface PlanMember {
   username: string | null;
   email: string | null;
   invitationStatus: string | null;
+  invitedBy: string | null;
   role: string;
   avatarSeed: string | null;
   avatar: AvatarResponse | null;

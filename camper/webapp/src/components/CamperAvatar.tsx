@@ -1,4 +1,5 @@
 import type { AvatarResponse } from '../api/client';
+import { AvatarHair } from './AvatarHair';
 import './CamperAvatar.css';
 
 function seededRandom(seed: number) {
@@ -55,6 +56,7 @@ function avatarToColors(av: AvatarResponse, fallback: typeof AVATAR_COLORS[0]) {
     hood: HAIR_COLORS[av.hairColor] || fallback.hood,
     body: SHIRT_COLORS[av.shirtColor] || fallback.body,
     accent: PANTS_COLORS[av.pantsColor] || fallback.accent,
+    hairStyle: av.hairStyle,
   };
 }
 
@@ -77,7 +79,7 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
   const y = -(Math.sin(angle) * radiusY - edgeY);
 
   const fallbackColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
-  const color = avatar ? avatarToColors(avatar, fallbackColor) : fallbackColor;
+  const color = avatar ? avatarToColors(avatar, fallbackColor) : { ...fallbackColor, hairStyle: 'short' };
   const isPending = !name;
   const isFailed = invitationStatus === 'failed' || invitationStatus === 'bounced' || invitationStatus === 'complained';
   const displayName = name || null;
@@ -127,11 +129,10 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
           {isPending ? <>
             {/* Ghost silhouette */}
             <circle cx="24" cy="14" r="11" fill="rgba(255,255,255,0.12)" />
-            <ellipse cx="24" cy="10" rx="12" ry="8" fill="rgba(255,255,255,0.08)" />
             <circle cx="20" cy="14" r="1.5" fill="rgba(255,255,255,0.2)" />
             <circle cx="28" cy="14" r="1.5" fill="rgba(255,255,255,0.2)" />
-            <text x="24" y="20" textAnchor="middle" fill="rgba(255,248,231,0.4)" fontSize="8" fontFamily="var(--font-body)" fontWeight="600">?</text>
             <rect x="13" y="26" width="22" height="24" rx="5" fill="rgba(255,255,255,0.08)" />
+            <text className="avatar-question-mark" x="24" y="44" textAnchor="middle" fill="rgba(255,248,231,0.5)" fontSize="16" fontFamily="var(--font-body)" fontWeight="700" style={{ cursor: 'default', pointerEvents: 'none' }}>?</text>
             <rect x="8" y="28" width="8" height="16" rx="4" fill="rgba(255,255,255,0.08)" />
             <rect x="32" y="28" width="8" height="16" rx="4" fill="rgba(255,255,255,0.08)" />
             <ellipse cx="19" cy="52" rx="6" ry="5" fill="rgba(255,255,255,0.06)" />
@@ -141,9 +142,8 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
           </> : <>
             {/* Face */}
             <circle cx="24" cy="14" r="11" fill={color.skin} />
-            {/* Hood / beanie */}
-            <path d="M13,14 Q13,4 24,3 Q35,4 35,14" fill={color.hood} />
-            <ellipse cx="24" cy="14" rx="12" ry="3" fill={color.hood} opacity="0.6" />
+            {/* Hair */}
+            <AvatarHair style={color.hairStyle || 'short'} color={color.hood} />
             {timeOfDay === 'night' ? <>
               {/* Brows — slightly furrowed, nervous */}
               <path d="M17,11 Q19.5,10 22,11.5" fill="none" stroke="#2A2A2A" strokeWidth="1.3" strokeLinecap="round" />
@@ -221,20 +221,17 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
             </>}
           </>}
         </svg>
+        {onRemove && (
+          <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
+            <svg width="32" height="32" viewBox="0 0 32 32">
+              <line x1="6" y1="7" x2="26" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
+              <line x1="26" y1="7" x2="6" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
+            </svg>
+          </button>
+        )}
       </div>
       {displayName && <span className="avatar-name">{displayName}</span>}
-      {onRemove && (
-        <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
-          <svg width="32" height="32" viewBox="0 0 32 32">
-            {/* Jagged red X — no background */}
-            <line x1="6" y1="7" x2="26" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
-            <line x1="26" y1="7" x2="6" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
-          </svg>
-        </button>
-      )}
       {!displayName && email && <span className="avatar-name avatar-name--email">{email}</span>}
-      {/* Warm glow from fire on the character */}
-      <div className="avatar-fire-glow" />
     </div>
   );
 }

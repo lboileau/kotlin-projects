@@ -19,6 +19,7 @@ data class PlanMember(
     val username: String?,
     val email: String?,
     val invitationStatus: String?,
+    val invitedBy: UUID?,
     val role: String,
     val avatarSeed: String?,
     val createdAt: Instant
