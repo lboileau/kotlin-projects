@@ -10,6 +10,10 @@ object UserRowAdapter {
         id = rs.getObject("id", UUID::class.java),
         email = rs.getString("email"),
         username = rs.getString("username"),
+        experienceLevel = rs.getString("experience_level"),
+        avatarSeed = rs.getString("avatar_seed"),
+        profileCompleted = rs.getBoolean("profile_completed"),
+        dietaryRestrictions = emptyList(),
         createdAt = rs.getTimestamp("created_at").toInstant(),
         updatedAt = rs.getTimestamp("updated_at").toInstant()
     )
