@@ -199,6 +199,7 @@ export function PlanPage() {
             Manage Plan
           </button>
         ) : undefined}
+        onProfileClick={() => setShowProfileSetup(true)}
       />
 
       {/* Campsite scene */}
@@ -254,7 +255,12 @@ export function PlanPage() {
                     timeOfDay={timeOfDay}
                     avatar={member.avatar}
                     onRemove={
-                      (member.userId === user?.id && !isOwner) || (isOwner && member.userId !== user?.id)
+                      // Owner can remove anyone except themselves
+                      (isOwner && member.userId !== user?.id)
+                      // Members can remove themselves
+                      || (member.userId === user?.id && !isOwner)
+                      // Inviter can cancel their own pending invites (not yet registered)
+                      || (member.invitedBy === user?.id && !member.username && member.userId !== user?.id)
                         ? () => handleRemoveMember(member.userId)
                         : undefined
                     }
@@ -483,6 +489,7 @@ export function PlanPage() {
             login(updatedUser);
             setShowProfileSetup(false);
           }}
+          onClose={() => setShowProfileSetup(false)}
         />
       )}
     </div>

@@ -1,6 +1,29 @@
 .setup-modal {
   max-width: 480px;
   text-align: center;
+  position: relative;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--charcoal-light);
+  transition: all 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--charcoal);
 }
 
 .setup-header {
