@@ -42,6 +42,32 @@
   pointer-events: none;
 }
 
+.modal-content--sm { max-width: 340px; }
+.modal-content--lg { max-width: 680px; }
+
+.modal-close-btn {
+  position: absolute;
+  top: var(--space-sm);
+  right: var(--space-sm);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--charcoal-light);
+  transition: all 0.2s ease;
+  z-index: 1;
+}
+
+.modal-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--charcoal);
+}
+
 .modal-content--coming-soon {
   border-color: rgba(212, 188, 148, 0.4);
 }

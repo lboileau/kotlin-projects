@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, type Item, type PlanMember } from '../api/client';
+import { Modal } from './ui/Modal';
 import './GearModal.css';
 
 export interface CategoryDef {
@@ -362,8 +363,6 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
     if (activeDay > numDays) setActiveDay(numDays);
   }, [numDays, activeDay]);
 
-  if (!isOpen) return null;
-
   // Filter items to only those matching this modal's categories
   const categoryValues = new Set(config.categories.map(c => c.value));
 
@@ -466,8 +465,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
   };
 
   return (
-    <div className="modal-overlay gear-modal-overlay" onClick={onClose}>
-      <div className="gear-modal" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" className="gear-modal">
         {/* Header */}
         <div className="gear-modal-header">
           <div className="gear-modal-header-left">
@@ -483,11 +481,6 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
               </p>
             </div>
           </div>
-          <button className="gear-modal-close" onClick={onClose} aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 20 20">
-              <path d="M5,5 L15,15 M15,5 L5,15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
         </div>
 
         {/* Overall progress */}
@@ -578,8 +571,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
             </>
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 
