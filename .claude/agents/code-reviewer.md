@@ -38,6 +38,7 @@ You are a **code reviewer** for a Kotlin Gradle monorepo. You review implementat
 - [ ] Factory function: no params, reads env vars
 - [ ] KDoc on all interface methods
 - [ ] Fake in testFixtures with real validation logic
+- [ ] Fake edge-case behavior matches JDBI behavior (nonexistent entities, empty results, null handling)
 - [ ] `Result<T, E>` return types, no exceptions for expected failures
 
 #### Service Layer
