@@ -14,6 +14,7 @@ import { ItineraryModal } from '../components/ItineraryModal';
 import { AssignmentsModal } from '../components/AssignmentsModal';
 import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG, LogBookSVG } from '../components/CampsiteItems';
 import { LogBookModal } from '../components/LogBookModal';
+import { ProfileSetupModal } from '../components/ProfileSetupModal';
 import { AppHeader } from '../components/AppHeader';
 import './PlanPage.css';
 
@@ -21,11 +22,12 @@ type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'logboo
 
 export function PlanPage() {
   const { planId } = useParams<{ planId: string }>();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [members, setMembers] = useState<PlanMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+  const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState<'day' | 'night'>(() => {
     const hour = new Date().getHours();
     return hour >= 6 && hour < 19 ? 'day' : 'night';
@@ -52,6 +54,13 @@ export function PlanPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Show profile setup modal if user hasn't completed their profile
+  useEffect(() => {
+    if (!loading && user && user.profileCompleted === false) {
+      setShowProfileSetup(true);
+    }
+  }, [loading, user]);
 
   // Live updates: resource-aware refetch via WebSocket
   const [assignmentsRefreshKey, setAssignmentsRefreshKey] = useState(0);
@@ -243,6 +252,7 @@ export function PlanPage() {
                     index={i}
                     total={memberCount}
                     timeOfDay={timeOfDay}
+                    avatar={member.avatar}
                     onRemove={
                       (member.userId === user?.id && !isOwner) || (isOwner && member.userId !== user?.id)
                         ? () => handleRemoveMember(member.userId)
@@ -462,6 +472,17 @@ export function PlanPage() {
           currentUserId={user.id}
           members={members}
           refreshKey={assignmentsRefreshKey}
+        />
+      )}
+
+      {showProfileSetup && user && (
+        <ProfileSetupModal
+          isOpen
+          user={user}
+          onComplete={(updatedUser) => {
+            login(updatedUser);
+            setShowProfileSetup(false);
+          }}
         />
       )}
     </div>
