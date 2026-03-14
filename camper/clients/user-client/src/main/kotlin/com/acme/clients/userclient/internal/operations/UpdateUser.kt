@@ -27,27 +27,30 @@ internal class UpdateUser(
             is Result.Failure -> existing
             is Result.Success -> {
                 val now = Instant.now()
+                val setClauses = mutableListOf("username = :username", "updated_at = :updatedAt")
+                if (param.experienceLevel != null) setClauses.add("experience_level = :experienceLevel")
+                if (param.avatarSeed != null) setClauses.add("avatar_seed = :avatarSeed")
+                if (param.profileCompleted == true) setClauses.add("profile_completed = true")
+
+                val sql = "UPDATE users SET ${setClauses.joinToString(", ")} WHERE id = :id"
+
                 jdbi.withHandle<Unit, Exception> { handle ->
-                    handle.createUpdate(
-                        """
-                        UPDATE users SET username = :username, updated_at = :updatedAt
-                        WHERE id = :id
-                        """.trimIndent()
-                    )
+                    val update = handle.createUpdate(sql)
                         .bind("id", param.id)
                         .bind("username", param.username)
                         .bind("updatedAt", now)
-                        .execute()
+
+                    if (param.experienceLevel != null) update.bind("experienceLevel", param.experienceLevel)
+                    if (param.avatarSeed != null) update.bind("avatarSeed", param.avatarSeed)
+
+                    update.execute()
                 }
-                success(
-                    existing.value.copy(
-                        username = param.username,
-                        experienceLevel = param.experienceLevel ?: existing.value.experienceLevel,
-                        avatarSeed = param.avatarSeed ?: existing.value.avatarSeed,
-                        profileCompleted = if (param.profileCompleted == true) true else existing.value.profileCompleted,
-                        updatedAt = now
-                    )
-                )
+
+                // Re-fetch to get enriched user with dietary restrictions
+                when (val refreshed = getUserById.execute(GetByIdParam(param.id))) {
+                    is Result.Success -> success(refreshed.value.copy(updatedAt = now))
+                    is Result.Failure -> refreshed
+                }
             }
         }
     }
