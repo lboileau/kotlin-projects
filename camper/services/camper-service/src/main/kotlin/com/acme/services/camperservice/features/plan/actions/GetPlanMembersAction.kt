@@ -46,6 +46,7 @@ internal class GetPlanMembersAction(
                         username = user?.username,
                         email = user?.email ?: invitation?.email,
                         invitationStatus = invitation?.status,
+                        invitedBy = invitation?.inviterId,
                         avatarSeed = user?.avatarSeed
                     )
                 }

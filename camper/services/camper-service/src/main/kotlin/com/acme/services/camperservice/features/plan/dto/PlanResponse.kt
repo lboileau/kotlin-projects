@@ -20,6 +20,7 @@ data class PlanMemberResponse(
     val username: String?,
     val email: String?,
     val invitationStatus: String?,
+    val invitedBy: UUID?,
     val role: String,
     val avatarSeed: String?,
     val avatar: AvatarResponse?,

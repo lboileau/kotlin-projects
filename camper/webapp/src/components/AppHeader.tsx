@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { AvatarHead } from './AvatarHead';
 import './AppHeader.css';
 import type { ReactNode } from 'react';
 
@@ -7,9 +8,10 @@ interface AppHeaderProps {
   pageTitle: string;
   pageIcon?: ReactNode;
   actions?: ReactNode;
+  onProfileClick?: () => void;
 }
 
-export function AppHeader({ pageTitle, pageIcon, actions }: AppHeaderProps) {
+export function AppHeader({ pageTitle, pageIcon, actions, onProfileClick }: AppHeaderProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -30,15 +32,8 @@ export function AppHeader({ pageTitle, pageIcon, actions }: AppHeaderProps) {
 
       <div className="app-header__right">
         {actions}
-        <button className="app-header__user-btn" onClick={() => navigate('/account')}>
-          <svg width="28" height="28" viewBox="0 0 28 28" className="app-header__avatar">
-            <defs><clipPath id="avatar-clip-header"><circle cx="14" cy="14" r="13" /></clipPath></defs>
-            <circle cx="14" cy="14" r="13" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="1.5" />
-            <g clipPath="url(#avatar-clip-header)">
-              <circle cx="14" cy="11" r="5" fill="var(--parchment)" />
-              <ellipse cx="14" cy="24" rx="8" ry="6" fill="var(--parchment)" />
-            </g>
-          </svg>
+        <button className="app-header__user-btn" onClick={onProfileClick || (() => navigate('/account'))}>
+          <AvatarHead avatar={user?.avatar} size={28} />
           <span className="app-header__user-name">{user?.username || user?.email}</span>
         </button>
         <button className="app-header__logout" onClick={logout}>Log Out</button>

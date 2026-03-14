@@ -1,7 +1,21 @@
+export interface AvatarResponse {
+  hairStyle: string;
+  hairColor: string;
+  skinColor: string;
+  clothingStyle: string;
+  pantsColor: string;
+  shirtColor: string;
+}
+
 export interface User {
   id: string;
   email: string;
   username: string | null;
+  experienceLevel: string | null;
+  avatarSeed: string | null;
+  profileCompleted: boolean;
+  dietaryRestrictions: string[];
+  avatar: AvatarResponse | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,7 +36,10 @@ export interface PlanMember {
   username: string | null;
   email: string | null;
   invitationStatus: string | null;
+  invitedBy: string | null;
   role: string;
+  avatarSeed: string | null;
+  avatar: AvatarResponse | null;
   createdAt: string;
 }
 
@@ -390,11 +407,26 @@ export const api = {
     });
   },
 
-  updateUser(userId: string, username: string): Promise<User> {
+  updateUser(userId: string, data: {
+    username: string;
+    experienceLevel?: string | null;
+    dietaryRestrictions?: string[] | null;
+    profileCompleted?: boolean;
+  }): Promise<User> {
     return request(`/api/users/${userId}`, {
       method: 'PUT',
-      body: JSON.stringify({ username }),
+      body: JSON.stringify(data),
     });
+  },
+
+  randomizeAvatar(userId: string): Promise<User> {
+    return request(`/api/users/${userId}/randomize-avatar`, {
+      method: 'POST',
+    });
+  },
+
+  getAvatar(userId: string): Promise<AvatarResponse> {
+    return request(`/api/users/${userId}/avatar`);
   },
 
   getPlans(): Promise<Plan[]> {

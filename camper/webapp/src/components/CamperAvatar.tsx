@@ -1,3 +1,5 @@
+import type { AvatarResponse } from '../api/client';
+import { AvatarHair } from './AvatarHair';
 import './CamperAvatar.css';
 
 function seededRandom(seed: number) {
@@ -14,6 +16,7 @@ interface Props {
   total: number;
   isAddButton?: boolean;
   timeOfDay?: 'day' | 'night';
+  avatar?: AvatarResponse | null;
   onClick?: () => void;
   onRemove?: () => void;
 }
@@ -29,7 +32,35 @@ const AVATAR_COLORS = [
   { body: '#4A5A4A', accent: '#6A7A5A', hood: '#3A4A3A', skin: '#C8986A' },
 ];
 
-export function CamperAvatar({ name, email, invitationStatus, role, index, total, isAddButton, timeOfDay, onClick, onRemove }: Props) {
+// Maps backend avatar enum values to hex colors for the SVG figure
+const SKIN_COLORS: Record<string, string> = {
+  light: '#F5D6B8', fair: '#F0C8A0', medium: '#D4A574', olive: '#C4946A',
+  tan: '#B8845A', brown: '#8B6B4A', dark: '#6A4A2A', deep: '#4A3020',
+};
+const HAIR_COLORS: Record<string, string> = {
+  black: '#1A1A1A', brown: '#4A3020', blonde: '#D4B870', red: '#8B3A1A',
+  gray: '#8A8A8A', white: '#E8E0D0', auburn: '#6A3A20', platinum: '#E8D8C0',
+};
+const SHIRT_COLORS: Record<string, string> = {
+  red: '#B83A2A', blue: '#3A5A8A', green: '#3A6A3A', yellow: '#C4A030',
+  orange: '#C06A20', purple: '#6A3A8A', white: '#E8E0D0', teal: '#2A6A6A',
+};
+const PANTS_COLORS: Record<string, string> = {
+  black: '#2A2A2A', navy: '#2A3A5A', khaki: '#C4B090', olive: '#5A6A3A',
+  brown: '#5A4030', gray: '#7A7A7A', denim: '#4A5A7A', charcoal: '#3A3A3A',
+};
+
+function avatarToColors(av: AvatarResponse, fallback: typeof AVATAR_COLORS[0]) {
+  return {
+    skin: SKIN_COLORS[av.skinColor] || fallback.skin,
+    hood: HAIR_COLORS[av.hairColor] || fallback.hood,
+    body: SHIRT_COLORS[av.shirtColor] || fallback.body,
+    accent: PANTS_COLORS[av.pantsColor] || fallback.accent,
+    hairStyle: av.hairStyle,
+  };
+}
+
+export function CamperAvatar({ name, email, invitationStatus, role, index, total, isAddButton, timeOfDay, avatar, onClick, onRemove }: Props) {
   // Arc above fire — pad edges so outermost avatars don't overlap inner ones
   const avatarWidth = 80; // approximate width of avatar + label
   const arcPad = Math.PI * 0.12; // 22° padding on each side
@@ -47,7 +78,8 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
   const edgeY = Math.sin(endAngle) * radiusY;
   const y = -(Math.sin(angle) * radiusY - edgeY);
 
-  const color = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  const fallbackColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
+  const color = avatar ? avatarToColors(avatar, fallbackColor) : fallbackColor;
   const isPending = !name;
   const isFailed = invitationStatus === 'failed' || invitationStatus === 'bounced' || invitationStatus === 'complained';
   const displayName = name || null;
@@ -97,11 +129,10 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
           {isPending ? <>
             {/* Ghost silhouette */}
             <circle cx="24" cy="14" r="11" fill="rgba(255,255,255,0.12)" />
-            <ellipse cx="24" cy="10" rx="12" ry="8" fill="rgba(255,255,255,0.08)" />
             <circle cx="20" cy="14" r="1.5" fill="rgba(255,255,255,0.2)" />
             <circle cx="28" cy="14" r="1.5" fill="rgba(255,255,255,0.2)" />
-            <text x="24" y="20" textAnchor="middle" fill="rgba(255,248,231,0.4)" fontSize="8" fontFamily="var(--font-body)" fontWeight="600">?</text>
             <rect x="13" y="26" width="22" height="24" rx="5" fill="rgba(255,255,255,0.08)" />
+            <text className="avatar-question-mark" x="24" y="44" textAnchor="middle" fill="rgba(255,248,231,0.5)" fontSize="16" fontFamily="var(--font-body)" fontWeight="700" style={{ cursor: 'default', pointerEvents: 'none' }}>?</text>
             <rect x="8" y="28" width="8" height="16" rx="4" fill="rgba(255,255,255,0.08)" />
             <rect x="32" y="28" width="8" height="16" rx="4" fill="rgba(255,255,255,0.08)" />
             <ellipse cx="19" cy="52" rx="6" ry="5" fill="rgba(255,255,255,0.06)" />
@@ -111,9 +142,8 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
           </> : <>
             {/* Face */}
             <circle cx="24" cy="14" r="11" fill={color.skin} />
-            {/* Hood / beanie */}
-            <path d="M13,14 Q13,4 24,3 Q35,4 35,14" fill={color.hood} />
-            <ellipse cx="24" cy="14" rx="12" ry="3" fill={color.hood} opacity="0.6" />
+            {/* Hair */}
+            <AvatarHair style={color.hairStyle || 'short'} color={color.hood} />
             {timeOfDay === 'night' ? <>
               {/* Brows — slightly furrowed, nervous */}
               <path d="M17,11 Q19.5,10 22,11.5" fill="none" stroke="#2A2A2A" strokeWidth="1.3" strokeLinecap="round" />
@@ -191,20 +221,17 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
             </>}
           </>}
         </svg>
+        {onRemove && (
+          <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
+            <svg width="32" height="32" viewBox="0 0 32 32">
+              <line x1="6" y1="7" x2="26" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
+              <line x1="26" y1="7" x2="6" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
+            </svg>
+          </button>
+        )}
       </div>
       {displayName && <span className="avatar-name">{displayName}</span>}
-      {onRemove && (
-        <button className="avatar-remove" onClick={onRemove} title="Remove from trip">
-          <svg width="32" height="32" viewBox="0 0 32 32">
-            {/* Jagged red X — no background */}
-            <line x1="6" y1="7" x2="26" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
-            <line x1="26" y1="7" x2="6" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
-          </svg>
-        </button>
-      )}
       {!displayName && email && <span className="avatar-name avatar-name--email">{email}</span>}
-      {/* Warm glow from fire on the character */}
-      <div className="avatar-fire-glow" />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import com.acme.services.camperservice.features.plan.dto.PlanResponse
 import com.acme.services.camperservice.features.plan.model.Plan
 import com.acme.services.camperservice.features.plan.model.PlanMember
 import com.acme.services.camperservice.features.user.mapper.AvatarMapper
+import java.util.UUID
 
 object PlanMapper {
 
@@ -25,6 +26,7 @@ object PlanMapper {
         username: String? = null,
         email: String? = null,
         invitationStatus: String? = null,
+        invitedBy: UUID? = null,
         avatarSeed: String? = null
     ): PlanMember = PlanMember(
         planId = clientMember.planId,
@@ -32,6 +34,7 @@ object PlanMapper {
         username = username,
         email = email,
         invitationStatus = invitationStatus,
+        invitedBy = invitedBy,
         role = clientMember.role,
         avatarSeed = avatarSeed,
         createdAt = clientMember.createdAt
@@ -53,6 +56,7 @@ object PlanMapper {
         username = member.username,
         email = member.email,
         invitationStatus = member.invitationStatus,
+        invitedBy = member.invitedBy,
         role = member.role,
         avatarSeed = member.avatarSeed,
         avatar = member.avatarSeed?.let { AvatarMapper.toResponse(AvatarGenerator.generate(it)) },
