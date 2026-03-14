@@ -34,7 +34,6 @@ export function AccountPage() {
               <ProfileForm
                 user={user}
                 onSave={login}
-                onAvatarChange={login}
                 submitLabel="Update Profile"
                 showEmail
               />

@@ -143,7 +143,7 @@ export function ItineraryModal({ isOpen, onClose, planId, isOwner, refreshKey }:
   const grouped = groupEventsByDate(events);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="itinerary-modal">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" className="itinerary-modal">
         {/* Header */}
         <div className="itinerary-header">
           <div className="itinerary-header-icon">

@@ -129,47 +129,8 @@
   position: relative;
 }
 
-.login-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
 .login-field--appear {
   animation: fade-in-up 0.3s ease;
-}
-
-.login-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--charcoal-light);
-  letter-spacing: 0.02em;
-}
-
-.login-optional {
-  font-weight: 400;
-  opacity: 0.6;
-  font-style: italic;
-}
-
-.login-input {
-  padding: 12px 16px;
-  border: 2px solid var(--tan-deep);
-  border-radius: var(--radius-md);
-  font-size: 0.95rem;
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--charcoal);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.login-input:focus {
-  border-color: var(--lavender-deep);
-  box-shadow: 0 0 0 3px rgba(184, 165, 204, 0.25);
-}
-
-.login-input::placeholder {
-  color: var(--tan-deep);
-  font-style: italic;
 }
 
 .login-error {

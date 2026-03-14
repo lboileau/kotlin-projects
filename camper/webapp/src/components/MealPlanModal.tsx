@@ -326,7 +326,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   const uniqueThemes = [...new Set(recipes.map(r => r.theme).filter(Boolean))] as string[];
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" className="meal-plan-modal">
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" className="meal-plan-modal">
         {/* Header */}
         <div className="mp-header">
           <div className="mp-header-left">
