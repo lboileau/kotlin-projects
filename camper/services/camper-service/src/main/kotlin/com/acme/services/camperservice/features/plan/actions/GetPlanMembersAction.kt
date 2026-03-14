@@ -45,7 +45,8 @@ internal class GetPlanMembersAction(
                         clientMember,
                         username = user?.username,
                         email = user?.email ?: invitation?.email,
-                        invitationStatus = invitation?.status
+                        invitationStatus = invitation?.status,
+                        avatarSeed = user?.avatarSeed
                     )
                 }
                 Result.Success(members)

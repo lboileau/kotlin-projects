@@ -26,6 +26,7 @@ internal class CreateUserAction(private val userClient: UserClient) {
             val existingUser = existing.value
             if (existingUser.username == null && param.username != null) {
                 logger.debug("Updating username for existing user email={}", param.email)
+                // TODO: Generate avatar seed via AvatarGenerator.seedFromName() if avatarSeed is null
                 val updated = userClient.update(ClientUpdateUserParam(id = existingUser.id, username = param.username))
                 if (updated is Result.Success) return Result.Success(UserMapper.fromClient(updated.value))
             }
@@ -34,6 +35,7 @@ internal class CreateUserAction(private val userClient: UserClient) {
         }
 
         logger.debug("Creating user email={}", param.email)
+        // TODO: Generate initial avatar seed via AvatarGenerator.seedFromName(username ?: email)
         return when (val result = userClient.create(ClientCreateUserParam(email = param.email, username = param.username))) {
             is Result.Success -> Result.Success(UserMapper.fromClient(result.value))
             is Result.Failure -> Result.Failure(UserError.fromClientError(result.error))

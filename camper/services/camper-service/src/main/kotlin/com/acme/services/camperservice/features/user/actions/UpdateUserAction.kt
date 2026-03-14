@@ -23,7 +23,14 @@ internal class UpdateUserAction(private val userClient: UserClient) {
         }
 
         logger.debug("Updating user id={}", param.userId)
-        return when (val result = userClient.update(ClientUpdateUserParam(id = param.userId, username = param.username))) {
+        // TODO: Handle dietary restrictions via userClient.setDietaryRestrictions()
+        // TODO: Pass experienceLevel and profileCompleted to client update
+        return when (val result = userClient.update(ClientUpdateUserParam(
+            id = param.userId,
+            username = param.username,
+            experienceLevel = param.experienceLevel,
+            profileCompleted = param.profileCompleted
+        ))) {
             is Result.Success -> Result.Success(UserMapper.fromClient(result.value))
             is Result.Failure -> Result.Failure(UserError.fromClientError(result.error))
         }

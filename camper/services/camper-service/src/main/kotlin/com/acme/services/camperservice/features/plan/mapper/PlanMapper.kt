@@ -2,10 +2,12 @@ package com.acme.services.camperservice.features.plan.mapper
 
 import com.acme.clients.planclient.model.Plan as ClientPlan
 import com.acme.clients.planclient.model.PlanMember as ClientPlanMember
+import com.acme.libs.avatargenerator.AvatarGenerator
 import com.acme.services.camperservice.features.plan.dto.PlanMemberResponse
 import com.acme.services.camperservice.features.plan.dto.PlanResponse
 import com.acme.services.camperservice.features.plan.model.Plan
 import com.acme.services.camperservice.features.plan.model.PlanMember
+import com.acme.services.camperservice.features.user.mapper.AvatarMapper
 
 object PlanMapper {
 
@@ -18,13 +20,20 @@ object PlanMapper {
         updatedAt = clientPlan.updatedAt
     )
 
-    fun fromClient(clientMember: ClientPlanMember, username: String? = null, email: String? = null, invitationStatus: String? = null): PlanMember = PlanMember(
+    fun fromClient(
+        clientMember: ClientPlanMember,
+        username: String? = null,
+        email: String? = null,
+        invitationStatus: String? = null,
+        avatarSeed: String? = null
+    ): PlanMember = PlanMember(
         planId = clientMember.planId,
         userId = clientMember.userId,
         username = username,
         email = email,
         invitationStatus = invitationStatus,
         role = clientMember.role,
+        avatarSeed = avatarSeed,
         createdAt = clientMember.createdAt
     )
 
@@ -45,6 +54,8 @@ object PlanMapper {
         email = member.email,
         invitationStatus = member.invitationStatus,
         role = member.role,
+        avatarSeed = member.avatarSeed,
+        avatar = member.avatarSeed?.let { AvatarMapper.toResponse(AvatarGenerator.generate(it)) },
         createdAt = member.createdAt
     )
 }

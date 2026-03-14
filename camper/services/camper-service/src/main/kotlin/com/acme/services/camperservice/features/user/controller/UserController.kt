@@ -5,10 +5,7 @@ import com.acme.services.camperservice.features.user.dto.AuthRequest
 import com.acme.services.camperservice.features.user.dto.CreateUserRequest
 import com.acme.services.camperservice.features.user.dto.UpdateUserRequest
 import com.acme.services.camperservice.features.user.mapper.UserMapper
-import com.acme.services.camperservice.features.user.params.AuthenticateUserParam
-import com.acme.services.camperservice.features.user.params.CreateUserParam
-import com.acme.services.camperservice.features.user.params.GetUserByIdParam
-import com.acme.services.camperservice.features.user.params.UpdateUserParam
+import com.acme.services.camperservice.features.user.params.*
 import com.acme.services.camperservice.features.user.service.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -47,7 +44,29 @@ class UserController(private val userService: UserService) {
         @RequestBody request: UpdateUserRequest
     ): ResponseEntity<Any> {
         logger.info("PUT /api/users/{}", userId)
-        val param = UpdateUserParam(userId = userId, username = request.username, requestingUserId = requestingUserId)
+        val param = UpdateUserParam(
+            userId = userId,
+            username = request.username,
+            experienceLevel = request.experienceLevel,
+            dietaryRestrictions = request.dietaryRestrictions,
+            profileCompleted = request.profileCompleted,
+            requestingUserId = requestingUserId
+        )
         return userService.update(param).toResponseEntity { UserMapper.toResponse(it) }
+    }
+
+    @PostMapping("/api/users/{userId}/randomize-avatar")
+    fun randomizeAvatar(
+        @PathVariable userId: UUID,
+        @RequestHeader("X-User-Id") requestingUserId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/users/{}/randomize-avatar", userId)
+        return ResponseEntity.status(501).body(mapOf("error" to "Not Implemented"))
+    }
+
+    @GetMapping("/api/users/{userId}/avatar")
+    fun getAvatar(@PathVariable userId: UUID): ResponseEntity<Any> {
+        logger.info("GET /api/users/{}/avatar", userId)
+        return ResponseEntity.status(501).body(mapOf("error" to "Not Implemented"))
     }
 }
