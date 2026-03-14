@@ -9,6 +9,7 @@ API service for camping trip planning — user registration, authentication, pla
 - Spring Boot 3.4.3 application on port 8080
 - Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, and `meal-plan-client` for data access
 - Uses `meal-plan-calculator` lib for shopping list computation and unit conversion
+- Uses `avatar-generator` lib for deterministic avatar generation from seed strings
 - Database: `camper-db` (port 5433, database `camper_db`)
 - **WebSocket:** STOMP-over-WebSocket at `/ws` for live updates. `PlanEventPublisher` broadcasts `PlanUpdateMessage(resource, action)` to `/topic/plans/{planId}` after successful mutations.
 
@@ -34,25 +35,32 @@ API service for camping trip planning — user registration, authentication, pla
   - `DELETE /api/worlds/{id}`
 
 ### User (`features/user/`)
-- **Model:** `User(id, email, username?, createdAt, updatedAt)`
-- **DTOs:** `CreateUserRequest(email, username?)`, `AuthRequest(email)`, `UpdateUserRequest(username)`, `UserResponse(id, email, username?, createdAt, updatedAt)`, `AuthResponse(id, email, username?)`
+- **Model:** `User(id, email, username?, experienceLevel?, avatarSeed?, profileCompleted, dietaryRestrictions, createdAt, updatedAt)`
+- **DTOs:**
+  - Requests: `CreateUserRequest(email, username?)`, `AuthRequest(email)`, `UpdateUserRequest(username, experienceLevel?, dietaryRestrictions?, profileCompleted?)`
+  - Responses: `UserResponse(id, email, username?, experienceLevel?, avatarSeed?, profileCompleted, dietaryRestrictions, avatar?, createdAt, updatedAt)`, `AuthResponse(id, email, username?, avatarSeed?, profileCompleted, avatar?)`, `AvatarResponse(hairStyle, hairColor, skinColor, clothingStyle, pantsColor, shirtColor)`
 - **Error:** `UserError` sealed class — `NotFound(email)`, `Invalid(field, reason)`, `Forbidden(userId)`, `RegistrationRequired(email)`
-- **Service params:** `GetUserByIdParam(userId)`, `CreateUserParam(email, username?)`, `AuthenticateUserParam(email)`, `UpdateUserParam(userId, username, requestingUserId)`
+- **Service params:** `GetUserByIdParam(userId)`, `CreateUserParam(email, username?)`, `AuthenticateUserParam(email)`, `UpdateUserParam(userId, username, experienceLevel?, dietaryRestrictions?, profileCompleted?, requestingUserId)`, `RandomizeAvatarParam(userId, requestingUserId)`, `GetAvatarParam(userId)`
 - **Actions:**
   - `GetUserByIdAction`: Fetches user by UUID
-  - `CreateUserAction`: Idempotent — checks getByEmail first, returns existing if found
+  - `CreateUserAction`: Idempotent — checks getByEmail first, returns existing if found. Generates initial avatar seed via `AvatarGenerator.seedFromName(username ?: email)`. For invite-flow users (existing stub), generates seed during username update if missing.
   - `AuthenticateUserAction`: Looks up user by email; returns `RegistrationRequired` error if username is null
-  - `UpdateUserAction`: Checks userId == requestingUserId for authorization
-- **Service:** `UserService` facade
+  - `UpdateUserAction`: Checks userId == requestingUserId for authorization. Updates experience level, dietary restrictions (via `setDietaryRestrictions`), and `profileCompleted` flag (one-way: only sets to true). Re-fetches user after update + dietary restrictions for enriched response.
+  - `RandomizeAvatarAction`: Generates random seed via `AvatarGenerator.randomSeed()`, updates user's avatar_seed. Reads user first (username required in UpdateUserParam).
+  - `GetAvatarAction`: Gets user, generates avatar from seed via `AvatarGenerator.generate()`
+- **Mappers:** `UserMapper` (fromClient, toResponse, toAuthResponse) — avatar computed from seed at mapping time. `AvatarMapper` converts `Avatar` model to `AvatarResponse` (lowercase enum names).
+- **Service:** `UserService` facade (methods: getById, create, authenticate, update, randomizeAvatar, getAvatar)
 - **Routes:**
-  - `GET /api/users/{userId}` — get user by ID
-  - `POST /api/users` — register (idempotent, returns 201)
-  - `POST /api/auth` — authenticate by email
-  - `PUT /api/users/{userId}` — update username (requires `X-User-Id` header)
+  - `GET /api/users/{userId}` — get user by ID (response includes avatar)
+  - `POST /api/users` — register (idempotent, returns 201, generates avatar seed)
+  - `POST /api/auth` — authenticate by email (response includes profileCompleted for frontend modal logic)
+  - `PUT /api/users/{userId}` — update profile (username, experienceLevel, dietaryRestrictions, profileCompleted; requires `X-User-Id` header)
+  - `POST /api/users/{userId}/randomize-avatar` — re-randomize avatar seed (requires `X-User-Id` header)
+  - `GET /api/users/{userId}/avatar` — get computed avatar for user
 
 ### Plan (`features/plan/`)
-- **Model:** `Plan(id, name, visibility, ownerId, createdAt, updatedAt, isMember=true)`, `PlanMember(planId, userId, username?, email?, invitationStatus?, createdAt)`
-- **DTOs:** `CreatePlanRequest(name)`, `UpdatePlanRequest(name, visibility?)`, `AddMemberRequest(email)`, `PlanResponse(..., isMember)`, `PlanMemberResponse(...)`
+- **Model:** `Plan(id, name, visibility, ownerId, createdAt, updatedAt, isMember=true)`, `PlanMember(planId, userId, username?, email?, invitationStatus?, role, avatarSeed?, createdAt)`
+- **DTOs:** `CreatePlanRequest(name)`, `UpdatePlanRequest(name, visibility?)`, `AddMemberRequest(email)`, `PlanResponse(..., isMember)`, `PlanMemberResponse(..., avatarSeed?, avatar?)`
 - **Error:** `PlanError` sealed class — `NotFound`, `NotOwner`, `AlreadyMember`, `NotMember`, `Invalid`
 - **Service params:** `CreatePlanParam(name, userId)`, `GetPlansParam(userId)`, `UpdatePlanParam(planId, name, visibility?, userId)`, `DeletePlanParam(planId, userId)`, `GetPlanMembersParam(planId)`, `AddPlanMemberParam(planId, email)`, `RemovePlanMemberParam(planId, userId, requestingUserId)`
 - **Actions:**
@@ -60,7 +68,7 @@ API service for camping trip planning — user registration, authentication, pla
   - `GetPlansAction`: Merges user's plans + public plans (deduped), marks non-member public plans with `isMember=false`
   - `UpdatePlanAction`: Owner-only, supports updating name and/or visibility
   - `DeletePlanAction`: Owner-only
-  - `GetPlanMembersAction`: Lists plan members, enriches with username and invitation status
+  - `GetPlanMembersAction`: Lists plan members, enriches with username, invitation status, and avatar seed (service-layer enrichment from user lookup — no plan-client changes)
   - `AddPlanMemberAction`: Uses userClient.getOrCreate, adds member, creates invitation, sends email (with dedup)
   - `RemovePlanMemberAction`: Self-remove or owner can remove
 - **Service:** `PlanService` facade (takes PlanClient + UserClient + EmailClient + InvitationClient)
@@ -240,7 +248,7 @@ API service for camping trip planning — user registration, authentication, pla
 - **Local dev:** `NoOpEmailClient` logs instead of sending real emails; no `RESEND_API_KEY` needed
 
 ## Key Patterns
-- `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` / `ItemMapper` / `ItineraryMapper` / `AssignmentMapper` adapt client models to service models
+- `WorldMapper.fromClient()` / `UserMapper` / `PlanMapper` / `ItemMapper` / `ItineraryMapper` / `AssignmentMapper` / `AvatarMapper` adapt client models to service models
 - Service param objects for all service calls
 - Action classes validate, convert params, call client
 - `GlobalExceptionHandler` catches `RuntimeException::class`
@@ -256,7 +264,7 @@ API service for camping trip planning — user registration, authentication, pla
 - `ItemClientConfig` — creates item client via factory function
 - `ItineraryClientConfig` — creates itinerary client via factory function
 - `WorldServiceConfig` — wires service via `@Configuration` bean
-- `UserServiceConfig` — wires UserService
+- `UserServiceConfig` — wires UserService (takes UserClient; AvatarGenerator is a static object, no DI needed)
 - `PlanServiceConfig` — wires PlanService (takes PlanClient + UserClient + EmailClient + InvitationClient)
 - `ItemServiceConfig` — wires ItemService (takes ItemClient)
 - `ItineraryServiceConfig` — wires ItineraryService (takes ItineraryClient + PlanClient)
@@ -275,8 +283,8 @@ API service for camping trip planning — user registration, authentication, pla
 - `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest`, `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest`, `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
 - **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`

@@ -12,11 +12,12 @@ camper/
 ├── Dockerfile
 ├── libs/
 │   ├── common/               # Shared utilities (no I/O)
+│   ├── avatar-generator/     # Deterministic avatar generation from SHA-256 seed (pure logic)
 │   └── meal-plan-calculator/  # Unit conversion & shopping list computation (pure logic)
 ├── clients/
 │   ├── common/               # Result type, error types, ClientContext
 │   ├── world-client/         # JDBI data access for worlds table
-│   ├── user-client/          # JDBI data access for users table
+│   ├── user-client/          # JDBI data access for users & user_dietary_restrictions tables
 │   ├── plan-client/          # JDBI data access for plans & plan_members tables
 │   ├── item-client/          # JDBI data access for items table
 │   ├── itinerary-client/     # JDBI data access for itineraries & itinerary_events tables
@@ -30,7 +31,7 @@ camper/
 │   └── log-book-client/      # JDBI data access for log_book_faqs & log_book_journal_entries tables
 ├── services/
 │   ├── common/               # ApiResponse shared type
-│   └── camper-service/       # Spring Boot REST API (features: user, plan, item, itinerary, assignment, mealplan, gearsync, webhook, logbook)
+│   └── camper-service/       # Spring Boot REST API (features: user, plan, item, itinerary, assignment, mealplan, gearsync, webhook, logbook, profile/avatar)
 └── databases/
     └── camper-db/            # Schema, migrations, seeds, docker-compose
 ```
@@ -62,6 +63,7 @@ Rule of thumb: "Does it do I/O? → `clients/`. Pure logic/types? → `libs/`."
 - **Service pattern:** Actions (validate → convert → call client) composed into a Service facade. Validations are 1:1 with actions.
 - **Live updates:** STOMP-over-WebSocket via `PlanEventPublisher`. Controllers publish `{ resource, action }` messages to `/topic/plans/{planId}` after successful mutations. Frontend subscribes per-plan and refetches on notification (deferred while modals are open).
 - **Computed read-time data:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles unit conversion and aggregation (pure logic, no I/O). Only purchase records are stored.
+- **Computed avatars:** Avatar properties are deterministically generated at read time from a stored seed string using the `avatar-generator` lib (SHA-256 → enum indices). No avatar images are stored.
 - **Testing:** Unit tests with FakeClient, acceptance tests with Testcontainers + @SpringBootTest.
 
 ## Key Conventions
