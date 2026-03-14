@@ -12,6 +12,39 @@ VALUES
     ('f5dda144-e150-9d4d-00b2-b00e118d5f66', 'charlie@example.com', NULL, now(), now())
 ON CONFLICT (email) DO NOTHING;
 
+-- ============================================================
+-- User profile data (rich profiles)
+-- ============================================================
+
+UPDATE users SET
+    experience_level = 'intermediate',
+    avatar_seed = '2bd806c97f0e00af1a1fc3328fa763a9269723c8db8fac4f93af71db186d6e90',
+    profile_completed = true
+WHERE id = 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44';  -- Alice
+
+UPDATE users SET
+    experience_level = 'advanced',
+    avatar_seed = '81b637d8fcd2c6da6359e6963113a1170de795e4b725b84d1e0b4cfd9ec58ce9',
+    profile_completed = true
+WHERE id = 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55';  -- Bob
+
+UPDATE users SET
+    experience_level = 'beginner',
+    avatar_seed = 'b9dd960c1753459a78115d3cb845a57d924b6877e805b08bd01086ccdf34433c',
+    profile_completed = false
+WHERE id = 'f5dda144-e150-9d4d-00b2-b00e118d5f66';  -- Charlie
+
+-- ============================================================
+-- User dietary restrictions
+-- ============================================================
+
+INSERT INTO user_dietary_restrictions (user_id, restriction, created_at)
+VALUES
+    ('d3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'vegetarian', now()),   -- Alice
+    ('e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'gluten_free', now()),  -- Bob
+    ('e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'nut_allergy', now())   -- Bob
+ON CONFLICT DO NOTHING;
+
 INSERT INTO plans (id, name, visibility, owner_id, created_at, updated_at)
 VALUES
     ('10aabb00-1111-2222-3333-444455556666', 'Summer Camping Trip', 'private', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now(), now()),
