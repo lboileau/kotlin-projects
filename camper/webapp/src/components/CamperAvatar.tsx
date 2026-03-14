@@ -22,14 +22,14 @@ interface Props {
 }
 
 const AVATAR_COLORS = [
-  { body: '#6B4E3D', accent: '#8B6B4A', hood: '#3A5A3A', skin: '#D4A574' },
-  { body: '#4A5A6A', accent: '#5A6A7A', hood: '#2A3A4A', skin: '#C4946A' },
-  { body: '#5A4A3A', accent: '#7A6A5A', hood: '#6A3A2A', skin: '#DCAC7C' },
-  { body: '#4A6A5A', accent: '#5A7A6A', hood: '#3A4A3A', skin: '#C89A6A' },
-  { body: '#6A5A4A', accent: '#8A7A6A', hood: '#4A3A2A', skin: '#D4A070' },
-  { body: '#5A5A6A', accent: '#6A6A7A', hood: '#3A3A5A', skin: '#CCA478' },
-  { body: '#5A4A4A', accent: '#7A5A4A', hood: '#4A5A4A', skin: '#D8AA74' },
-  { body: '#4A5A4A', accent: '#6A7A5A', hood: '#3A4A3A', skin: '#C8986A' },
+  { body: '#6B4E3D', accent: '#8B6B4A', hood: '#3A5A3A', skin: '#D4A574', hairStyle: 'short' },
+  { body: '#4A5A6A', accent: '#5A6A7A', hood: '#2A3A4A', skin: '#C4946A', hairStyle: 'short' },
+  { body: '#5A4A3A', accent: '#7A6A5A', hood: '#6A3A2A', skin: '#DCAC7C', hairStyle: 'short' },
+  { body: '#4A6A5A', accent: '#5A7A6A', hood: '#3A4A3A', skin: '#C89A6A', hairStyle: 'short' },
+  { body: '#6A5A4A', accent: '#8A7A6A', hood: '#4A3A2A', skin: '#D4A070', hairStyle: 'short' },
+  { body: '#5A5A6A', accent: '#6A6A7A', hood: '#3A3A5A', skin: '#CCA478', hairStyle: 'short' },
+  { body: '#5A4A4A', accent: '#7A5A4A', hood: '#4A5A4A', skin: '#D8AA74', hairStyle: 'short' },
+  { body: '#4A5A4A', accent: '#6A7A5A', hood: '#3A4A3A', skin: '#C8986A', hairStyle: 'short' },
 ];
 
 // Maps backend avatar enum values to hex colors for the SVG figure
