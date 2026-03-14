@@ -23,6 +23,12 @@ interface UserClient {
     /** Get an existing user by email, or create one if not found. */
     fun getOrCreate(param: GetOrCreateUserParam): Result<User, AppError>
 
-    /** Update a user's username. */
+    /** Update a user's profile. */
     fun update(param: UpdateUserParam): Result<User, AppError>
+
+    /** Get dietary restrictions for a user. */
+    fun getDietaryRestrictions(param: GetDietaryRestrictionsParam): Result<List<String>, AppError>
+
+    /** Replace all dietary restrictions for a user (idempotent). */
+    fun setDietaryRestrictions(param: SetDietaryRestrictionsParam): Result<List<String>, AppError>
 }

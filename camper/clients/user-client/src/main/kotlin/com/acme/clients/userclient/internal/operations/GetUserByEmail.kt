@@ -24,7 +24,7 @@ internal class GetUserByEmail(private val jdbi: Jdbi) {
         val normalizedEmail = EmailNormalizer.normalize(param.email)
         logger.debug("Finding user by email={}", normalizedEmail)
         val entity = jdbi.withHandle<User?, Exception> { handle ->
-            handle.createQuery("SELECT id, email, username, created_at, updated_at FROM users WHERE ${EmailNormalizer.SQL_EXPRESSION} = :email")
+            handle.createQuery("SELECT id, email, username, experience_level, avatar_seed, profile_completed, created_at, updated_at FROM users WHERE ${EmailNormalizer.SQL_EXPRESSION} = :email")
                 .bind("email", normalizedEmail)
                 .map { rs, _ -> UserRowAdapter.fromResultSet(rs) }
                 .findOne()

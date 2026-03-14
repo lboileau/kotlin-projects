@@ -14,10 +14,14 @@ internal class JdbiUserClient(jdbi: Jdbi) : UserClient {
     private val createUser = CreateUser(jdbi)
     private val getOrCreateUser = GetOrCreateUser(getUserByEmail, createUser)
     private val updateUser = UpdateUser(jdbi, getUserById)
+    private val getDietaryRestrictions = GetDietaryRestrictions(jdbi)
+    private val setDietaryRestrictions = SetDietaryRestrictions(jdbi)
 
     override fun getById(param: GetByIdParam): Result<User, AppError> = getUserById.execute(param)
     override fun getByEmail(param: GetByEmailParam): Result<User, AppError> = getUserByEmail.execute(param)
     override fun create(param: CreateUserParam): Result<User, AppError> = createUser.execute(param)
     override fun getOrCreate(param: GetOrCreateUserParam): Result<User, AppError> = getOrCreateUser.execute(param)
     override fun update(param: UpdateUserParam): Result<User, AppError> = updateUser.execute(param)
+    override fun getDietaryRestrictions(param: GetDietaryRestrictionsParam): Result<List<String>, AppError> = getDietaryRestrictions.execute(param)
+    override fun setDietaryRestrictions(param: SetDietaryRestrictionsParam): Result<List<String>, AppError> = setDietaryRestrictions.execute(param)
 }
