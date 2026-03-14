@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api, type LogBookFaqResponse, type LogBookJournalEntryResponse } from '../api/client';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import './Modal.css';
+import { Modal } from './ui/Modal';
 import './LogBookModal.css';
 
 interface Props {
@@ -168,14 +168,11 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
     }
   };
 
-  if (!isOpen) return null;
-
   const currentEntry = entries[currentPage];
   const totalPages = entries.length;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content logbook-modal" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={onClose} className="logbook-modal">
         {/* Header */}
         <div className="logbook-header">
           <div className="logbook-header-icon">
@@ -504,7 +501,6 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
             Close
           </Button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

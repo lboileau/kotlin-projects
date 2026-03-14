@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import './Modal.css';
+import { Modal } from './ui/Modal';
 
 interface Props {
   isOpen: boolean;
@@ -14,8 +14,6 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<number, string>>({});
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  if (!isOpen) return null;
 
   const addRow = () => {
     setEmails([...emails, '']);
@@ -98,8 +96,7 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
   const hasValidEmail = emails.some(em => em.trim().length > 0);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={onClose}>
         <div className="modal-icon-large">
           <svg width="48" height="48" viewBox="0 0 48 48">
             <circle cx="24" cy="16" r="10" fill="var(--lavender)" />
@@ -151,7 +148,6 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

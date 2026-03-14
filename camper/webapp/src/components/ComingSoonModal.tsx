@@ -1,5 +1,5 @@
 import { Button } from './ui/Button';
-import './Modal.css';
+import { Modal } from './ui/Modal';
 
 interface Props {
   isOpen: boolean;
@@ -37,16 +37,13 @@ function getFlavorText(category: string): string {
 }
 
 export function ComingSoonModal({ isOpen, onClose, title, icon }: Props) {
-  if (!isOpen) return null;
-
   const category = title.toLowerCase().includes('equip') ? 'equipment'
     : title.toLowerCase().includes('menu') || title.toLowerCase().includes('kitchen') ? 'kitchen'
     : title.toLowerCase().includes('itinerary') || title.toLowerCase().includes('map') ? 'itinerary'
     : 'tent';
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content modal-content--coming-soon" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={onClose} className="modal-content--coming-soon">
         <div className="modal-icon-large">{icon}</div>
         <h2 className="modal-title">{title}</h2>
         <p className="modal-flavor">{getFlavorText(category)}</p>
@@ -59,7 +56,6 @@ export function ComingSoonModal({ isOpen, onClose, title, icon }: Props) {
         <Button onClick={onClose}>
           Return to Camp
         </Button>
-      </div>
-    </div>
+    </Modal>
   );
 }
