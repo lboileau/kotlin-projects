@@ -39,7 +39,15 @@ internal class UpdateUser(
                         .bind("updatedAt", now)
                         .execute()
                 }
-                success(existing.value.copy(username = param.username, updatedAt = now))
+                success(
+                    existing.value.copy(
+                        username = param.username,
+                        experienceLevel = param.experienceLevel ?: existing.value.experienceLevel,
+                        avatarSeed = param.avatarSeed ?: existing.value.avatarSeed,
+                        profileCompleted = if (param.profileCompleted == true) true else existing.value.profileCompleted,
+                        updatedAt = now
+                    )
+                )
             }
         }
     }

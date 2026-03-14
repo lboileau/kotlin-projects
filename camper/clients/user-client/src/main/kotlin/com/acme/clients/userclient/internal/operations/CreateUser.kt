@@ -30,17 +30,28 @@ internal class CreateUser(private val jdbi: Jdbi) {
                 val now = Instant.now()
                 handle.createUpdate(
                     """
-                    INSERT INTO users (id, email, username, created_at, updated_at)
-                    VALUES (:id, :email, :username, :createdAt, :updatedAt)
+                    INSERT INTO users (id, email, username, avatar_seed, created_at, updated_at)
+                    VALUES (:id, :email, :username, :avatarSeed, :createdAt, :updatedAt)
                     """.trimIndent()
                 )
                     .bind("id", id)
                     .bind("email", normalizedEmail)
                     .bind("username", param.username)
+                    .bind("avatarSeed", param.avatarSeed)
                     .bind("createdAt", now)
                     .bind("updatedAt", now)
                     .execute()
-                User(id = id, email = normalizedEmail, username = param.username, createdAt = now, updatedAt = now)
+                User(
+                    id = id,
+                    email = normalizedEmail,
+                    username = param.username,
+                    experienceLevel = null,
+                    avatarSeed = param.avatarSeed,
+                    profileCompleted = false,
+                    dietaryRestrictions = emptyList(),
+                    createdAt = now,
+                    updatedAt = now
+                )
             }
             success(entity)
         } catch (e: Exception) {
