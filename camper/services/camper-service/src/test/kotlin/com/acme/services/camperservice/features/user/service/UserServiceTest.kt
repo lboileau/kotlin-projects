@@ -383,9 +383,9 @@ class UserServiceTest {
             val result = userService.randomizeAvatar(RandomizeAvatarParam(userId = created.id, requestingUserId = created.id))
 
             assertThat(result.isSuccess).isTrue()
-            val user = (result as Result.Success).value
-            assertThat(user.avatarSeed).isNotNull()
-            assertThat(user.avatarSeed).isNotEqualTo(originalSeed)
+            val preview = (result as Result.Success).value
+            assertThat(preview.seed).isNotNull()
+            assertThat(preview.seed).isNotEqualTo(originalSeed)
         }
 
         @Test

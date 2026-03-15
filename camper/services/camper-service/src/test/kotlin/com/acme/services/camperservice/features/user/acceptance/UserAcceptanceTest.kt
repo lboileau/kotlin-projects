@@ -5,6 +5,7 @@ import com.acme.services.camperservice.features.plan.dto.PlanMemberResponse
 import com.acme.services.camperservice.features.user.acceptance.fixture.UserFixture
 import com.acme.services.camperservice.features.user.dto.AuthRequest
 import com.acme.services.camperservice.features.user.dto.AuthResponse
+import com.acme.services.camperservice.features.user.dto.AvatarPreviewResponse
 import com.acme.services.camperservice.features.user.dto.AvatarResponse
 import com.acme.services.camperservice.features.user.dto.CreateUserRequest
 import com.acme.services.camperservice.features.user.dto.UpdateUserRequest
@@ -501,12 +502,12 @@ class UserAcceptanceTest {
                 "/api/users/$userId/randomize-avatar",
                 HttpMethod.POST,
                 jsonEntityWithUserId(null, userId),
-                UserResponse::class.java
+                AvatarPreviewResponse::class.java
             )
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-            assertThat(response.body!!.avatarSeed).isNotNull()
-            assertThat(response.body!!.avatarSeed).isNotEqualTo("old-seed")
+            assertThat(response.body!!.seed).isNotNull()
+            assertThat(response.body!!.seed).isNotEqualTo("old-seed")
             assertThat(response.body!!.avatar).isNotNull
         }
 
