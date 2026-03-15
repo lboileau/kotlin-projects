@@ -29,7 +29,8 @@ internal class UpdateUserAction(private val userClient: UserClient) {
             id = param.userId,
             username = param.username,
             experienceLevel = param.experienceLevel,
-            profileCompleted = param.profileCompleted
+            profileCompleted = param.profileCompleted,
+            avatarSeed = param.avatarSeed
         ))
         if (updateResult is Result.Failure) return Result.Failure(UserError.fromClientError(updateResult.error))
 

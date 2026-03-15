@@ -22,15 +22,14 @@ export function ProfileForm({ user, onSave, submitLabel = 'Save Profile', showEm
   const [experienceLevel, setExperienceLevel] = useState(user.experienceLevel || '');
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>(user.dietaryRestrictions || []);
   const [avatar, setAvatar] = useState<AvatarResponse | null>(user.avatar);
+  const [avatarSeed, setAvatarSeed] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [randomizing, setRandomizing] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
 
-  const [avatarDirty, setAvatarDirty] = useState(false);
-
   const isDirty =
-    avatarDirty ||
+    avatarSeed !== null ||
     username.trim() !== (user.username || '') ||
     experienceLevel !== (user.experienceLevel || '') ||
     JSON.stringify([...dietaryRestrictions].sort()) !== JSON.stringify([...(user.dietaryRestrictions || [])].sort());
@@ -38,9 +37,9 @@ export function ProfileForm({ user, onSave, submitLabel = 'Save Profile', showEm
   const handleRandomize = async () => {
     setRandomizing(true);
     try {
-      const updated = await api.randomizeAvatar(user.id);
-      setAvatar(updated.avatar);
-      setAvatarDirty(true);
+      const preview = await api.randomizeAvatar(user.id);
+      setAvatar(preview.avatar);
+      setAvatarSeed(preview.seed);
     } catch {
       // silently fail
     } finally {
@@ -60,11 +59,10 @@ export function ProfileForm({ user, onSave, submitLabel = 'Save Profile', showEm
         experienceLevel: experienceLevel || null,
         dietaryRestrictions,
         ...(markProfileCompleted ? { profileCompleted: true } : {}),
+        ...(avatarSeed ? { avatarSeed } : {}),
       });
-      // Include the latest avatar (may have been randomized locally)
-      const result = avatar !== user.avatar ? { ...updated, avatar } : updated;
-      onSave(result);
-      setAvatarDirty(false);
+      onSave(updated);
+      setAvatarSeed(null);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {

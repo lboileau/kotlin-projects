@@ -33,3 +33,8 @@ data class AvatarResponse(
     val pantsColor: String,
     val shirtColor: String
 )
+
+data class AvatarPreviewResponse(
+    val seed: String,
+    val avatar: AvatarResponse
+)

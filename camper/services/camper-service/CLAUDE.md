@@ -37,16 +37,16 @@ API service for camping trip planning — user registration, authentication, pla
 ### User (`features/user/`)
 - **Model:** `User(id, email, username?, experienceLevel?, avatarSeed?, profileCompleted, dietaryRestrictions, createdAt, updatedAt)`
 - **DTOs:**
-  - Requests: `CreateUserRequest(email, username?)`, `AuthRequest(email)`, `UpdateUserRequest(username, experienceLevel?, dietaryRestrictions?, profileCompleted?)`
-  - Responses: `UserResponse(id, email, username?, experienceLevel?, avatarSeed?, profileCompleted, dietaryRestrictions, avatar?, createdAt, updatedAt)`, `AuthResponse(id, email, username?, avatarSeed?, profileCompleted, avatar?)`, `AvatarResponse(hairStyle, hairColor, skinColor, clothingStyle, pantsColor, shirtColor)`
+  - Requests: `CreateUserRequest(email, username?)`, `AuthRequest(email)`, `UpdateUserRequest(username, experienceLevel?, dietaryRestrictions?, profileCompleted?, avatarSeed?)`
+  - Responses: `UserResponse(id, email, username?, experienceLevel?, avatarSeed?, profileCompleted, dietaryRestrictions, avatar?, createdAt, updatedAt)`, `AuthResponse(id, email, username?, avatarSeed?, profileCompleted, avatar?)`, `AvatarResponse(hairStyle, hairColor, skinColor, clothingStyle, pantsColor, shirtColor)`, `AvatarPreviewResponse(seed, avatar)`
 - **Error:** `UserError` sealed class — `NotFound(email)`, `Invalid(field, reason)`, `Forbidden(userId)`, `RegistrationRequired(email)`
-- **Service params:** `GetUserByIdParam(userId)`, `CreateUserParam(email, username?)`, `AuthenticateUserParam(email)`, `UpdateUserParam(userId, username, experienceLevel?, dietaryRestrictions?, profileCompleted?, requestingUserId)`, `RandomizeAvatarParam(userId, requestingUserId)`, `GetAvatarParam(userId)`
+- **Service params:** `GetUserByIdParam(userId)`, `CreateUserParam(email, username?)`, `AuthenticateUserParam(email)`, `UpdateUserParam(userId, username, experienceLevel?, dietaryRestrictions?, profileCompleted?, avatarSeed?, requestingUserId)`, `RandomizeAvatarParam(userId, requestingUserId)`, `GetAvatarParam(userId)`
 - **Actions:**
   - `GetUserByIdAction`: Fetches user by UUID
   - `CreateUserAction`: Idempotent — checks getByEmail first, returns existing if found. Generates initial avatar seed via `AvatarGenerator.seedFromName(username ?: email)`. For invite-flow users (existing stub), generates seed during username update if missing.
   - `AuthenticateUserAction`: Looks up user by email; returns `RegistrationRequired` error if username is null
-  - `UpdateUserAction`: Checks userId == requestingUserId for authorization. Updates experience level, dietary restrictions (via `setDietaryRestrictions`), and `profileCompleted` flag (one-way: only sets to true). Re-fetches user after update + dietary restrictions for enriched response.
-  - `RandomizeAvatarAction`: Generates random seed via `AvatarGenerator.randomSeed()`, updates user's avatar_seed. Reads user first (username required in UpdateUserParam).
+  - `UpdateUserAction`: Checks userId == requestingUserId for authorization. Updates experience level, dietary restrictions (via `setDietaryRestrictions`), `profileCompleted` flag (one-way: only sets to true), and optional `avatarSeed`. Re-fetches user after update + dietary restrictions for enriched response.
+  - `RandomizeAvatarAction`: Generates random seed via `AvatarGenerator.randomSeed()` and computes avatar preview. Returns `AvatarPreviewResponse(seed, avatar)` without persisting — the seed is saved later via `UpdateUserAction` when the user submits the profile form.
   - `GetAvatarAction`: Gets user, generates avatar from seed via `AvatarGenerator.generate()`
 - **Mappers:** `UserMapper` (fromClient, toResponse, toAuthResponse) — avatar computed from seed at mapping time. `AvatarMapper` converts `Avatar` model to `AvatarResponse` (lowercase enum names).
 - **Service:** `UserService` facade (methods: getById, create, authenticate, update, randomizeAvatar, getAvatar)
@@ -54,8 +54,8 @@ API service for camping trip planning — user registration, authentication, pla
   - `GET /api/users/{userId}` — get user by ID (response includes avatar)
   - `POST /api/users` — register (idempotent, returns 201, generates avatar seed)
   - `POST /api/auth` — authenticate by email (response includes profileCompleted for frontend modal logic)
-  - `PUT /api/users/{userId}` — update profile (username, experienceLevel, dietaryRestrictions, profileCompleted; requires `X-User-Id` header)
-  - `POST /api/users/{userId}/randomize-avatar` — re-randomize avatar seed (requires `X-User-Id` header)
+  - `PUT /api/users/{userId}` — update profile (username, experienceLevel, dietaryRestrictions, profileCompleted, avatarSeed; requires `X-User-Id` header)
+  - `POST /api/users/{userId}/randomize-avatar` — generate random avatar preview without persisting (returns `AvatarPreviewResponse(seed, avatar)`; requires `X-User-Id` header)
   - `GET /api/users/{userId}/avatar` — get computed avatar for user
 
 ### Plan (`features/plan/`)

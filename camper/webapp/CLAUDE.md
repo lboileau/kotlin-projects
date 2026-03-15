@@ -27,7 +27,20 @@ webapp/
 │   │   └── usePlanUpdates.ts # STOMP WebSocket hook for live plan updates
 │   ├── context/
 │   │   └── AuthContext.tsx  # Auth state (localStorage-persisted)
+│   ├── lib/
+│   │   ├── avatarConstants.ts          # Shared color maps (SKIN_COLORS, HAIR_COLORS, etc.)
+│   │   └── profileConstants.ts         # Shared option arrays (DIETARY_OPTIONS, EXPERIENCE_OPTIONS)
 │   ├── components/
+│   │   ├── ui/                         # Shared UI primitives
+│   │   │   ├── Button.tsx/css          # Shared button (variants: primary/secondary/danger/ghost/icon)
+│   │   │   ├── Input.tsx               # Shared text input (forwardRef, error prop)
+│   │   │   ├── Select.tsx              # Shared select dropdown (options array)
+│   │   │   ├── FormField.tsx           # Label + children wrapper
+│   │   │   ├── CheckboxGroup.tsx       # 2-column checkbox grid
+│   │   │   ├── Modal.tsx               # Shared modal shell (overlay, close, escape, sizes sm/md/lg/xl)
+│   │   │   └── ui.css                  # Consolidated input/select/checkbox/field styles
+│   │   ├── AvatarPreview.tsx           # Full-body seated avatar SVG preview
+│   │   ├── ProfileForm.tsx/css         # Shared profile editing form (used by modal + account page)
 │   │   ├── ParallaxBackground.tsx/css  # Layered parallax with mouse tracking
 │   │   ├── Campfire.tsx/css            # Animated CSS campfire (flames, embers, smoke, logs, stones)
 │   │   ├── CamperAvatar.tsx/css        # SVG illustrated person seated around fire
@@ -51,6 +64,24 @@ webapp/
 ```
 
 ## Architecture
+
+### Shared UI Components (`components/ui/`)
+All UI primitives are defined once and reused everywhere. Never create ad-hoc styled buttons, inputs, or modals.
+- **`Button`** — variants: `primary`, `secondary`, `danger`, `ghost`, `icon`. Sizes: `sm`, `md`, `lg`. Props: `loading`, `disabled`, `className`, standard HTML button attributes.
+- **`Input`** — styled text input with `forwardRef` and optional `error` prop. CSS class: `ui-input`.
+- **`Select`** — styled select with `options: {value, label}[]` and optional `placeholder`.
+- **`FormField`** — label + children wrapper. CSS classes: `form-field`, `form-field__label`.
+- **`CheckboxGroup`** — 2-column checkbox grid with `options`, `selected`, `onChange`.
+- **`Modal`** — shared modal shell with overlay, close button, escape-to-close. Sizes: `sm` (340px), `md` (420px, default), `lg` (600px), `xl` (860px). Props: `isOpen`, `onClose`, `title?`, `flavor?`, `size`, `closable` (default true), `className`.
+
+### Shared Constants (`lib/`)
+- `avatarConstants.ts` — `SKIN_COLORS`, `HAIR_COLORS`, `SHIRT_COLORS`, `PANTS_COLORS`, `FALLBACK_COLORS`
+- `profileConstants.ts` — `DIETARY_OPTIONS`, `EXPERIENCE_OPTIONS`
+
+### Shared Feature Components
+- **`AvatarPreview`** — full-body seated avatar SVG. Props: `avatar: AvatarResponse | null`, `size?: number`.
+- **`ProfileForm`** — shared profile editing form (trail name, experience, dietary, avatar preview + randomize, submit). Used by both `ProfileSetupModal` and `AccountPage`. Avatar randomize is preview-only (no persistence until save). Props: `user`, `onSave`, `submitLabel?`, `showEmail?`, `markProfileCompleted?`.
+- **`AppHeader`** — shared page header with logo, page title, user avatar, logout. Used by `PlanPage`, `AccountPage`, `HomePage`, `RecipesPage`.
 
 ### API Layer (`api/client.ts`)
 - Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse`, `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
@@ -165,8 +196,12 @@ npx tsc --noEmit
 ## Conventions
 
 - **No UI framework** — all styling is custom CSS with CSS variables
+- **Shared UI components** — all buttons, inputs, selects, modals, and form fields use shared primitives from `components/ui/`. Never create ad-hoc styled versions.
+- **Shared constants** — color maps and option arrays live in `lib/`. Never duplicate in component files.
 - **SVG art** — all illustrations are inline SVG, no external image files
 - **Animations** — CSS-only (keyframes in animations.css), no JS animation libraries
 - **Component pattern:** Each visual component has co-located `.tsx` + `.css` files
-- **Modals** share `Modal.css` for base parchment styling
+- **Modals** use `<Modal>` from `components/ui/Modal` for overlay, close button, escape-to-close. `Modal.css` provides base parchment styling. Custom modal CSS should only add layout (flex, height, overflow), not re-declare background/border/shadow.
+- **Pages** use `<AppHeader>` for the header — never create custom headers
+- **Avatar randomize** is preview-only — the `randomizeAvatar` endpoint returns a preview without persisting. The seed is saved when the profile form is submitted via `updateUser`.
 - **Parallax** uses CSS `calc()` with `--mouse-x`/`--mouse-y` custom properties set via JS mousemove listener

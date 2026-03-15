@@ -50,6 +50,7 @@ class UserController(private val userService: UserService) {
             experienceLevel = request.experienceLevel,
             dietaryRestrictions = request.dietaryRestrictions,
             profileCompleted = request.profileCompleted,
+            avatarSeed = request.avatarSeed,
             requestingUserId = requestingUserId
         )
         return userService.update(param).toResponseEntity { UserMapper.toResponse(it) }
@@ -62,7 +63,7 @@ class UserController(private val userService: UserService) {
     ): ResponseEntity<Any> {
         logger.info("POST /api/users/{}/randomize-avatar", userId)
         val param = RandomizeAvatarParam(userId = userId, requestingUserId = requestingUserId)
-        return userService.randomizeAvatar(param).toResponseEntity { UserMapper.toResponse(it) }
+        return userService.randomizeAvatar(param).toResponseEntity { it }
     }
 
     @GetMapping("/api/users/{userId}/avatar")
