@@ -489,6 +489,7 @@ export function PlanPage() {
           onComplete={(updatedUser) => {
             login(updatedUser);
             setShowProfileSetup(false);
+            loadData();
           }}
           onClose={() => setShowProfileSetup(false)}
         />

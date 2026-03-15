@@ -526,7 +526,7 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
     : 'No canoes launched yet \u2014 paddle up!';
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="assign-modal">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" className="assign-modal">
         {/* Header */}
         <div className="assign-modal-header">
           <div className="assign-modal-header-left">

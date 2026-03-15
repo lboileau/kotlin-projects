@@ -172,7 +172,7 @@ export function LogBookModal({ isOpen, onClose, planId, userId, userRole, member
   const totalPages = entries.length;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="logbook-modal">
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" className="logbook-modal">
         {/* Header */}
         <div className="logbook-header">
           <div className="logbook-header-icon">

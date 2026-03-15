@@ -465,7 +465,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" className="gear-modal">
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" className="gear-modal">
         {/* Header */}
         <div className="gear-modal-header">
           <div className="gear-modal-header-left">

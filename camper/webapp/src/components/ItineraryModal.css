@@ -1,11 +1,8 @@
 .itinerary-modal {
-  max-width: 520px;
-  width: 94%;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
   text-align: left;
-  padding: var(--space-lg) var(--space-xl) var(--space-md);
 }
 
 /* Header */
