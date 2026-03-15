@@ -16,6 +16,7 @@ import { TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG, LogBookSVG } from '
 import { LogBookModal } from '../components/LogBookModal';
 import { ProfileSetupModal } from '../components/ProfileSetupModal';
 import { AppHeader } from '../components/AppHeader';
+import { Button } from '../components/ui/Button';
 import './PlanPage.css';
 
 type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'logbook' | 'addMember' | 'managePlan' | null;
@@ -341,13 +342,13 @@ export function PlanPage() {
                     onKeyDown={e => { if (e.key === 'Enter') handleSavePlanName(); }}
                     placeholder="Plan name"
                   />
-                  <button
-                    className="modal-btn manage-plan-save-btn"
+                  <Button
+                    className="manage-plan-save-btn"
                     onClick={handleSavePlanName}
                     disabled={savingName || !editPlanName.trim() || editPlanName.trim() === plan.name}
                   >
                     {savingName ? '...' : 'Save'}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -409,9 +410,9 @@ export function PlanPage() {
             </div>
 
             <div className="modal-actions" style={{ marginTop: 'var(--space-lg)' }}>
-              <button className="modal-btn" onClick={() => setActiveModal(null)}>
+              <Button onClick={() => setActiveModal(null)}>
                 Done
-              </button>
+              </Button>
             </div>
           </div>
         </div>

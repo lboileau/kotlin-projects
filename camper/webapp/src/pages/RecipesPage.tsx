@@ -11,6 +11,7 @@ import {
 
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
+import { Button } from '../components/ui/Button';
 import './RecipesPage.css';
 import '../components/Modal.css';
 
@@ -1337,24 +1338,24 @@ export function RecipesPage() {
 
                       {/* Actions */}
                       <div className="resolve-modal__actions">
-                        <button
-                          className="modal-btn modal-btn--danger resolve-modal__remove-btn"
+                        <Button
+                          variant="danger"
+                          className="resolve-modal__remove-btn"
                           onClick={() => handleRemoveIngredient()}
                           disabled={resolving}
                         >
                           Remove from recipe
-                        </button>
+                        </Button>
                         <div className="resolve-modal__actions-right">
-                          <button className="modal-btn modal-btn--secondary" onClick={closeResolveModal} disabled={resolving}>
+                          <Button variant="secondary" onClick={closeResolveModal} disabled={resolving}>
                             Cancel
-                          </button>
-                          <button
-                            className="modal-btn"
+                          </Button>
+                          <Button
                             disabled={resolving || (!resolveSelectedId && !(resolveCreateMode && newIngName.trim()))}
                             onClick={handleResolveSave}
                           >
                             {resolving ? 'Saving...' : 'Save'}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </div>
@@ -1805,12 +1806,12 @@ export function RecipesPage() {
             <h2 className="modal-title">Remove from Cookbook?</h2>
             <p className="modal-flavor">"{deletingRecipe.name}" will be lost from the recipe chest.</p>
             <div className="modal-actions">
-              <button className="modal-btn modal-btn--secondary" onClick={() => setDeletingRecipe(null)}>
+              <Button variant="secondary" onClick={() => setDeletingRecipe(null)}>
                 Keep It
-              </button>
-              <button className="modal-btn modal-btn--danger" onClick={handleDeleteConfirm}>
+              </Button>
+              <Button variant="danger" onClick={handleDeleteConfirm}>
                 Remove
-              </button>
+              </Button>
             </div>
           </div>
         </div>

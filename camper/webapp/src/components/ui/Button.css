@@ -1,0 +1,111 @@
+/* ── Shared Button ──────────────────────────── */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Lora', serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* ── Sizes ──────────────────────────────────── */
+
+.btn--sm {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+}
+
+.btn--md {
+  padding: 10px 22px;
+  font-size: 0.9rem;
+}
+
+.btn--lg {
+  padding: 14px 28px;
+  font-size: 1rem;
+}
+
+/* ── Variants ───────────────────────────────── */
+
+/* Primary — sage-green gradient */
+.btn--primary {
+  background: linear-gradient(135deg, var(--sage-deep), var(--sage-dark));
+  color: white;
+  box-shadow: 0 4px 12px rgba(90, 122, 86, 0.3);
+}
+
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(90, 122, 86, 0.4);
+}
+
+.btn--primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Secondary — transparent with border */
+.btn--secondary {
+  background: transparent;
+  color: var(--charcoal-light);
+  border: 1px solid var(--tan-deep);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Danger — rose gradient */
+.btn--danger {
+  background: linear-gradient(135deg, var(--rose-deep), #C44A30);
+  color: white;
+  box-shadow: 0 4px 12px rgba(196, 74, 48, 0.3);
+}
+
+.btn--danger:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(196, 74, 48, 0.4);
+}
+
+.btn--danger:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Ghost — minimal, no background/border */
+.btn--ghost {
+  background: none;
+  border: none;
+  color: var(--sage-dark);
+  font-weight: 600;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+/* Icon — small, circular, for icon-only buttons */
+.btn--icon {
+  background: none;
+  border: none;
+  padding: 6px;
+  border-radius: 50%;
+  color: var(--charcoal-light);
+}
+
+.btn--icon:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ── States ─────────────────────────────────── */
+
+.btn:disabled,
+.btn--loading {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

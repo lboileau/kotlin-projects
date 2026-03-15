@@ -1,3 +1,4 @@
+import { Button } from './ui/Button';
 import './Modal.css';
 
 interface Props {
@@ -55,9 +56,9 @@ export function ComingSoonModal({ isOpen, onClose, title, icon }: Props) {
           </svg>
         </div>
         <p className="modal-subtitle">This part of camp is still being set up. Check back soon, adventurer.</p>
-        <button className="modal-btn" onClick={onClose}>
+        <Button onClick={onClose}>
           Return to Camp
-        </button>
+        </Button>
       </div>
     </div>
   );

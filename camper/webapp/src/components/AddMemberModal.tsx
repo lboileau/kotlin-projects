@@ -1,4 +1,6 @@
 import { useState, useRef } from 'react';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import './Modal.css';
 
 interface Props {
@@ -114,10 +116,9 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
           {emails.map((email, i) => (
             <div key={i} className="modal-email-row">
               <div className="modal-email-input-wrap">
-                <input
+                <Input
                   ref={el => { inputRefs.current[i] = el; }}
                   type="email"
-                  className="modal-input"
                   placeholder="fellow.adventurer@email.com"
                   value={email}
                   onChange={e => updateEmail(i, e.target.value)}
@@ -142,12 +143,12 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
             + Add another email
           </button>
           <div className="modal-actions">
-            <button type="button" className="modal-btn modal-btn--secondary" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
-            </button>
-            <button type="submit" className="modal-btn" disabled={loading || !hasValidEmail}>
+            </Button>
+            <Button type="submit" disabled={loading || !hasValidEmail}>
               {loading ? 'Summoning...' : emails.filter(e => e.trim()).length > 1 ? 'Send Invitations' : 'Send Invitation'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

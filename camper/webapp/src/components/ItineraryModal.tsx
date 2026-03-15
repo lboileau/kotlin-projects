@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api, type ItineraryEvent } from '../api/client';
+import { Button } from './ui/Button';
+import { Input } from './ui/Input';
 import './Modal.css';
 import './ItineraryModal.css';
 
@@ -179,15 +181,13 @@ export function ItineraryModal({ isOpen, onClose, planId, isOwner, refreshKey }:
               <h3 className="itinerary-form-title">
                 {editingEvent ? 'Edit Event' : 'New Event'}
               </h3>
-              <input
-                className="modal-input"
+              <Input
                 placeholder="Event title"
                 value={form.title}
                 onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                 autoFocus
               />
-              <input
-                className="modal-input"
+              <Input
                 type="datetime-local"
                 value={form.eventAt}
                 onChange={e => setForm(f => ({ ...f, eventAt: e.target.value }))}
@@ -208,12 +208,12 @@ export function ItineraryModal({ isOpen, onClose, planId, isOwner, refreshKey }:
               />
               {error && <p className="modal-error">{error}</p>}
               <div className="modal-actions">
-                <button type="button" className="modal-btn modal-btn--secondary" onClick={resetForm}>
+                <Button type="button" variant="secondary" onClick={resetForm}>
                   Cancel
-                </button>
-                <button type="submit" className="modal-btn" disabled={saving}>
+                </Button>
+                <Button type="submit" disabled={saving}>
                   {saving ? 'Saving...' : editingEvent ? 'Update' : 'Add Event'}
-                </button>
+                </Button>
               </div>
             </form>
           ) : events.length === 0 ? (
@@ -316,17 +316,17 @@ export function ItineraryModal({ isOpen, onClose, planId, isOwner, refreshKey }:
         {/* Footer */}
         <div className="itinerary-footer">
           {isOwner && !showForm && (
-            <button className="modal-btn itinerary-add-btn" onClick={() => { setShowForm(true); setEditingEvent(null); setForm(EMPTY_FORM); }}>
+            <Button className="itinerary-add-btn" onClick={() => { setShowForm(true); setEditingEvent(null); setForm(EMPTY_FORM); }}>
               <svg width="14" height="14" viewBox="0 0 14 14">
                 <line x1="7" y1="2" x2="7" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                 <line x1="2" y1="7" x2="12" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
               Add Event
-            </button>
+            </Button>
           )}
-          <button className="modal-btn modal-btn--secondary" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

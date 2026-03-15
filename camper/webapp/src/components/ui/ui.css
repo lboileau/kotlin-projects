@@ -1,0 +1,96 @@
+/* ── Shared Form Components ─────────────────── */
+
+/* Input */
+.ui-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border: 2px solid var(--tan-deep);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--charcoal);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ui-input:focus {
+  border-color: var(--lavender-deep);
+  box-shadow: 0 0 0 3px rgba(184, 165, 204, 0.3);
+}
+
+.ui-input::placeholder {
+  color: var(--tan-deep);
+  font-style: italic;
+}
+
+.ui-input--error {
+  border-color: var(--flame);
+}
+
+.ui-input__error {
+  font-size: 0.8rem;
+  color: var(--flame);
+  margin-top: 4px;
+}
+
+/* Select */
+.ui-select {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  border: 2px solid var(--tan-deep);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--charcoal);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%235A5A5A' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.ui-select:focus {
+  border-color: var(--lavender-deep);
+  box-shadow: 0 0 0 3px rgba(184, 165, 204, 0.3);
+}
+
+/* CheckboxGroup */
+.ui-checkbox-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.ui-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--charcoal);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.ui-checkbox-item input[type="checkbox"] {
+  accent-color: var(--sage-deep);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* FormField */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field__label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--charcoal-light);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
