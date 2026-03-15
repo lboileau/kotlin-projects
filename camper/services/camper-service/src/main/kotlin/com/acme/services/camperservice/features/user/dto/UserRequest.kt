@@ -8,5 +8,6 @@ data class UpdateUserRequest(
     val username: String,
     val experienceLevel: String? = null,
     val dietaryRestrictions: List<String>? = null,
-    val profileCompleted: Boolean? = null
+    val profileCompleted: Boolean? = null,
+    val avatarSeed: String? = null
 )

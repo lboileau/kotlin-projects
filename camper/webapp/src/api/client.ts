@@ -412,6 +412,7 @@ export const api = {
     experienceLevel?: string | null;
     dietaryRestrictions?: string[] | null;
     profileCompleted?: boolean;
+    avatarSeed?: string;
   }): Promise<User> {
     return request(`/api/users/${userId}`, {
       method: 'PUT',
@@ -419,7 +420,7 @@ export const api = {
     });
   },
 
-  randomizeAvatar(userId: string): Promise<User> {
+  randomizeAvatar(userId: string): Promise<{ seed: string; avatar: AvatarResponse }> {
     return request(`/api/users/${userId}/randomize-avatar`, {
       method: 'POST',
     });
