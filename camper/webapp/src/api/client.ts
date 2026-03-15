@@ -366,6 +366,40 @@ export interface CopyToTripRequest {
   servings?: number;
 }
 
+// ── Gear Pack Types ──────────────────────────
+
+export interface GearPackSummary {
+  id: string;
+  name: string;
+  description: string;
+  itemCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GearPackDetail {
+  id: string;
+  name: string;
+  description: string;
+  items: GearPackItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GearPackItem {
+  id: string;
+  name: string;
+  category: string;
+  defaultQuantity: number;
+  scalable: boolean;
+  sortOrder: number;
+}
+
+export interface ApplyGearPackResponse {
+  appliedCount: number;
+  items: Item[];
+}
+
 // ── Log Book Types ──────────────────────────
 
 export interface LogBookFaqResponse {
@@ -889,6 +923,23 @@ export const api = {
   deleteLogBookJournalEntry(planId: string, entryId: string): Promise<void> {
     return request(`/api/plans/${planId}/log-book/journal/${entryId}`, {
       method: 'DELETE',
+    });
+  },
+
+  // ── Gear Packs ──────────────────────────
+
+  getGearPacks(): Promise<GearPackSummary[]> {
+    return request('/api/gear-packs');
+  },
+
+  getGearPack(id: string): Promise<GearPackDetail> {
+    return request(`/api/gear-packs/${id}`);
+  },
+
+  applyGearPack(id: string, data: { planId: string; groupSize: number }): Promise<ApplyGearPackResponse> {
+    return request(`/api/gear-packs/${id}/apply`, {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   },
 };

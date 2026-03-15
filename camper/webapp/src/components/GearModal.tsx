@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, type Item, type PlanMember } from '../api/client';
 import { Modal } from './ui/Modal';
+import { GearPacksPanel } from './GearPacksPanel';
 import './GearModal.css';
 
 export interface CategoryDef {
@@ -21,6 +22,7 @@ interface ChecklistModalConfig {
   categories: CategoryDef[];
   planOnly?: boolean;
   dayTabs?: boolean;
+  showGearPacks?: boolean;
 }
 
 interface ChecklistModalProps {
@@ -519,6 +521,16 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
                 </div>
               )}
 
+              {/* Gear Packs */}
+              {config.showGearPacks && canEditShared && (
+                <GearPacksPanel
+                  planId={planId}
+                  memberCount={members.length}
+                  canEdit={canEditShared}
+                  onItemsChanged={loadItems}
+                />
+              )}
+
               {/* Plan checklist */}
               <ChecklistSection
                 title={config.dayTabs ? `Day ${activeDay}` : config.sharedTitle}
@@ -603,6 +615,7 @@ const GEAR_CONFIG: ChecklistModalConfig = {
   sharedSubtitle: 'For the whole group',
   personalDividerLabel: 'Personal Packs',
   categories: GEAR_CATEGORIES,
+  showGearPacks: true,
 };
 
 interface ModalProps {

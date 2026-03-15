@@ -1,0 +1,287 @@
+/* ==========================================
+   GEAR PACKS PANEL — Template Pack Selector
+   ========================================== */
+
+.gear-packs-panel {
+  margin-bottom: var(--space-sm);
+  border: 1px solid rgba(168, 139, 91, 0.15);
+  border-radius: var(--radius-sm);
+  background: rgba(184, 165, 204, 0.06);
+}
+
+/* ── Header ─────────────────────────────── */
+
+.gear-packs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.gear-packs-header:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.gear-packs-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.gear-packs-chevron {
+  color: var(--charcoal-light);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.gear-packs-chevron--open {
+  transform: rotate(90deg);
+}
+
+.gear-packs-icon {
+  color: var(--lavender-deep);
+  flex-shrink: 0;
+}
+
+.gear-packs-title {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.gear-packs-badge {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--lavender-deep);
+  background: rgba(184, 165, 204, 0.15);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* ── Body ───────────────────────────────── */
+
+.gear-packs-body {
+  padding: 0 var(--space-md) var(--space-md);
+  animation: gear-section-expand 0.2s ease;
+}
+
+.gear-packs-loading,
+.gear-packs-empty {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--charcoal-light);
+  padding: var(--space-xs) 0;
+}
+
+/* ── Success / Error Messages ────────────── */
+
+.gear-packs-success {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--sage-dark);
+  background: rgba(143, 176, 138, 0.12);
+  border: 1px solid rgba(143, 176, 138, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.gear-packs-error {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--flame);
+  background: rgba(232, 93, 58, 0.08);
+  border: 1px solid rgba(232, 93, 58, 0.2);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+/* ── Pack Card ──────────────────────────── */
+
+.gear-pack-card {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(168, 139, 91, 0.12);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-xs);
+}
+
+.gear-pack-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.gear-pack-card-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+}
+
+.gear-pack-card-icon {
+  color: var(--lavender-deep);
+  flex-shrink: 0;
+}
+
+.gear-pack-card-name {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--charcoal);
+}
+
+.gear-pack-card-count {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--charcoal-light);
+  background: rgba(0, 0, 0, 0.04);
+  padding: 1px 6px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.gear-pack-card-description {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--charcoal-light);
+  font-style: italic;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.gear-pack-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Preview / Apply Buttons ─────────────── */
+
+.gear-pack-preview-btn,
+.gear-pack-apply-btn {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.gear-pack-preview-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(168, 139, 91, 0.2);
+  color: var(--charcoal-light);
+}
+
+.gear-pack-preview-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(168, 139, 91, 0.35);
+  color: var(--charcoal);
+}
+
+.gear-pack-apply-btn {
+  background: linear-gradient(135deg, var(--sage-deep), var(--sage-dark));
+  border: none;
+  color: white;
+  box-shadow: 0 1px 4px rgba(90, 122, 86, 0.2);
+}
+
+.gear-pack-apply-btn:hover:not(:disabled) {
+  box-shadow: 0 2px 8px rgba(90, 122, 86, 0.3);
+  transform: translateY(-1px);
+}
+
+.gear-pack-apply-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Preview Section ─────────────────────── */
+
+.gear-pack-preview {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid rgba(168, 139, 91, 0.1);
+  animation: gear-section-expand 0.2s ease;
+}
+
+.gear-pack-group-size {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.gear-pack-group-label {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--charcoal-light);
+}
+
+.gear-pack-group-stepper {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* ── Items List ──────────────────────────── */
+
+.gear-pack-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gear-pack-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.gear-pack-item-row:nth-child(odd) {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.gear-pack-item-name {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal);
+}
+
+.gear-pack-item-qty {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--charcoal-light);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.gear-pack-item-scaled {
+  font-size: 0.65rem;
+  color: var(--lavender-deep);
+  opacity: 0.7;
+}
