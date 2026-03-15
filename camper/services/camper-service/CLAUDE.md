@@ -7,7 +7,7 @@ API service for camping trip planning — user registration, authentication, pla
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, and `meal-plan-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `gear-pack-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, and `meal-plan-client` for data access
 - Uses `meal-plan-calculator` lib for shopping list computation and unit conversion
 - Uses `avatar-generator` lib for deterministic avatar generation from seed strings
 - Database: `camper-db` (port 5433, database `camper_db`)
@@ -100,6 +100,26 @@ API service for camping trip planning — user registration, authentication, pla
   - `PUT /api/items/{id}` — update item
   - `DELETE /api/items/{id}` — delete item (204)
 - **Polymorphic ownership:** Items have nullable FK columns (`plan_id`, `user_id`). Shared gear: `plan_id` only. Personal gear per plan: both `plan_id` + `user_id`. At least one must be set (DB CHECK constraint). Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
+
+### Gear Pack (`features/gearpack/`)
+- **Model:** `GearPack(id, name, description, items, createdAt, updatedAt)`, `GearPackItem(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackResult(appliedCount, items)`, `AppliedItem(id, planId, name, category, quantity, packed, createdAt, updatedAt)`
+- **DTOs:** `GearPackSummaryResponse(id, name, description, itemCount, createdAt, updatedAt)`, `GearPackDetailResponse(id, name, description, items, createdAt, updatedAt)`, `GearPackItemResponse(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackRequest(planId, groupSize)`, `ApplyGearPackResponse(appliedCount, items)`, `AppliedItemResponse(id, planId, userId?, name, category, quantity, packed, createdAt, updatedAt)`
+- **Error:** `GearPackError` sealed class — `NotFound(packId)`, `Invalid(field, reason)`, `Forbidden(planId, userId)`, `ApplyFailed(packName, reason)`
+- **Service params:** `ListGearPacksParam(requestingUserId)`, `GetGearPackParam(id, requestingUserId)`, `ApplyGearPackParam(gearPackId, planId, groupSize, requestingUserId)`
+- **Validations:** 1:1 with actions in `validations/`
+  - `ValidateListGearPacks`, `ValidateGetGearPack`: no-op
+  - `ValidateApplyGearPack`: groupSize must be > 0
+- **Actions:**
+  - `ListGearPacksAction`: Lists all available gear packs via GearPackClient
+  - `GetGearPackAction`: Fetches gear pack with items by ID
+  - `ApplyGearPackAction`: Authorizes (OWNER/MANAGER), fetches pack, creates items via ItemClient with quantity scaling (scalable items multiply by groupSize). Short-circuits on first item creation failure.
+- **Mapper:** `GearPackMapper` — fromClient, toSummaryResponse (itemCount from items.size), toDetailResponse, toApplyResponse
+- **Service:** `GearPackService` facade (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
+- **Routes:** (all require `X-User-Id` header)
+  - `GET /api/gear-packs` — list all available gear packs
+  - `GET /api/gear-packs/{id}` — get gear pack detail with items
+  - `POST /api/gear-packs/{id}/apply` — apply gear pack to a plan (201, publishes WebSocket `items/updated` event)
+- **Key design:** Gear packs are read-only templates seeded via migration (V032). Applying a pack creates regular items via the existing item system. Once applied, items are independent.
 
 ### Itinerary (`features/itinerary/`)
 - **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
@@ -279,12 +299,14 @@ API service for camping trip planning — user registration, authentication, pla
 - `RecipeScraperClientConfig` — creates NoOp or Claude-backed scraper client based on `ANTHROPIC_API_KEY` env var
 - `IngredientServiceConfig` — wires IngredientService (takes IngredientClient)
 - `RecipeServiceConfig` — wires RecipeService (takes RecipeClient + IngredientClient + RecipeScraperClient)
+- `GearPackClientConfig` — creates gear pack client via factory function
+- `GearPackServiceConfig` — wires GearPackService (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - `MealPlanClientConfig` — creates meal plan client via factory function
 - `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `GearPackServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `GearPackAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `GearPackFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`
