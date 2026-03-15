@@ -33,7 +33,7 @@ Your first action is always:
 You MUST use Claude agent teams to spawn named teammates in tmux panes for ALL work. You never write application code, tests, schemas, or documentation yourself. Every piece of work is delegated to the appropriate teammate spawned as a Claude agent team member in its own tmux pane.
 
 When spawning teammates, always use the Agent tool with:
-- `subagent_type` matching the teammate role (e.g., `kotlin-dev`, `db-dev`, `test-engineer`, `architect`, `code-reviewer`, `test-reviewer`, `doc-updater`)
+- `subagent_type` matching the teammate role (e.g., `kotlin-dev`, `web-dev`, `db-dev`, `test-engineer`, `architect`, `code-reviewer`, `test-reviewer`, `doc-updater`)
 - `team_name` set to the team you created
 - `name` set to the teammate's role name so it is addressable
 - A clear, self-contained prompt with all context the teammate needs to work autonomously
@@ -43,8 +43,10 @@ When spawning teammates, always use the Agent tool with:
 1. **Manage the PR stack** — You own all Graphite (`gt`) and git commands. You create branches, commit, submit, restack, and amend.
 2. **Spawn teammates in tmux panes** — You use the Agent tool to spawn specialized Claude agent team members for each phase. Every teammate runs in its own tmux pane with a clear, self-contained prompt.
 3. **Run review cycles** — After each implementation PR, spawn the appropriate reviewer in a tmux pane. If the reviewer flags issues, spawn the developer back to fix them, then re-review. Loop until clean.
-4. **Enforce build gates** — After every PR, run `./gradlew clean build` (or module-specific build). Nothing moves forward until green.
-5. **Collect retros** — Each dev teammate (kotlin-dev, db-dev, test-engineer) provides a retro report on completion. Collect all retros and pass them to the doc-updater.
+4. **Enforce build gates** — After every PR, run the appropriate build check. Nothing moves forward until green.
+   - **Kotlin/backend PRs:** `./gradlew clean build` (or module-specific build)
+   - **Web/frontend PRs:** `cd webapp && npx tsc --noEmit && npm run build`
+5. **Collect retros** — Each dev teammate (kotlin-dev, web-dev, db-dev, test-engineer) provides a retro report on completion. Collect all retros and pass them to the doc-updater.
 6. **Present retro before submitting** — The doc-updater produces a final report. Present this retro to the user BEFORE submitting the stack. The user must review the retro and approve submission.
 
 ## Agent Team
@@ -56,6 +58,7 @@ Each teammate is spawned as a Claude agent team member in its own tmux pane:
 | `architect` | `architect` | Phase 1-3 | Creates the feature plan, defines contracts |
 | `db-dev` | `db-dev` | Phase 4-5 (DB work) | Creates schemas, migrations, seeds |
 | `kotlin-dev` | `kotlin-dev` | Phase 4-5 (client/service/lib work) | Implements Kotlin code per plan |
+| `web-dev` | `web-dev` | Phase 4-5 (webapp/frontend work) | Implements React + TypeScript frontend per plan |
 | `test-engineer` | `test-engineer` | Phase 6-7 | Creates unit, integration, and acceptance tests |
 | `code-reviewer` | `code-reviewer` | After each implementation PR | Reviews code against plan + patterns |
 | `test-reviewer` | `test-reviewer` | After each test PR | Reviews tests for quality and coverage |
@@ -81,13 +84,14 @@ Stack (bottom → top):
 7. [client-impl]  feat(<feature>): client implementation — operations, adapters, factory, fake
 8. [lib-impl]     feat(<feature>): lib implementation — utility logic (if needed)
 9. [service-impl] feat(<feature>): service implementation — actions, service, controller wiring
-10. [client-test]  feat(<feature>): client tests — integration tests for client
-11. [service-test] feat(<feature>): service tests — unit tests for service layer
-12. [acceptance]   feat(<feature>): acceptance tests — end-to-end API tests
-13. [docs]         feat(<feature>): update documentation and skills — retrospective-driven updates
+10. [webapp]       feat(<feature>): webapp — frontend components, pages, shared UI (may be split into multiple PRs for phased work)
+11. [client-test]  feat(<feature>): client tests — integration tests for client
+12. [service-test] feat(<feature>): service tests — unit tests for service layer
+13. [acceptance]   feat(<feature>): acceptance tests — end-to-end API tests
+14. [docs]         feat(<feature>): update documentation and skills — retrospective-driven updates
 ```
 
-Not every feature needs all 13 PRs. Omit layers that don't apply.
+Not every feature needs all 14 PRs. Omit layers that don't apply.
 
 ### Phase 1-2: Plan
 
@@ -211,6 +215,29 @@ Spawn `kotlin-dev`: implement actions (validate → convert → call client), se
 
 Build check → Spawn `code-reviewer` → review cycle. Collect retro.
 
+#### PR: Webapp (if needed)
+
+```bash
+gt create -m "feat(<feature>): webapp" --no-interactive
+```
+
+Spawn `web-dev` with the plan document. The webapp PR may be split into multiple PRs if the plan defines phased work with dependencies (e.g., "extract shared components" → "adopt components" → "cleanup dead CSS"). In that case, create one branch per phase and follow the plan's dependency graph.
+
+**Parallelism rules for web PRs:**
+- Independent tickets (no shared files) → spawn `web-dev` agents in parallel
+- Tickets touching the same files → spawn sequentially
+- Dependent tickets → spawn in dependency order
+
+Build check: `cd webapp && npx tsc --noEmit && npm run build`
+
+Spawn `code-reviewer` → review cycle. The reviewer should check:
+- Shared UI component usage (`Button`, `Input`, `Modal` from `components/ui/` — no ad-hoc styling)
+- Constants imported from `lib/` (no duplication in component files)
+- CSS quality (design tokens, no dead classes, no hardcoded colors)
+- No broken imports or stale code
+
+Collect retro.
+
 ### Phase 6: Test PRs
 
 #### PR: Client Tests
@@ -265,7 +292,7 @@ Do not proceed to documentation until the full build is green.
 
 Spawn `doc-updater` with:
 - The plan document
-- ALL collected retros from developers (kotlin-dev, db-dev, test-engineer)
+- ALL collected retros from developers (kotlin-dev, web-dev, db-dev, test-engineer)
 - A summary of the full build: what was created, what issues were found, what reviewer feedback required fixes
 - The list of all files created/modified across the stack
 
@@ -361,6 +388,7 @@ gt create -m "fix(<area>): <short description>" --no-interactive
 Based on the affected layer, spawn the appropriate agent:
 - **Client/service/lib bug** → Spawn `kotlin-dev` with the diagnosis and fix plan
 - **Database bug** → Spawn `db-dev` with the diagnosis and fix plan
+- **Web/frontend bug** → Spawn `web-dev` with the diagnosis and fix plan
 - **Multi-layer bug** → Spawn each developer sequentially for their layer
 
 Build check → Spawn `code-reviewer` → review cycle. Collect retros.
@@ -474,7 +502,7 @@ When a reviewer returns `CHANGES REQUESTED`:
 
 ## Retro Collection
 
-Each developer teammate (kotlin-dev, db-dev, test-engineer) provides a retro report on completion.
+Each developer teammate (kotlin-dev, web-dev, db-dev, test-engineer) provides a retro report on completion.
 
 ### Retro Report Format (required from every developer)
 
