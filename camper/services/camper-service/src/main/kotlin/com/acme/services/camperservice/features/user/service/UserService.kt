@@ -14,7 +14,7 @@ class UserService(userClient: UserClient) {
     private val createUser = CreateUserAction(userClient)
     private val authenticateUser = AuthenticateUserAction(userClient)
     private val updateUser = UpdateUserAction(userClient)
-    private val randomizeAvatarAction = RandomizeAvatarAction()
+    private val randomizeAvatarAction = RandomizeAvatarAction(userClient)
     private val getAvatarAction = GetAvatarAction(userClient)
 
     fun getById(param: GetUserByIdParam) = getUserById.execute(param)
