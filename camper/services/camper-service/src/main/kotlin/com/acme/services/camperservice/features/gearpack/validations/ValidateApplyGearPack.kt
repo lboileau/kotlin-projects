@@ -1,6 +1,7 @@
 package com.acme.services.camperservice.features.gearpack.validations
 
 import com.acme.clients.common.Result
+import com.acme.clients.common.failure
 import com.acme.clients.common.success
 import com.acme.services.camperservice.features.gearpack.error.GearPackError
 import com.acme.services.camperservice.features.gearpack.params.ApplyGearPackParam
@@ -16,6 +17,9 @@ internal class ValidateApplyGearPack {
     }
 
     private fun validate(param: ApplyGearPackParam): Result<Unit, GearPackError> {
+        if (param.groupSize <= 0) {
+            return failure(GearPackError.Invalid("groupSize", "must be greater than 0"))
+        }
         return success(Unit)
     }
 }
