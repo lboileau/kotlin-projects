@@ -7,7 +7,7 @@ API service for camping trip planning — user registration, authentication, pla
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, `meal-plan-client`, and `log-book-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `gear-pack-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, and `meal-plan-client` for data access
 - Uses `meal-plan-calculator` lib for shopping list computation and unit conversion
 - Uses `avatar-generator` lib for deterministic avatar generation from seed strings
 - Database: `camper-db` (port 5433, database `camper_db`)
@@ -101,32 +101,44 @@ API service for camping trip planning — user registration, authentication, pla
   - `DELETE /api/items/{id}` — delete item (204)
 - **Polymorphic ownership:** Items have nullable FK columns (`plan_id`, `user_id`). Shared gear: `plan_id` only. Personal gear per plan: both `plan_id` + `user_id`. At least one must be set (DB CHECK constraint). Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
 
-### Itinerary (`features/itinerary/`)
-- **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, createdAt, updatedAt)`, `ItineraryEventLink(id, eventId, url, label?, createdAt)`
-- **DTOs:**
-  - Requests: `AddEventRequest(title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `UpdateEventRequest(title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `LinkInput(url, label?)`
-  - Responses: `ItineraryResponse(id, planId, events, totalEstimatedCost?, createdAt, updatedAt)`, `ItineraryEventResponse(id, itineraryId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links, createdAt, updatedAt)`, `LinkResponse(id, url, label?, createdAt)`
-- **Error:** `ItineraryError` sealed class — `PlanNotFound(planId)`, `NotFound(planId)`, `EventNotFound(eventId)`, `Invalid(field, reason)`
-- **Service params:** `GetItineraryParam(planId)`, `DeleteItineraryParam(planId)`, `AddEventParam(planId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `UpdateEventParam(planId, eventId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `DeleteEventParam(planId, eventId)`
-- **Validations:**
-  - `category` must be one of: travel, accommodation, activity, meal, other
-  - `estimatedCost` must be >= 0 if provided
-  - `eventEndAt` must be after `eventAt` if provided
-  - Max 10 links per event; each `link.url` must not be blank
+### Gear Pack (`features/gearpack/`)
+- **Model:** `GearPack(id, name, description, items, createdAt, updatedAt)`, `GearPackItem(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackResult(appliedCount, items)`, `AppliedItem(id, planId, name, category, quantity, packed, createdAt, updatedAt)`
+- **DTOs:** `GearPackSummaryResponse(id, name, description, itemCount, createdAt, updatedAt)`, `GearPackDetailResponse(id, name, description, items, createdAt, updatedAt)`, `GearPackItemResponse(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackRequest(planId, groupSize)`, `ApplyGearPackResponse(appliedCount, items)`, `AppliedItemResponse(id, planId, userId?, name, category, quantity, packed, createdAt, updatedAt)`
+- **Error:** `GearPackError` sealed class — `NotFound(packId)`, `Invalid(field, reason)`, `Forbidden(planId, userId)`, `ApplyFailed(packName, reason)`
+- **Service params:** `ListGearPacksParam(requestingUserId)`, `GetGearPackParam(id, requestingUserId)`, `ApplyGearPackParam(gearPackId, planId, groupSize, requestingUserId)`
+- **Validations:** 1:1 with actions in `validations/`
+  - `ValidateListGearPacks`, `ValidateGetGearPack`: no-op
+  - `ValidateApplyGearPack`: groupSize must be > 0
 - **Actions:**
-  - `GetItineraryAction`: Fetches itinerary by planId with events ordered by eventAt, fetches links for all events. Returns `Triple<Itinerary, List<ItineraryEvent>, Map<UUID, List<ItineraryEventLink>>>`
+  - `ListGearPacksAction`: Lists all available gear packs via GearPackClient
+  - `GetGearPackAction`: Fetches gear pack with items by ID
+  - `ApplyGearPackAction`: Authorizes (OWNER/MANAGER), fetches pack, creates items via ItemClient with quantity scaling (scalable items multiply by groupSize). Short-circuits on first item creation failure.
+- **Mapper:** `GearPackMapper` — fromClient, toSummaryResponse (itemCount from items.size), toDetailResponse, toApplyResponse
+- **Service:** `GearPackService` facade (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
+- **Routes:** (all require `X-User-Id` header)
+  - `GET /api/gear-packs` — list all available gear packs
+  - `GET /api/gear-packs/{id}` — get gear pack detail with items
+  - `POST /api/gear-packs/{id}/apply` — apply gear pack to a plan (201, publishes WebSocket `items/updated` event)
+- **Key design:** Gear packs are read-only templates seeded via migration (V032). Applying a pack creates regular items via the existing item system. Once applied, items are independent.
+
+### Itinerary (`features/itinerary/`)
+- **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
+- **DTOs:** `AddEventRequest(title, description?, details?, eventAt)`, `UpdateEventRequest(title, description?, details?, eventAt)`, `ItineraryResponse(id, planId, events, createdAt, updatedAt)`, `ItineraryEventResponse(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
+- **Error:** `ItineraryError` sealed class — `PlanNotFound(planId)`, `NotFound(planId)`, `EventNotFound(eventId)`, `Invalid(field, reason)`
+- **Service params:** `GetItineraryParam(planId)`, `DeleteItineraryParam(planId)`, `AddEventParam(planId, title, description?, details?, eventAt)`, `UpdateEventParam(planId, eventId, title, description?, details?, eventAt)`, `DeleteEventParam(planId, eventId)`
+- **Actions:**
+  - `GetItineraryAction`: Fetches itinerary by planId with events ordered by eventAt
   - `DeleteItineraryAction`: Deletes itinerary and all events (cascade)
-  - `AddEventAction`: Auto-creates itinerary if none exists, adds event, replaces links if provided. Returns `Pair<ItineraryEvent, List<ItineraryEventLink>>`
-  - `UpdateEventAction`: Updates event fields, replaces links if provided (null = keep existing, empty list = delete all). Returns `Pair<ItineraryEvent, List<ItineraryEventLink>>`
-  - `DeleteEventAction`: Deletes a single event (links cascade)
+  - `AddEventAction`: Auto-creates itinerary if none exists, then adds event
+  - `UpdateEventAction`: Updates event fields
+  - `DeleteEventAction`: Deletes a single event
 - **Service:** `ItineraryService` facade (takes ItineraryClient + PlanClient)
 - **Routes:** (all require `X-User-Id` header)
-  - `GET /api/plans/{planId}/itinerary` — get itinerary with events, links, and totalEstimatedCost
+  - `GET /api/plans/{planId}/itinerary` — get itinerary with events
   - `DELETE /api/plans/{planId}/itinerary` — delete itinerary (204)
-  - `POST /api/plans/{planId}/itinerary/events` — add event with optional links (201, auto-creates itinerary)
-  - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event with optional link replacement
+  - `POST /api/plans/{planId}/itinerary/events` — add event (201, auto-creates itinerary)
+  - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event
   - `DELETE /api/plans/{planId}/itinerary/events/{eventId}` — delete event (204)
-- **Link semantics:** Links are managed inline via nested writes (no separate endpoints). Update: `null` = keep existing links, `[]` = delete all, populated list = full replacement (delete + insert). Links use a "replace-all" pattern — no individual link CRUD.
 
 ### Assignment (`features/assignment/`)
 - **Model:** `Assignment(id, planId, name, type, maxOccupancy, ownerId, createdAt, updatedAt)`, `AssignmentMember(assignmentId, userId, username?, createdAt)`, `AssignmentDetail(id, planId, name, type, maxOccupancy, ownerId, members, createdAt, updatedAt)`
@@ -205,12 +217,12 @@ API service for camping trip planning — user registration, authentication, pla
   - `POST /api/recipes/{id}/publish` — publish recipe (creator only)
 
 ### Meal Plan (`features/mealplan/`)
-- **Models:** Uses `MealPlan`, `MealPlanDay`, `MealPlanRecipe`, `ShoppingListPurchase`, `ShoppingListManualItem` from meal-plan-client; `Recipe`, `RecipeIngredient` from recipe-client; `Ingredient` from ingredient-client
+- **Models:** Uses `MealPlan`, `MealPlanDay`, `MealPlanRecipe`, `ShoppingListPurchase` from meal-plan-client; `Recipe`, `RecipeIngredient` from recipe-client; `Ingredient` from ingredient-client
 - **DTOs:**
-  - Requests: `CreateMealPlanRequest(name, servings, scalingMode?, isTemplate?, planId?)`, `UpdateMealPlanRequest(name?, servings?, scalingMode?)`, `AddDayRequest(dayNumber)`, `AddRecipeRequest(mealType, recipeId)`, `CopyToTripRequest(planId, servings?)`, `SaveAsTemplateRequest(name)`, `UpdatePurchaseRequest(ingredientId?, manualItemId?, unit?, quantityPurchased)`, `AddManualItemRequest(ingredientId?, description?, quantity?, unit?)`
-  - Responses: `MealPlanDetailResponse` (nested days → meals → recipes with scaled ingredients), `ShoppingListResponse` (computed categories → items with purchase status), `ManualItemResponse(id, ingredientId?, ingredientName?, description?, quantity, unit?, quantityPurchased, status, category)`, `ShoppingListItemResponse` (now includes `source`, `manualItemId`, `description`; `ingredientId`, `ingredientName`, `unit` are nullable for free-form items)
-- **Error:** `MealPlanError` sealed class — `MealPlanNotFound(id)`, `DayNotFound(id)`, `RecipeNotFound(id)`, `DuplicateDayNumber(dayNumber)`, `PlanAlreadyHasMealPlan(planId)`, `NotATemplate(id)`, `IsATemplate(id)`, `Invalid(field, reason)`, `ManualItemNotFound(id)`, `DuplicateManualItem(ingredientId, unit)`
-- **Service params:** `CreateMealPlanParam`, `GetMealPlanDetailParam`, `GetMealPlanByPlanIdParam`, `GetTemplatesParam`, `UpdateMealPlanParam`, `DeleteMealPlanParam`, `CopyToTripParam`, `SaveAsTemplateParam`, `AddDayParam`, `RemoveDayParam`, `AddRecipeToMealParam`, `RemoveRecipeFromMealParam`, `GetShoppingListParam`, `UpdatePurchaseParam(mealPlanId, userId, ingredientId?, manualItemId?, unit?, quantityPurchased)`, `ResetPurchasesParam`, `AddManualItemParam(mealPlanId, userId, ingredientId?, description?, quantity?, unit?)`, `RemoveManualItemParam(mealPlanId, userId, itemId)`
+  - Requests: `CreateMealPlanRequest(name, servings, scalingMode?, isTemplate?, planId?)`, `UpdateMealPlanRequest(name?, servings?, scalingMode?)`, `AddDayRequest(dayNumber)`, `AddRecipeRequest(mealType, recipeId)`, `CopyToTripRequest(planId, servings?)`, `SaveAsTemplateRequest(name)`, `UpdatePurchaseRequest(ingredientId, unit, quantityPurchased)`
+  - Responses: `MealPlanDetailResponse` (nested days → meals → recipes with scaled ingredients), `ShoppingListResponse` (computed categories → items with purchase status)
+- **Error:** `MealPlanError` sealed class — `MealPlanNotFound(id)`, `DayNotFound(id)`, `RecipeNotFound(id)`, `DuplicateDayNumber(dayNumber)`, `PlanAlreadyHasMealPlan(planId)`, `NotATemplate(id)`, `IsATemplate(id)`, `Invalid(field, reason)`
+- **Service params:** `CreateMealPlanParam`, `GetMealPlanDetailParam`, `GetMealPlanByPlanIdParam`, `GetTemplatesParam`, `UpdateMealPlanParam`, `DeleteMealPlanParam`, `CopyToTripParam`, `SaveAsTemplateParam`, `AddDayParam`, `RemoveDayParam`, `AddRecipeToMealParam`, `RemoveRecipeFromMealParam`, `GetShoppingListParam`, `UpdatePurchaseParam`, `ResetPurchasesParam`
 - **Actions:**
   - `CreateMealPlanAction`: Creates trip or template meal plan; validates plan doesn't already have one
   - `GetMealPlanDetailAction`: Fetches meal plan with full nested detail via `MealPlanDetailBuilder`
@@ -218,17 +230,15 @@ API service for camping trip planning — user registration, authentication, pla
   - `GetTemplatesAction`: Lists template meal plans for a user
   - `UpdateMealPlanAction`: Updates name, servings, scaling mode
   - `DeleteMealPlanAction`: Deletes meal plan (cascades)
-  - `CopyToTripAction`: Deep-copies template to a trip (new days, recipes; no purchases, no manual items)
-  - `SaveAsTemplateAction`: Deep-copies trip meal plan as a template (new days, recipes; no purchases, no manual items)
+  - `CopyToTripAction`: Deep-copies template to a trip (new days, recipes; no purchases)
+  - `SaveAsTemplateAction`: Deep-copies trip meal plan as a template (new days, recipes; no purchases)
   - `AddDayAction`: Adds a day to the meal plan (validates unique day number)
   - `RemoveDayAction`: Removes a day from the meal plan
   - `AddRecipeToMealAction`: Adds a recipe to a specific meal type on a day
   - `RemoveRecipeFromMealAction`: Removes a recipe from a meal
-  - `GetShoppingListAction`: Computes shopping list using `ShoppingListCalculator` (scale → convert → aggregate → join purchases); merges manual items (ingredient-based and free-form) into the same category structure. Recipe items get `source="recipe"`, manual items get `source="manual"` with `manualItemId`. Free-form items use category `"misc"`. Manual items bypass `ShoppingListCalculator` entirely — they are merged at the action layer. Purchase status derived via `PurchaseStatus.derive()`. Purchases are matched to shopping list rows by ingredient, with unit conversion via `UnitConverter` when bestFit changes the row's unit. Orphaned purchases only show as `no_longer_needed` when the ingredient is fully removed or the purchase unit is not convertible to any current row unit; zero-quantity orphans are filtered out.
-  - `UpdatePurchaseAction`: Branches on `manualItemId` vs `ingredientId` — manual items update via `mealPlanClient.updateManualItemPurchase()`, recipe items via `mealPlanClient.upsertPurchase()` (existing)
-  - `ResetPurchasesAction`: Deletes all recipe purchases AND resets manual item `quantity_purchased` to 0
-  - `AddManualItemAction`: Validates params (ingredient-based vs free-form), verifies meal plan and ingredient exist, calls `mealPlanClient.addManualItem()`. Returns `DuplicateManualItem` on conflict
-  - `RemoveManualItemAction`: Verifies meal plan exists, calls `mealPlanClient.removeManualItem()`. Returns `ManualItemNotFound` if not found
+  - `GetShoppingListAction`: Computes shopping list using `ShoppingListCalculator` (scale → convert → aggregate → join purchases); purchase status derived via `PurchaseStatus.derive()`. Purchases are matched to shopping list rows by ingredient, with unit conversion via `UnitConverter` when bestFit changes the row's unit (e.g. purchase in `g` matched to a `kg` row). Orphaned purchases only show as `no_longer_needed` when the ingredient is fully removed or the purchase unit is not convertible to any current row unit; zero-quantity orphans are filtered out.
+  - `UpdatePurchaseAction`: Creates/updates purchase quantity for an ingredient+unit
+  - `ResetPurchasesAction`: Deletes all purchases for a meal plan
   - `MealPlanDetailBuilder`: Shared builder that assembles the nested detail response (days → meals → recipes with scaled ingredients, `isFullyPurchased` flag)
 - **Service:** `MealPlanService` facade (takes MealPlanClient + RecipeClient + IngredientClient)
 - **Routes:** (all require `X-User-Id` header)
@@ -244,12 +254,10 @@ API service for camping trip planning — user registration, authentication, pla
   - `DELETE /api/meal-plans/{mealPlanId}/days/{dayId}` — remove day (204)
   - `POST /api/meal-plans/{mealPlanId}/days/{dayId}/recipes` — add recipe to meal (201)
   - `DELETE /api/meal-plan-recipes/{mealPlanRecipeId}` — remove recipe from meal (204, separate controller)
-  - `GET /api/meal-plans/{id}/shopping-list` — get computed shopping list (includes manual items with `source`/`manualItemId`/`description`)
-  - `PATCH /api/meal-plans/{id}/shopping-list` — update purchase (accepts `ingredientId` or `manualItemId`)
-  - `DELETE /api/meal-plans/{id}/shopping-list` — reset all purchases incl. manual items (204)
-  - `POST /api/meal-plans/{id}/shopping-list/items` — add manual item (ingredient-based or free-form) (201)
-  - `DELETE /api/meal-plans/{id}/shopping-list/items/{itemId}` — remove manual item (204)
-- **Key design:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles scaling and unit conversion. Only purchase records are stored. Manual items have their own `quantity_purchased` column and bypass the calculator — they are merged at the action layer after recipe-based computation.
+  - `GET /api/meal-plans/{id}/shopping-list` — get computed shopping list
+  - `PATCH /api/meal-plans/{id}/shopping-list` — update purchase
+  - `DELETE /api/meal-plans/{id}/shopping-list` — reset all purchases (204)
+- **Key design:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles scaling and unit conversion. Only purchase records are stored.
 
 ### Invite Email Flow (cross-cutting: Plan + Webhook)
 - When a member is added to a plan, an invitation email is sent via the `EmailClient`
@@ -291,12 +299,14 @@ API service for camping trip planning — user registration, authentication, pla
 - `RecipeScraperClientConfig` — creates NoOp or Claude-backed scraper client based on `ANTHROPIC_API_KEY` env var
 - `IngredientServiceConfig` — wires IngredientService (takes IngredientClient)
 - `RecipeServiceConfig` — wires RecipeService (takes RecipeClient + IngredientClient + RecipeScraperClient)
+- `GearPackClientConfig` — creates gear pack client via factory function
+- `GearPackServiceConfig` — wires GearPackService (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - `MealPlanClientConfig` — creates meal plan client via factory function
 - `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest` (includes event metadata and link management tests), `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest` (93 tests — includes manual item add/remove, purchase update, reset, shopping list merge, validation edge cases), `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest` (includes event metadata, links, cost summary, and link replacement tests), `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` (54 tests — includes manual item CRUD, purchase tracking, reset, category grouping, copy/template exclusion) with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
+- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `GearPackServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `GearPackAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `GearPackFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`

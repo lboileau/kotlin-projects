@@ -47,6 +47,7 @@ webapp/
 │   │   ├── CampsiteItems.tsx           # SVG art: TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG
 │   │   ├── InteractableItem.tsx/css    # Hoverable/clickable campsite object with glow + tooltip
 │   │   ├── GearModal.tsx/css            # Equipment & gear management modal (checklist per owner)
+│   │   ├── GearPacksPanel.tsx/css      # Collapsible gear pack browser (preview, scale, apply)
 │   │   ├── MealPlanModal.tsx/css       # Meal plan modal — overview, recipe book, shopping list
 │   │   ├── AssignmentsModal.tsx/css    # Tent & canoe group assignments modal
 │   │   ├── ComingSoonModal.tsx         # Themed "not ready" modal with flavor text
@@ -84,7 +85,7 @@ All UI primitives are defined once and reused everywhere. Never create ad-hoc st
 - **`AppHeader`** — shared page header with logo, page title, user avatar, logout. Used by `PlanPage`, `AccountPage`, `HomePage`, `RecipesPage`.
 
 ### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse`, `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
+- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`, `GearPackSummary`, `GearPackDetail`, `GearPackItem`, `ApplyGearPackResponse`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse`, `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
 - `request<T>()` helper auto-injects `X-User-Id` from localStorage
 - All methods return typed promises; throws on non-OK responses
 
@@ -105,7 +106,7 @@ All UI primitives are defined once and reused everywhere. Never create ad-hoc st
 - **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`. If sign-in fails because user has no username, auto-switches to Register tab with error message.
 - **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
 - **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealPlanModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (edit plan name + toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others. Pending (invited but not registered) members show their email address. Campfire circle radius scales dynamically with member count to prevent avatar overlap.
-  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists scoped to the current plan, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists.
+  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists scoped to the current plan, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists. **Gear Packs:** A collapsible `GearPacksPanel` at the top of shared gear lets owners/managers browse predefined gear templates, preview items with quantity scaling by group size, and apply packs to bulk-add items.
   - **MealPlanModal** — Fixed-height (88vh) three-view modal opened from the kitchen campsite item. Three tab views:
     - **Overview:** Editable meal plan name (blur-to-save), servings-per-recipe stepper, save-as-template / load-from-template links. Day tabs (add/remove days). Four meal type sections (Breakfast, Lunch, Dinner, Snacks) each with inline recipe search-and-add and remove buttons. Empty state shows a create form with name input, servings stepper, and optional template loader with preview.
     - **Recipe Book:** Open-book layout (left page: search + filter pills + scrollable recipe list; spine; right page: selected recipe detail with ingredients). "Add to Meal Plan" button pinned at bottom with day + meal type popover (pre-selects active day). Left and right pages scroll independently.
@@ -146,6 +147,9 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | POST | `/api/items` | X-User-Id | GearModal (create item) |
 | PUT | `/api/items/:id` | X-User-Id | GearModal (update item) |
 | DELETE | `/api/items/:id` | X-User-Id | GearModal (delete item) |
+| GET | `/api/gear-packs` | X-User-Id | GearPacksPanel (list packs) |
+| GET | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (preview pack items) |
+| POST | `/api/gear-packs/:id/apply` | X-User-Id | GearPacksPanel (apply pack to plan) |
 | GET | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (list) |
 | GET | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (detail) |
 | POST | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (create) |
