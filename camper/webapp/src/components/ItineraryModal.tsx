@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api, type ItineraryEvent } from '../api/client';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
-import './Modal.css';
+import { Modal } from './ui/Modal';
 import './ItineraryModal.css';
 
 interface Props {
@@ -140,13 +140,10 @@ export function ItineraryModal({ isOpen, onClose, planId, isOwner, refreshKey }:
     }
   };
 
-  if (!isOpen) return null;
-
   const grouped = groupEventsByDate(events);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content itinerary-modal" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={onClose} className="itinerary-modal">
         {/* Header */}
         <div className="itinerary-header">
           <div className="itinerary-header-icon">
@@ -328,7 +325,6 @@ export function ItineraryModal({ isOpen, onClose, planId, isOwner, refreshKey }:
             Close
           </Button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

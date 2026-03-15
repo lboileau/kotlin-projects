@@ -11,6 +11,7 @@ import {
   type MealsByTypeResponse,
 } from '../api/client';
 import { Button } from './ui/Button';
+import { Modal } from './ui/Modal';
 import './MealPlanModal.css';
 
 type ViewTab = 'overview' | 'recipes' | 'shopping';
@@ -122,8 +123,6 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
       loadShoppingList();
     }
   }, [activeView, mealPlan, loadShoppingList]);
-
-  if (!isOpen) return null;
 
   const handleCreate = async () => {
     if (!createName.trim()) return;
@@ -327,8 +326,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   const uniqueThemes = [...new Set(recipes.map(r => r.theme).filter(Boolean))] as string[];
 
   return (
-    <div className="modal-overlay meal-plan-overlay" onClick={onClose}>
-      <div className="meal-plan-modal" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" className="meal-plan-modal">
         {/* Header */}
         <div className="mp-header">
           <div className="mp-header-left">
@@ -360,11 +358,6 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
             ))}
           </div>
 
-          <button className="mp-close" onClick={onClose} aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 20 20">
-              <path d="M5,5 L15,15 M15,5 L5,15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
         </div>
 
         {/* Body */}
@@ -445,8 +438,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
             />
           )}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
 

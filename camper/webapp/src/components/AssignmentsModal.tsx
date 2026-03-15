@@ -3,7 +3,7 @@ import { api, type AssignmentDetail, type PlanMember } from '../api/client';
 import { SKIN_COLORS, HAIR_COLORS, FALLBACK_COLORS } from '../lib/avatarConstants';
 import { AvatarHair } from './AvatarHair';
 import { Button } from './ui/Button';
-import './Modal.css';
+import { Modal } from './ui/Modal';
 import './AssignmentsModal.css';
 
 interface AssignmentsModalProps {
@@ -407,8 +407,6 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
     setAddMemberCardId(null);
   }, [activeTab]);
 
-  if (!isOpen) return null;
-
   const filteredAssignments = assignments.filter(a => a.type === activeTab);
 
   // Active plan members not assigned to any group of the current tab type
@@ -528,8 +526,7 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
     : 'No canoes launched yet \u2014 paddle up!';
 
   return (
-    <div className="modal-overlay assign-modal-overlay" onClick={onClose}>
-      <div className="assign-modal" onClick={e => e.stopPropagation()}>
+    <Modal isOpen={isOpen} onClose={onClose} className="assign-modal">
         {/* Header */}
         <div className="assign-modal-header">
           <div className="assign-modal-header-left">
@@ -546,11 +543,6 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
               <p className="assign-modal-subtitle">Organize your crew into tents & canoes</p>
             </div>
           </div>
-          <button className="assign-modal-close" onClick={onClose} aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 20 20">
-              <path d="M5,5 L15,15 M15,5 L5,15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
         </div>
 
         {/* Tab bar */}
@@ -705,7 +697,6 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
             Close
           </Button>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }
