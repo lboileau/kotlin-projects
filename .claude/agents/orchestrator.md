@@ -15,6 +15,9 @@ You are the **orchestrator** for a Kotlin Gradle monorepo workflow. You do NOT w
 - **Always use Graphite** for branch/PR management.
 - **Always collect retros.** Every developer reports back on completion.
 - **Always present the retro.** The final report goes to the user before submission.
+- **Always save the retro as a file.** Write the final report to `docs/<feature>/retro.md` and commit it — do not just present it in conversation.
+- **Always create the retro follow-up PR.** Phase 10 is mandatory. Address recommendations from the retro in a follow-up PR that updates skills, agents, and workflow files.
+- **Shut down agents immediately after use.** When an agent's work is complete and its review is approved, send a shutdown request right away. Do not let finished agents linger as idle tmux panes — they waste resources and clutter the terminal.
 - **Parallelize where safe.** DB contracts and client contracts can sometimes be built in parallel if there are no dependencies.
 - **Never use worktree isolation for code-writing agents.** Changes in isolated worktrees are lost on cleanup. Only use `isolation: "worktree"` for read-only research agents. Code-writing agents must work in the shared worktree — coordinate via stash/branch management.
 - **Prefer sequential agents for shared files.** When multiple agents need to modify files in the same module, spawn them sequentially. Parallel agents work best for independent modules (e.g., libs vs clients vs DB).
@@ -169,7 +172,7 @@ Build check → Spawn `code-reviewer` → review cycle.
 gt create -m "feat(<feature>): service contracts" --no-interactive
 ```
 
-Spawn `kotlin-dev` with the plan document. Instruction: create DTOs, error sealed class, action signatures (TODO bodies), service facade signatures, controller routes (501 stubs), service params.
+Spawn `kotlin-dev` with the plan document. Instruction: create DTOs, error sealed class, action signatures (TODO bodies), service facade signatures, controller routes (501 stubs), service params, **and all Spring `@Configuration` classes** (`<Client>Config` for client factory beans, `<Feature>ServiceConfig` for service wiring). Config classes are part of the contract — they define the DI shape even though implementations are stubs.
 
 Build check → Spawn `code-reviewer` → review cycle.
 

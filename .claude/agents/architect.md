@@ -29,6 +29,7 @@ You know and design around these conventions:
 - Factory function: `create<Name>Client()` — can take params if needed, reads env vars for defaults
 - KDoc on all interface methods
 - Interface + fake (testFixtures) for testing
+- **List-with-counts:** When a list endpoint returns a computed field from a child relation (e.g., `itemCount`), the plan must specify explicitly whether the client fetches children (preferred for small datasets) or uses a SQL COUNT subquery. Never assume the service layer can derive counts from an empty list.
 
 ### Service Layer
 - Action classes: 1:1 with service methods in `features/<feature>/actions/`
