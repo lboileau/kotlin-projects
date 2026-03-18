@@ -1,0 +1,29 @@
+plugins {
+    kotlin("jvm")
+    kotlin("plugin.spring")
+    id("org.springframework.boot")
+    id("io.spring.dependency-management")
+}
+
+dependencies {
+    implementation(project(":clients:client-common"))
+    implementation(project(":clients:world-client"))
+    implementation(project(":services:service-common"))
+
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-starter-jdbc")
+    testImplementation(testFixtures(project(":clients:world-client")))
+    testImplementation("org.testcontainers:postgresql:1.20.4")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.4")
+    testImplementation("org.postgresql:postgresql:42.7.4")
+}
+
+tasks.withType<Test> {
+    systemProperty("project.root", rootProject.projectDir.absolutePath)
+    systemProperty("spring.profiles.active", "test")
+}

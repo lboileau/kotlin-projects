@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  interview-manager-db:
+    image: postgres:16-alpine
+    container_name: interview-manager-db
+    environment:
+      POSTGRES_DB: interview_manager_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - interview-manager-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  interview-manager-db-data:
