@@ -222,6 +222,26 @@ class ItemAcceptanceTest {
         }
 
         @Test
+        fun `GET by plan excludes personal items`() {
+            fixture.insertItem(planId = planId, name = "Shared Tent", category = "shelter")
+            fixture.insertItem(planId = planId, name = "Shared Stove", category = "cooking")
+            fixture.insertItem(planId = planId, userId = userId, name = "Personal Headlamp", category = "lighting")
+            fixture.insertItem(planId = planId, userId = userId, name = "Personal Knife", category = "tools")
+
+            val response = restTemplate.exchange(
+                "/api/items?ownerType=plan&ownerId=$planId",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                Array<ItemResponse>::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body).hasSize(2)
+            assertThat(response.body!!.map { it.name }).containsExactlyInAnyOrder("Shared Tent", "Shared Stove")
+            assertThat(response.body!!.all { it.userId == null }).isTrue()
+        }
+
+        @Test
         fun `GET returns personal items scoped to plan`() {
             fixture.insertItem(planId = planId, userId = userId, name = "Headlamp", category = "lighting")
             fixture.insertItem(planId = planId, userId = userId, name = "Knife", category = "tools")

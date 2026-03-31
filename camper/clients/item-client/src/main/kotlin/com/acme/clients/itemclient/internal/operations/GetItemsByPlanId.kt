@@ -25,6 +25,7 @@ internal class GetItemsByPlanId(private val jdbi: Jdbi) {
                 SELECT id, plan_id, user_id, name, category, quantity, packed, created_at, updated_at
                 FROM items
                 WHERE plan_id = :planId
+                AND user_id IS NULL
                 ORDER BY created_at
                 """.trimIndent()
             )

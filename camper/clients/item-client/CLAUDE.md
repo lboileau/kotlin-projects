@@ -8,7 +8,7 @@ Data access client for camping trip gear/equipment items.
 ## Public API (`ItemClient` interface)
 - `create(CreateItemParam)` — Create a new item (planId required, userId optional for personal gear)
 - `getById(GetByIdParam)` — Retrieve an item by ID
-- `getByPlanId(GetByPlanIdParam)` — Retrieve all items for a plan (shared + personal)
+- `getByPlanId(GetByPlanIdParam)` — Retrieve shared/plan-level items only (user_id IS NULL)
 - `getByUserId(GetByUserIdParam)` — Retrieve all items for a user (across all plans)
 - `getByPlanIdAndUserId(GetByPlanIdAndUserIdParam)` — Retrieve personal items for a user within a specific plan
 - `update(UpdateItemParam)` — Update an existing item
