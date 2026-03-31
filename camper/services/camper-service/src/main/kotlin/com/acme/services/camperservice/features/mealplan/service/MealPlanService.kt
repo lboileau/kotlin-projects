@@ -4,6 +4,7 @@ import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.clients.mealplanclient.api.MealPlanClient
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.services.camperservice.features.mealplan.actions.AddDayAction
+import com.acme.services.camperservice.features.mealplan.actions.AddManualItemAction
 import com.acme.services.camperservice.features.mealplan.actions.AddRecipeToMealAction
 import com.acme.services.camperservice.features.mealplan.actions.CopyToTripAction
 import com.acme.services.camperservice.features.mealplan.actions.CreateMealPlanAction
@@ -13,6 +14,7 @@ import com.acme.services.camperservice.features.mealplan.actions.GetMealPlanDeta
 import com.acme.services.camperservice.features.mealplan.actions.GetShoppingListAction
 import com.acme.services.camperservice.features.mealplan.actions.GetTemplatesAction
 import com.acme.services.camperservice.features.mealplan.actions.RemoveDayAction
+import com.acme.services.camperservice.features.mealplan.actions.RemoveManualItemAction
 import com.acme.services.camperservice.features.mealplan.actions.RemoveRecipeFromMealAction
 import com.acme.services.camperservice.features.mealplan.actions.ResetPurchasesAction
 import com.acme.services.camperservice.features.mealplan.actions.SaveAsTemplateAction
@@ -40,6 +42,8 @@ class MealPlanService(
     private val getShoppingList = GetShoppingListAction(mealPlanClient, recipeClient, ingredientClient)
     private val updatePurchase = UpdatePurchaseAction(mealPlanClient)
     private val resetPurchases = ResetPurchasesAction(mealPlanClient)
+    private val addManualItemAction = AddManualItemAction(mealPlanClient, ingredientClient)
+    private val removeManualItemAction = RemoveManualItemAction(mealPlanClient)
 
     fun create(param: CreateMealPlanParam) = createMealPlan.execute(param)
     fun getDetail(param: GetMealPlanDetailParam) = getMealPlanDetail.execute(param)
@@ -56,4 +60,6 @@ class MealPlanService(
     fun getShoppingList(param: GetShoppingListParam) = getShoppingList.execute(param)
     fun updatePurchase(param: UpdatePurchaseParam) = updatePurchase.execute(param)
     fun resetPurchases(param: ResetPurchasesParam) = resetPurchases.execute(param)
+    fun addManualItem(param: AddManualItemParam) = addManualItemAction.execute(param)
+    fun removeManualItem(param: RemoveManualItemParam) = removeManualItemAction.execute(param)
 }

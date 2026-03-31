@@ -95,11 +95,58 @@ internal class ValidateGetShoppingList {
 
 internal class ValidateUpdatePurchase {
     fun execute(param: UpdatePurchaseParam): Result<Unit, MealPlanError> {
+        if (param.ingredientId == null && param.manualItemId == null) {
+            return Result.Failure(MealPlanError.Invalid("ingredientId/manualItemId", "exactly one must be provided"))
+        }
+        if (param.ingredientId != null && param.manualItemId != null) {
+            return Result.Failure(MealPlanError.Invalid("ingredientId/manualItemId", "exactly one must be provided"))
+        }
+        if (param.ingredientId != null && param.unit == null) {
+            return Result.Failure(MealPlanError.Invalid("unit", "must be provided when ingredientId is used"))
+        }
         if (param.quantityPurchased < java.math.BigDecimal.ZERO) {
             return Result.Failure(MealPlanError.Invalid("quantityPurchased", "must be >= 0"))
         }
         return success(Unit)
     }
+}
+
+internal class ValidateAddManualItem {
+    fun execute(param: AddManualItemParam): Result<Unit, MealPlanError> {
+        if (param.ingredientId == null && param.description == null) {
+            return Result.Failure(MealPlanError.Invalid("ingredientId/description", "either ingredientId or description must be provided"))
+        }
+        if (param.ingredientId != null && param.description != null) {
+            return Result.Failure(MealPlanError.Invalid("ingredientId/description", "only one of ingredientId or description may be provided"))
+        }
+        if (param.ingredientId != null) {
+            if (param.quantity == null || param.quantity <= java.math.BigDecimal.ZERO) {
+                return Result.Failure(MealPlanError.Invalid("quantity", "must be greater than 0 for ingredient-based items"))
+            }
+            if (param.unit == null) {
+                return Result.Failure(MealPlanError.Invalid("unit", "must be provided for ingredient-based items"))
+            }
+        }
+        if (param.description != null) {
+            if (param.quantity != null) {
+                return Result.Failure(MealPlanError.Invalid("quantity", "must not be provided for free-form items"))
+            }
+            if (param.unit != null) {
+                return Result.Failure(MealPlanError.Invalid("unit", "must not be provided for free-form items"))
+            }
+            if (param.description.isBlank()) {
+                return Result.Failure(MealPlanError.Invalid("description", "must not be blank"))
+            }
+            if (param.description.length > 500) {
+                return Result.Failure(MealPlanError.Invalid("description", "must not exceed 500 characters"))
+            }
+        }
+        return success(Unit)
+    }
+}
+
+internal class ValidateRemoveManualItem {
+    fun execute(param: RemoveManualItemParam): Result<Unit, MealPlanError> = success(Unit)
 }
 
 internal class ValidateResetPurchases {

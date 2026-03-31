@@ -4,18 +4,17 @@ import com.acme.clients.common.Result
 import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.mealplanclient.api.MealPlanClient
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
-import com.acme.services.camperservice.features.mealplan.params.ResetPurchasesParam
-import com.acme.services.camperservice.features.mealplan.validations.ValidateResetPurchases
-import com.acme.clients.mealplanclient.api.DeletePurchasesParam as ClientDeletePurchasesParam
+import com.acme.services.camperservice.features.mealplan.params.RemoveManualItemParam
+import com.acme.services.camperservice.features.mealplan.validations.ValidateRemoveManualItem
 import com.acme.clients.mealplanclient.api.GetByIdParam as ClientGetByIdParam
-import com.acme.clients.mealplanclient.api.ResetManualItemPurchasesParam as ClientResetManualItemPurchasesParam
+import com.acme.clients.mealplanclient.api.RemoveManualItemParam as ClientRemoveManualItemParam
 
-internal class ResetPurchasesAction(
+internal class RemoveManualItemAction(
     private val mealPlanClient: MealPlanClient,
 ) {
-    private val validate = ValidateResetPurchases()
+    private val validate = ValidateRemoveManualItem()
 
-    fun execute(param: ResetPurchasesParam): Result<Unit, MealPlanError> {
+    fun execute(param: RemoveManualItemParam): Result<Unit, MealPlanError> {
         when (val validation = validate.execute(param)) {
             is Result.Failure -> return validation
             is Result.Success -> {}
@@ -30,14 +29,12 @@ internal class ResetPurchasesAction(
             }
         }
 
-        when (val result = mealPlanClient.deletePurchases(ClientDeletePurchasesParam(param.mealPlanId))) {
-            is Result.Success -> {}
-            is Result.Failure -> return Result.Failure(MealPlanError.Invalid("purchases", result.error.message))
-        }
-
-        return when (val result = mealPlanClient.resetManualItemPurchases(ClientResetManualItemPurchasesParam(param.mealPlanId))) {
+        return when (val result = mealPlanClient.removeManualItem(ClientRemoveManualItemParam(param.itemId))) {
             is Result.Success -> Result.Success(Unit)
-            is Result.Failure -> Result.Failure(MealPlanError.Invalid("manualItemPurchases", result.error.message))
+            is Result.Failure -> when (result.error) {
+                is NotFoundError -> Result.Failure(MealPlanError.ManualItemNotFound(param.itemId))
+                else -> Result.Failure(MealPlanError.Invalid("manualItem", result.error.message))
+            }
         }
     }
 }

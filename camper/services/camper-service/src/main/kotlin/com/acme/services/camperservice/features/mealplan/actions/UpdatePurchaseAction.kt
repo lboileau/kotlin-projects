@@ -9,6 +9,7 @@ import com.acme.services.camperservice.features.mealplan.mapper.MealPlanMapper
 import com.acme.services.camperservice.features.mealplan.params.UpdatePurchaseParam
 import com.acme.services.camperservice.features.mealplan.validations.ValidateUpdatePurchase
 import com.acme.clients.mealplanclient.api.GetByIdParam as ClientGetByIdParam
+import com.acme.clients.mealplanclient.api.UpdateManualItemPurchaseParam as ClientUpdateManualItemPurchaseParam
 import com.acme.clients.mealplanclient.api.UpsertPurchaseParam as ClientUpsertPurchaseParam
 
 internal class UpdatePurchaseAction(
@@ -31,19 +32,47 @@ internal class UpdatePurchaseAction(
             }
         }
 
-        // TODO: service-impl PR will add branching on manualItemId vs ingredientId
-        val purchase = when (val result = mealPlanClient.upsertPurchase(
-            ClientUpsertPurchaseParam(
-                mealPlanId = param.mealPlanId,
-                ingredientId = param.ingredientId!!,
-                unit = param.unit!!,
-                quantityPurchased = param.quantityPurchased,
-            )
-        )) {
-            is Result.Success -> result.value
-            is Result.Failure -> return Result.Failure(MealPlanError.Invalid("purchase", result.error.message))
-        }
+        if (param.manualItemId != null) {
+            // Manual item purchase update
+            val item = when (val result = mealPlanClient.updateManualItemPurchase(
+                ClientUpdateManualItemPurchaseParam(
+                    id = param.manualItemId,
+                    quantityPurchased = param.quantityPurchased,
+                )
+            )) {
+                is Result.Success -> result.value
+                is Result.Failure -> return when (result.error) {
+                    is NotFoundError -> Result.Failure(MealPlanError.ManualItemNotFound(param.manualItemId))
+                    else -> Result.Failure(MealPlanError.Invalid("manualItem", result.error.message))
+                }
+            }
 
-        return Result.Success(MealPlanMapper.toShoppingListPurchaseResponse(purchase))
+            return Result.Success(
+                ShoppingListPurchaseResponse(
+                    id = item.id,
+                    mealPlanId = item.mealPlanId,
+                    ingredientId = item.ingredientId ?: item.id,
+                    unit = item.unit ?: "",
+                    quantityPurchased = item.quantityPurchased,
+                    createdAt = item.createdAt,
+                    updatedAt = item.updatedAt,
+                )
+            )
+        } else {
+            // Recipe-based purchase update (existing flow)
+            val purchase = when (val result = mealPlanClient.upsertPurchase(
+                ClientUpsertPurchaseParam(
+                    mealPlanId = param.mealPlanId,
+                    ingredientId = param.ingredientId!!,
+                    unit = param.unit!!,
+                    quantityPurchased = param.quantityPurchased,
+                )
+            )) {
+                is Result.Success -> result.value
+                is Result.Failure -> return Result.Failure(MealPlanError.Invalid("purchase", result.error.message))
+            }
+
+            return Result.Success(MealPlanMapper.toShoppingListPurchaseResponse(purchase))
+        }
     }
 }
