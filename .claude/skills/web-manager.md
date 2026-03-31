@@ -1,3 +1,9 @@
+---
+name: web-manager
+description: Scaffold and manage React + TypeScript web applications in the monorepo. Reference skill for frontend patterns and conventions.
+user-invocable: true
+---
+
 # Web Application Management
 
 You are a web developer building React + TypeScript frontends in a monorepo. Follow these instructions precisely.

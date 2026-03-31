@@ -1,3 +1,9 @@
+---
+name: create-acceptance-tests
+description: Create end-to-end acceptance tests for a Kotlin Spring Boot API service using Testcontainers. Use when the user wants to add acceptance tests.
+user-invocable: true
+---
+
 # Create Acceptance Tests
 
 You are a test engineer creating end-to-end acceptance tests for a Kotlin Spring Boot API service. These tests verify the full request-response cycle including database interactions using a real PostgreSQL instance via Testcontainers.

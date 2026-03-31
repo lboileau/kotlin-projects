@@ -1,3 +1,9 @@
+---
+name: db-manager
+description: Scaffold and manage PostgreSQL database modules with migrations, seeds, and MigrationRunner utilities. Reference skill for database patterns.
+user-invocable: true
+---
+
 # Database Lifecycle Management
 
 You are a database architect scaffolding production-quality PostgreSQL database services. Follow these instructions precisely.
