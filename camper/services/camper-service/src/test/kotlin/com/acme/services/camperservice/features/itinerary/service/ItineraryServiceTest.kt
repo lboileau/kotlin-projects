@@ -50,6 +50,7 @@ class ItineraryServiceTest {
                 ClientItineraryEvent(
                     id = eventId, itineraryId = itineraryId, title = "Hike",
                     description = "Morning hike", details = null, eventAt = eventAt,
+                    category = "activity", estimatedCost = null, location = null, eventEndAt = null,
                     createdAt = Instant.now(), updatedAt = Instant.now()
                 )
             )
@@ -126,7 +127,8 @@ class ItineraryServiceTest {
             val result = itineraryService.addEvent(
                 AddEventParam(
                     planId = planId, title = "Campfire",
-                    description = "Evening campfire", details = null, eventAt = eventAt
+                    description = "Evening campfire", details = null, eventAt = eventAt,
+                    category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
 
@@ -146,7 +148,8 @@ class ItineraryServiceTest {
             val result = itineraryService.addEvent(
                 AddEventParam(
                     planId = UUID.randomUUID(), title = "Campfire",
-                    description = null, details = null, eventAt = eventAt
+                    description = null, details = null, eventAt = eventAt,
+                    category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
 
@@ -160,7 +163,8 @@ class ItineraryServiceTest {
             val result = itineraryService.addEvent(
                 AddEventParam(
                     planId = planId, title = "",
-                    description = null, details = null, eventAt = eventAt
+                    description = null, details = null, eventAt = eventAt,
+                    category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
 
@@ -178,7 +182,8 @@ class ItineraryServiceTest {
             val addResult = itineraryService.addEvent(
                 AddEventParam(
                     planId = planId, title = "Hike",
-                    description = "Morning hike", details = null, eventAt = eventAt
+                    description = "Morning hike", details = null, eventAt = eventAt,
+                    category = "activity", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
             val createdEvent = (addResult as Result.Success).value
@@ -188,7 +193,8 @@ class ItineraryServiceTest {
                 UpdateEventParam(
                     planId = planId, eventId = createdEvent.id,
                     title = "Afternoon Hike", description = "Changed to afternoon",
-                    details = "Bring water", eventAt = newEventAt
+                    details = "Bring water", eventAt = newEventAt,
+                    category = "activity", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
 
@@ -205,7 +211,8 @@ class ItineraryServiceTest {
             val result = itineraryService.updateEvent(
                 UpdateEventParam(
                     planId = planId, eventId = UUID.randomUUID(),
-                    title = "Nope", description = null, details = null, eventAt = eventAt
+                    title = "Nope", description = null, details = null, eventAt = eventAt,
+                    category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
 
@@ -220,7 +227,8 @@ class ItineraryServiceTest {
             val addResult = itineraryService.addEvent(
                 AddEventParam(
                     planId = planId, title = "Hike",
-                    description = null, details = null, eventAt = eventAt
+                    description = null, details = null, eventAt = eventAt,
+                    category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
             val createdEvent = (addResult as Result.Success).value
@@ -228,7 +236,8 @@ class ItineraryServiceTest {
             val result = itineraryService.updateEvent(
                 UpdateEventParam(
                     planId = planId, eventId = createdEvent.id,
-                    title = "", description = null, details = null, eventAt = eventAt
+                    title = "", description = null, details = null, eventAt = eventAt,
+                    category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
 
@@ -246,7 +255,8 @@ class ItineraryServiceTest {
             val addResult = itineraryService.addEvent(
                 AddEventParam(
                     planId = planId, title = "Hike",
-                    description = null, details = null, eventAt = eventAt
+                    description = null, details = null, eventAt = eventAt,
+                    category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
             val createdEvent = (addResult as Result.Success).value

@@ -50,7 +50,12 @@ class ItineraryController(
             title = request.title,
             description = request.description,
             details = request.details,
-            eventAt = request.eventAt
+            eventAt = request.eventAt,
+            category = request.category,
+            estimatedCost = request.estimatedCost,
+            location = request.location,
+            eventEndAt = request.eventEndAt,
+            links = request.links
         )
         val result = itineraryService.addEvent(param)
         if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")
@@ -72,7 +77,12 @@ class ItineraryController(
             title = request.title,
             description = request.description,
             details = request.details,
-            eventAt = request.eventAt
+            eventAt = request.eventAt,
+            category = request.category,
+            estimatedCost = request.estimatedCost,
+            location = request.location,
+            eventEndAt = request.eventEndAt,
+            links = request.links
         )
         val result = itineraryService.updateEvent(param)
         if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")

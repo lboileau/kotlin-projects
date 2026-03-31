@@ -23,6 +23,10 @@ object ItineraryMapper {
         description = clientEvent.description,
         details = clientEvent.details,
         eventAt = clientEvent.eventAt,
+        category = clientEvent.category,
+        estimatedCost = clientEvent.estimatedCost,
+        location = clientEvent.location,
+        eventEndAt = clientEvent.eventEndAt,
         createdAt = clientEvent.createdAt,
         updatedAt = clientEvent.updatedAt
     )
@@ -31,6 +35,7 @@ object ItineraryMapper {
         id = itinerary.id,
         planId = itinerary.planId,
         events = events.map { toResponse(it) },
+        totalEstimatedCost = events.mapNotNull { it.estimatedCost }.takeIf { it.isNotEmpty() }?.sumOf { it },
         createdAt = itinerary.createdAt,
         updatedAt = itinerary.updatedAt
     )
@@ -42,6 +47,11 @@ object ItineraryMapper {
         description = event.description,
         details = event.details,
         eventAt = event.eventAt,
+        category = event.category,
+        estimatedCost = event.estimatedCost,
+        location = event.location,
+        eventEndAt = event.eventEndAt,
+        links = emptyList(),
         createdAt = event.createdAt,
         updatedAt = event.updatedAt
     )
