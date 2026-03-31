@@ -54,7 +54,7 @@ class FakeItemClient : ItemClient {
         val validation = validateGetByPlanId.execute(param)
         if (validation is Result.Failure) return validation
 
-        val entities = store.values.filter { it.planId == param.planId }.sortedBy { it.createdAt }
+        val entities = store.values.filter { it.planId == param.planId && it.userId == null }.sortedBy { it.createdAt }
         return success(entities)
     }
 
