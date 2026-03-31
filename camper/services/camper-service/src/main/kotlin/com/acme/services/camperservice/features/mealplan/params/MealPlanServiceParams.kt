@@ -85,9 +85,25 @@ data class GetShoppingListParam(
 data class UpdatePurchaseParam(
     val mealPlanId: UUID,
     val userId: UUID,
-    val ingredientId: UUID,
-    val unit: String,
+    val ingredientId: UUID?,
+    val manualItemId: UUID?,
+    val unit: String?,
     val quantityPurchased: BigDecimal
+)
+
+data class AddManualItemParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val ingredientId: UUID?,
+    val description: String?,
+    val quantity: BigDecimal?,
+    val unit: String?,
+)
+
+data class RemoveManualItemParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val itemId: UUID,
 )
 
 data class ResetPurchasesParam(

@@ -31,11 +31,12 @@ internal class UpdatePurchaseAction(
             }
         }
 
+        // TODO: service-impl PR will add branching on manualItemId vs ingredientId
         val purchase = when (val result = mealPlanClient.upsertPurchase(
             ClientUpsertPurchaseParam(
                 mealPlanId = param.mealPlanId,
-                ingredientId = param.ingredientId,
-                unit = param.unit,
+                ingredientId = param.ingredientId!!,
+                unit = param.unit!!,
                 quantityPurchased = param.quantityPurchased,
             )
         )) {

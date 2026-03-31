@@ -569,7 +569,7 @@ class MealPlanAcceptanceTest {
             restTemplate.exchange(
                 "/api/meal-plans/${mealPlan.id}/shopping-list",
                 HttpMethod.PATCH,
-                entityWithUser(UpdatePurchaseRequest(ingredientId, "cup", BigDecimal("1")), userId),
+                entityWithUser(UpdatePurchaseRequest(ingredientId = ingredientId, unit = "cup", quantityPurchased = BigDecimal("1")), userId),
                 ShoppingListPurchaseResponse::class.java
             )
 
@@ -577,7 +577,7 @@ class MealPlanAcceptanceTest {
             restTemplate.exchange(
                 "/api/meal-plans/${mealPlan.id}/shopping-list",
                 HttpMethod.PATCH,
-                entityWithUser(UpdatePurchaseRequest(ingredientId, "cup", BigDecimal("2")), userId),
+                entityWithUser(UpdatePurchaseRequest(ingredientId = ingredientId, unit = "cup", quantityPurchased = BigDecimal("2")), userId),
                 ShoppingListPurchaseResponse::class.java
             )
 
@@ -606,7 +606,7 @@ class MealPlanAcceptanceTest {
             restTemplate.exchange(
                 "/api/meal-plans/${mealPlan.id}/shopping-list",
                 HttpMethod.PATCH,
-                entityWithUser(UpdatePurchaseRequest(ingredientId, "pieces", BigDecimal("4")), userId),
+                entityWithUser(UpdatePurchaseRequest(ingredientId = ingredientId, unit = "pieces", quantityPurchased = BigDecimal("4")), userId),
                 ShoppingListPurchaseResponse::class.java
             )
 
@@ -647,7 +647,7 @@ class MealPlanAcceptanceTest {
             restTemplate.exchange(
                 "/api/meal-plans/${mealPlan.id}/shopping-list",
                 HttpMethod.PATCH,
-                entityWithUser(UpdatePurchaseRequest(ingredientId, "cup", BigDecimal("1")), userId),
+                entityWithUser(UpdatePurchaseRequest(ingredientId = ingredientId, unit = "cup", quantityPurchased = BigDecimal("1")), userId),
                 ShoppingListPurchaseResponse::class.java
             )
 
@@ -868,7 +868,7 @@ class MealPlanAcceptanceTest {
             restTemplate.exchange(
                 "/api/meal-plans/${mealPlan.id}/shopping-list",
                 HttpMethod.PATCH,
-                entityWithUser(UpdatePurchaseRequest(ingredientId, "cup", BigDecimal("1")), userId),
+                entityWithUser(UpdatePurchaseRequest(ingredientId = ingredientId, unit = "cup", quantityPurchased = BigDecimal("1")), userId),
                 ShoppingListPurchaseResponse::class.java
             )
 
@@ -992,13 +992,13 @@ class MealPlanAcceptanceTest {
             restTemplate.exchange(
                 "/api/meal-plans/${tripMealPlan.id}/shopping-list",
                 HttpMethod.PATCH,
-                entityWithUser(UpdatePurchaseRequest(flourId, "cup", BigDecimal("8")), userId),
+                entityWithUser(UpdatePurchaseRequest(ingredientId = flourId, unit = "cup", quantityPurchased = BigDecimal("8")), userId),
                 ShoppingListPurchaseResponse::class.java
             )
             restTemplate.exchange(
                 "/api/meal-plans/${tripMealPlan.id}/shopping-list",
                 HttpMethod.PATCH,
-                entityWithUser(UpdatePurchaseRequest(eggsId, "pieces", BigDecimal("6")), userId),
+                entityWithUser(UpdatePurchaseRequest(ingredientId = eggsId, unit = "pieces", quantityPurchased = BigDecimal("6")), userId),
                 ShoppingListPurchaseResponse::class.java
             )
 

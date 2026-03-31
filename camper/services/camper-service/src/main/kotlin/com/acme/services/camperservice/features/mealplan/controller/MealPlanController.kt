@@ -1,6 +1,7 @@
 package com.acme.services.camperservice.features.mealplan.controller
 
 import com.acme.clients.common.Result
+import com.acme.services.common.ApiResponse
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.mealplan.dto.*
 import com.acme.services.camperservice.features.mealplan.params.*
@@ -206,10 +207,33 @@ class MealPlanController(
             mealPlanId = id,
             userId = userId,
             ingredientId = request.ingredientId,
+            manualItemId = request.manualItemId,
             unit = request.unit,
             quantityPurchased = request.quantityPurchased,
         )
         return mealPlanService.updatePurchase(param).toResponseEntity { it }
+    }
+
+    /** POST /api/meal-plans/{id}/shopping-list/items — Add manual item */
+    @PostMapping("/{id}/shopping-list/items")
+    fun addManualItem(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID,
+        @RequestBody request: AddManualItemRequest,
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/meal-plans/{}/shopping-list/items", id)
+        return ResponseEntity.status(501).body(ApiResponse.ErrorBody("NOT_IMPLEMENTED", "Not yet implemented"))
+    }
+
+    /** DELETE /api/meal-plans/{id}/shopping-list/items/{itemId} — Remove manual item */
+    @DeleteMapping("/{id}/shopping-list/items/{itemId}")
+    fun removeManualItem(
+        @PathVariable id: UUID,
+        @PathVariable itemId: UUID,
+        @RequestHeader("X-User-Id") userId: UUID,
+    ): ResponseEntity<Any> {
+        logger.info("DELETE /api/meal-plans/{}/shopping-list/items/{}", id, itemId)
+        return ResponseEntity.status(501).body(ApiResponse.ErrorBody("NOT_IMPLEMENTED", "Not yet implemented"))
     }
 
     /** DELETE /api/meal-plans/{id}/shopping-list — Reset all purchases */

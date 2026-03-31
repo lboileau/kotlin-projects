@@ -175,6 +175,10 @@ fun MealPlanError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
     is MealPlanError.Invalid -> ResponseEntity.status(400)
         .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is MealPlanError.ManualItemNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is MealPlanError.DuplicateManualItem -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
 }
 
 @JvmName("mealPlanResultToResponseEntity")
