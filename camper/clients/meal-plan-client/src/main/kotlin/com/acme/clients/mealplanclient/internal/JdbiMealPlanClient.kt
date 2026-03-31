@@ -7,6 +7,7 @@ import com.acme.clients.mealplanclient.internal.operations.*
 import com.acme.clients.mealplanclient.model.MealPlan
 import com.acme.clients.mealplanclient.model.MealPlanDay
 import com.acme.clients.mealplanclient.model.MealPlanRecipe
+import com.acme.clients.mealplanclient.model.ShoppingListManualItem
 import com.acme.clients.mealplanclient.model.ShoppingListPurchase
 import org.jdbi.v3.core.Jdbi
 
@@ -45,4 +46,9 @@ internal class JdbiMealPlanClient(jdbi: Jdbi) : MealPlanClient {
     override fun getPurchases(param: GetPurchasesParam): Result<List<ShoppingListPurchase>, AppError> = getPurchases.execute(param)
     override fun upsertPurchase(param: UpsertPurchaseParam): Result<ShoppingListPurchase, AppError> = upsertPurchase.execute(param)
     override fun deletePurchases(param: DeletePurchasesParam): Result<Unit, AppError> = deletePurchases.execute(param)
+    override fun addManualItem(param: AddManualItemParam): Result<ShoppingListManualItem, AppError> = throw NotImplementedError("Contract stub")
+    override fun getManualItems(param: GetManualItemsParam): Result<List<ShoppingListManualItem>, AppError> = throw NotImplementedError("Contract stub")
+    override fun removeManualItem(param: RemoveManualItemParam): Result<Unit, AppError> = throw NotImplementedError("Contract stub")
+    override fun updateManualItemPurchase(param: UpdateManualItemPurchaseParam): Result<ShoppingListManualItem, AppError> = throw NotImplementedError("Contract stub")
+    override fun resetManualItemPurchases(param: ResetManualItemPurchasesParam): Result<Unit, AppError> = throw NotImplementedError("Contract stub")
 }

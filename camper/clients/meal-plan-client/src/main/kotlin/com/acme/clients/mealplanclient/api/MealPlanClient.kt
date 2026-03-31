@@ -5,6 +5,7 @@ import com.acme.clients.common.error.AppError
 import com.acme.clients.mealplanclient.model.MealPlan
 import com.acme.clients.mealplanclient.model.MealPlanDay
 import com.acme.clients.mealplanclient.model.MealPlanRecipe
+import com.acme.clients.mealplanclient.model.ShoppingListManualItem
 import com.acme.clients.mealplanclient.model.ShoppingListPurchase
 
 /**
@@ -74,4 +75,21 @@ interface MealPlanClient {
 
     /** Delete all purchase records for a meal plan. */
     fun deletePurchases(param: DeletePurchasesParam): Result<Unit, AppError>
+
+    // --- Shopping List Manual Items ---
+
+    /** Add a manual item to a meal plan's shopping list. */
+    fun addManualItem(param: AddManualItemParam): Result<ShoppingListManualItem, AppError>
+
+    /** Retrieve all manual items for a meal plan. */
+    fun getManualItems(param: GetManualItemsParam): Result<List<ShoppingListManualItem>, AppError>
+
+    /** Remove a manual item by its unique identifier. Returns NotFoundError if not found. */
+    fun removeManualItem(param: RemoveManualItemParam): Result<Unit, AppError>
+
+    /** Update the purchased quantity of a manual item. Returns NotFoundError if not found. */
+    fun updateManualItemPurchase(param: UpdateManualItemPurchaseParam): Result<ShoppingListManualItem, AppError>
+
+    /** Reset quantity_purchased to 0 for all manual items in a meal plan. */
+    fun resetManualItemPurchases(param: ResetManualItemPurchasesParam): Result<Unit, AppError>
 }

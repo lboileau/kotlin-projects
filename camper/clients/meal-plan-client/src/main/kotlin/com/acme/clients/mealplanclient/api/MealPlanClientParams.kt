@@ -80,3 +80,29 @@ data class UpsertPurchaseParam(
 
 /** Parameter for deleting all purchases for a meal plan. */
 data class DeletePurchasesParam(val mealPlanId: UUID)
+
+// --- Shopping list manual item params ---
+
+/** Parameter for adding a manual item to a shopping list. */
+data class AddManualItemParam(
+    val mealPlanId: UUID,
+    val ingredientId: UUID?,
+    val description: String?,
+    val quantity: BigDecimal,
+    val unit: String?,
+)
+
+/** Parameter for retrieving all manual items for a meal plan. */
+data class GetManualItemsParam(val mealPlanId: UUID)
+
+/** Parameter for removing a manual item by ID. */
+data class RemoveManualItemParam(val id: UUID)
+
+/** Parameter for updating the purchased quantity of a manual item. */
+data class UpdateManualItemPurchaseParam(
+    val id: UUID,
+    val quantityPurchased: BigDecimal,
+)
+
+/** Parameter for resetting all manual item purchases for a meal plan. */
+data class ResetManualItemPurchasesParam(val mealPlanId: UUID)
