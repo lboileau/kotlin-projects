@@ -1,3 +1,9 @@
+---
+name: build-feature
+description: Gather feature requirements from the user, write a handoff file, then hand off to the orchestrator. Use when the user wants to build a new feature.
+user-invocable: true
+---
+
 # Build Feature
 
 Gather requirements from the user, write a handoff file, then tell the user to clear context and start the orchestrator. You do NOT write code, manage PRs, or run the build yourself.

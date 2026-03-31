@@ -1,3 +1,9 @@
+---
+name: fix-bug
+description: Gather bug details from the user, write a handoff file, then hand off to the orchestrator. Use when the user wants to fix a bug.
+user-invocable: true
+---
+
 # Fix Bug
 
 Gather bug details from the user, write a handoff file, then tell the user to clear context and start the orchestrator. You do NOT write code, manage PRs, or run the build yourself.

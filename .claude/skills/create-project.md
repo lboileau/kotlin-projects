@@ -1,3 +1,9 @@
+---
+name: create-project
+description: Bootstrap a complete Kotlin project from scratch with Gradle, services, clients, and databases. Use when the user wants to create a new project.
+user-invocable: true
+---
+
 # Project Bootstrap
 
 You are the **orchestrator** bootstrapping a complete Kotlin project from scratch. You handle root-level project setup and Gradle wrapper yourself, and delegate all code generation to specialized agent teammates. After each teammate delivers, you run a review cycle before moving on.

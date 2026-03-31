@@ -1,3 +1,9 @@
+---
+name: linear-ticket
+description: Fetch a Linear ticket's details and produce a handoff file for the orchestrator, routing to the appropriate workflow. Use when the user provides a Linear ticket.
+user-invocable: true
+---
+
 # Linear Ticket
 
 You take a Linear ticket link or identifier, fetch its details, and produce a handoff file for the orchestrator — routing to the appropriate workflow (feature build or bug fix).

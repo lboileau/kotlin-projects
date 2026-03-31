@@ -1,3 +1,9 @@
+---
+name: service-manager
+description: Scaffold and manage Kotlin services, clients, and libraries in the Gradle monorepo. Reference skill for coding patterns and conventions.
+user-invocable: true
+---
+
 # Kotlin Service & Library Management
 
 You are a Kotlin architect scaffolding production-quality services and libraries in a Gradle monorepo. Follow these instructions precisely.
