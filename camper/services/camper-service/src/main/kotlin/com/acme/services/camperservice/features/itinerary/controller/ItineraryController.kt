@@ -25,8 +25,8 @@ class ItineraryController(
     fun getItinerary(@PathVariable planId: UUID): ResponseEntity<Any> {
         logger.info("GET /api/plans/{}/itinerary", planId)
         val param = GetItineraryParam(planId = planId)
-        return itineraryService.getItinerary(param).toResponseEntity { (itinerary, events) ->
-            ItineraryMapper.toResponse(itinerary, events)
+        return itineraryService.getItinerary(param).toResponseEntity { (itinerary, events, linksByEventId) ->
+            ItineraryMapper.toResponse(itinerary, events, linksByEventId)
         }
     }
 
@@ -59,8 +59,8 @@ class ItineraryController(
         )
         val result = itineraryService.addEvent(param)
         if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")
-        return result.toResponseEntity(successStatus = 201) {
-            ItineraryMapper.toResponse(it)
+        return result.toResponseEntity(successStatus = 201) { (event, links) ->
+            ItineraryMapper.toResponse(event, links)
         }
     }
 
@@ -86,7 +86,9 @@ class ItineraryController(
         )
         val result = itineraryService.updateEvent(param)
         if (result is Result.Success) eventPublisher.publishUpdate(planId, "itinerary", "updated")
-        return result.toResponseEntity { ItineraryMapper.toResponse(it) }
+        return result.toResponseEntity { (event, links) ->
+            ItineraryMapper.toResponse(event, links)
+        }
     }
 
     @DeleteMapping("/events/{eventId}")
