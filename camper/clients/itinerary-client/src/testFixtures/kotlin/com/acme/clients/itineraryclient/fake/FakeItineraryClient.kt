@@ -9,6 +9,7 @@ import com.acme.clients.common.success
 import com.acme.clients.itineraryclient.api.*
 import com.acme.clients.itineraryclient.internal.validations.ValidateAddEvent
 import com.acme.clients.itineraryclient.internal.validations.ValidateCreateItinerary
+import com.acme.clients.itineraryclient.internal.validations.ValidateReplaceEventLinks
 import com.acme.clients.itineraryclient.internal.validations.ValidateUpdateEvent
 import com.acme.clients.itineraryclient.model.Itinerary
 import com.acme.clients.itineraryclient.model.ItineraryEvent
@@ -20,10 +21,12 @@ import java.util.concurrent.ConcurrentHashMap
 class FakeItineraryClient : ItineraryClient {
     private val itineraryStore = ConcurrentHashMap<UUID, Itinerary>()
     private val eventStore = ConcurrentHashMap<UUID, ItineraryEvent>()
+    private val linkStore = ConcurrentHashMap<UUID, ItineraryEventLink>()
 
     private val validateCreateItinerary = ValidateCreateItinerary()
     private val validateAddEvent = ValidateAddEvent()
     private val validateUpdateEvent = ValidateUpdateEvent()
+    private val validateReplaceEventLinks = ValidateReplaceEventLinks()
 
     override fun getByPlanId(param: GetByPlanIdParam): Result<Itinerary, AppError> {
         val entity = itineraryStore.values.find { it.planId == param.planId }
@@ -50,8 +53,10 @@ class FakeItineraryClient : ItineraryClient {
     override fun delete(param: DeleteItineraryParam): Result<Unit, AppError> {
         val entity = itineraryStore.values.find { it.planId == param.planId }
             ?: return failure(NotFoundError("Itinerary", param.planId.toString()))
-        itineraryStore.remove(entity.id)
+        val eventIds = eventStore.values.filter { it.itineraryId == entity.id }.map { it.id }.toSet()
+        linkStore.entries.removeAll { it.value.eventId in eventIds }
         eventStore.entries.removeAll { it.value.itineraryId == entity.id }
+        itineraryStore.remove(entity.id)
         return success(Unit)
     }
 
@@ -106,20 +111,42 @@ class FakeItineraryClient : ItineraryClient {
     }
 
     override fun deleteEvent(param: DeleteEventParam): Result<Unit, AppError> {
+        linkStore.entries.removeAll { it.value.eventId == param.id }
         return if (eventStore.remove(param.id) != null) success(Unit) else failure(NotFoundError("ItineraryEvent", param.id.toString()))
     }
 
     override fun getLinksByEventIds(param: GetLinksByEventIdsParam): Result<List<ItineraryEventLink>, AppError> {
-        throw NotImplementedError("getLinksByEventIds is not yet implemented in FakeItineraryClient")
+        if (param.eventIds.isEmpty()) return success(emptyList())
+        val eventIds = param.eventIds.toSet()
+        val links = linkStore.values
+            .filter { it.eventId in eventIds }
+            .sortedBy { it.createdAt }
+        return success(links)
     }
 
     override fun replaceEventLinks(param: ReplaceEventLinksParam): Result<List<ItineraryEventLink>, AppError> {
-        throw NotImplementedError("replaceEventLinks is not yet implemented in FakeItineraryClient")
+        val validation = validateReplaceEventLinks.execute(param)
+        if (validation is Result.Failure) return validation
+
+        linkStore.entries.removeAll { it.value.eventId == param.eventId }
+        val now = Instant.now()
+        val newLinks = param.links.map { link ->
+            ItineraryEventLink(
+                id = UUID.randomUUID(),
+                eventId = param.eventId,
+                url = link.url,
+                label = link.label,
+                createdAt = now
+            )
+        }
+        newLinks.forEach { linkStore[it.id] = it }
+        return success(newLinks)
     }
 
     fun reset() {
         itineraryStore.clear()
         eventStore.clear()
+        linkStore.clear()
     }
 
     fun seedItinerary(vararg entities: Itinerary) {
@@ -128,5 +155,9 @@ class FakeItineraryClient : ItineraryClient {
 
     fun seedEvent(vararg entities: ItineraryEvent) {
         entities.forEach { eventStore[it.id] = it }
+    }
+
+    fun seedLink(vararg entities: ItineraryEventLink) {
+        entities.forEach { linkStore[it.id] = it }
     }
 }
