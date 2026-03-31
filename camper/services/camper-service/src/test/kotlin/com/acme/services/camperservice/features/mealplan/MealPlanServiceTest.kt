@@ -655,6 +655,28 @@ class MealPlanServiceTest {
             assertThat(result.isSuccess).isTrue()
             assertThat((result as Result.Success).value.servings).isEqualTo(8)
         }
+
+        @Test
+        fun `copy to trip does not copy manual items`() {
+            val template = seedMealPlan(name = "Template", isTemplate = true, planId = null)
+            val ingredient = seedIngredient("Butter", "dairy", "g")
+            seedManualItem(template.id, ingredientId = ingredient.id, quantity = BigDecimal("200"), unit = "g")
+            seedManualItem(template.id, description = "Paper plates")
+
+            val result = service.copyToTrip(CopyToTripParam(
+                mealPlanId = template.id,
+                userId = userId,
+                planId = UUID.randomUUID(),
+                servings = null,
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val tripMealPlan = (result as Result.Success).value
+
+            // Verify the new trip meal plan has no manual items
+            val shoppingList = (service.getShoppingList(GetShoppingListParam(tripMealPlan.id, userId)) as Result.Success).value
+            assertThat(shoppingList.totalItems).isEqualTo(0)
+        }
     }
 
     // ─── SaveAsTemplate ─────────────────────────────────────────────────────
@@ -745,6 +767,27 @@ class MealPlanServiceTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `save as template does not copy manual items`() {
+            val tripPlan = seedMealPlan(isTemplate = false)
+            val ingredient = seedIngredient("Salt", "spice", "g")
+            seedManualItem(tripPlan.id, ingredientId = ingredient.id, quantity = BigDecimal("100"), unit = "g")
+            seedManualItem(tripPlan.id, description = "Napkins")
+
+            val result = service.saveAsTemplate(SaveAsTemplateParam(
+                mealPlanId = tripPlan.id,
+                userId = userId,
+                name = "Template Copy",
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val template = (result as Result.Success).value
+
+            // Verify the template has no manual items
+            val shoppingList = (service.getShoppingList(GetShoppingListParam(template.id, userId)) as Result.Success).value
+            assertThat(shoppingList.totalItems).isEqualTo(0)
         }
     }
 
@@ -1535,6 +1578,141 @@ class MealPlanServiceTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add ingredient-based with null quantity returns Invalid`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = null,
+                unit = "g",
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add ingredient-based with null unit returns Invalid`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal("100"),
+                unit = null,
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add ingredient-based with zero quantity returns Invalid`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal.ZERO,
+                unit = "g",
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add ingredient-based with invalid unit returns Invalid`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal("100"),
+                unit = "invalid_unit",
+            ))
+
+            // Note: service-level validation delegates to client which validates units
+            // If service doesn't validate unit, this will succeed but client will reject
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add free-form with blank description returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                description = "   ",
+                quantity = null,
+                unit = null,
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add free-form with description exceeding 500 chars returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                description = "a".repeat(501),
+                quantity = null,
+                unit = null,
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add same ingredient with different unit succeeds`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient("Flour", "baking", "g")
+
+            val r1 = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal("200"),
+                unit = "g",
+            ))
+            val r2 = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal("2"),
+                unit = "cup",
+            ))
+
+            assertThat(r1.isSuccess).isTrue()
+            assertThat(r2.isSuccess).isTrue()
+            assertThat((r1 as Result.Success).value.id).isNotEqualTo((r2 as Result.Success).value.id)
         }
     }
 
