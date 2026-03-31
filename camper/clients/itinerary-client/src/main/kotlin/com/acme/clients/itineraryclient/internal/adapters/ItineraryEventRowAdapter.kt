@@ -16,6 +16,10 @@ object ItineraryEventRowAdapter {
         description = rs.getString("description"),
         details = rs.getString("details"),
         eventAt = rs.getTimestamp("event_at").toInstant(),
+        category = rs.getString("category"),
+        estimatedCost = rs.getBigDecimal("estimated_cost"),
+        location = rs.getString("location"),
+        eventEndAt = rs.getTimestamp("event_end_at")?.toInstant(),
         createdAt = rs.getTimestamp("created_at").toInstant(),
         updatedAt = rs.getTimestamp("updated_at").toInstant()
     )

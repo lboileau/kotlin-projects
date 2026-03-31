@@ -27,7 +27,9 @@ internal class UpdateItineraryEvent(private val jdbi: Jdbi) {
             handle.createUpdate(
                 """
                 UPDATE itinerary_events
-                SET title = :title, description = :description, details = :details, event_at = :eventAt, updated_at = :updatedAt
+                SET title = :title, description = :description, details = :details, event_at = :eventAt,
+                    category = :category, estimated_cost = :estimatedCost, location = :location, event_end_at = :eventEndAt,
+                    updated_at = :updatedAt
                 WHERE id = :id
                 """.trimIndent()
             )
@@ -36,6 +38,10 @@ internal class UpdateItineraryEvent(private val jdbi: Jdbi) {
                 .bind("description", param.description)
                 .bind("details", param.details)
                 .bind("eventAt", param.eventAt)
+                .bind("category", param.category)
+                .bind("estimatedCost", param.estimatedCost)
+                .bind("location", param.location)
+                .bind("eventEndAt", param.eventEndAt)
                 .bind("updatedAt", now)
                 .execute()
         }
@@ -44,7 +50,7 @@ internal class UpdateItineraryEvent(private val jdbi: Jdbi) {
         val entity = jdbi.withHandle<ItineraryEvent?, Exception> { handle ->
             handle.createQuery(
                 """
-                SELECT id, itinerary_id, title, description, details, event_at, created_at, updated_at
+                SELECT id, itinerary_id, title, description, details, event_at, category, estimated_cost, location, event_end_at, created_at, updated_at
                 FROM itinerary_events
                 WHERE id = :id
                 """.trimIndent()

@@ -17,7 +17,7 @@ internal class GetItineraryEvents(private val jdbi: Jdbi) {
         val entities = jdbi.withHandle<List<ItineraryEvent>, Exception> { handle ->
             handle.createQuery(
                 """
-                SELECT id, itinerary_id, title, description, details, event_at, created_at, updated_at
+                SELECT id, itinerary_id, title, description, details, event_at, category, estimated_cost, location, event_end_at, created_at, updated_at
                 FROM itinerary_events
                 WHERE itinerary_id = :itineraryId
                 ORDER BY event_at ASC

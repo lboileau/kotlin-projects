@@ -1,5 +1,6 @@
 package com.acme.clients.itineraryclient.api
 
+import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
@@ -21,7 +22,11 @@ data class AddEventParam(
     val title: String,
     val description: String?,
     val details: String?,
-    val eventAt: Instant
+    val eventAt: Instant,
+    val category: String,
+    val estimatedCost: BigDecimal?,
+    val location: String?,
+    val eventEndAt: Instant?
 )
 
 /** Parameter for updating an itinerary event. */
@@ -30,8 +35,21 @@ data class UpdateEventParam(
     val title: String,
     val description: String?,
     val details: String?,
-    val eventAt: Instant
+    val eventAt: Instant,
+    val category: String,
+    val estimatedCost: BigDecimal?,
+    val location: String?,
+    val eventEndAt: Instant?
 )
 
 /** Parameter for deleting an itinerary event. */
 data class DeleteEventParam(val id: UUID)
+
+/** Parameter for retrieving links by event IDs. */
+data class GetLinksByEventIdsParam(val eventIds: List<UUID>)
+
+/** Input for a single link to create. */
+data class LinkInput(val url: String, val label: String?)
+
+/** Parameter for replacing all links on an event. */
+data class ReplaceEventLinksParam(val eventId: UUID, val links: List<LinkInput>)
