@@ -3,7 +3,9 @@ package com.acme.clients.mealplanclient
 import com.acme.clients.common.Result
 import com.acme.clients.common.error.ConflictError
 import com.acme.clients.common.error.NotFoundError
+import com.acme.clients.common.error.ValidationError
 import com.acme.clients.mealplanclient.api.AddDayParam
+import com.acme.clients.mealplanclient.api.AddManualItemParam
 import com.acme.clients.mealplanclient.api.AddRecipeParam
 import com.acme.clients.mealplanclient.api.CreateMealPlanParam
 import com.acme.clients.mealplanclient.api.DeleteMealPlanParam
@@ -11,12 +13,16 @@ import com.acme.clients.mealplanclient.api.DeletePurchasesParam
 import com.acme.clients.mealplanclient.api.GetByIdParam
 import com.acme.clients.mealplanclient.api.GetByPlanIdParam
 import com.acme.clients.mealplanclient.api.GetDaysParam
+import com.acme.clients.mealplanclient.api.GetManualItemsParam
 import com.acme.clients.mealplanclient.api.GetPurchasesParam
 import com.acme.clients.mealplanclient.api.GetRecipesByDayIdParam
 import com.acme.clients.mealplanclient.api.GetRecipesByMealPlanIdParam
 import com.acme.clients.mealplanclient.api.MealPlanClient
 import com.acme.clients.mealplanclient.api.RemoveDayParam
+import com.acme.clients.mealplanclient.api.RemoveManualItemParam
 import com.acme.clients.mealplanclient.api.RemoveRecipeParam
+import com.acme.clients.mealplanclient.api.ResetManualItemPurchasesParam
+import com.acme.clients.mealplanclient.api.UpdateManualItemPurchaseParam
 import com.acme.clients.mealplanclient.api.UpdateMealPlanParam
 import com.acme.clients.mealplanclient.api.UpsertPurchaseParam
 import com.acme.clients.mealplanclient.test.MealPlanTestDb
@@ -67,7 +73,7 @@ class MealPlanClientIntegrationTest {
         jdbi.withHandle<Unit, Exception> { handle ->
             handle.createUpdate(
                 """
-                TRUNCATE TABLE shopping_list_purchases, meal_plan_recipes, meal_plan_days, meal_plans,
+                TRUNCATE TABLE shopping_list_manual_items, shopping_list_purchases, meal_plan_recipes, meal_plan_days, meal_plans,
                     recipe_ingredients, recipes, ingredients, items, assignment_members, assignments,
                     itinerary_events, itineraries, invitations, plan_members, plans, users CASCADE
                 """.trimIndent()
@@ -722,6 +728,507 @@ class MealPlanClientIntegrationTest {
             }
             assertThat(result).isNotNull()
             assertThat(result!!.message).contains("fk_shopping_list_purchases_ingredient")
+        }
+    }
+
+    @Nested
+    inner class AddManualItem {
+        @Test
+        fun `add ingredient-based manual item returns all fields`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("250"), unit = "g"
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val item = (result as Result.Success).value
+            assertThat(item.id).isNotNull()
+            assertThat(item.mealPlanId).isEqualTo(mp.id)
+            assertThat(item.ingredientId).isEqualTo(testIngredientId)
+            assertThat(item.description).isNull()
+            assertThat(item.quantity).isEqualByComparingTo(BigDecimal("250"))
+            assertThat(item.unit).isEqualTo("g")
+            assertThat(item.quantityPurchased).isEqualByComparingTo(BigDecimal.ZERO)
+            assertThat(item.createdAt).isNotNull()
+            assertThat(item.updatedAt).isNotNull()
+        }
+
+        @Test
+        fun `add free-form manual item returns all fields`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Paper plates", quantity = BigDecimal("1"), unit = null
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val item = (result as Result.Success).value
+            assertThat(item.ingredientId).isNull()
+            assertThat(item.description).isEqualTo("Paper plates")
+            assertThat(item.quantity).isEqualByComparingTo(BigDecimal("1"))
+            assertThat(item.unit).isNull()
+        }
+
+        @Test
+        fun `duplicate ingredient and unit combo returns ConflictError`() {
+            val mp = createTemplate()
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("100"), unit = "g"
+                )
+            )
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("200"), unit = "g"
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ConflictError::class.java)
+        }
+
+        @Test
+        fun `same ingredient with different units is allowed`() {
+            val mp = createTemplate()
+            val r1 = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("100"), unit = "g"
+                )
+            )
+            val r2 = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("2"), unit = "kg"
+                )
+            )
+            assertThat(r1).isInstanceOf(Result.Success::class.java)
+            assertThat(r2).isInstanceOf(Result.Success::class.java)
+        }
+
+        @Test
+        fun `zero quantity returns ValidationError`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal.ZERO, unit = "g"
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `negative quantity returns ValidationError`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("-1"), unit = "g"
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `invalid unit returns ValidationError`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("100"), unit = "invalid_unit"
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `ingredient-based item without unit returns ValidationError`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("100"), unit = null
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `blank description returns ValidationError`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "   ", quantity = BigDecimal("1"), unit = null
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `description exceeding 500 chars returns ValidationError`() {
+            val mp = createTemplate()
+            val longDescription = "a".repeat(501)
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = longDescription, quantity = BigDecimal("1"), unit = null
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `neither ingredientId nor description returns ValidationError`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = null, quantity = BigDecimal("1"), unit = null
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `both ingredientId and description returns ValidationError`() {
+            val mp = createTemplate()
+            val result = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = "Some text", quantity = BigDecimal("1"), unit = "g"
+                )
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `multiple free-form items with same description is allowed`() {
+            val mp = createTemplate()
+            val r1 = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Paper plates", quantity = BigDecimal("1"), unit = null
+                )
+            )
+            val r2 = client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Paper plates", quantity = BigDecimal("1"), unit = null
+                )
+            )
+            assertThat(r1).isInstanceOf(Result.Success::class.java)
+            assertThat(r2).isInstanceOf(Result.Success::class.java)
+            assertThat((r1 as Result.Success).value.id).isNotEqualTo((r2 as Result.Success).value.id)
+        }
+    }
+
+    @Nested
+    inner class GetManualItems {
+        @Test
+        fun `returns empty list when no manual items exist`() {
+            val mp = createTemplate()
+            val result = client.getManualItems(GetManualItemsParam(mealPlanId = mp.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val items = (result as Result.Success).value
+            assertThat(items).isEmpty()
+        }
+
+        @Test
+        fun `returns manual items for the specified meal plan only`() {
+            val mp1 = createTemplate("Plan A")
+            val mp2 = createTemplate("Plan B")
+
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp1.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("100"), unit = "g"
+                )
+            )
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp1.id, ingredientId = null,
+                    description = "Napkins", quantity = BigDecimal("1"), unit = null
+                )
+            )
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp2.id, ingredientId = null,
+                    description = "Cups", quantity = BigDecimal("1"), unit = null
+                )
+            )
+
+            val result = client.getManualItems(GetManualItemsParam(mealPlanId = mp1.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val items = (result as Result.Success).value
+            assertThat(items).hasSize(2)
+            assertThat(items.all { it.mealPlanId == mp1.id }).isTrue()
+        }
+
+        @Test
+        fun `results ordered by created_at`() {
+            val mp = createTemplate()
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "First item", quantity = BigDecimal("1"), unit = null
+                )
+            )
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Second item", quantity = BigDecimal("1"), unit = null
+                )
+            )
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Third item", quantity = BigDecimal("1"), unit = null
+                )
+            )
+
+            val result = client.getManualItems(GetManualItemsParam(mealPlanId = mp.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val items = (result as Result.Success).value
+            assertThat(items).hasSize(3)
+            assertThat(items.map { it.description }).containsExactly("First item", "Second item", "Third item")
+            assertThat(items[0].createdAt).isBeforeOrEqualTo(items[1].createdAt)
+            assertThat(items[1].createdAt).isBeforeOrEqualTo(items[2].createdAt)
+        }
+    }
+
+    @Nested
+    inner class RemoveManualItem {
+        @Test
+        fun `successfully removes an existing manual item`() {
+            val mp = createTemplate()
+            val item = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Remove me", quantity = BigDecimal("1"), unit = null
+                )
+            ) as Result.Success).value
+
+            val result = client.removeManualItem(RemoveManualItemParam(item.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+
+            val items = (client.getManualItems(GetManualItemsParam(mealPlanId = mp.id)) as Result.Success).value
+            assertThat(items).isEmpty()
+        }
+
+        @Test
+        fun `returns NotFoundError for non-existent item ID`() {
+            val result = client.removeManualItem(RemoveManualItemParam(UUID.randomUUID()))
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(NotFoundError::class.java)
+        }
+    }
+
+    @Nested
+    inner class UpdateManualItemPurchase {
+        @Test
+        fun `successfully updates quantity_purchased`() {
+            val mp = createTemplate()
+            val item = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("500"), unit = "g"
+                )
+            ) as Result.Success).value
+
+            val result = client.updateManualItemPurchase(
+                UpdateManualItemPurchaseParam(id = item.id, quantityPurchased = BigDecimal("250"))
+            )
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val updated = (result as Result.Success).value
+            assertThat(updated.id).isEqualTo(item.id)
+            assertThat(updated.quantityPurchased).isEqualByComparingTo(BigDecimal("250"))
+            assertThat(updated.updatedAt).isAfterOrEqualTo(item.updatedAt)
+        }
+
+        @Test
+        fun `returns NotFoundError for non-existent item ID`() {
+            val result = client.updateManualItemPurchase(
+                UpdateManualItemPurchaseParam(id = UUID.randomUUID(), quantityPurchased = BigDecimal("10"))
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(NotFoundError::class.java)
+        }
+
+        @Test
+        fun `negative quantityPurchased returns ValidationError`() {
+            val mp = createTemplate()
+            val item = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Test item", quantity = BigDecimal("1"), unit = null
+                )
+            ) as Result.Success).value
+
+            val result = client.updateManualItemPurchase(
+                UpdateManualItemPurchaseParam(id = item.id, quantityPurchased = BigDecimal("-1"))
+            )
+            assertThat(result).isInstanceOf(Result.Failure::class.java)
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(ValidationError::class.java)
+        }
+
+        @Test
+        fun `zero quantityPurchased is allowed`() {
+            val mp = createTemplate()
+            val item = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Test item", quantity = BigDecimal("1"), unit = null
+                )
+            ) as Result.Success).value
+
+            val result = client.updateManualItemPurchase(
+                UpdateManualItemPurchaseParam(id = item.id, quantityPurchased = BigDecimal.ZERO)
+            )
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val updated = (result as Result.Success).value
+            assertThat(updated.quantityPurchased).isEqualByComparingTo(BigDecimal.ZERO)
+        }
+    }
+
+    @Nested
+    inner class ResetManualItemPurchases {
+        @Test
+        fun `resets quantity_purchased to 0 for all manual items in the meal plan`() {
+            val mp = createTemplate()
+            val item1 = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = testIngredientId,
+                    description = null, quantity = BigDecimal("500"), unit = "g"
+                )
+            ) as Result.Success).value
+            val item2 = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Napkins", quantity = BigDecimal("1"), unit = null
+                )
+            ) as Result.Success).value
+
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item1.id, quantityPurchased = BigDecimal("250")))
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item2.id, quantityPurchased = BigDecimal("1")))
+
+            val result = client.resetManualItemPurchases(ResetManualItemPurchasesParam(mealPlanId = mp.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+
+            val items = (client.getManualItems(GetManualItemsParam(mealPlanId = mp.id)) as Result.Success).value
+            assertThat(items).hasSize(2)
+            assertThat(items.all { it.quantityPurchased.compareTo(BigDecimal.ZERO) == 0 }).isTrue()
+        }
+
+        @Test
+        fun `does not affect manual items in other meal plans`() {
+            val mp1 = createTemplate("Plan A")
+            val mp2 = createTemplate("Plan B")
+
+            val item1 = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp1.id, ingredientId = null,
+                    description = "Plan A item", quantity = BigDecimal("1"), unit = null
+                )
+            ) as Result.Success).value
+            val item2 = (client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp2.id, ingredientId = null,
+                    description = "Plan B item", quantity = BigDecimal("1"), unit = null
+                )
+            ) as Result.Success).value
+
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item1.id, quantityPurchased = BigDecimal("1")))
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item2.id, quantityPurchased = BigDecimal("1")))
+
+            client.resetManualItemPurchases(ResetManualItemPurchasesParam(mealPlanId = mp1.id))
+
+            val mp1Items = (client.getManualItems(GetManualItemsParam(mealPlanId = mp1.id)) as Result.Success).value
+            assertThat(mp1Items).hasSize(1)
+            assertThat(mp1Items[0].quantityPurchased).isEqualByComparingTo(BigDecimal.ZERO)
+
+            val mp2Items = (client.getManualItems(GetManualItemsParam(mealPlanId = mp2.id)) as Result.Success).value
+            assertThat(mp2Items).hasSize(1)
+            assertThat(mp2Items[0].quantityPurchased).isEqualByComparingTo(BigDecimal("1"))
+        }
+
+        @Test
+        fun `reset on meal plan with no manual items succeeds`() {
+            val mp = createTemplate()
+            val result = client.resetManualItemPurchases(ResetManualItemPurchasesParam(mealPlanId = mp.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+        }
+    }
+
+    @Nested
+    inner class ManualItemCascadeDeletes {
+        @Test
+        fun `delete meal plan cascades to manual items`() {
+            val mp = createTemplate()
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = null,
+                    description = "Cascade me", quantity = BigDecimal("1"), unit = null
+                )
+            )
+
+            client.delete(DeleteMealPlanParam(mp.id))
+
+            val count = jdbi.withHandle<Long, Exception> { handle ->
+                handle.createQuery("SELECT count(*) FROM shopping_list_manual_items WHERE meal_plan_id = :id")
+                    .bind("id", mp.id)
+                    .mapTo(Long::class.java)
+                    .one()
+            }
+            assertThat(count).isEqualTo(0)
+        }
+
+        @Test
+        fun `delete ingredient cascades to manual items referencing it`() {
+            val mp = createTemplate()
+            val ingredientId = UUID.randomUUID()
+            jdbi.withHandle<Unit, Exception> { handle ->
+                handle.createUpdate("INSERT INTO ingredients (id, name, category, default_unit) VALUES (:id, :name, :category, :defaultUnit)")
+                    .bind("id", ingredientId).bind("name", "Butter").bind("category", "dairy").bind("defaultUnit", "g").execute()
+            }
+            client.addManualItem(
+                AddManualItemParam(
+                    mealPlanId = mp.id, ingredientId = ingredientId,
+                    description = null, quantity = BigDecimal("200"), unit = "g"
+                )
+            )
+
+            jdbi.withHandle<Unit, Exception> { handle ->
+                handle.createUpdate("DELETE FROM ingredients WHERE id = :id").bind("id", ingredientId).execute()
+            }
+
+            val items = (client.getManualItems(GetManualItemsParam(mealPlanId = mp.id)) as Result.Success).value
+            assertThat(items).isEmpty()
         }
     }
 }
