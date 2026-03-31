@@ -92,23 +92,31 @@ VALUES
     ('aa001100-aaaa-bbbb-cccc-ddddeeee0001', '10aabb00-1111-2222-3333-444455556666', now(), now())
 ON CONFLICT DO NOTHING;
 
-INSERT INTO itinerary_events (id, itinerary_id, title, description, details, event_at, created_at, updated_at)
+INSERT INTO itinerary_events (id, itinerary_id, title, description, details, event_at, category, estimated_cost, location, event_end_at, created_at, updated_at)
 VALUES
     ('bb001100-1111-2222-3333-444455550001', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
      'Arrive at campsite', 'Set up tents and organize the camp area before dark.',
      'Site #14 at Pine Ridge Campground. Check-in at the ranger station on the way in.',
-     '2026-07-10 15:00:00+00', now(), now()),
+     '2026-07-10 15:00:00+00', 'travel', NULL, 'Pine Ridge Campground, Site #14', NULL, now(), now()),
     ('bb001100-1111-2222-3333-444455550002', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
      'Morning hike to Eagle Peak', 'A moderate 5-mile loop trail with great views of the valley.',
      NULL,
-     '2026-07-11 08:00:00+00', now(), now()),
+     '2026-07-11 08:00:00+00', 'activity', 0, 'Eagle Peak Trailhead', '2026-07-11 12:00:00+00', now(), now()),
     ('bb001100-1111-2222-3333-444455550003', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
      'Campfire dinner', 'Cook dinner over the fire and share stories.',
      'Bring foil packets for veggies. Bob is handling the firewood.',
-     '2026-07-11 18:30:00+00', now(), now()),
+     '2026-07-11 18:30:00+00', 'meal', 35.00, NULL, '2026-07-11 20:30:00+00', now(), now()),
     ('bb001100-1111-2222-3333-444455550004', 'aa001100-aaaa-bbbb-cccc-ddddeeee0001',
      'Pack up and head home', NULL, NULL,
-     '2026-07-12 10:00:00+00', now(), now())
+     '2026-07-12 10:00:00+00', 'travel', NULL, NULL, NULL, now(), now())
+ON CONFLICT DO NOTHING;
+
+INSERT INTO itinerary_event_links (id, event_id, url, label, created_at)
+VALUES
+    ('cc001100-1111-2222-3333-444455550001', 'bb001100-1111-2222-3333-444455550002',
+     'https://www.alltrails.com/trail/eagle-peak-loop', 'AllTrails', now()),
+    ('cc001100-1111-2222-3333-444455550002', 'bb001100-1111-2222-3333-444455550003',
+     'https://www.campfirerecipes.com/foil-packet-veggies', 'Foil Packet Veggies Recipe', now())
 ON CONFLICT DO NOTHING;
 
 INSERT INTO assignments (id, plan_id, name, type, max_occupancy, owner_id, created_at, updated_at)
