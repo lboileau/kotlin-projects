@@ -8,10 +8,13 @@ import com.acme.clients.common.failure
 import com.acme.clients.common.success
 import com.acme.clients.mealplanclient.api.*
 import com.acme.clients.mealplanclient.internal.validations.ValidateAddDay
+import com.acme.clients.mealplanclient.internal.validations.ValidateAddManualItem
 import com.acme.clients.mealplanclient.internal.validations.ValidateAddRecipe
 import com.acme.clients.mealplanclient.internal.validations.ValidateCreateMealPlan
+import com.acme.clients.mealplanclient.internal.validations.ValidateUpdateManualItemPurchase
 import com.acme.clients.mealplanclient.internal.validations.ValidateUpdateMealPlan
 import com.acme.clients.mealplanclient.internal.validations.ValidateUpsertPurchase
+import java.math.BigDecimal
 import com.acme.clients.mealplanclient.model.MealPlan
 import com.acme.clients.mealplanclient.model.MealPlanDay
 import com.acme.clients.mealplanclient.model.MealPlanRecipe
@@ -26,12 +29,15 @@ class FakeMealPlanClient : MealPlanClient {
     private val days = ConcurrentHashMap<UUID, MealPlanDay>()
     private val recipes = ConcurrentHashMap<UUID, MealPlanRecipe>()
     private val purchases = ConcurrentHashMap<UUID, ShoppingListPurchase>()
+    private val manualItems = ConcurrentHashMap<UUID, ShoppingListManualItem>()
 
     private val validateCreate = ValidateCreateMealPlan()
     private val validateUpdate = ValidateUpdateMealPlan()
     private val validateAddDay = ValidateAddDay()
     private val validateAddRecipe = ValidateAddRecipe()
     private val validateUpsertPurchase = ValidateUpsertPurchase()
+    private val validateAddManualItem = ValidateAddManualItem()
+    private val validateUpdateManualItemPurchase = ValidateUpdateManualItemPurchase()
 
     // --- Meal Plans ---
 
@@ -90,11 +96,12 @@ class FakeMealPlanClient : MealPlanClient {
     override fun delete(param: DeleteMealPlanParam): Result<Unit, AppError> {
         if (!mealPlans.containsKey(param.id)) return failure(NotFoundError("MealPlan", param.id.toString()))
         mealPlans.remove(param.id)
-        // Cascade: remove days, recipes on those days, and purchases
+        // Cascade: remove days, recipes on those days, purchases, and manual items
         val dayIds = days.values.filter { it.mealPlanId == param.id }.map { it.id }.toSet()
         days.keys.removeAll(dayIds)
         recipes.values.removeIf { it.mealPlanDayId in dayIds }
         purchases.values.removeIf { it.mealPlanId == param.id }
+        manualItems.values.removeIf { it.mealPlanId == param.id }
         return success(Unit)
     }
 
@@ -214,23 +221,66 @@ class FakeMealPlanClient : MealPlanClient {
     // --- Shopping List Manual Items ---
 
     override fun addManualItem(param: AddManualItemParam): Result<ShoppingListManualItem, AppError> {
-        throw NotImplementedError("Contract stub")
+        val validation = validateAddManualItem.execute(param)
+        if (validation is Result.Failure) return validation
+
+        // Enforce partial unique index: (meal_plan_id, ingredient_id, unit) for ingredient-based items
+        if (param.ingredientId != null) {
+            val duplicate = manualItems.values.any {
+                it.mealPlanId == param.mealPlanId && it.ingredientId == param.ingredientId && it.unit == param.unit
+            }
+            if (duplicate) {
+                return failure(ConflictError("ShoppingListManualItem", "ingredient ${param.ingredientId} with unit ${param.unit} already exists for this meal plan"))
+            }
+        }
+
+        val entity = ShoppingListManualItem(
+            id = UUID.randomUUID(),
+            mealPlanId = param.mealPlanId,
+            ingredientId = param.ingredientId,
+            description = param.description,
+            quantity = param.quantity,
+            unit = param.unit,
+            quantityPurchased = BigDecimal.ZERO,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now(),
+        )
+        manualItems[entity.id] = entity
+        return success(entity)
     }
 
     override fun getManualItems(param: GetManualItemsParam): Result<List<ShoppingListManualItem>, AppError> {
-        throw NotImplementedError("Contract stub")
+        return success(manualItems.values.filter { it.mealPlanId == param.mealPlanId }.sortedBy { it.createdAt })
     }
 
     override fun removeManualItem(param: RemoveManualItemParam): Result<Unit, AppError> {
-        throw NotImplementedError("Contract stub")
+        if (!manualItems.containsKey(param.id)) return failure(NotFoundError("ShoppingListManualItem", param.id.toString()))
+        manualItems.remove(param.id)
+        return success(Unit)
     }
 
     override fun updateManualItemPurchase(param: UpdateManualItemPurchaseParam): Result<ShoppingListManualItem, AppError> {
-        throw NotImplementedError("Contract stub")
+        val validation = validateUpdateManualItemPurchase.execute(param)
+        if (validation is Result.Failure) return validation
+
+        val existing = manualItems[param.id] ?: return failure(NotFoundError("ShoppingListManualItem", param.id.toString()))
+        val updated = existing.copy(
+            quantityPurchased = param.quantityPurchased,
+            updatedAt = Instant.now(),
+        )
+        manualItems[param.id] = updated
+        return success(updated)
     }
 
     override fun resetManualItemPurchases(param: ResetManualItemPurchasesParam): Result<Unit, AppError> {
-        throw NotImplementedError("Contract stub")
+        manualItems.replaceAll { _, item ->
+            if (item.mealPlanId == param.mealPlanId) {
+                item.copy(quantityPurchased = BigDecimal.ZERO, updatedAt = Instant.now())
+            } else {
+                item
+            }
+        }
+        return success(Unit)
     }
 
     // --- Test helpers ---
@@ -240,6 +290,7 @@ class FakeMealPlanClient : MealPlanClient {
         days.clear()
         recipes.clear()
         purchases.clear()
+        manualItems.clear()
     }
 
     fun seed(vararg entities: MealPlan) = entities.forEach { mealPlans[it.id] = it }
@@ -249,4 +300,6 @@ class FakeMealPlanClient : MealPlanClient {
     fun seedRecipes(vararg entities: MealPlanRecipe) = entities.forEach { recipes[it.id] = it }
 
     fun seedPurchases(vararg entities: ShoppingListPurchase) = entities.forEach { purchases[it.id] = it }
+
+    fun seedManualItems(vararg entities: ShoppingListManualItem) = entities.forEach { manualItems[it.id] = it }
 }
