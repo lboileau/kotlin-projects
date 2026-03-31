@@ -1,6 +1,7 @@
 package com.acme.services.camperservice.features.itinerary.acceptance.fixture
 
 import org.springframework.jdbc.core.JdbcTemplate
+import java.math.BigDecimal
 import java.time.Instant
 import java.util.UUID
 
@@ -54,21 +55,28 @@ class ItineraryFixture(private val jdbcTemplate: JdbcTemplate) {
         description: String? = null,
         details: String? = null,
         eventAt: Instant = Instant.now(),
+        category: String = "other",
+        estimatedCost: BigDecimal? = null,
+        location: String? = null,
+        eventEndAt: Instant? = null,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now()
     ): UUID {
         jdbcTemplate.update(
             """
-            INSERT INTO itinerary_events (id, itinerary_id, title, description, details, event_at, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO itinerary_events (id, itinerary_id, title, description, details, event_at, category, estimated_cost, location, event_end_at, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """.trimIndent(),
             id, itineraryId, title, description, details,
-            java.sql.Timestamp.from(eventAt), java.sql.Timestamp.from(createdAt), java.sql.Timestamp.from(updatedAt)
+            java.sql.Timestamp.from(eventAt), category,
+            estimatedCost, location,
+            eventEndAt?.let { java.sql.Timestamp.from(it) },
+            java.sql.Timestamp.from(createdAt), java.sql.Timestamp.from(updatedAt)
         )
         return id
     }
 
     fun truncateAll() {
-        jdbcTemplate.execute("TRUNCATE TABLE itinerary_events, itineraries, plan_members, plans, users CASCADE")
+        jdbcTemplate.execute("TRUNCATE TABLE itinerary_event_links, itinerary_events, itineraries, plan_members, plans, users CASCADE")
     }
 }
