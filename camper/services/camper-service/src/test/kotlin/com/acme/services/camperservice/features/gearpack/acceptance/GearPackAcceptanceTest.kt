@@ -446,6 +446,9 @@ class GearPackAcceptanceTest {
             // Verify a non-scalable item's quantity
             val spatula = dbItems.find { it["name"] == "Spatula" }
             assertThat(spatula!!["quantity"]).isEqualTo(1)
+
+            // Verify gear_pack_id is stored on all items in the database
+            assertThat(dbItems.all { it["gear_pack_id"] == COOKING_EQUIPMENT_PACK_ID }).isTrue()
         }
     }
 

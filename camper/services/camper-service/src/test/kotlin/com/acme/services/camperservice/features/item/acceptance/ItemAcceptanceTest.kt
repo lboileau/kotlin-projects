@@ -632,6 +632,8 @@ class ItemAcceptanceTest {
             val body = response.body!!
             assertThat(body.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
             assertThat(body.name).isEqualTo("Cast Iron Pan")
+            // create does not SELECT with JOIN after INSERT — gearPackName is null in the create response
+            assertThat(body.gearPackName).isNull()
         }
 
         @Test
@@ -736,6 +738,9 @@ class ItemAcceptanceTest {
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
+            // update does not re-SELECT with JOIN — gearPackName is null in the PUT response;
+            // a subsequent GET will resolve the name via LEFT JOIN
+            assertThat(response.body!!.gearPackName).isNull()
         }
 
         @Test
