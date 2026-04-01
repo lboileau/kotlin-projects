@@ -1043,6 +1043,540 @@ class MealPlanAcceptanceTest {
         }
     }
 
+    // --- Manual Item Tests ---
+
+    @Nested
+    inner class ManualItemOperations {
+
+        @Test
+        fun `POST adds ingredient-based manual item and returns 201`() {
+            val ingredientId = fixture.insertIngredient(name = "Butter", category = "dairy", defaultUnit = "g")
+            val mealPlan = createMealPlanViaApi(name = "Manual Items", planId = planId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = ingredientId, description = null, quantity = BigDecimal("250"), unit = "g"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            val body = response.body!!
+            assertThat(body.id).isNotNull()
+            assertThat(body.ingredientId).isEqualTo(ingredientId)
+            assertThat(body.ingredientName).isEqualTo("Butter")
+            assertThat(body.description).isNull()
+            assertThat(body.quantity).isEqualByComparingTo(BigDecimal("250"))
+            assertThat(body.unit).isEqualTo("g")
+            assertThat(body.quantityPurchased).isEqualByComparingTo(BigDecimal.ZERO)
+            assertThat(body.status).isEqualTo("not_purchased")
+            assertThat(body.category).isEqualTo("dairy")
+        }
+
+        @Test
+        fun `POST adds free-form manual item and returns 201`() {
+            val mealPlan = createMealPlanViaApi(name = "Free-form Items", planId = planId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = null, description = "Paper plates", quantity = null, unit = null),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            val body = response.body!!
+            assertThat(body.ingredientId).isNull()
+            assertThat(body.ingredientName).isNull()
+            assertThat(body.description).isEqualTo("Paper plates")
+            assertThat(body.quantity).isEqualByComparingTo(BigDecimal.ONE)
+            assertThat(body.unit).isNull()
+            assertThat(body.category).isEqualTo("misc")
+        }
+
+        @Test
+        fun `POST returns 409 for duplicate ingredient and unit`() {
+            val ingredientId = fixture.insertIngredient(name = "Salt", category = "spice", defaultUnit = "g")
+            val mealPlan = createMealPlanViaApi(name = "Dup Test", planId = planId)
+
+            restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = ingredientId, quantity = BigDecimal("100"), unit = "g"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = ingredientId, quantity = BigDecimal("200"), unit = "g"),
+                    userId
+                ),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CONFLICT)
+        }
+
+        @Test
+        fun `POST returns 400 when neither ingredientId nor description provided`() {
+            val mealPlan = createMealPlanViaApi(name = "Bad Request", planId = planId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = null, description = null, quantity = null, unit = null),
+                    userId
+                ),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `POST returns 400 for free-form item with quantity`() {
+            val mealPlan = createMealPlanViaApi(name = "Bad Free-form", planId = planId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = null, description = "Paper plates", quantity = BigDecimal("5"), unit = null),
+                    userId
+                ),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `POST returns 400 for free-form item with unit`() {
+            val mealPlan = createMealPlanViaApi(name = "Bad Free-form Unit", planId = planId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = null, description = "Napkins", quantity = null, unit = "g"),
+                    userId
+                ),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `DELETE removes manual item and returns 204`() {
+            val mealPlan = createMealPlanViaApi(name = "Remove Item", planId = planId)
+
+            val addResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(description = "Remove me"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+            val itemId = addResponse.body!!.id
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items/$itemId",
+                HttpMethod.DELETE,
+                entityWithUser(null, userId),
+                Void::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+
+            // Verify it's gone from shopping list
+            val listResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+            assertThat(listResponse.body!!.totalItems).isEqualTo(0)
+        }
+
+        @Test
+        fun `DELETE returns 404 for non-existent manual item`() {
+            val mealPlan = createMealPlanViaApi(name = "Not Found", planId = planId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items/${UUID.randomUUID()}",
+                HttpMethod.DELETE,
+                entityWithUser(null, userId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @Nested
+    inner class ManualItemsInShoppingList {
+
+        @Test
+        fun `GET shopping list includes manual items with source manual`() {
+            val ingredientId = fixture.insertIngredient(name = "Olive Oil", category = "pantry", defaultUnit = "ml")
+            val mealPlan = createMealPlanViaApi(name = "Manual In List", planId = planId)
+
+            restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = ingredientId, quantity = BigDecimal("500"), unit = "ml"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            val items = response.body!!.categories.flatMap { it.items }
+            assertThat(items).hasSize(1)
+            assertThat(items[0].source).isEqualTo("manual")
+            assertThat(items[0].manualItemId).isNotNull()
+            assertThat(items[0].ingredientName).isEqualTo("Olive Oil")
+            assertThat(items[0].quantityRequired).isEqualByComparingTo(BigDecimal("500"))
+        }
+
+        @Test
+        fun `free-form items appear in misc category`() {
+            val mealPlan = createMealPlanViaApi(name = "Misc Category", planId = planId)
+
+            restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(description = "Paper towels"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+
+            val miscCategory = response.body!!.categories.find { it.category == "misc" }
+            assertThat(miscCategory).isNotNull
+            assertThat(miscCategory!!.items).hasSize(1)
+            assertThat(miscCategory.items[0].description).isEqualTo("Paper towels")
+            assertThat(miscCategory.items[0].ingredientName).isNull()
+        }
+
+        @Test
+        fun `recipe items have source recipe and null manualItemId`() {
+            val ingredientId = fixture.insertIngredient(name = "Flour", category = "pantry", defaultUnit = "cup")
+            val recipeId = fixture.insertRecipe(name = "Bread", baseServings = 4, createdBy = userId)
+            fixture.insertRecipeIngredient(recipeId = recipeId, ingredientId = ingredientId, quantity = BigDecimal("2"), unit = "cup")
+
+            val mealPlan = createMealPlanViaApi(name = "Recipe Source", servings = 4, planId = planId)
+            val day = addDayViaApi(mealPlan.id, 1)
+            addRecipeViaApi(mealPlan.id, day.id, "breakfast", recipeId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+
+            val items = response.body!!.categories.flatMap { it.items }
+            assertThat(items).hasSize(1)
+            assertThat(items[0].source).isEqualTo("recipe")
+            assertThat(items[0].manualItemId).isNull()
+            assertThat(items[0].description).isNull()
+        }
+
+        @Test
+        fun `manual items have correct purchase status after PATCH`() {
+            val mealPlan = createMealPlanViaApi(name = "Manual Purchase", planId = planId)
+
+            val addResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(description = "Charcoal"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+            val manualItemId = addResponse.body!!.id
+
+            // Update purchase on the manual item
+            restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.PATCH,
+                entityWithUser(
+                    UpdatePurchaseRequest(manualItemId = manualItemId, quantityPurchased = BigDecimal("1")),
+                    userId
+                ),
+                ShoppingListPurchaseResponse::class.java
+            )
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+
+            val items = response.body!!.categories.flatMap { it.items }
+            val charcoalItem = items.find { it.description == "Charcoal" }!!
+            assertThat(charcoalItem.status).isEqualTo("done")
+            assertThat(charcoalItem.quantityPurchased).isEqualByComparingTo(BigDecimal("1"))
+        }
+    }
+
+    @Nested
+    inner class ManualItemPurchaseUpdate {
+
+        @Test
+        fun `PATCH updates manual item purchase via manualItemId`() {
+            val ingredientId = fixture.insertIngredient(name = "Butter", category = "dairy", defaultUnit = "g")
+            val mealPlan = createMealPlanViaApi(name = "Purchase Manual", planId = planId)
+
+            val addResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(ingredientId = ingredientId, quantity = BigDecimal("200"), unit = "g"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+            val manualItemId = addResponse.body!!.id
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.PATCH,
+                entityWithUser(
+                    UpdatePurchaseRequest(manualItemId = manualItemId, quantityPurchased = BigDecimal("150")),
+                    userId
+                ),
+                ShoppingListPurchaseResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.quantityPurchased).isEqualByComparingTo(BigDecimal("150"))
+        }
+
+        @Test
+        fun `PATCH returns 404 for non-existent manual item`() {
+            val mealPlan = createMealPlanViaApi(name = "Not Found Purchase", planId = planId)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.PATCH,
+                entityWithUser(
+                    UpdatePurchaseRequest(manualItemId = UUID.randomUUID(), quantityPurchased = BigDecimal("10")),
+                    userId
+                ),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @Nested
+    inner class ManualItemReset {
+
+        @Test
+        fun `DELETE reset also resets manual item purchases`() {
+            val mealPlan = createMealPlanViaApi(name = "Reset Manual", planId = planId)
+
+            // Add and purchase a manual item
+            val addResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(description = "Firewood"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+            val manualItemId = addResponse.body!!.id
+
+            restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.PATCH,
+                entityWithUser(
+                    UpdatePurchaseRequest(manualItemId = manualItemId, quantityPurchased = BigDecimal("1")),
+                    userId
+                ),
+                ShoppingListPurchaseResponse::class.java
+            )
+
+            // Reset
+            val resetResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.DELETE,
+                entityWithUser(null, userId),
+                Void::class.java
+            )
+            assertThat(resetResponse.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+
+            // Verify manual item purchase was reset
+            val listResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+            val items = listResponse.body!!.categories.flatMap { it.items }
+            assertThat(items).hasSize(1)
+            assertThat(items[0].description).isEqualTo("Firewood")
+            assertThat(items[0].quantityPurchased).isEqualByComparingTo(BigDecimal.ZERO)
+            assertThat(items[0].status).isEqualTo("not_purchased")
+        }
+    }
+
+    @Nested
+    inner class ManualItemsCrossCutting {
+
+        @Test
+        fun `manual items NOT copied in copy-to-trip`() {
+            val template = createMealPlanViaApi(name = "Template With Manual", servings = 4, isTemplate = true)
+
+            // Add manual item to template
+            restTemplate.exchange(
+                "/api/meal-plans/${template.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(description = "Charcoal"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+
+            // Copy to trip
+            val copyResponse = restTemplate.exchange(
+                "/api/meal-plans/${template.id}/copy-to-trip",
+                HttpMethod.POST,
+                entityWithUser(CopyToTripRequest(planId = planId, servings = 4), userId),
+                MealPlanDetailResponse::class.java
+            )
+            assertThat(copyResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+            val tripMealPlanId = copyResponse.body!!.id
+
+            // Verify trip meal plan has no manual items
+            val listResponse = restTemplate.exchange(
+                "/api/meal-plans/$tripMealPlanId/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+            assertThat(listResponse.body!!.totalItems).isEqualTo(0)
+        }
+
+        @Test
+        fun `manual items NOT copied in save-as-template`() {
+            val mealPlan = createMealPlanViaApi(name = "Trip With Manual", servings = 4, planId = planId)
+
+            // Add manual item
+            restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(description = "Ice"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+
+            // Save as template
+            val saveResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/save-as-template",
+                HttpMethod.POST,
+                entityWithUser(SaveAsTemplateRequest(name = "Saved Template"), userId),
+                MealPlanResponse::class.java
+            )
+            assertThat(saveResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+            val templateId = saveResponse.body!!.id
+
+            // Verify template has no manual items
+            val listResponse = restTemplate.exchange(
+                "/api/meal-plans/$templateId/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+            assertThat(listResponse.body!!.totalItems).isEqualTo(0)
+        }
+
+        @Test
+        fun `POST add then GET then DELETE then GET workflow`() {
+            val mealPlan = createMealPlanViaApi(name = "CRUD Workflow", planId = planId)
+
+            // Add
+            val addResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items",
+                HttpMethod.POST,
+                entityWithUser(
+                    AddManualItemRequest(description = "Matches"),
+                    userId
+                ),
+                ManualItemResponse::class.java
+            )
+            assertThat(addResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+            val itemId = addResponse.body!!.id
+
+            // GET - verify it's there
+            val list1 = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+            assertThat(list1.body!!.totalItems).isEqualTo(1)
+
+            // DELETE
+            val deleteResponse = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list/items/$itemId",
+                HttpMethod.DELETE,
+                entityWithUser(null, userId),
+                Void::class.java
+            )
+            assertThat(deleteResponse.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+
+            // GET - verify it's gone
+            val list2 = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}/shopping-list",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ShoppingListResponse::class.java
+            )
+            assertThat(list2.body!!.totalItems).isEqualTo(0)
+        }
+    }
+
     // --- Detail Response Shape Tests ---
 
     @Nested

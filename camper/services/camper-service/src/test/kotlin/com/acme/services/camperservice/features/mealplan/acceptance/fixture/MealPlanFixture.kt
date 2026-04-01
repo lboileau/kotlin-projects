@@ -159,9 +159,29 @@ class MealPlanFixture(private val jdbcTemplate: JdbcTemplate) {
         return id
     }
 
+    fun insertManualItem(
+        id: UUID = UUID.randomUUID(),
+        mealPlanId: UUID,
+        ingredientId: UUID? = null,
+        description: String? = null,
+        quantity: BigDecimal = BigDecimal.ONE,
+        unit: String? = null,
+        quantityPurchased: BigDecimal = BigDecimal.ZERO
+    ): UUID {
+        jdbcTemplate.update(
+            """
+            INSERT INTO shopping_list_manual_items (id, meal_plan_id, ingredient_id, description, quantity, unit, quantity_purchased, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            id, mealPlanId, ingredientId, description, quantity, unit, quantityPurchased,
+            java.sql.Timestamp.from(Instant.now()), java.sql.Timestamp.from(Instant.now())
+        )
+        return id
+    }
+
     fun truncateAll() {
         jdbcTemplate.execute(
-            "TRUNCATE TABLE shopping_list_purchases, meal_plan_recipes, meal_plan_days, meal_plans, recipe_ingredients, recipes, ingredients, plan_members, plans, users CASCADE"
+            "TRUNCATE TABLE shopping_list_manual_items, shopping_list_purchases, meal_plan_recipes, meal_plan_days, meal_plans, recipe_ingredients, recipes, ingredients, plan_members, plans, users CASCADE"
         )
     }
 }
