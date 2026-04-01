@@ -14,6 +14,8 @@ object ItemMapper {
         category = clientItem.category,
         quantity = clientItem.quantity,
         packed = clientItem.packed,
+        gearPackId = clientItem.gearPackId,
+        gearPackName = clientItem.gearPackName,
         createdAt = clientItem.createdAt,
         updatedAt = clientItem.updatedAt,
     )
@@ -26,6 +28,8 @@ object ItemMapper {
         category = item.category,
         quantity = item.quantity,
         packed = item.packed,
+        gearPackId = item.gearPackId,
+        gearPackName = item.gearPackName,
         createdAt = item.createdAt,
         updatedAt = item.updatedAt,
     )

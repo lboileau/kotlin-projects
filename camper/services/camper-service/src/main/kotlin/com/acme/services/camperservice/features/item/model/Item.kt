@@ -11,6 +11,8 @@ data class Item(
     val category: String,
     val quantity: Int,
     val packed: Boolean,
+    val gearPackId: UUID? = null,
+    val gearPackName: String? = null,
     val createdAt: Instant,
     val updatedAt: Instant,
 )

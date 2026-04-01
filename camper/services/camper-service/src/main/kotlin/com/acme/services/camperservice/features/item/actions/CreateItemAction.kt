@@ -45,6 +45,7 @@ internal class CreateItemAction(
             category = param.category,
             quantity = param.quantity,
             packed = param.packed,
+            gearPackId = param.gearPackId,
         ))) {
             is Result.Success -> Result.Success(ItemMapper.fromClient(result.value))
             is Result.Failure -> Result.Failure(ItemError.fromClientError(result.error))

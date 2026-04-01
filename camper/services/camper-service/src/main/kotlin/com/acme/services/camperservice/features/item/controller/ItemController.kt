@@ -35,6 +35,7 @@ class ItemController(
             ownerType = request.ownerType,
             ownerId = request.ownerId,
             planId = request.planId,
+            gearPackId = request.gearPackId,
             requestingUserId = userId,
         )
         val result = itemService.create(param)
@@ -80,6 +81,7 @@ class ItemController(
             category = request.category,
             quantity = request.quantity,
             packed = request.packed,
+            gearPackId = request.gearPackId,
             requestingUserId = userId,
         )
         val result = itemService.update(param)

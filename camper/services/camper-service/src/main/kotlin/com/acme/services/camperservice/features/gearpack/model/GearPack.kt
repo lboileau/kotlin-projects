@@ -33,6 +33,7 @@ data class AppliedItem(
     val category: String,
     val quantity: Int,
     val packed: Boolean,
+    val gearPackId: UUID? = null,
     val createdAt: Instant,
     val updatedAt: Instant,
 )

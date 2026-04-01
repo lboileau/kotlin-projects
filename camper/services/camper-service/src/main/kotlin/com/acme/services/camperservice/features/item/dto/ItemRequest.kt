@@ -10,6 +10,7 @@ data class CreateItemRequest(
     val ownerType: String,
     val ownerId: UUID,
     val planId: UUID? = null,
+    val gearPackId: UUID? = null,
 )
 
 data class UpdateItemRequest(
@@ -17,4 +18,5 @@ data class UpdateItemRequest(
     val category: String,
     val quantity: Int,
     val packed: Boolean,
+    val gearPackId: UUID? = null,
 )
