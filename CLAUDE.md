@@ -9,6 +9,7 @@
 - /service-manager: .claude/skills/service-manager/SKILL.md
 - /web-manager: .claude/skills/web-manager/SKILL.md
 - /linear-ticket: .claude/skills/linear-ticket/SKILL.md
+- /run-dev: .claude/skills/run-dev/SKILL.md
 
 ## Agent Team
 Specialized agents in `.claude/agents/` power the build workflow:
