@@ -145,7 +145,8 @@ class ItemClientIntegrationTest {
             ) as Result.Success).value
             assertThat(created.gearPackId).isNull()
 
-            client.update(UpdateItemParam(id = created.id, name = "Cutting Board", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId))
+            val updateResult = client.update(UpdateItemParam(id = created.id, name = "Cutting Board", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId))
+            assertThat(updateResult).isInstanceOf(Result.Success::class.java)
 
             val fetched = (client.getById(GetByIdParam(created.id)) as Result.Success).value
             assertThat(fetched.gearPackId).isEqualTo(cookingEquipmentPackId)
@@ -158,11 +159,31 @@ class ItemClientIntegrationTest {
                 CreateItemParam(planId = testPlanId, userId = null, name = "Large Pot", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId)
             ) as Result.Success).value
 
-            client.update(UpdateItemParam(id = created.id, name = "Large Pot", category = "kitchen", quantity = 1, packed = false, gearPackId = null))
+            val updateResult = client.update(UpdateItemParam(id = created.id, name = "Large Pot", category = "kitchen", quantity = 1, packed = false, gearPackId = null))
+            assertThat(updateResult).isInstanceOf(Result.Success::class.java)
 
             val fetched = (client.getById(GetByIdParam(created.id)) as Result.Success).value
             assertThat(fetched.gearPackId).isNull()
             assertThat(fetched.gearPackName).isNull()
+        }
+
+        @Test
+        fun `getByUserId resolves gearPackName via LEFT JOIN when item has gearPackId`() {
+            client.create(CreateItemParam(planId = testPlanId, userId = testUserId, name = "Camp Mug", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId))
+            client.create(CreateItemParam(planId = testPlanId, userId = testUserId, name = "Water Bottle", category = "hydration", quantity = 1, packed = false, gearPackId = null))
+
+            val result = client.getByUserId(GetByUserIdParam(testUserId))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val items = (result as Result.Success).value
+            assertThat(items).hasSize(2)
+
+            val grouped = items.first { it.name == "Camp Mug" }
+            assertThat(grouped.gearPackId).isEqualTo(cookingEquipmentPackId)
+            assertThat(grouped.gearPackName).isEqualTo("Cooking Equipment")
+
+            val ungrouped = items.first { it.name == "Water Bottle" }
+            assertThat(ungrouped.gearPackId).isNull()
+            assertThat(ungrouped.gearPackName).isNull()
         }
     }
 
