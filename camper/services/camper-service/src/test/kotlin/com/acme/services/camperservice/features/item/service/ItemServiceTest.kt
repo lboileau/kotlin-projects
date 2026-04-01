@@ -280,6 +280,52 @@ class ItemServiceTest {
     }
 
     @Nested
+    inner class CreateWithGearPackId {
+        @Test
+        fun `create with gearPackId sets gearPackId on the created item`() {
+            val gearPackId = UUID.randomUUID()
+
+            val result = itemService.create(
+                CreateItemParam(
+                    name = "Cast Iron Pan",
+                    category = "Kitchen",
+                    quantity = 1,
+                    packed = false,
+                    ownerType = "plan",
+                    ownerId = planId,
+                    gearPackId = gearPackId,
+                    requestingUserId = requestingUserId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isEqualTo(gearPackId)
+            assertThat(item.name).isEqualTo("Cast Iron Pan")
+            assertThat(item.planId).isEqualTo(planId)
+        }
+
+        @Test
+        fun `create without gearPackId leaves gearPackId null`() {
+            val result = itemService.create(
+                CreateItemParam(
+                    name = "Tent",
+                    category = "Shelter",
+                    quantity = 1,
+                    packed = false,
+                    ownerType = "plan",
+                    ownerId = planId,
+                    requestingUserId = requestingUserId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isNull()
+        }
+    }
+
+    @Nested
     inner class Update {
         @Test
         fun `update returns success when item exists`() {
@@ -349,6 +395,63 @@ class ItemServiceTest {
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(ItemError.Invalid::class.java)
             assertThat((error as ItemError.Invalid).field).isEqualTo("name")
+        }
+
+        @Test
+        fun `update with gearPackId sets gearPackId on the updated item`() {
+            val gearPackId = UUID.randomUUID()
+            val created = (itemService.create(
+                CreateItemParam(
+                    name = "Tent", category = "Shelter", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, requestingUserId = requestingUserId,
+                )
+            ) as Result.Success).value
+
+            val result = itemService.update(
+                UpdateItemParam(
+                    id = created.id,
+                    name = "Tent",
+                    category = "Shelter",
+                    quantity = 1,
+                    packed = false,
+                    gearPackId = gearPackId,
+                    requestingUserId = requestingUserId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isEqualTo(gearPackId)
+        }
+
+        @Test
+        fun `update clears gearPackId when null is passed`() {
+            val gearPackId = UUID.randomUUID()
+            // Create item with a gearPackId
+            val created = (itemService.create(
+                CreateItemParam(
+                    name = "Cast Iron Pan", category = "Kitchen", quantity = 1, packed = false,
+                    ownerType = "plan", ownerId = planId, gearPackId = gearPackId, requestingUserId = requestingUserId,
+                )
+            ) as Result.Success).value
+            assertThat(created.gearPackId).isEqualTo(gearPackId)
+
+            // Update with gearPackId = null
+            val result = itemService.update(
+                UpdateItemParam(
+                    id = created.id,
+                    name = "Cast Iron Pan",
+                    category = "Kitchen",
+                    quantity = 1,
+                    packed = false,
+                    gearPackId = null,
+                    requestingUserId = requestingUserId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isNull()
         }
     }
 
