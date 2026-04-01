@@ -55,10 +55,23 @@ export interface Item {
   updatedAt: string;
 }
 
+export interface LinkResponse {
+  id: string;
+  url: string;
+  label: string | null;
+  createdAt: string;
+}
+
+export interface LinkInput {
+  url: string;
+  label: string | null;
+}
+
 export interface Itinerary {
   id: string;
   planId: string;
   events: ItineraryEvent[];
+  totalEstimatedCost: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,6 +83,11 @@ export interface ItineraryEvent {
   description: string | null;
   details: string | null;
   eventAt: string;
+  category: string;
+  estimatedCost: number | null;
+  location: string | null;
+  eventEndAt: string | null;
+  links: LinkResponse[];
   createdAt: string;
   updatedAt: string;
 }
@@ -508,14 +526,34 @@ export const api = {
     return request(`/api/plans/${planId}/itinerary`);
   },
 
-  addEvent(planId: string, data: { title: string; description?: string | null; details?: string | null; eventAt: string }): Promise<ItineraryEvent> {
+  addEvent(planId: string, data: {
+    title: string;
+    description?: string | null;
+    details?: string | null;
+    eventAt: string;
+    category: string;
+    estimatedCost?: number | null;
+    location?: string | null;
+    eventEndAt?: string | null;
+    links?: LinkInput[] | null;
+  }): Promise<ItineraryEvent> {
     return request(`/api/plans/${planId}/itinerary/events`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
-  updateEvent(planId: string, eventId: string, data: { title: string; description?: string | null; details?: string | null; eventAt: string }): Promise<ItineraryEvent> {
+  updateEvent(planId: string, eventId: string, data: {
+    title: string;
+    description?: string | null;
+    details?: string | null;
+    eventAt: string;
+    category: string;
+    estimatedCost?: number | null;
+    location?: string | null;
+    eventEndAt?: string | null;
+    links?: LinkInput[] | null;
+  }): Promise<ItineraryEvent> {
     return request(`/api/plans/${planId}/itinerary/events/${eventId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
