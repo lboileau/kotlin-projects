@@ -21,6 +21,8 @@ internal class JdbiItineraryClient(jdbi: Jdbi) : ItineraryClient {
     private val addItineraryEvent = AddItineraryEvent(jdbi)
     private val updateItineraryEvent = UpdateItineraryEvent(jdbi)
     private val deleteItineraryEvent = DeleteItineraryEvent(jdbi)
+    private val getLinksByEventIds = GetLinksByEventIds(jdbi)
+    private val replaceEventLinks = ReplaceEventLinks(jdbi)
 
     override fun getByPlanId(param: GetByPlanIdParam): Result<Itinerary, AppError> = getItineraryByPlanId.execute(param)
     override fun create(param: CreateItineraryParam): Result<Itinerary, AppError> = createItinerary.execute(param)
@@ -30,7 +32,7 @@ internal class JdbiItineraryClient(jdbi: Jdbi) : ItineraryClient {
     override fun updateEvent(param: UpdateEventParam): Result<ItineraryEvent, AppError> = updateItineraryEvent.execute(param)
     override fun deleteEvent(param: DeleteEventParam): Result<Unit, AppError> = deleteItineraryEvent.execute(param)
     override fun getLinksByEventIds(param: GetLinksByEventIdsParam): Result<List<ItineraryEventLink>, AppError> =
-        throw NotImplementedError("getLinksByEventIds is not yet implemented")
+        getLinksByEventIds.execute(param)
     override fun replaceEventLinks(param: ReplaceEventLinksParam): Result<List<ItineraryEventLink>, AppError> =
-        throw NotImplementedError("replaceEventLinks is not yet implemented")
+        replaceEventLinks.execute(param)
 }
