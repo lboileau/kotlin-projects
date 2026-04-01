@@ -333,6 +333,20 @@ class GearPackServiceTest {
         }
 
         @Test
+        fun `apply sets gearPackId on every created item`() {
+            val result = gearPackService.apply(
+                ApplyGearPackParam(gearPackId = packId, planId = planId, groupSize = 2, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val items = (result as Result.Success).value.items
+            assertThat(items).hasSize(2)
+            for (item in items) {
+                assertThat(item.gearPackId).isEqualTo(packId)
+            }
+        }
+
+        @Test
         fun `returns ApplyFailed when item creation fails`() {
             fakeGearPackClient.reset()
             val invalidItem = clientGearPackItem(name = "", sortOrder = 1) // blank name triggers validation failure in FakeItemClient
