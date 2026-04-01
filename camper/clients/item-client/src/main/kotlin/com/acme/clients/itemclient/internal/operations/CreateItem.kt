@@ -25,8 +25,8 @@ internal class CreateItem(private val jdbi: Jdbi) {
             val now = Instant.now()
             handle.createUpdate(
                 """
-                INSERT INTO items (id, plan_id, user_id, name, category, quantity, packed, created_at, updated_at)
-                VALUES (:id, CAST(:planId AS uuid), CAST(:userId AS uuid), :name, :category, :quantity, :packed, :createdAt, :updatedAt)
+                INSERT INTO items (id, plan_id, user_id, name, category, quantity, packed, gear_pack_id, created_at, updated_at)
+                VALUES (:id, CAST(:planId AS uuid), CAST(:userId AS uuid), :name, :category, :quantity, :packed, CAST(:gearPackId AS uuid), :createdAt, :updatedAt)
                 """.trimIndent()
             )
                 .bind("id", id)
@@ -36,6 +36,7 @@ internal class CreateItem(private val jdbi: Jdbi) {
                 .bind("category", param.category)
                 .bind("quantity", param.quantity)
                 .bind("packed", param.packed)
+                .bind("gearPackId", param.gearPackId?.toString())
                 .bind("createdAt", now)
                 .bind("updatedAt", now)
                 .execute()
@@ -47,6 +48,8 @@ internal class CreateItem(private val jdbi: Jdbi) {
                 category = param.category,
                 quantity = param.quantity,
                 packed = param.packed,
+                gearPackId = param.gearPackId,
+                gearPackName = null,
                 createdAt = now,
                 updatedAt = now
             )
