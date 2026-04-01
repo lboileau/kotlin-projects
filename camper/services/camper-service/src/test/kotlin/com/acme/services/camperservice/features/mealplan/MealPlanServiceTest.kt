@@ -7,6 +7,7 @@ import com.acme.clients.mealplanclient.fake.FakeMealPlanClient
 import com.acme.clients.mealplanclient.model.MealPlan
 import com.acme.clients.mealplanclient.model.MealPlanDay
 import com.acme.clients.mealplanclient.model.MealPlanRecipe
+import com.acme.clients.mealplanclient.model.ShoppingListManualItem
 import com.acme.clients.mealplanclient.model.ShoppingListPurchase
 import com.acme.clients.recipeclient.fake.FakeRecipeClient
 import com.acme.clients.recipeclient.model.Recipe
@@ -168,6 +169,29 @@ class MealPlanServiceTest {
         )
         fakeMealPlanClient.seedPurchases(purchase)
         return purchase
+    }
+
+    private fun seedManualItem(
+        mealPlanId: UUID,
+        ingredientId: UUID? = null,
+        description: String? = null,
+        quantity: BigDecimal = BigDecimal.ONE,
+        unit: String? = null,
+        quantityPurchased: BigDecimal = BigDecimal.ZERO,
+    ): ShoppingListManualItem {
+        val item = ShoppingListManualItem(
+            id = UUID.randomUUID(),
+            mealPlanId = mealPlanId,
+            ingredientId = ingredientId,
+            description = description,
+            quantity = quantity,
+            unit = unit,
+            quantityPurchased = quantityPurchased,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now(),
+        )
+        fakeMealPlanClient.seedManualItems(item)
+        return item
     }
 
     // ─── CreateMealPlan ─────────────────────────────────────────────────────
@@ -1307,6 +1331,433 @@ class MealPlanServiceTest {
 
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.MealPlanNotFound::class.java)
+        }
+
+        @Test
+        fun `reset purchases also resets manual item quantities`() {
+            val mealPlan = seedMealPlan()
+            seedPurchase(mealPlan.id, UUID.randomUUID(), "g", BigDecimal("500"))
+            val ingredient = seedIngredient("Butter", "dairy", "g")
+            seedManualItem(mealPlan.id, ingredientId = ingredient.id, quantity = BigDecimal("200"), unit = "g", quantityPurchased = BigDecimal("100"))
+            seedManualItem(mealPlan.id, description = "Paper plates", quantityPurchased = BigDecimal("1"))
+
+            val result = service.resetPurchases(ResetPurchasesParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+
+            // Verify manual items were reset
+            val shoppingList = (service.getShoppingList(GetShoppingListParam(mealPlan.id, userId)) as Result.Success).value
+            val manualItems = shoppingList.categories.flatMap { it.items }.filter { it.source == "manual" }
+            assertThat(manualItems).hasSize(2)
+            assertThat(manualItems.all { it.quantityPurchased.compareTo(BigDecimal.ZERO) == 0 }).isTrue()
+        }
+    }
+
+    // ─── AddManualItem ──────────────────────────────────────────────────────
+
+    @Nested
+    inner class AddManualItem {
+
+        @Test
+        fun `add ingredient-based manual item returns correct response`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient("Butter", "dairy", "g")
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal("250"),
+                unit = "g",
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val response = (result as Result.Success).value
+            assertThat(response.id).isNotNull()
+            assertThat(response.ingredientId).isEqualTo(ingredient.id)
+            assertThat(response.ingredientName).isEqualTo("Butter")
+            assertThat(response.description).isNull()
+            assertThat(response.quantity).isEqualByComparingTo(BigDecimal("250"))
+            assertThat(response.unit).isEqualTo("g")
+            assertThat(response.quantityPurchased).isEqualByComparingTo(BigDecimal.ZERO)
+            assertThat(response.status).isEqualTo("not_purchased")
+            assertThat(response.category).isEqualTo("dairy")
+        }
+
+        @Test
+        fun `add free-form manual item returns correct response`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                description = "Paper plates",
+                quantity = null,
+                unit = null,
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val response = (result as Result.Success).value
+            assertThat(response.ingredientId).isNull()
+            assertThat(response.ingredientName).isNull()
+            assertThat(response.description).isEqualTo("Paper plates")
+            assertThat(response.quantity).isEqualByComparingTo(BigDecimal.ONE)
+            assertThat(response.unit).isNull()
+            assertThat(response.status).isEqualTo("not_purchased")
+            assertThat(response.category).isEqualTo("misc")
+        }
+
+        @Test
+        fun `add manual item with non-existent ingredient returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = UUID.randomUUID(),
+                description = null,
+                quantity = BigDecimal("100"),
+                unit = "g",
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add manual item with non-existent meal plan returns MealPlanNotFound`() {
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = UUID.randomUUID(),
+                userId = userId,
+                ingredientId = null,
+                description = "Test",
+                quantity = null,
+                unit = null,
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.MealPlanNotFound::class.java)
+        }
+
+        @Test
+        fun `add duplicate ingredient and unit returns DuplicateManualItem`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient("Butter", "dairy", "g")
+
+            service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal("100"),
+                unit = "g",
+            ))
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = null,
+                quantity = BigDecimal("200"),
+                unit = "g",
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.DuplicateManualItem::class.java)
+        }
+
+        @Test
+        fun `add with both ingredientId and description returns Invalid`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = ingredient.id,
+                description = "Some text",
+                quantity = BigDecimal("100"),
+                unit = "g",
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add with neither ingredientId nor description returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                description = null,
+                quantity = null,
+                unit = null,
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add free-form with quantity provided returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                description = "Paper plates",
+                quantity = BigDecimal("5"),
+                unit = null,
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `add free-form with unit provided returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.addManualItem(AddManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                description = "Paper plates",
+                quantity = null,
+                unit = "g",
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+    }
+
+    // ─── RemoveManualItem ───────────────────────────────────────────────────
+
+    @Nested
+    inner class RemoveManualItem {
+
+        @Test
+        fun `remove manual item succeeds`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient("Butter", "dairy", "g")
+            val item = seedManualItem(mealPlan.id, ingredientId = ingredient.id, quantity = BigDecimal("200"), unit = "g")
+
+            val result = service.removeManualItem(RemoveManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                itemId = item.id,
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+        @Test
+        fun `remove non-existent manual item returns ManualItemNotFound`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.removeManualItem(RemoveManualItemParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                itemId = UUID.randomUUID(),
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.ManualItemNotFound::class.java)
+        }
+
+        @Test
+        fun `remove manual item with non-existent meal plan returns MealPlanNotFound`() {
+            val result = service.removeManualItem(RemoveManualItemParam(
+                mealPlanId = UUID.randomUUID(),
+                userId = userId,
+                itemId = UUID.randomUUID(),
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.MealPlanNotFound::class.java)
+        }
+    }
+
+    // ─── GetShoppingList with Manual Items ──────────────────────────────────
+
+    @Nested
+    inner class GetShoppingListWithManualItems {
+
+        @Test
+        fun `shopping list includes manual items with source manual`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient("Butter", "dairy", "g")
+            seedManualItem(mealPlan.id, ingredientId = ingredient.id, quantity = BigDecimal("200"), unit = "g")
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val response = (result as Result.Success).value
+            val allItems = response.categories.flatMap { it.items }
+            assertThat(allItems).hasSize(1)
+            val manualItem = allItems[0]
+            assertThat(manualItem.source).isEqualTo("manual")
+            assertThat(manualItem.manualItemId).isNotNull()
+            assertThat(manualItem.ingredientName).isEqualTo("Butter")
+            assertThat(manualItem.quantityRequired).isEqualByComparingTo(BigDecimal("200"))
+            assertThat(manualItem.unit).isEqualTo("g")
+            assertThat(manualItem.usedInRecipes).isEmpty()
+        }
+
+        @Test
+        fun `free-form manual items appear in misc category`() {
+            val mealPlan = seedMealPlan()
+            seedManualItem(mealPlan.id, description = "Paper plates")
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val response = (result as Result.Success).value
+            val miscCategory = response.categories.find { it.category == "misc" }
+            assertThat(miscCategory).isNotNull
+            assertThat(miscCategory!!.items).hasSize(1)
+            assertThat(miscCategory.items[0].description).isEqualTo("Paper plates")
+            assertThat(miscCategory.items[0].ingredientName).isNull()
+            assertThat(miscCategory.items[0].source).isEqualTo("manual")
+        }
+
+        @Test
+        fun `ingredient-based manual items use ingredient category`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient("Olive Oil", "pantry", "ml")
+            seedManualItem(mealPlan.id, ingredientId = ingredient.id, quantity = BigDecimal("500"), unit = "ml")
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val response = (result as Result.Success).value
+            val pantryCategory = response.categories.find { it.category == "pantry" }
+            assertThat(pantryCategory).isNotNull
+            assertThat(pantryCategory!!.items).hasSize(1)
+            assertThat(pantryCategory.items[0].ingredientName).isEqualTo("Olive Oil")
+        }
+
+        @Test
+        fun `recipe items have source recipe and null manualItemId`() {
+            val mealPlan = seedMealPlan(servings = 4, scalingMode = "fractional")
+            val day1 = seedDay(mealPlan.id, 1)
+            val tomato = seedIngredient("Tomato", "produce", "g")
+            val recipe = seedRecipe("Salad", baseServings = 4)
+            seedRecipeIngredient(recipe.id, tomato.id, BigDecimal("200"), "g")
+            seedMealPlanRecipe(day1.id, "lunch", recipe.id)
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val allItems = (result as Result.Success).value.categories.flatMap { it.items }
+            val recipeItem = allItems.find { it.ingredientName == "Tomato" }!!
+            assertThat(recipeItem.source).isEqualTo("recipe")
+            assertThat(recipeItem.manualItemId).isNull()
+            assertThat(recipeItem.description).isNull()
+        }
+
+        @Test
+        fun `shopping list with both recipe and manual items counts all`() {
+            val mealPlan = seedMealPlan(servings = 4, scalingMode = "fractional")
+            val day1 = seedDay(mealPlan.id, 1)
+            val tomato = seedIngredient("Tomato", "produce", "g")
+            val recipe = seedRecipe("Salad", baseServings = 4)
+            seedRecipeIngredient(recipe.id, tomato.id, BigDecimal("200"), "g")
+            seedMealPlanRecipe(day1.id, "lunch", recipe.id)
+
+            val butter = seedIngredient("Butter", "dairy", "g")
+            seedManualItem(mealPlan.id, ingredientId = butter.id, quantity = BigDecimal("200"), unit = "g")
+            seedManualItem(mealPlan.id, description = "Napkins")
+
+            val result = service.getShoppingList(GetShoppingListParam(mealPlan.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            val response = (result as Result.Success).value
+            assertThat(response.totalItems).isEqualTo(3)
+        }
+    }
+
+    // ─── UpdatePurchase for Manual Items ────────────────────────────────────
+
+    @Nested
+    inner class UpdatePurchaseManualItem {
+
+        @Test
+        fun `update purchase on manual item via manualItemId succeeds`() {
+            val mealPlan = seedMealPlan()
+            val ingredient = seedIngredient("Butter", "dairy", "g")
+            val item = seedManualItem(mealPlan.id, ingredientId = ingredient.id, quantity = BigDecimal("200"), unit = "g")
+
+            val result = service.updatePurchase(UpdatePurchaseParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                manualItemId = item.id,
+                unit = null,
+                quantityPurchased = BigDecimal("150"),
+            ))
+
+            assertThat(result.isSuccess).isTrue()
+            val response = (result as Result.Success).value
+            assertThat(response.quantityPurchased).isEqualByComparingTo(BigDecimal("150"))
+        }
+
+        @Test
+        fun `update purchase on non-existent manual item returns ManualItemNotFound`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.updatePurchase(UpdatePurchaseParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                manualItemId = UUID.randomUUID(),
+                unit = null,
+                quantityPurchased = BigDecimal("10"),
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.ManualItemNotFound::class.java)
+        }
+
+        @Test
+        fun `update purchase with both ingredientId and manualItemId returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.updatePurchase(UpdatePurchaseParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = UUID.randomUUID(),
+                manualItemId = UUID.randomUUID(),
+                unit = "g",
+                quantityPurchased = BigDecimal("10"),
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
+        }
+
+        @Test
+        fun `update purchase with neither ingredientId nor manualItemId returns Invalid`() {
+            val mealPlan = seedMealPlan()
+
+            val result = service.updatePurchase(UpdatePurchaseParam(
+                mealPlanId = mealPlan.id,
+                userId = userId,
+                ingredientId = null,
+                manualItemId = null,
+                unit = null,
+                quantityPurchased = BigDecimal("10"),
+            ))
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(MealPlanError.Invalid::class.java)
         }
     }
 }
