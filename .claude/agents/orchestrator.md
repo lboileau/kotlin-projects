@@ -149,7 +149,7 @@ Build check → Spawn `code-reviewer` → review cycle.
 gt create -m "feat(<feature>): client contracts" --no-interactive
 ```
 
-Spawn `kotlin-dev` with the plan document. Instruction: create client interface (KDoc, no body), param objects, model types, fake stubs (throw NotImplementedError).
+Spawn `kotlin-dev` with the plan document. Instruction: create client interface (KDoc, no body), param objects, model types, fake stubs (throw NotImplementedError) in BOTH the FakeClient AND the JdbiClient (or any concrete implementation).
 
 Build check → Spawn `code-reviewer` → review cycle.
 
@@ -169,7 +169,7 @@ Build check → Spawn `code-reviewer` → review cycle.
 gt create -m "feat(<feature>): service contracts" --no-interactive
 ```
 
-Spawn `kotlin-dev` with the plan document. Instruction: create DTOs, error sealed class, action signatures (TODO bodies), service facade signatures, controller routes (501 stubs), service params.
+Spawn `kotlin-dev` with the plan document. Instruction: create DTOs, error sealed class, action signatures (TODO bodies), service facade signatures, controller routes (501 stubs), service params. **Important:** When modifying existing data classes (adding fields, changing nullability), the contract PR must also fix ALL call sites (actions, tests, mappers) that construct those objects to maintain compilation.
 
 Build check → Spawn `code-reviewer` → review cycle.
 
@@ -300,7 +300,7 @@ Spawn `doc-updater` with:
 gt create -m "feat(<feature>): update documentation and skills" --no-interactive
 ```
 
-The doc-updater produces documentation changes AND a final report with recommendations.
+The doc-updater produces documentation changes AND a final report with recommendations. The final report MUST be saved as `docs/<feature>/retro.md` alongside `handoff.md` and `plan.md` — all feature build artifacts live in the same directory.
 
 **RETRO GATE:** Present the final report to the user BEFORE submitting:
 

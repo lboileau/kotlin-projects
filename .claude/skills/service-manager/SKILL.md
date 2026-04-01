@@ -108,6 +108,8 @@ clients/   →  databases/  (testFixtures dependency for migration runner)
 - **Row adapters:** Separate `adapters/` directory for DB ResultSet → model mapping
 - **Factory function:** `create<Name>Client()` — takes no params, reads DB connection from env vars (`DB_URL`, `DB_USER`, `DB_PASSWORD`), creates its own Jdbi internally. The service never sees JDBI.
 - **KDoc:** All interface methods have KDoc documentation
+- **Nullable UUID binding in JDBI:** When binding a nullable `UUID?` in JDBI SQL, use `CAST(:param AS uuid)` in the SQL and `.bind("param", value?.toString())` in Kotlin. Without the CAST, JDBI sends null as varchar which causes a PostgreSQL type mismatch error. This applies to any nullable UUID column (FK columns, optional references, etc.).
+- **Contract PR stubs:** When creating client contract PRs, add `NotImplementedError` stubs in BOTH the `FakeClient` AND the `JdbiClient` (or any concrete implementation). This ensures the project compiles at the contract stage.
 
 ### Service Patterns
 - **Action classes:** 1:1 with service methods in `features/<feature>/actions/`. Each action takes a service param, validates, converts to client param, calls client
@@ -809,6 +811,7 @@ internal class Create<Entity>(private val jdbi: Jdbi) {
                 """.trimIndent())
                     .bind("id", id)
                     // ... bind all fields from param
+                    // For nullable UUIDs: use CAST(:param AS uuid) in SQL + .bind("param", value?.toString())
                     .bind("createdAt", now)
                     .bind("updatedAt", now)
                     .execute()

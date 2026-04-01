@@ -72,7 +72,9 @@ Do NOT update skills for one-off quirks.
 
 ## Final Report
 
-After completing all documentation and skill updates, produce a **Final Report** that includes:
+After completing all documentation and skill updates, save the final report as `docs/<feature>/retro.md` alongside the `handoff.md` and `plan.md` files. All feature build artifacts must live in the same directory.
+
+The report must include:
 
 1. **Build Summary** — What was built, how many PRs, overall success assessment
 2. **Issues Log** — All issues encountered across the build, how they were resolved
