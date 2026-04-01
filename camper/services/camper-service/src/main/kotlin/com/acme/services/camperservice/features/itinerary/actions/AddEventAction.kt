@@ -5,11 +5,14 @@ import com.acme.clients.itineraryclient.api.CreateItineraryParam as ClientCreate
 import com.acme.clients.itineraryclient.api.GetByPlanIdParam as ClientGetByPlanIdParam
 import com.acme.clients.itineraryclient.api.ItineraryClient
 import com.acme.clients.itineraryclient.api.AddEventParam as ClientAddEventParam
+import com.acme.clients.itineraryclient.api.LinkInput as ClientLinkInput
+import com.acme.clients.itineraryclient.api.ReplaceEventLinksParam as ClientReplaceEventLinksParam
 import com.acme.clients.planclient.api.PlanClient
 import com.acme.clients.planclient.api.GetByIdParam as PlanGetByIdParam
 import com.acme.services.camperservice.features.itinerary.error.ItineraryError
 import com.acme.services.camperservice.features.itinerary.mapper.ItineraryMapper
 import com.acme.services.camperservice.features.itinerary.model.ItineraryEvent
+import com.acme.services.camperservice.features.itinerary.model.ItineraryEventLink
 import com.acme.services.camperservice.features.itinerary.params.AddEventParam
 import com.acme.services.camperservice.features.itinerary.validations.ValidateAddEvent
 import org.slf4j.LoggerFactory
@@ -22,7 +25,7 @@ internal class AddEventAction(
     private val logger = LoggerFactory.getLogger(AddEventAction::class.java)
     private val validate = ValidateAddEvent()
 
-    fun execute(param: AddEventParam): Result<ItineraryEvent, ItineraryError> {
+    fun execute(param: AddEventParam): Result<Pair<ItineraryEvent, List<ItineraryEventLink>>, ItineraryError> {
         val validation = validate.execute(param)
         if (validation is Result.Failure) return validation
 
@@ -39,7 +42,7 @@ internal class AddEventAction(
             ?: return Result.Failure(ItineraryError.Invalid("itinerary", "failed to get or create itinerary"))
 
         // Add event to itinerary
-        return when (val result = itineraryClient.addEvent(
+        val event = when (val result = itineraryClient.addEvent(
             ClientAddEventParam(
                 itineraryId = itineraryId,
                 title = param.title,
@@ -52,9 +55,24 @@ internal class AddEventAction(
                 eventEndAt = param.eventEndAt
             )
         )) {
-            is Result.Success -> Result.Success(ItineraryMapper.fromClient(result.value))
-            is Result.Failure -> Result.Failure(ItineraryError.fromClientError(result.error))
+            is Result.Success -> ItineraryMapper.fromClient(result.value)
+            is Result.Failure -> return Result.Failure(ItineraryError.fromClientError(result.error))
         }
+
+        // Replace links if provided
+        val links = if (!param.links.isNullOrEmpty()) {
+            when (val linkResult = itineraryClient.replaceEventLinks(
+                ClientReplaceEventLinksParam(
+                    eventId = event.id,
+                    links = param.links.map { ClientLinkInput(url = it.url, label = it.label) }
+                )
+            )) {
+                is Result.Success -> linkResult.value.map { ItineraryMapper.fromClient(it) }
+                is Result.Failure -> return Result.Failure(ItineraryError.fromClientError(linkResult.error))
+            }
+        } else emptyList()
+
+        return Result.Success(Pair(event, links))
     }
 
     private fun getOrCreateItineraryId(planId: UUID): UUID? {

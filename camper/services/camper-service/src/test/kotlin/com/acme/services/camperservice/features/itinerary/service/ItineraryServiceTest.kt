@@ -58,7 +58,7 @@ class ItineraryServiceTest {
             val result = itineraryService.getItinerary(GetItineraryParam(planId = planId))
 
             assertThat(result.isSuccess).isTrue()
-            val (itinerary, events) = (result as Result.Success).value
+            val (itinerary, events, _) = (result as Result.Success).value
             assertThat(itinerary.planId).isEqualTo(planId)
             assertThat(events).hasSize(1)
             assertThat(events[0].title).isEqualTo("Hike")
@@ -133,7 +133,7 @@ class ItineraryServiceTest {
             )
 
             assertThat(result.isSuccess).isTrue()
-            val event = (result as Result.Success).value
+            val (event, _) = (result as Result.Success).value
             assertThat(event.title).isEqualTo("Campfire")
             assertThat(event.description).isEqualTo("Evening campfire")
             assertThat(event.eventAt).isEqualTo(eventAt)
@@ -186,7 +186,7 @@ class ItineraryServiceTest {
                     category = "activity", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
-            val createdEvent = (addResult as Result.Success).value
+            val (createdEvent, _) = (addResult as Result.Success).value
             val newEventAt = Instant.parse("2026-07-15T14:00:00Z")
 
             val result = itineraryService.updateEvent(
@@ -199,7 +199,7 @@ class ItineraryServiceTest {
             )
 
             assertThat(result.isSuccess).isTrue()
-            val updated = (result as Result.Success).value
+            val (updated, _) = (result as Result.Success).value
             assertThat(updated.title).isEqualTo("Afternoon Hike")
             assertThat(updated.description).isEqualTo("Changed to afternoon")
             assertThat(updated.details).isEqualTo("Bring water")
@@ -231,7 +231,7 @@ class ItineraryServiceTest {
                     category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
-            val createdEvent = (addResult as Result.Success).value
+            val (createdEvent, _) = (addResult as Result.Success).value
 
             val result = itineraryService.updateEvent(
                 UpdateEventParam(
@@ -259,7 +259,7 @@ class ItineraryServiceTest {
                     category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null
                 )
             )
-            val createdEvent = (addResult as Result.Success).value
+            val (createdEvent, _) = (addResult as Result.Success).value
 
             val result = itineraryService.deleteEvent(DeleteEventParam(planId = planId, eventId = createdEvent.id))
 
