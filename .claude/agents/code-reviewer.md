@@ -1,7 +1,7 @@
 ---
 name: code-reviewer
 description: Code reviewer who checks implementation PRs against the feature plan and architecture patterns. Ensures code adheres to the plan, follows conventions, and maintains quality.
-model: opus
+model: sonnet
 skills:
   - service-manager
   - db-manager

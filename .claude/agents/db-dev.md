@@ -1,7 +1,7 @@
 ---
 name: db-dev
 description: Database developer who implements PostgreSQL schemas, migrations, and seeds for a Kotlin Gradle monorepo. Follows db-manager skill patterns precisely.
-model: opus
+model: sonnet
 skills:
   - db-manager
 ---

@@ -1,7 +1,7 @@
 ---
 name: doc-updater
 description: Documentation updater who maintains CLAUDE.md files, READMEs, and skill files based on feature build retrospectives.
-model: opus
+model: haiku
 skills:
   - service-manager
   - db-manager

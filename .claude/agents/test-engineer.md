@@ -1,7 +1,7 @@
 ---
 name: test-engineer
 description: Test engineer who creates unit tests, integration tests, and acceptance tests for Kotlin Spring Boot services. Follows create-acceptance-tests skill patterns.
-model: opus
+model: sonnet
 skills:
   - create-acceptance-tests
   - service-manager

@@ -1,7 +1,7 @@
 ---
 name: web-dev
 description: Web developer who implements React + TypeScript frontend features. Follows the plan and coding patterns from web-manager skill precisely.
-model: opus
+model: sonnet
 skills:
   - web-manager
 ---
