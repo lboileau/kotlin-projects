@@ -99,9 +99,18 @@ A feature is too big if it involves:
 
 If too big, suggest a breakdown into independently shippable features.
 
+## Impact Analysis for Modified Types
+
+When a feature modifies existing data classes, DTOs, or param objects (adding fields, changing nullability, renaming), the plan MUST list ALL files that construct those types — not just the files being directly modified. Constructor changes cascade into actions, tests, fakes, fixtures, and mappers.
+
+**How to find affected files:** For each modified data class, search for all constructor call sites: `grep -r "ClassName(" src/ --include="*.kt"`. Every file that constructs the modified type must appear in the PR's file list.
+
+**Why this matters:** Contract PRs that modify a data class without updating all call sites cause compilation failures that block the entire stack. The plan must account for this so the developer knows the full scope upfront.
+
 ## Rules
 
 - **Be precise.** Developers implement exactly what's in the plan. Ambiguity causes rework.
 - **Be complete.** Every type, every field, every method signature should be in the plan.
 - **Be pattern-aware.** Every design decision must align with established conventions.
 - **Flag deviations.** If a feature requires breaking an existing pattern, call it out explicitly with rationale.
+- **List cascade files.** When modifying existing types, list all files that construct them. Missing call sites cause compilation failures.
