@@ -6,6 +6,7 @@ import com.acme.clients.itineraryclient.api.*
 import com.acme.clients.itineraryclient.internal.operations.*
 import com.acme.clients.itineraryclient.model.Itinerary
 import com.acme.clients.itineraryclient.model.ItineraryEvent
+import com.acme.clients.itineraryclient.model.ItineraryEventLink
 import org.jdbi.v3.core.Jdbi
 
 /**
@@ -28,4 +29,8 @@ internal class JdbiItineraryClient(jdbi: Jdbi) : ItineraryClient {
     override fun addEvent(param: AddEventParam): Result<ItineraryEvent, AppError> = addItineraryEvent.execute(param)
     override fun updateEvent(param: UpdateEventParam): Result<ItineraryEvent, AppError> = updateItineraryEvent.execute(param)
     override fun deleteEvent(param: DeleteEventParam): Result<Unit, AppError> = deleteItineraryEvent.execute(param)
+    override fun getLinksByEventIds(param: GetLinksByEventIdsParam): Result<List<ItineraryEventLink>, AppError> =
+        throw NotImplementedError("getLinksByEventIds is not yet implemented")
+    override fun replaceEventLinks(param: ReplaceEventLinksParam): Result<List<ItineraryEventLink>, AppError> =
+        throw NotImplementedError("replaceEventLinks is not yet implemented")
 }

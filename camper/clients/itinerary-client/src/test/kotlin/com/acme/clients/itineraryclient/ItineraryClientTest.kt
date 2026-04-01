@@ -151,7 +151,11 @@ class ItineraryClientTest {
                     title = "Morning Hike",
                     description = "Trail to the summit",
                     details = "Bring water and sunscreen",
-                    eventAt = eventAt
+                    eventAt = eventAt,
+                    category = "activity",
+                    estimatedCost = null,
+                    location = "Summit Trail",
+                    eventEndAt = null
                 )
             )
             assertThat(result).isInstanceOf(Result.Success::class.java)
@@ -161,6 +165,8 @@ class ItineraryClientTest {
             assertThat(event.description).isEqualTo("Trail to the summit")
             assertThat(event.details).isEqualTo("Bring water and sunscreen")
             assertThat(event.eventAt).isEqualTo(eventAt)
+            assertThat(event.category).isEqualTo("activity")
+            assertThat(event.location).isEqualTo("Summit Trail")
             assertThat(event.id).isNotNull()
             assertThat(event.createdAt).isNotNull()
         }
@@ -175,7 +181,11 @@ class ItineraryClientTest {
                     title = "",
                     description = null,
                     details = null,
-                    eventAt = Instant.now()
+                    eventAt = Instant.now(),
+                    category = "other",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             )
             assertThat(result).isInstanceOf(Result.Failure::class.java)
@@ -199,7 +209,11 @@ class ItineraryClientTest {
                     title = "Afternoon Swim",
                     description = null,
                     details = null,
-                    eventAt = laterTime
+                    eventAt = laterTime,
+                    category = "activity",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             )
             client.addEvent(
@@ -208,7 +222,11 @@ class ItineraryClientTest {
                     title = "Morning Coffee",
                     description = null,
                     details = null,
-                    eventAt = earlierTime
+                    eventAt = earlierTime,
+                    category = "meal",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             )
 
@@ -241,7 +259,11 @@ class ItineraryClientTest {
                     title = "Old Title",
                     description = "Old desc",
                     details = "Old details",
-                    eventAt = Instant.parse("2026-07-15T10:00:00Z")
+                    eventAt = Instant.parse("2026-07-15T10:00:00Z"),
+                    category = "other",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             ) as Result.Success).value
 
@@ -252,7 +274,11 @@ class ItineraryClientTest {
                     title = "New Title",
                     description = "New desc",
                     details = "New details",
-                    eventAt = newEventAt
+                    eventAt = newEventAt,
+                    category = "activity",
+                    estimatedCost = null,
+                    location = "New Location",
+                    eventEndAt = null
                 )
             )
             assertThat(result).isInstanceOf(Result.Success::class.java)
@@ -273,7 +299,11 @@ class ItineraryClientTest {
                     title = "Nope",
                     description = null,
                     details = null,
-                    eventAt = Instant.now()
+                    eventAt = Instant.now(),
+                    category = "other",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             )
             assertThat(result).isInstanceOf(Result.Failure::class.java)
@@ -293,7 +323,11 @@ class ItineraryClientTest {
                     title = "Doomed Event",
                     description = null,
                     details = null,
-                    eventAt = Instant.now()
+                    eventAt = Instant.now(),
+                    category = "other",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             ) as Result.Success).value
 
@@ -324,7 +358,11 @@ class ItineraryClientTest {
                     title = "Event 1",
                     description = null,
                     details = null,
-                    eventAt = Instant.now()
+                    eventAt = Instant.now(),
+                    category = "other",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             )
             client.addEvent(
@@ -333,7 +371,11 @@ class ItineraryClientTest {
                     title = "Event 2",
                     description = null,
                     details = null,
-                    eventAt = Instant.now()
+                    eventAt = Instant.now(),
+                    category = "other",
+                    estimatedCost = null,
+                    location = null,
+                    eventEndAt = null
                 )
             )
 

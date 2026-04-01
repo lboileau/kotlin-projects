@@ -4,6 +4,7 @@ import com.acme.clients.common.Result
 import com.acme.clients.common.error.AppError
 import com.acme.clients.itineraryclient.model.Itinerary
 import com.acme.clients.itineraryclient.model.ItineraryEvent
+import com.acme.clients.itineraryclient.model.ItineraryEventLink
 
 /**
  * Client interface for Itinerary entity operations.
@@ -32,4 +33,10 @@ interface ItineraryClient {
 
     /** Delete an itinerary event. */
     fun deleteEvent(param: DeleteEventParam): Result<Unit, AppError>
+
+    /** Retrieve all links for a list of events. */
+    fun getLinksByEventIds(param: GetLinksByEventIdsParam): Result<List<ItineraryEventLink>, AppError>
+
+    /** Replace all links for an event (delete existing, insert new). */
+    fun replaceEventLinks(param: ReplaceEventLinksParam): Result<List<ItineraryEventLink>, AppError>
 }

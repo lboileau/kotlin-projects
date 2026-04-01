@@ -12,6 +12,7 @@ import com.acme.clients.itineraryclient.internal.validations.ValidateCreateItine
 import com.acme.clients.itineraryclient.internal.validations.ValidateUpdateEvent
 import com.acme.clients.itineraryclient.model.Itinerary
 import com.acme.clients.itineraryclient.model.ItineraryEvent
+import com.acme.clients.itineraryclient.model.ItineraryEventLink
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -72,6 +73,10 @@ class FakeItineraryClient : ItineraryClient {
             description = param.description,
             details = param.details,
             eventAt = param.eventAt,
+            category = param.category,
+            estimatedCost = param.estimatedCost,
+            location = param.location,
+            eventEndAt = param.eventEndAt,
             createdAt = Instant.now(),
             updatedAt = Instant.now()
         )
@@ -90,6 +95,10 @@ class FakeItineraryClient : ItineraryClient {
             description = param.description,
             details = param.details,
             eventAt = param.eventAt,
+            category = param.category,
+            estimatedCost = param.estimatedCost,
+            location = param.location,
+            eventEndAt = param.eventEndAt,
             updatedAt = Instant.now()
         )
         eventStore[param.id] = updated
@@ -98,6 +107,14 @@ class FakeItineraryClient : ItineraryClient {
 
     override fun deleteEvent(param: DeleteEventParam): Result<Unit, AppError> {
         return if (eventStore.remove(param.id) != null) success(Unit) else failure(NotFoundError("ItineraryEvent", param.id.toString()))
+    }
+
+    override fun getLinksByEventIds(param: GetLinksByEventIdsParam): Result<List<ItineraryEventLink>, AppError> {
+        throw NotImplementedError("getLinksByEventIds is not yet implemented in FakeItineraryClient")
+    }
+
+    override fun replaceEventLinks(param: ReplaceEventLinksParam): Result<List<ItineraryEventLink>, AppError> {
+        throw NotImplementedError("replaceEventLinks is not yet implemented in FakeItineraryClient")
     }
 
     fun reset() {

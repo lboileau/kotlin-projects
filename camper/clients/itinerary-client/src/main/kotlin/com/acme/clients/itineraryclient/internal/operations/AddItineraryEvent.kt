@@ -25,8 +25,8 @@ internal class AddItineraryEvent(private val jdbi: Jdbi) {
             val now = Instant.now()
             handle.createUpdate(
                 """
-                INSERT INTO itinerary_events (id, itinerary_id, title, description, details, event_at, created_at, updated_at)
-                VALUES (:id, :itineraryId, :title, :description, :details, :eventAt, :createdAt, :updatedAt)
+                INSERT INTO itinerary_events (id, itinerary_id, title, description, details, event_at, category, estimated_cost, location, event_end_at, created_at, updated_at)
+                VALUES (:id, :itineraryId, :title, :description, :details, :eventAt, :category, :estimatedCost, :location, :eventEndAt, :createdAt, :updatedAt)
                 """.trimIndent()
             )
                 .bind("id", id)
@@ -35,6 +35,10 @@ internal class AddItineraryEvent(private val jdbi: Jdbi) {
                 .bind("description", param.description)
                 .bind("details", param.details)
                 .bind("eventAt", param.eventAt)
+                .bind("category", param.category)
+                .bind("estimatedCost", param.estimatedCost)
+                .bind("location", param.location)
+                .bind("eventEndAt", param.eventEndAt)
                 .bind("createdAt", now)
                 .bind("updatedAt", now)
                 .execute()
@@ -45,6 +49,10 @@ internal class AddItineraryEvent(private val jdbi: Jdbi) {
                 description = param.description,
                 details = param.details,
                 eventAt = param.eventAt,
+                category = param.category,
+                estimatedCost = param.estimatedCost,
+                location = param.location,
+                eventEndAt = param.eventEndAt,
                 createdAt = now,
                 updatedAt = now
             )
