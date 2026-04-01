@@ -7,7 +7,7 @@ API service for camping trip planning — user registration, authentication, pla
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, and `meal-plan-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, `meal-plan-client`, and `log-book-client` for data access
 - Uses `meal-plan-calculator` lib for shopping list computation and unit conversion
 - Uses `avatar-generator` lib for deterministic avatar generation from seed strings
 - Database: `camper-db` (port 5433, database `camper_db`)
@@ -102,23 +102,31 @@ API service for camping trip planning — user registration, authentication, pla
 - **Polymorphic ownership:** Items have nullable FK columns (`plan_id`, `user_id`). Shared gear: `plan_id` only. Personal gear per plan: both `plan_id` + `user_id`. At least one must be set (DB CHECK constraint). Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
 
 ### Itinerary (`features/itinerary/`)
-- **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
-- **DTOs:** `AddEventRequest(title, description?, details?, eventAt)`, `UpdateEventRequest(title, description?, details?, eventAt)`, `ItineraryResponse(id, planId, events, createdAt, updatedAt)`, `ItineraryEventResponse(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
+- **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, createdAt, updatedAt)`, `ItineraryEventLink(id, eventId, url, label?, createdAt)`
+- **DTOs:**
+  - Requests: `AddEventRequest(title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `UpdateEventRequest(title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `LinkInput(url, label?)`
+  - Responses: `ItineraryResponse(id, planId, events, totalEstimatedCost?, createdAt, updatedAt)`, `ItineraryEventResponse(id, itineraryId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links, createdAt, updatedAt)`, `LinkResponse(id, url, label?, createdAt)`
 - **Error:** `ItineraryError` sealed class — `PlanNotFound(planId)`, `NotFound(planId)`, `EventNotFound(eventId)`, `Invalid(field, reason)`
-- **Service params:** `GetItineraryParam(planId)`, `DeleteItineraryParam(planId)`, `AddEventParam(planId, title, description?, details?, eventAt)`, `UpdateEventParam(planId, eventId, title, description?, details?, eventAt)`, `DeleteEventParam(planId, eventId)`
+- **Service params:** `GetItineraryParam(planId)`, `DeleteItineraryParam(planId)`, `AddEventParam(planId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `UpdateEventParam(planId, eventId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `DeleteEventParam(planId, eventId)`
+- **Validations:**
+  - `category` must be one of: travel, accommodation, activity, meal, other
+  - `estimatedCost` must be >= 0 if provided
+  - `eventEndAt` must be after `eventAt` if provided
+  - Max 10 links per event; each `link.url` must not be blank
 - **Actions:**
-  - `GetItineraryAction`: Fetches itinerary by planId with events ordered by eventAt
+  - `GetItineraryAction`: Fetches itinerary by planId with events ordered by eventAt, fetches links for all events. Returns `Triple<Itinerary, List<ItineraryEvent>, Map<UUID, List<ItineraryEventLink>>>`
   - `DeleteItineraryAction`: Deletes itinerary and all events (cascade)
-  - `AddEventAction`: Auto-creates itinerary if none exists, then adds event
-  - `UpdateEventAction`: Updates event fields
-  - `DeleteEventAction`: Deletes a single event
+  - `AddEventAction`: Auto-creates itinerary if none exists, adds event, replaces links if provided. Returns `Pair<ItineraryEvent, List<ItineraryEventLink>>`
+  - `UpdateEventAction`: Updates event fields, replaces links if provided (null = keep existing, empty list = delete all). Returns `Pair<ItineraryEvent, List<ItineraryEventLink>>`
+  - `DeleteEventAction`: Deletes a single event (links cascade)
 - **Service:** `ItineraryService` facade (takes ItineraryClient + PlanClient)
 - **Routes:** (all require `X-User-Id` header)
-  - `GET /api/plans/{planId}/itinerary` — get itinerary with events
+  - `GET /api/plans/{planId}/itinerary` — get itinerary with events, links, and totalEstimatedCost
   - `DELETE /api/plans/{planId}/itinerary` — delete itinerary (204)
-  - `POST /api/plans/{planId}/itinerary/events` — add event (201, auto-creates itinerary)
-  - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event
+  - `POST /api/plans/{planId}/itinerary/events` — add event with optional links (201, auto-creates itinerary)
+  - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event with optional link replacement
   - `DELETE /api/plans/{planId}/itinerary/events/{eventId}` — delete event (204)
+- **Link semantics:** Links are managed inline via nested writes (no separate endpoints). Update: `null` = keep existing links, `[]` = delete all, populated list = full replacement (delete + insert). Links use a "replace-all" pattern — no individual link CRUD.
 
 ### Assignment (`features/assignment/`)
 - **Model:** `Assignment(id, planId, name, type, maxOccupancy, ownerId, createdAt, updatedAt)`, `AssignmentMember(assignmentId, userId, username?, createdAt)`, `AssignmentDetail(id, planId, name, type, maxOccupancy, ownerId, members, createdAt, updatedAt)`
@@ -283,8 +291,8 @@ API service for camping trip planning — user registration, authentication, pla
 - `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest` (includes event metadata and link management tests), `AssignmentServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest` (includes event metadata, links, cost summary, and link replacement tests), `AssignmentAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
 - **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`

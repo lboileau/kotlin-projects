@@ -20,7 +20,7 @@ camper/
 │   ├── user-client/          # JDBI data access for users & user_dietary_restrictions tables
 │   ├── plan-client/          # JDBI data access for plans & plan_members tables
 │   ├── item-client/          # JDBI data access for items table
-│   ├── itinerary-client/     # JDBI data access for itineraries & itinerary_events tables
+│   ├── itinerary-client/     # JDBI data access for itineraries, itinerary_events & itinerary_event_links tables
 │   ├── assignment-client/    # JDBI data access for assignments & assignment_members tables
 │   ├── invitation-client/    # JDBI data access for invitations table
 │   ├── email-client/         # Email sending via Resend SDK (+ NoOp for local dev)
