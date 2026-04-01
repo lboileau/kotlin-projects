@@ -66,6 +66,107 @@ class ItemClientIntegrationTest {
     }
 
     @Nested
+    inner class GearPackId {
+
+        private val cookingEquipmentPackId = UUID.fromString("cc000000-0001-4000-8000-000000000001")
+
+        @Test
+        fun `create with gearPackId stores gearPackId and returns null gearPackName`() {
+            val result = client.create(
+                CreateItemParam(planId = testPlanId, userId = null, name = "Cast Iron Pan", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId)
+            )
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isEqualTo(cookingEquipmentPackId)
+            // create does not SELECT after INSERT — gearPackName is always null from create
+            assertThat(item.gearPackName).isNull()
+        }
+
+        @Test
+        fun `create with null gearPackId returns item with null gearPackId and null gearPackName`() {
+            val result = client.create(
+                CreateItemParam(planId = testPlanId, userId = null, name = "Sleeping Bag", category = "sleeping", quantity = 1, packed = false, gearPackId = null)
+            )
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isNull()
+            assertThat(item.gearPackName).isNull()
+        }
+
+        @Test
+        fun `getById resolves gearPackName via LEFT JOIN when item has gearPackId`() {
+            val created = (client.create(
+                CreateItemParam(planId = testPlanId, userId = null, name = "Tongs", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId)
+            ) as Result.Success).value
+
+            val result = client.getById(GetByIdParam(created.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isEqualTo(cookingEquipmentPackId)
+            assertThat(item.gearPackName).isEqualTo("Cooking Equipment")
+        }
+
+        @Test
+        fun `getById returns null gearPackName when item has no gearPackId`() {
+            val created = (client.create(
+                CreateItemParam(planId = testPlanId, userId = null, name = "Tent", category = "shelter", quantity = 1, packed = false, gearPackId = null)
+            ) as Result.Success).value
+
+            val result = client.getById(GetByIdParam(created.id))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val item = (result as Result.Success).value
+            assertThat(item.gearPackId).isNull()
+            assertThat(item.gearPackName).isNull()
+        }
+
+        @Test
+        fun `getByPlanId resolves gearPackId and gearPackName for grouped items`() {
+            client.create(CreateItemParam(planId = testPlanId, userId = null, name = "Spatula", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId))
+            client.create(CreateItemParam(planId = testPlanId, userId = null, name = "Hammock", category = "sleeping", quantity = 1, packed = false, gearPackId = null))
+
+            val result = client.getByPlanId(GetByPlanIdParam(testPlanId))
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val items = (result as Result.Success).value
+            assertThat(items).hasSize(2)
+
+            val grouped = items.first { it.name == "Spatula" }
+            assertThat(grouped.gearPackId).isEqualTo(cookingEquipmentPackId)
+            assertThat(grouped.gearPackName).isEqualTo("Cooking Equipment")
+
+            val ungrouped = items.first { it.name == "Hammock" }
+            assertThat(ungrouped.gearPackId).isNull()
+            assertThat(ungrouped.gearPackName).isNull()
+        }
+
+        @Test
+        fun `update sets gearPackId on item that had none`() {
+            val created = (client.create(
+                CreateItemParam(planId = testPlanId, userId = null, name = "Cutting Board", category = "kitchen", quantity = 1, packed = false, gearPackId = null)
+            ) as Result.Success).value
+            assertThat(created.gearPackId).isNull()
+
+            client.update(UpdateItemParam(id = created.id, name = "Cutting Board", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId))
+
+            val fetched = (client.getById(GetByIdParam(created.id)) as Result.Success).value
+            assertThat(fetched.gearPackId).isEqualTo(cookingEquipmentPackId)
+            assertThat(fetched.gearPackName).isEqualTo("Cooking Equipment")
+        }
+
+        @Test
+        fun `update clears gearPackId when set to null`() {
+            val created = (client.create(
+                CreateItemParam(planId = testPlanId, userId = null, name = "Large Pot", category = "kitchen", quantity = 1, packed = false, gearPackId = cookingEquipmentPackId)
+            ) as Result.Success).value
+
+            client.update(UpdateItemParam(id = created.id, name = "Large Pot", category = "kitchen", quantity = 1, packed = false, gearPackId = null))
+
+            val fetched = (client.getById(GetByIdParam(created.id)) as Result.Success).value
+            assertThat(fetched.gearPackId).isNull()
+            assertThat(fetched.gearPackName).isNull()
+        }
+    }
+
+    @Nested
     inner class Create {
         @Test
         fun `create returns created item with plan owner`() {
