@@ -30,13 +30,13 @@ internal class AddManualItem(private val jdbi: Jdbi) {
                 handle.createQuery(
                     """
                     INSERT INTO shopping_list_manual_items (id, meal_plan_id, ingredient_id, description, quantity, unit, quantity_purchased, created_at, updated_at)
-                    VALUES (:id, :mealPlanId, :ingredientId, :description, :quantity, :unit, 0, :createdAt, :updatedAt)
+                    VALUES (:id, :mealPlanId, CAST(:ingredientId AS uuid), :description, :quantity, :unit, 0, :createdAt, :updatedAt)
                     RETURNING id, meal_plan_id, ingredient_id, description, quantity, unit, quantity_purchased, created_at, updated_at
                     """.trimIndent()
                 )
                     .bind("id", id)
                     .bind("mealPlanId", param.mealPlanId)
-                    .bind("ingredientId", param.ingredientId)
+                    .bind("ingredientId", param.ingredientId?.toString())
                     .bind("description", param.description)
                     .bind("quantity", param.quantity)
                     .bind("unit", param.unit)
