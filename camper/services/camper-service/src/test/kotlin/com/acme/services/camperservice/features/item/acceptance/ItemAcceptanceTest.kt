@@ -2,6 +2,7 @@ package com.acme.services.camperservice.features.item.acceptance
 
 import com.acme.services.camperservice.config.TestContainerConfig
 import com.acme.services.camperservice.features.item.acceptance.fixture.ItemFixture
+import com.acme.services.camperservice.features.item.acceptance.fixture.ItemFixture.Companion.COOKING_EQUIPMENT_PACK_ID
 import com.acme.services.camperservice.features.item.dto.CreateItemRequest
 import com.acme.services.camperservice.features.item.dto.ItemResponse
 import com.acme.services.camperservice.features.item.dto.UpdateItemRequest
@@ -602,6 +603,250 @@ class ItemAcceptanceTest {
                 Map::class.java
             )
             assertThat(verifyResponse.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @Nested
+    inner class GearPackId {
+
+        @Test
+        fun `POST creates item with gearPackId and returns 201`() {
+            val request = CreateItemRequest(
+                name = "Cast Iron Pan",
+                category = "kitchen",
+                quantity = 1,
+                packed = false,
+                ownerType = "plan",
+                ownerId = planId,
+                gearPackId = COOKING_EQUIPMENT_PACK_ID,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(request, userId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            val body = response.body!!
+            assertThat(body.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
+            assertThat(body.name).isEqualTo("Cast Iron Pan")
+        }
+
+        @Test
+        fun `GET item by ID includes gearPackId and gearPackName`() {
+            val itemId = fixture.insertItem(
+                planId = planId,
+                name = "Large Pot",
+                category = "kitchen",
+                gearPackId = COOKING_EQUIPMENT_PACK_ID,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            val body = response.body!!
+            assertThat(body.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
+            assertThat(body.gearPackName).isEqualTo("Cooking Equipment")
+        }
+
+        @Test
+        fun `GET item by ID returns null gearPackId and gearPackName when not set`() {
+            val itemId = fixture.insertItem(
+                planId = planId,
+                name = "Sleeping Bag",
+                category = "sleep",
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            val body = response.body!!
+            assertThat(body.gearPackId).isNull()
+            assertThat(body.gearPackName).isNull()
+        }
+
+        @Test
+        fun `GET list includes gearPackId and gearPackName for items with gear pack`() {
+            fixture.insertItem(
+                planId = planId,
+                name = "Spatula",
+                category = "kitchen",
+                gearPackId = COOKING_EQUIPMENT_PACK_ID,
+            )
+            fixture.insertItem(
+                planId = planId,
+                name = "Sleeping Pad",
+                category = "sleep",
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items?ownerType=plan&ownerId=$planId",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                Array<ItemResponse>::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            val items = response.body!!
+            assertThat(items).hasSize(2)
+
+            val spatula = items.find { it.name == "Spatula" }!!
+            assertThat(spatula.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
+            assertThat(spatula.gearPackName).isEqualTo("Cooking Equipment")
+
+            val sleepingPad = items.find { it.name == "Sleeping Pad" }!!
+            assertThat(sleepingPad.gearPackId).isNull()
+            assertThat(sleepingPad.gearPackName).isNull()
+        }
+
+        @Test
+        fun `PUT sets gearPackId on item that had none`() {
+            val itemId = fixture.insertItem(
+                planId = planId,
+                name = "Tongs",
+                category = "kitchen",
+            )
+
+            val request = UpdateItemRequest(
+                name = "Tongs",
+                category = "kitchen",
+                quantity = 1,
+                packed = false,
+                gearPackId = COOKING_EQUIPMENT_PACK_ID,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.PUT,
+                entityWithUser(request, userId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
+        }
+
+        @Test
+        fun `PUT clears gearPackId when set to null`() {
+            val itemId = fixture.insertItem(
+                planId = planId,
+                name = "Cutting Board",
+                category = "kitchen",
+                gearPackId = COOKING_EQUIPMENT_PACK_ID,
+            )
+
+            val request = UpdateItemRequest(
+                name = "Cutting Board",
+                category = "kitchen",
+                quantity = 1,
+                packed = false,
+                gearPackId = null,
+            )
+
+            val response = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.PUT,
+                entityWithUser(request, userId),
+                ItemResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.gearPackId).isNull()
+        }
+
+        @Test
+        fun `POST then GET returns item with gearPackId and gearPackName`() {
+            // 1. Create item with gearPackId
+            val createRequest = CreateItemRequest(
+                name = "Grill Grate",
+                category = "kitchen",
+                quantity = 1,
+                packed = false,
+                ownerType = "plan",
+                ownerId = planId,
+                gearPackId = COOKING_EQUIPMENT_PACK_ID,
+            )
+            val createResponse = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(createRequest, userId),
+                ItemResponse::class.java
+            )
+            assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+            val itemId = createResponse.body!!.id
+            assertThat(createResponse.body!!.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
+
+            // 2. GET by ID — verify gearPackName is resolved
+            val getResponse = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ItemResponse::class.java
+            )
+            assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(getResponse.body!!.gearPackId).isEqualTo(COOKING_EQUIPMENT_PACK_ID)
+            assertThat(getResponse.body!!.gearPackName).isEqualTo("Cooking Equipment")
+        }
+
+        @Test
+        fun `POST then PUT clears gearPackId then GET verifies cleared`() {
+            // 1. Create item with gearPackId
+            val createRequest = CreateItemRequest(
+                name = "Can Opener",
+                category = "kitchen",
+                quantity = 1,
+                packed = false,
+                ownerType = "plan",
+                ownerId = planId,
+                gearPackId = COOKING_EQUIPMENT_PACK_ID,
+            )
+            val createResponse = restTemplate.exchange(
+                "/api/items",
+                HttpMethod.POST,
+                entityWithUser(createRequest, userId),
+                ItemResponse::class.java
+            )
+            assertThat(createResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+            val itemId = createResponse.body!!.id
+
+            // 2. PUT to clear gearPackId
+            val updateRequest = UpdateItemRequest(
+                name = "Can Opener",
+                category = "kitchen",
+                quantity = 1,
+                packed = false,
+                gearPackId = null,
+            )
+            val updateResponse = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.PUT,
+                entityWithUser(updateRequest, userId),
+                ItemResponse::class.java
+            )
+            assertThat(updateResponse.statusCode).isEqualTo(HttpStatus.OK)
+
+            // 3. GET to verify gearPackId and gearPackName are both null
+            val getResponse = restTemplate.exchange(
+                "/api/items/$itemId",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                ItemResponse::class.java
+            )
+            assertThat(getResponse.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(getResponse.body!!.gearPackId).isNull()
+            assertThat(getResponse.body!!.gearPackName).isNull()
         }
     }
 
