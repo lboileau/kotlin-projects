@@ -14,8 +14,7 @@ import { AppHeader } from '../components/AppHeader';
 import { Button } from '../components/ui/Button';
 import './RecipesPage.css';
 import '../components/Modal.css';
-
-const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'] as const;
+import { UNITS } from '../lib/constants';
 const CATEGORIES = ['produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other'] as const;
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'appetizer', 'side', 'drink'] as const;
 const THEMES = ['chicken', 'beef', 'pork', 'fish', 'seafood', 'vegetarian', 'vegan', 'pasta', 'soup', 'salad', 'other'] as const;
