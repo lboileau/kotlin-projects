@@ -6,6 +6,11 @@ import java.util.UUID
 
 class ItemFixture(private val jdbcTemplate: JdbcTemplate) {
 
+    companion object {
+        /** Seeded by V036 migration — always present after migrations run. */
+        val COOKING_EQUIPMENT_PACK_ID: UUID = UUID.fromString("cc000000-0001-4000-8000-000000000001")
+    }
+
     fun insertUser(
         id: UUID = UUID.randomUUID(),
         email: String = "user-${UUID.randomUUID().toString().take(8)}@example.com",
@@ -41,12 +46,13 @@ class ItemFixture(private val jdbcTemplate: JdbcTemplate) {
         category: String = "gear",
         quantity: Int = 1,
         packed: Boolean = false,
+        gearPackId: UUID? = null,
         createdAt: Instant = Instant.now(),
         updatedAt: Instant = Instant.now()
     ): UUID {
         jdbcTemplate.update(
-            "INSERT INTO items (id, plan_id, user_id, name, category, quantity, packed, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            id, planId, userId, name, category, quantity, packed, java.sql.Timestamp.from(createdAt), java.sql.Timestamp.from(updatedAt)
+            "INSERT INTO items (id, plan_id, user_id, name, category, quantity, packed, gear_pack_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            id, planId, userId, name, category, quantity, packed, gearPackId, java.sql.Timestamp.from(createdAt), java.sql.Timestamp.from(updatedAt)
         )
         return id
     }

@@ -51,7 +51,7 @@ class GearPackFixture(private val jdbcTemplate: JdbcTemplate) {
 
     fun getItemsByPlanId(planId: UUID): List<Map<String, Any?>> {
         return jdbcTemplate.queryForList(
-            "SELECT id, plan_id, user_id, name, category, quantity, packed FROM items WHERE plan_id = ? ORDER BY name",
+            "SELECT id, plan_id, user_id, name, category, quantity, packed, gear_pack_id FROM items WHERE plan_id = ? ORDER BY name",
             planId
         )
     }

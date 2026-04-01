@@ -336,6 +336,53 @@ class GearPackAcceptanceTest {
     }
 
     @Nested
+    inner class ApplyGearPackSetsGearPackId {
+
+        @Test
+        fun `POST apply sets gearPackId on all created items`() {
+            val request = ApplyGearPackRequest(planId = planId, groupSize = 1)
+
+            val response = restTemplate.exchange(
+                "/api/gear-packs/$COOKING_EQUIPMENT_PACK_ID/apply",
+                HttpMethod.POST,
+                entityWithUser(request, ownerId),
+                ApplyGearPackResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            val items = response.body!!.items
+            assertThat(items).hasSize(12)
+            assertThat(items.all { it.gearPackId == COOKING_EQUIPMENT_PACK_ID }).isTrue()
+        }
+
+        @Test
+        fun `POST apply then GET items list shows gearPackId and gearPackName`() {
+            val request = ApplyGearPackRequest(planId = planId, groupSize = 1)
+
+            val applyResponse = restTemplate.exchange(
+                "/api/gear-packs/$COOKING_EQUIPMENT_PACK_ID/apply",
+                HttpMethod.POST,
+                entityWithUser(request, ownerId),
+                ApplyGearPackResponse::class.java
+            )
+            assertThat(applyResponse.statusCode).isEqualTo(HttpStatus.CREATED)
+
+            val itemsResponse = restTemplate.exchange(
+                "/api/items?ownerType=plan&ownerId=$planId",
+                HttpMethod.GET,
+                entityWithUser(null, ownerId),
+                Array<ItemResponse>::class.java
+            )
+
+            assertThat(itemsResponse.statusCode).isEqualTo(HttpStatus.OK)
+            val items = itemsResponse.body!!
+            assertThat(items).hasSize(12)
+            assertThat(items.all { it.gearPackId == COOKING_EQUIPMENT_PACK_ID }).isTrue()
+            assertThat(items.all { it.gearPackName == "Cooking Equipment" }).isTrue()
+        }
+    }
+
+    @Nested
     inner class ReadYourOwnWrites {
 
         @Test
@@ -399,6 +446,9 @@ class GearPackAcceptanceTest {
             // Verify a non-scalable item's quantity
             val spatula = dbItems.find { it["name"] == "Spatula" }
             assertThat(spatula!!["quantity"]).isEqualTo(1)
+
+            // Verify gear_pack_id is stored on all items in the database
+            assertThat(dbItems.all { it["gear_pack_id"] == COOKING_EQUIPMENT_PACK_ID }).isTrue()
         }
     }
 
