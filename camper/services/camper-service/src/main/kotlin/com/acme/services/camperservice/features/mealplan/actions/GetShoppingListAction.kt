@@ -228,8 +228,47 @@ internal class GetShoppingListAction(
                 )
             }
 
-        // Load manual items
-        val manualItems = when (val result = mealPlanClient.getManualItems(GetManualItemsParam(mealPlan.id))) {
+        val manualItemResponses = when (val result = loadManualItems(mealPlan.id, ingredientInfoMap)) {
+            is Result.Success -> result.value
+            is Result.Failure -> return result
+        }
+
+        val allItems = items + orphanedItems + manualItemResponses.map { it.first }
+
+        // Build a category lookup for manual items (they may not have ingredientId in ingredientInfoMap)
+        val manualItemCategories = manualItemResponses.associate { (response, category) -> response to category }
+
+        // Group by category
+        val categories = allItems
+            .groupBy { item ->
+                manualItemCategories[item]
+                    ?: ingredientInfoMap[item.ingredientId]?.category
+                    ?: "other"
+            }
+            .map { (category, categoryItems) ->
+                ShoppingListCategoryResponse(category = category, items = categoryItems)
+            }
+            .sortedBy { it.category }
+
+        val fullyPurchasedCount = allItems.count { it.status == PurchaseStatus.DONE.name.lowercase() }
+
+        return Result.Success(
+            ShoppingListResponse(
+                mealPlanId = mealPlan.id,
+                servings = mealPlan.servings,
+                scalingMode = mealPlan.scalingMode,
+                totalItems = allItems.size,
+                fullyPurchasedCount = fullyPurchasedCount,
+                categories = categories,
+            )
+        )
+    }
+
+    private fun loadManualItems(
+        mealPlanId: UUID,
+        ingredientInfoMap: MutableMap<UUID, IngredientInfo>,
+    ): Result<List<Pair<ShoppingListItemResponse, String>>, MealPlanError> {
+        val manualItems = when (val result = mealPlanClient.getManualItems(GetManualItemsParam(mealPlanId))) {
             is Result.Success -> result.value
             is Result.Failure -> return Result.Failure(MealPlanError.Invalid("manualItems", result.error.message))
         }
@@ -272,35 +311,7 @@ internal class GetShoppingListAction(
             ) to manualCategory
         }
 
-        val allItems = items + orphanedItems + manualItemResponses.map { it.first }
-
-        // Build a category lookup for manual items (they may not have ingredientId in ingredientInfoMap)
-        val manualItemCategories = manualItemResponses.associate { (response, category) -> response to category }
-
-        // Group by category
-        val categories = allItems
-            .groupBy { item ->
-                manualItemCategories[item]
-                    ?: ingredientInfoMap[item.ingredientId]?.category
-                    ?: "other"
-            }
-            .map { (category, categoryItems) ->
-                ShoppingListCategoryResponse(category = category, items = categoryItems)
-            }
-            .sortedBy { it.category }
-
-        val fullyPurchasedCount = allItems.count { it.status == PurchaseStatus.DONE.name.lowercase() }
-
-        return Result.Success(
-            ShoppingListResponse(
-                mealPlanId = mealPlan.id,
-                servings = mealPlan.servings,
-                scalingMode = mealPlan.scalingMode,
-                totalItems = allItems.size,
-                fullyPurchasedCount = fullyPurchasedCount,
-                categories = categories,
-            )
-        )
+        return Result.Success(manualItemResponses)
     }
 
 }
