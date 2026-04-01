@@ -87,6 +87,7 @@ class FakeItemClient : ItemClient {
             quantity = param.quantity,
             packed = param.packed,
             gearPackId = param.gearPackId,
+            gearPackName = if (param.gearPackId == existing.gearPackId) existing.gearPackName else null,
             updatedAt = Instant.now()
         )
         store[param.id] = updated
