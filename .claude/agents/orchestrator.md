@@ -169,7 +169,9 @@ Build check → Spawn `code-reviewer` → review cycle.
 gt create -m "feat(<feature>): service contracts" --no-interactive
 ```
 
-Spawn `kotlin-dev` with the plan document. Instruction: create DTOs, error sealed class, action signatures (TODO bodies), service facade signatures, controller routes (501 stubs), service params. **Important:** When modifying existing data classes (adding fields, changing nullability), the contract PR must also fix ALL call sites (actions, tests, mappers) that construct those objects to maintain compilation.
+Spawn `kotlin-dev` with the plan document. Instruction: create DTOs, error sealed class, action signatures (TODO bodies), service facade signatures, controller routes (501 stubs), service params.
+
+**CRITICAL — Constructor call-site cascade:** When modifying existing data classes (adding fields, changing nullability), the contract PR must also fix ALL call sites that construct those objects. This includes actions, tests, mappers, fakes, fixtures, and any other file that calls `ClassName(...)`. Before committing, the developer MUST grep for all constructor call sites (e.g., `grep -r "ClassName(" src/ --include="*.kt"`) and update every one. Failing to do this causes surprise compilation failures that block the entire stack. The plan's file list for this PR must include all affected files — see the architect's guidance on impact analysis.
 
 Build check → Spawn `code-reviewer` → review cycle.
 
@@ -196,6 +198,8 @@ gt create -m "feat(<feature>): client implementation" --no-interactive
 Spawn `kotlin-dev`: implement operations (JDBI), row adapters, factory, fake with real validation.
 
 Build check → Spawn `code-reviewer` → review cycle. Collect retro.
+
+> **Integration test priority:** After the client implementation PR is reviewed and approved, consider running client integration tests immediately (before proceeding to service implementation). JDBI-specific bugs (nullable bindings, type mismatches, SQL errors) are invisible to fake-based tests and can compound through the service layer if not caught early.
 
 #### PR: Library Implementation (if needed)
 
