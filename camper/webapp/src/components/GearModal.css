@@ -686,6 +686,49 @@
   60% { transform: rotate(3deg); }
 }
 
+/* ── Gear Pack Groups ───────────────────── */
+
+.gear-pack-group {
+  margin-bottom: 0.75rem;
+  border-left: 3px solid var(--sage);
+  border-radius: 0 8px 8px 0;
+  background: linear-gradient(135deg, rgba(165, 190, 160, 0.08), transparent);
+  padding: 0.5rem 0.5rem 0.25rem 0.75rem;
+}
+
+.gear-pack-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.375rem;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid rgba(165, 190, 160, 0.2);
+  font-family: var(--font-heading);
+  font-size: 0.8rem;
+  color: var(--sage-deep);
+  letter-spacing: 0.02em;
+}
+
+.gear-pack-group-icon {
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.gear-pack-group-name {
+  font-weight: 600;
+}
+
+.gear-pack-group-count {
+  margin-left: auto;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.gear-pack-group-items .gear-category-group {
+  margin-left: 0.25rem;
+}
+
 /* ── Responsive ─────────────────────────── */
 
 @media (max-width: 600px) {

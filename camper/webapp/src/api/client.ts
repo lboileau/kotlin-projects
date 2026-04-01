@@ -51,6 +51,8 @@ export interface Item {
   category: string;
   quantity: number;
   packed: boolean;
+  gearPackId: string | null;
+  gearPackName: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -559,14 +561,14 @@ export const api = {
     return request(url);
   },
 
-  createItem(data: { name: string; category: string; quantity: number; packed: boolean; ownerType: string; ownerId: string; planId?: string }): Promise<Item> {
+  createItem(data: { name: string; category: string; quantity: number; packed: boolean; ownerType: string; ownerId: string; planId?: string; gearPackId?: string | null }): Promise<Item> {
     return request('/api/items', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
-  updateItem(itemId: string, data: { name: string; category: string; quantity: number; packed: boolean }): Promise<Item> {
+  updateItem(itemId: string, data: { name: string; category: string; quantity: number; packed: boolean; gearPackId?: string | null }): Promise<Item> {
     return request(`/api/items/${itemId}`, {
       method: 'PUT',
       body: JSON.stringify(data),

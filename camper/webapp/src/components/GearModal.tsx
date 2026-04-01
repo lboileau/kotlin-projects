@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { api, type Item, type PlanMember } from '../api/client';
 import { Modal } from './ui/Modal';
 import { GearPacksPanel } from './GearPacksPanel';
@@ -153,13 +153,15 @@ function ItemRow({ item, canEdit, categories, onTogglePacked, onDelete, onUpdate
 interface AddItemFormProps {
   categories: CategoryDef[];
   placeholder: string;
-  onAdd: (name: string, category: string, quantity: number) => Promise<void>;
+  onAdd: (name: string, category: string, quantity: number, gearPackId?: string | null) => Promise<void>;
+  gearPacks?: { id: string; name: string }[];
 }
 
-function AddItemForm({ categories, placeholder, onAdd }: AddItemFormProps) {
+function AddItemForm({ categories, placeholder, onAdd, gearPacks }: AddItemFormProps) {
   const [name, setName] = useState('');
   const [category, setCategory] = useState(categories[0]?.value ?? '');
   const [quantity, setQuantity] = useState(1);
+  const [gearPackId, setGearPackId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -168,7 +170,7 @@ function AddItemForm({ categories, placeholder, onAdd }: AddItemFormProps) {
     if (!name.trim()) return;
     setAdding(true);
     try {
-      await onAdd(name.trim(), category, quantity);
+      await onAdd(name.trim(), category, quantity, gearPackId);
       setName('');
       setQuantity(1);
       inputRef.current?.focus();
@@ -197,6 +199,19 @@ function AddItemForm({ categories, placeholder, onAdd }: AddItemFormProps) {
           <option key={c.value} value={c.value}>{c.icon} {c.label}</option>
         ))}
       </select>
+      {gearPacks && gearPacks.length > 0 && (
+        <select
+          className="gear-add-category"
+          value={gearPackId ?? ''}
+          onChange={e => setGearPackId(e.target.value || null)}
+          disabled={adding}
+        >
+          <option value="">None</option>
+          {gearPacks.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+      )}
       <div className="gear-add-qty">
         <button type="button" className="gear-qty-btn" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={adding}>−</button>
         <span className="gear-qty-value">{quantity}</span>
@@ -213,7 +228,7 @@ interface ChecklistSectionProps {
   title: string;
   subtitle?: string;
   items: Item[];
-  onAdd: (name: string, category: string, quantity: number) => Promise<void>;
+  onAdd: (name: string, category: string, quantity: number, gearPackId?: string | null) => Promise<void>;
   onToggle: (item: Item) => Promise<void>;
   onDelete: (item: Item) => Promise<void>;
   onUpdate: (item: Item, name: string, quantity: number, category: string) => Promise<void>;
@@ -223,23 +238,41 @@ interface ChecklistSectionProps {
   categories: CategoryDef[];
   addPlaceholder: string;
   emptyText: string;
+  gearPacks?: { id: string; name: string }[];
 }
 
-function ChecklistSection({ title, subtitle, items, onAdd, onToggle, onDelete, onUpdate, defaultExpanded = true, accentColor, canEdit, categories, addPlaceholder, emptyText }: ChecklistSectionProps) {
+function ChecklistSection({ title, subtitle, items, onAdd, onToggle, onDelete, onUpdate, defaultExpanded = true, accentColor, canEdit, categories, addPlaceholder, emptyText, gearPacks }: ChecklistSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const packedCount = items.filter(i => i.packed).length;
   const totalCount = items.length;
   const progress = totalCount > 0 ? (packedCount / totalCount) * 100 : 0;
 
-  // Group items by category
-  const grouped = items.reduce<Record<string, Item[]>>((acc, item) => {
+  const categoryOrder = categories.map(c => c.value);
+
+  // Separate items into gear pack groups and ungrouped
+  const gearPackGroups = useMemo(() => {
+    const groups: Record<string, Item[]> = {};
+    items.forEach(item => {
+      if (item.gearPackId) {
+        (groups[item.gearPackId] ??= []).push(item);
+      }
+    });
+    return groups;
+  }, [items]);
+
+  const ungroupedItems = useMemo(
+    () => items.filter(item => !item.gearPackId),
+    [items]
+  );
+
+  // Group ungrouped items by category
+  const ungroupedByCategory = ungroupedItems.reduce<Record<string, Item[]>>((acc, item) => {
     (acc[item.category] ??= []).push(item);
     return acc;
   }, {});
 
-  const categoryOrder = categories.map(c => c.value);
-  const sortedCategories = Object.keys(grouped).sort((a, b) => {
+  const sortedUngroupedCategories = Object.keys(ungroupedByCategory).sort((a, b) => {
     const ai = categoryOrder.indexOf(a);
     const bi = categoryOrder.indexOf(b);
     return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
@@ -265,13 +298,62 @@ function ChecklistSection({ title, subtitle, items, onAdd, onToggle, onDelete, o
 
       {expanded && (
         <div className="gear-section-body">
-          {sortedCategories.map(cat => (
+          {/* Gear pack groups first */}
+          {Object.entries(gearPackGroups).map(([packId, packItems]) => {
+            const packName = packItems[0]?.gearPackName ?? 'Gear Pack';
+            const packPacked = packItems.filter(i => i.packed).length;
+
+            // Sub-group by category within the pack
+            const packByCategory = packItems.reduce<Record<string, Item[]>>((acc, item) => {
+              (acc[item.category] ??= []).push(item);
+              return acc;
+            }, {});
+            const sortedPackCategories = Object.keys(packByCategory).sort((a, b) => {
+              const ai = categoryOrder.indexOf(a);
+              const bi = categoryOrder.indexOf(b);
+              return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+            });
+
+            return (
+              <div key={packId} className="gear-pack-group">
+                <div className="gear-pack-group-header">
+                  <span className="gear-pack-group-icon">⬡</span>
+                  <span className="gear-pack-group-name">{packName}</span>
+                  <span className="gear-pack-group-count">{packPacked}/{packItems.length}</span>
+                </div>
+                <div className="gear-pack-group-items">
+                  {sortedPackCategories.map(cat => (
+                    <div key={cat} className="gear-category-group">
+                      <div className="gear-category-label">
+                        <span className="gear-category-icon">{getCategoryIcon(cat, categories)}</span>
+                        <span>{getCategoryLabel(cat, categories)}</span>
+                      </div>
+                      {packByCategory[cat].map(item => (
+                        <ItemRow
+                          key={item.id}
+                          item={item}
+                          canEdit={canEdit}
+                          categories={categories}
+                          onTogglePacked={onToggle}
+                          onDelete={onDelete}
+                          onUpdate={onUpdate}
+                        />
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Ungrouped items (existing behavior) */}
+          {sortedUngroupedCategories.map(cat => (
             <div key={cat} className="gear-category-group">
               <div className="gear-category-label">
                 <span className="gear-category-icon">{getCategoryIcon(cat, categories)}</span>
                 <span>{getCategoryLabel(cat, categories)}</span>
               </div>
-              {grouped[cat].map(item => (
+              {ungroupedByCategory[cat].map(item => (
                 <ItemRow
                   key={item.id}
                   item={item}
@@ -284,10 +366,11 @@ function ChecklistSection({ title, subtitle, items, onAdd, onToggle, onDelete, o
               ))}
             </div>
           ))}
+
           {totalCount === 0 && (
             <p className="gear-empty">{canEdit ? emptyText : 'No items yet.'}</p>
           )}
-          {canEdit && <AddItemForm categories={categories} placeholder={addPlaceholder} onAdd={onAdd} />}
+          {canEdit && <AddItemForm categories={categories} placeholder={addPlaceholder} onAdd={onAdd} gearPacks={gearPacks} />}
         </div>
       )}
     </div>
@@ -419,15 +502,15 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
 
   // CRUD callbacks — with day prefix when dayTabs
   const makePlanCrud = (ownerType: string, ownerId: string) => ({
-    onAdd: async (name: string, category: string, quantity: number) => {
+    onAdd: async (name: string, category: string, quantity: number, gearPackId?: string | null) => {
       const cat = config.dayTabs ? toDayCategory(activeDay, category) : category;
-      await api.createItem({ name, category: cat, quantity, packed: false, ownerType, ownerId });
+      await api.createItem({ name, category: cat, quantity, packed: false, ownerType, ownerId, gearPackId });
       loadItems();
     },
     onToggle: async (item: Item) => {
       // item may have stripped category — find original
       const realCategory = config.dayTabs ? toDayCategory(activeDay, item.category) : item.category;
-      await api.updateItem(item.id, { name: item.name, category: realCategory, quantity: item.quantity, packed: !item.packed });
+      await api.updateItem(item.id, { name: item.name, category: realCategory, quantity: item.quantity, packed: !item.packed, gearPackId: item.gearPackId });
       loadItems();
     },
     onDelete: async (item: Item) => {
@@ -436,18 +519,18 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
     },
     onUpdate: async (item: Item, name: string, quantity: number, category: string) => {
       const cat = config.dayTabs ? toDayCategory(activeDay, category) : category;
-      await api.updateItem(item.id, { name, category: cat, quantity, packed: item.packed });
+      await api.updateItem(item.id, { name, category: cat, quantity, packed: item.packed, gearPackId: item.gearPackId });
       loadItems();
     },
   });
 
   const makeMemberCrud = (userId: string) => ({
-    onAdd: async (name: string, category: string, quantity: number) => {
-      await api.createItem({ name, category, quantity, packed: false, ownerType: 'user', ownerId: userId, planId });
+    onAdd: async (name: string, category: string, quantity: number, gearPackId?: string | null) => {
+      await api.createItem({ name, category, quantity, packed: false, ownerType: 'user', ownerId: userId, planId, gearPackId });
       loadItems();
     },
     onToggle: async (item: Item) => {
-      await api.updateItem(item.id, { name: item.name, category: item.category, quantity: item.quantity, packed: !item.packed });
+      await api.updateItem(item.id, { name: item.name, category: item.category, quantity: item.quantity, packed: !item.packed, gearPackId: item.gearPackId });
       loadItems();
     },
     onDelete: async (item: Item) => {
@@ -455,10 +538,21 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
       loadItems();
     },
     onUpdate: async (item: Item, name: string, quantity: number, category: string) => {
-      await api.updateItem(item.id, { name, category, quantity, packed: item.packed });
+      await api.updateItem(item.id, { name, category, quantity, packed: item.packed, gearPackId: item.gearPackId });
       loadItems();
     },
   });
+
+  // Derive active gear packs from plan items for the AddItemForm dropdown
+  const activeGearPacks = useMemo(() => {
+    const packs = new Map<string, string>();
+    filteredPlanItems.forEach(item => {
+      if (item.gearPackId && item.gearPackName) {
+        packs.set(item.gearPackId, item.gearPackName);
+      }
+    });
+    return Array.from(packs.entries()).map(([id, name]) => ({ id, name }));
+  }, [filteredPlanItems]);
 
   const handleAddDay = () => {
     const newDay = numDays + 1;
@@ -542,6 +636,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
                 categories={config.categories}
                 addPlaceholder={config.addPlaceholder}
                 emptyText={config.emptyText}
+                gearPacks={config.showGearPacks ? activeGearPacks : undefined}
               />
 
               {!config.planOnly && (
