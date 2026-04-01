@@ -1,6 +1,12 @@
 package com.acme.services.camperservice.features.gearpack.controller
 
+import com.acme.clients.common.Result
+import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.gearpack.dto.ApplyGearPackRequest
+import com.acme.services.camperservice.features.gearpack.mapper.GearPackMapper
+import com.acme.services.camperservice.features.gearpack.params.ApplyGearPackParam
+import com.acme.services.camperservice.features.gearpack.params.GetGearPackParam
+import com.acme.services.camperservice.features.gearpack.params.ListGearPacksParam
 import com.acme.services.camperservice.features.gearpack.service.GearPackService
 import com.acme.services.camperservice.websocket.PlanEventPublisher
 import org.slf4j.LoggerFactory
@@ -19,7 +25,10 @@ class GearPackController(
     @GetMapping
     fun list(@RequestHeader("X-User-Id") userId: UUID): ResponseEntity<Any> {
         logger.info("GET /api/gear-packs")
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = ListGearPacksParam(requestingUserId = userId)
+        return gearPackService.list(param).toResponseEntity { packs ->
+            packs.map { GearPackMapper.toSummaryResponse(it) }
+        }
     }
 
     @GetMapping("/{id}")
@@ -28,7 +37,8 @@ class GearPackController(
         @RequestHeader("X-User-Id") userId: UUID,
     ): ResponseEntity<Any> {
         logger.info("GET /api/gear-packs/{}", id)
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = GetGearPackParam(id = id, requestingUserId = userId)
+        return gearPackService.getById(param).toResponseEntity { GearPackMapper.toDetailResponse(it) }
     }
 
     @PostMapping("/{id}/apply")
@@ -38,6 +48,16 @@ class GearPackController(
         @RequestBody request: ApplyGearPackRequest,
     ): ResponseEntity<Any> {
         logger.info("POST /api/gear-packs/{}/apply", id)
-        return ResponseEntity.status(501).body("Not implemented")
+        val param = ApplyGearPackParam(
+            gearPackId = id,
+            planId = request.planId,
+            groupSize = request.groupSize,
+            requestingUserId = userId,
+        )
+        val result = gearPackService.apply(param)
+        if (result is Result.Success) {
+            eventPublisher.publishUpdate(request.planId, "items", "updated")
+        }
+        return result.toResponseEntity(successStatus = 201) { GearPackMapper.toApplyResponse(it) }
     }
 }
