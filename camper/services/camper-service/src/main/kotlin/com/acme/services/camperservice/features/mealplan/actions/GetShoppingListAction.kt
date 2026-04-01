@@ -4,6 +4,7 @@ import com.acme.clients.common.Result
 import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.clients.mealplanclient.api.GetDaysParam
+import com.acme.clients.mealplanclient.api.GetManualItemsParam
 import com.acme.clients.mealplanclient.api.GetPurchasesParam
 import com.acme.clients.mealplanclient.api.GetRecipesByDayIdParam
 import com.acme.clients.mealplanclient.api.MealPlanClient
@@ -227,11 +228,62 @@ internal class GetShoppingListAction(
                 )
             }
 
-        val allItems = items + orphanedItems
+        // Load manual items
+        val manualItems = when (val result = mealPlanClient.getManualItems(GetManualItemsParam(mealPlan.id))) {
+            is Result.Success -> result.value
+            is Result.Failure -> return Result.Failure(MealPlanError.Invalid("manualItems", result.error.message))
+        }
+
+        val manualItemResponses = manualItems.map { item ->
+            val manualCategory: String
+            val manualIngredientName: String?
+            val ingId = item.ingredientId
+
+            if (ingId != null) {
+                val info = ingredientInfoMap[ingId]
+                    ?: when (val result = ingredientClient.getById(IngredientGetByIdParam(ingId))) {
+                        is Result.Success -> IngredientInfo(
+                            ingredientId = result.value.id,
+                            name = result.value.name,
+                            category = result.value.category,
+                        ).also { ingredientInfoMap[ingId] = it }
+                        is Result.Failure -> null
+                    }
+                manualCategory = info?.category ?: "other"
+                manualIngredientName = info?.name
+            } else {
+                manualCategory = "misc"
+                manualIngredientName = null
+            }
+
+            val status = PurchaseStatus.derive(item.quantity, item.quantityPurchased).name.lowercase()
+
+            ShoppingListItemResponse(
+                ingredientId = item.ingredientId,
+                ingredientName = manualIngredientName,
+                description = item.description,
+                quantityRequired = item.quantity,
+                quantityPurchased = item.quantityPurchased,
+                unit = item.unit,
+                status = status,
+                usedInRecipes = emptyList(),
+                source = "manual",
+                manualItemId = item.id,
+            ) to manualCategory
+        }
+
+        val allItems = items + orphanedItems + manualItemResponses.map { it.first }
+
+        // Build a category lookup for manual items (they may not have ingredientId in ingredientInfoMap)
+        val manualItemCategories = manualItemResponses.associate { (response, category) -> response to category }
 
         // Group by category
         val categories = allItems
-            .groupBy { ingredientInfoMap[it.ingredientId]?.category ?: "other" }
+            .groupBy { item ->
+                manualItemCategories[item]
+                    ?: ingredientInfoMap[item.ingredientId]?.category
+                    ?: "other"
+            }
             .map { (category, categoryItems) ->
                 ShoppingListCategoryResponse(category = category, items = categoryItems)
             }
