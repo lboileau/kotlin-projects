@@ -1,0 +1,107 @@
+.ingredient-search__wrap {
+  position: relative;
+}
+
+.ingredient-search__input {
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  border: 1px solid rgba(168, 139, 91, 0.3);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--charcoal);
+}
+
+.ingredient-search__input:focus {
+  border-color: var(--ember);
+  box-shadow: 0 0 0 2px rgba(244, 164, 96, 0.15);
+}
+
+.ingredient-search__dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(168, 139, 91, 0.2);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.ingredient-search__dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--charcoal);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.ingredient-search__dropdown-item:hover {
+  background: rgba(244, 164, 96, 0.1);
+}
+
+.ingredient-search__dropdown-cat {
+  font-size: 0.7rem;
+  color: var(--charcoal-light);
+  text-transform: capitalize;
+}
+
+.ingredient-search__dropdown-empty {
+  display: block;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-style: italic;
+  color: var(--charcoal-light);
+}
+
+.ingredient-search__selected {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 8px 12px;
+  background: rgba(143, 176, 138, 0.12);
+  border: 1px solid rgba(143, 176, 138, 0.3);
+  border-radius: var(--radius-sm);
+}
+
+.ingredient-search__selected-name {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--charcoal);
+  flex: 1;
+  text-transform: capitalize;
+}
+
+.ingredient-search__selected-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+  cursor: pointer;
+  color: var(--charcoal-light);
+  padding: 0;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.ingredient-search__selected-clear:hover {
+  background: rgba(0, 0, 0, 0.15);
+}

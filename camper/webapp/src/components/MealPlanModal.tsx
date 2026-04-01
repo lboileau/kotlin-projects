@@ -12,13 +12,13 @@ import {
   type MealsByTypeResponse,
 } from '../api/client';
 import { Button } from './ui/Button';
+import { IngredientSearch } from './ui/IngredientSearch';
 import { Modal } from './ui/Modal';
 import './MealPlanModal.css';
+import { UNITS } from '../lib/constants';
 
 type ViewTab = 'overview' | 'recipes' | 'shopping';
 type MealType = keyof MealsByTypeResponse;
-
-const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'] as const;
 
 const MEAL_TYPES: { key: MealType; label: string; icon: string }[] = [
   { key: 'breakfast', label: 'Breakfast', icon: '\u2600' },
@@ -1214,7 +1214,6 @@ function ShoppingListView({
 }: ShoppingListProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [addMode, setAddMode] = useState<'ingredient' | 'freeform'>('ingredient');
-  const [addSearch, setAddSearch] = useState('');
   const [selectedIngredient, setSelectedIngredient] = useState<IngredientResponse | null>(null);
   const [addQuantity, setAddQuantity] = useState('');
   const [addUnit, setAddUnit] = useState('');
@@ -1222,7 +1221,6 @@ function ShoppingListView({
   const [adding, setAdding] = useState(false);
 
   const resetAddForm = () => {
-    setAddSearch('');
     setSelectedIngredient(null);
     setAddQuantity('');
     setAddUnit('');
@@ -1253,10 +1251,6 @@ function ShoppingListView({
   const canSubmit = addMode === 'ingredient'
     ? selectedIngredient && addQuantity && parseFloat(addQuantity) > 0 && addUnit
     : addDescription.trim().length > 0;
-
-  const filteredIngredients = addSearch
-    ? ingredients.filter(i => i.name.toLowerCase().includes(addSearch.toLowerCase())).slice(0, 8)
-    : [];
 
   if (!mealPlan) {
     return (
@@ -1294,47 +1288,16 @@ function ShoppingListView({
 
           {addMode === 'ingredient' ? (
             <div className="mp-shopping-add-ingredient">
-              {selectedIngredient ? (
-                <div className="mp-shopping-add-selected">
-                  <span className="mp-shopping-add-selected-name">{selectedIngredient.name}</span>
-                  <button className="mp-shopping-add-selected-clear" onClick={() => { setSelectedIngredient(null); setAddSearch(''); setAddUnit(''); }}>
-                    <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2,2 L8,8 M8,2 L2,8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
-                  </button>
-                </div>
-              ) : (
-                <div className="mp-shopping-add-search-wrap">
-                  <input
-                    className="mp-shopping-add-search"
-                    value={addSearch}
-                    onChange={e => setAddSearch(e.target.value)}
-                    placeholder="Search ingredients..."
-                    autoFocus
-                  />
-                  {addSearch && filteredIngredients.length > 0 && (
-                    <div className="mp-shopping-add-dropdown">
-                      {filteredIngredients.map(ing => (
-                        <button
-                          key={ing.id}
-                          className="mp-shopping-add-dropdown-item"
-                          onClick={() => {
-                            setSelectedIngredient(ing);
-                            setAddSearch('');
-                            setAddUnit(ing.defaultUnit);
-                          }}
-                        >
-                          <span>{ing.name}</span>
-                          <span className="mp-shopping-add-dropdown-cat">{ing.category}</span>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {addSearch && filteredIngredients.length === 0 && (
-                    <div className="mp-shopping-add-dropdown">
-                      <span className="mp-shopping-add-dropdown-empty">No ingredients found</span>
-                    </div>
-                  )}
-                </div>
-              )}
+              <IngredientSearch
+                ingredients={ingredients}
+                selectedIngredient={selectedIngredient}
+                onSelect={(ing) => {
+                  setSelectedIngredient(ing);
+                  setAddUnit(ing.defaultUnit);
+                }}
+                onClear={() => { setSelectedIngredient(null); setAddUnit(''); }}
+                placeholder="Search ingredients..."
+              />
               <div className="mp-shopping-add-qty-row">
                 <input
                   className="mp-shopping-add-qty"
