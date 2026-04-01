@@ -30,7 +30,7 @@ internal class AnthropicRecipeScraperClient(
         logger.info("Scraping recipe from url={}", param.sourceUrl)
         return try {
             val params = MessageCreateParams.builder()
-                .model(Model.CLAUDE_OPUS_4_6)
+                .model(Model.CLAUDE_SONNET_4_6)
                 .maxTokens(4096L)
                 .system(SYSTEM_PROMPT)
                 .addUserMessage(buildUserMessage(param))
