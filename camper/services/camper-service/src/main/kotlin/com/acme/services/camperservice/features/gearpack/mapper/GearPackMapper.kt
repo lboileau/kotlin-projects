@@ -72,6 +72,7 @@ object GearPackMapper {
         category = item.category,
         quantity = item.quantity,
         packed = item.packed,
+        gearPackId = item.gearPackId,
         createdAt = item.createdAt,
         updatedAt = item.updatedAt,
     )

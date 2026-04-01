@@ -10,6 +10,7 @@ data class CreateItemParam(
     val ownerType: String,
     val ownerId: UUID,
     val planId: UUID? = null,
+    val gearPackId: UUID? = null,
     val requestingUserId: UUID,
 )
 
@@ -23,6 +24,7 @@ data class UpdateItemParam(
     val category: String,
     val quantity: Int,
     val packed: Boolean,
+    val gearPackId: UUID? = null,
     val requestingUserId: UUID,
 )
 

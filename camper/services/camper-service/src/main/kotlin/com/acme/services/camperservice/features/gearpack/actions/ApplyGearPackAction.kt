@@ -62,6 +62,7 @@ internal class ApplyGearPackAction(
                     category = packItem.category,
                     quantity = finalQuantity,
                     packed = false,
+                    gearPackId = param.gearPackId,
                 )
             )
 
@@ -76,6 +77,7 @@ internal class ApplyGearPackAction(
                             category = item.category,
                             quantity = item.quantity,
                             packed = item.packed,
+                            gearPackId = item.gearPackId,
                             createdAt = item.createdAt,
                             updatedAt = item.updatedAt,
                         )
