@@ -105,3 +105,98 @@
 .ingredient-search__selected-clear:hover {
   background: rgba(0, 0, 0, 0.15);
 }
+
+.ingredient-search__dropdown-create {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ember);
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(168, 139, 91, 0.15);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
+}
+
+.ingredient-search__dropdown-create:hover {
+  background: rgba(244, 164, 96, 0.1);
+}
+
+.ingredient-search__create-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(168, 139, 91, 0.25);
+  border-radius: var(--radius-sm);
+}
+
+.ingredient-search__create-row {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.ingredient-search__create-select {
+  flex: 1;
+  padding: 6px 8px;
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  border: 1px solid rgba(168, 139, 91, 0.3);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--charcoal);
+  text-transform: capitalize;
+}
+
+.ingredient-search__create-error {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--rose);
+}
+
+.ingredient-search__create-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+}
+
+.ingredient-search__create-cancel,
+.ingredient-search__create-save {
+  padding: 5px 12px;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ingredient-search__create-cancel {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--charcoal-light);
+}
+
+.ingredient-search__create-cancel:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.ingredient-search__create-save {
+  background: var(--ember);
+  color: white;
+  font-weight: 600;
+}
+
+.ingredient-search__create-save:hover {
+  background: var(--flame);
+}
+
+.ingredient-search__create-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

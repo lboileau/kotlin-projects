@@ -466,6 +466,11 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
               onAddManualItem={handleAddManualItem}
               onRemoveManualItem={handleRemoveManualItem}
               ingredients={ingredients}
+              onCreateIngredient={async (data) => {
+                const created = await api.createIngredient(data);
+                setIngredients(prev => [...prev, created]);
+                return created;
+              }}
             />
           )}
         </div>
@@ -1114,6 +1119,7 @@ interface ShoppingListProps {
   onAddManualItem: (data: { ingredientId?: string; description?: string; quantity?: number; unit?: string }) => void;
   onRemoveManualItem: (itemId: string) => void;
   ingredients: IngredientResponse[];
+  onCreateIngredient: (data: { name: string; category: string; defaultUnit: string }) => Promise<IngredientResponse>;
 }
 
 // Merge items with same ingredientId but different units into a single display row
@@ -1210,7 +1216,7 @@ function statusLabel(status: string): string {
 
 function ShoppingListView({
   shoppingList, mealPlan, onTogglePurchase, onResetPurchases,
-  resetConfirm, setResetConfirm, onAddManualItem, onRemoveManualItem, ingredients,
+  resetConfirm, setResetConfirm, onAddManualItem, onRemoveManualItem, ingredients, onCreateIngredient,
 }: ShoppingListProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [addMode, setAddMode] = useState<'ingredient' | 'freeform'>('ingredient');
@@ -1297,6 +1303,7 @@ function ShoppingListView({
                 }}
                 onClear={() => { setSelectedIngredient(null); setAddUnit(''); }}
                 placeholder="Search ingredients..."
+                onCreateIngredient={onCreateIngredient}
               />
               <div className="mp-shopping-add-qty-row">
                 <input
