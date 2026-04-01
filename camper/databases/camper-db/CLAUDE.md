@@ -155,12 +155,32 @@ CREATE TABLE itinerary_events (
     description    TEXT,
     details        TEXT,
     event_at       TIMESTAMPTZ  NOT NULL,
+    category       VARCHAR(50)  NOT NULL    DEFAULT 'other',
+    estimated_cost DECIMAL(10,2),
+    location       VARCHAR(500),
+    event_end_at   TIMESTAMPTZ,
     created_at     TIMESTAMPTZ  NOT NULL    DEFAULT now(),
     updated_at     TIMESTAMPTZ  NOT NULL    DEFAULT now(),
 
-    CONSTRAINT fk_itinerary_events_itinerary FOREIGN KEY (itinerary_id) REFERENCES itineraries (id) ON DELETE CASCADE
+    CONSTRAINT fk_itinerary_events_itinerary FOREIGN KEY (itinerary_id) REFERENCES itineraries (id) ON DELETE CASCADE,
+    CONSTRAINT ck_itinerary_events_category CHECK (category IN ('travel', 'accommodation', 'activity', 'meal', 'other'))
 );
 CREATE INDEX idx_itinerary_events_itinerary_id ON itinerary_events (itinerary_id);
+```
+
+### itinerary_event_links
+
+```sql
+CREATE TABLE itinerary_event_links (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id   UUID        NOT NULL,
+    url        TEXT        NOT NULL,
+    label      VARCHAR(255),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT fk_event_links_event FOREIGN KEY (event_id) REFERENCES itinerary_events (id) ON DELETE CASCADE
+);
+CREATE INDEX idx_event_links_event_id ON itinerary_event_links (event_id);
 ```
 
 ### assignments
@@ -414,6 +434,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_
 - `items.user_id` → `users.id` (FK, CASCADE on delete)
 - `itineraries.plan_id` → `plans.id` (FK, CASCADE on delete, UNIQUE — 1:1 with plans)
 - `itinerary_events.itinerary_id` → `itineraries.id` (FK, CASCADE on delete)
+- `itinerary_event_links.event_id` → `itinerary_events.id` (FK, CASCADE on delete)
 - `assignments.plan_id` → `plans.id` (FK, CASCADE on delete)
 - `assignments.owner_id` → `users.id` (FK; ownership transfers to plan owner on user deletion via trigger)
 - `assignment_members.assignment_id` → `assignments.id` (FK, CASCADE on delete)
@@ -452,6 +473,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_
 - Each plan has at most one itinerary (enforced by `uq_itineraries_plan_id`).
 - Deleting a plan cascades to itineraries, which cascades to itinerary_events.
 - `description` and `details` in itinerary_events are nullable.
+- Itinerary event category must be one of: travel, accommodation, activity, meal, other (enforced by `ck_itinerary_events_category`). Defaults to 'other'.
+- `estimated_cost`, `location`, and `event_end_at` in itinerary_events are nullable.
+- Deleting an itinerary event cascades to its itinerary_event_links.
+- `label` in itinerary_event_links is nullable.
 - Assignment type must be 'tent' or 'canoe' (enforced by `ck_assignments_type`).
 - Assignment max_occupancy must be > 0 (enforced by `ck_assignments_max_occupancy`).
 - Assignment names are unique per plan and type (enforced by `uq_assignments_plan_id_name_type`).
