@@ -300,13 +300,16 @@ export interface ShoppingListCategoryResponse {
 }
 
 export interface ShoppingListItemResponse {
-  ingredientId: string;
-  ingredientName: string;
+  ingredientId: string | null;
+  ingredientName: string | null;
+  description: string | null;
   quantityRequired: number;
   quantityPurchased: number;
-  unit: string;
+  unit: string | null;
   status: string;
   usedInRecipes: string[];
+  source: string;
+  manualItemId: string | null;
 }
 
 export interface CreateMealPlanRequest {
@@ -329,9 +332,29 @@ export interface AddRecipeToMealRequest {
 }
 
 export interface UpdatePurchaseRequest {
-  ingredientId: string;
-  unit: string;
+  ingredientId?: string;
+  manualItemId?: string;
+  unit?: string;
   quantityPurchased: number;
+}
+
+export interface AddManualItemRequest {
+  ingredientId?: string;
+  description?: string;
+  quantity?: number;
+  unit?: string;
+}
+
+export interface ManualItemResponse {
+  id: string;
+  ingredientId: string | null;
+  ingredientName: string | null;
+  description: string | null;
+  quantity: number;
+  unit: string | null;
+  quantityPurchased: number;
+  status: string;
+  category: string;
 }
 
 export interface SaveAsTemplateRequest {
@@ -782,6 +805,19 @@ export const api = {
 
   resetPurchases(mealPlanId: string): Promise<void> {
     return request(`/api/meal-plans/${mealPlanId}/shopping-list`, {
+      method: 'DELETE',
+    });
+  },
+
+  addManualItem(mealPlanId: string, data: AddManualItemRequest): Promise<ManualItemResponse> {
+    return request(`/api/meal-plans/${mealPlanId}/shopping-list/items`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  removeManualItem(mealPlanId: string, itemId: string): Promise<void> {
+    return request(`/api/meal-plans/${mealPlanId}/shopping-list/items/${itemId}`, {
       method: 'DELETE',
     });
   },

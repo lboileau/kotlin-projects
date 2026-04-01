@@ -8,6 +8,7 @@ import {
   type RecipeDetailResponse,
   type ShoppingListResponse,
   type ShoppingListItemResponse,
+  type IngredientResponse,
   type MealsByTypeResponse,
 } from '../api/client';
 import { Button } from './ui/Button';
@@ -16,6 +17,8 @@ import './MealPlanModal.css';
 
 type ViewTab = 'overview' | 'recipes' | 'shopping';
 type MealType = keyof MealsByTypeResponse;
+
+const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'] as const;
 
 const MEAL_TYPES: { key: MealType; label: string; icon: string }[] = [
   { key: 'breakfast', label: 'Breakfast', icon: '\u2600' },
@@ -49,6 +52,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   // Shopping List state
   const [shoppingList, setShoppingList] = useState<ShoppingListResponse | null>(null);
   const [resetConfirm, setResetConfirm] = useState(false);
+  const [ingredients, setIngredients] = useState<IngredientResponse[]>([]);
 
   // Create form state
   const [createName, setCreateName] = useState('');
@@ -109,14 +113,24 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
     }
   }, []);
 
+  const loadIngredients = useCallback(async () => {
+    try {
+      const data = await api.getIngredients();
+      setIngredients(data);
+    } catch {
+      setIngredients([]);
+    }
+  }, []);
+
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
       loadMealPlan();
       loadRecipes();
       loadTemplates();
+      loadIngredients();
     }
-  }, [isOpen, loadMealPlan, loadRecipes, loadTemplates]);
+  }, [isOpen, loadMealPlan, loadRecipes, loadTemplates, loadIngredients]);
 
   useEffect(() => {
     if (activeView === 'shopping' && mealPlan) {
@@ -225,18 +239,32 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
     } catch { /* */ }
   };
 
-  const handleTogglePurchase = async (entries: { ingredientId: string; unit: string; quantityRequired: number; quantityPurchased: number }[]) => {
+  const handleTogglePurchase = async (entries: { ingredientId: string | null; manualItemId: string | null; unit: string | null; quantityRequired: number; quantityPurchased: number }[]) => {
     if (!mealPlan) return;
-    // If all entries are fully purchased, unmark all; otherwise mark all as purchased
     const allDone = entries.every(e => e.quantityPurchased >= e.quantityRequired);
     try {
       await Promise.all(entries.map(e =>
         api.updatePurchase(mealPlan.id, {
-          ingredientId: e.ingredientId,
-          unit: e.unit,
+          ...(e.manualItemId ? { manualItemId: e.manualItemId } : { ingredientId: e.ingredientId!, unit: e.unit! }),
           quantityPurchased: allDone ? 0 : e.quantityRequired,
         })
       ));
+      await loadShoppingList();
+    } catch { /* */ }
+  };
+
+  const handleAddManualItem = async (data: { ingredientId?: string; description?: string; quantity?: number; unit?: string }) => {
+    if (!mealPlan) return;
+    try {
+      await api.addManualItem(mealPlan.id, data);
+      await loadShoppingList();
+    } catch { /* */ }
+  };
+
+  const handleRemoveManualItem = async (itemId: string) => {
+    if (!mealPlan) return;
+    try {
+      await api.removeManualItem(mealPlan.id, itemId);
       await loadShoppingList();
     } catch { /* */ }
   };
@@ -435,6 +463,9 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
               onResetPurchases={handleResetPurchases}
               resetConfirm={resetConfirm}
               setResetConfirm={setResetConfirm}
+              onAddManualItem={handleAddManualItem}
+              onRemoveManualItem={handleRemoveManualItem}
+              ingredients={ingredients}
             />
           )}
         </div>
@@ -1076,19 +1107,25 @@ function RecipeBookView({
 interface ShoppingListProps {
   shoppingList: ShoppingListResponse | null;
   mealPlan: MealPlanDetailResponse | null;
-  onTogglePurchase: (entries: { ingredientId: string; unit: string; quantityRequired: number; quantityPurchased: number }[]) => void;
+  onTogglePurchase: (entries: { ingredientId: string | null; manualItemId: string | null; unit: string | null; quantityRequired: number; quantityPurchased: number }[]) => void;
   onResetPurchases: () => void;
   resetConfirm: boolean;
   setResetConfirm: (v: boolean) => void;
+  onAddManualItem: (data: { ingredientId?: string; description?: string; quantity?: number; unit?: string }) => void;
+  onRemoveManualItem: (itemId: string) => void;
+  ingredients: IngredientResponse[];
 }
 
 // Merge items with same ingredientId but different units into a single display row
 interface MergedShoppingItem {
-  ingredientId: string;
-  ingredientName: string;
-  entries: { unit: string; quantityRequired: number; quantityPurchased: number; status: string }[];
+  ingredientId: string | null;
+  ingredientName: string | null;
+  description: string | null;
+  entries: { unit: string | null; quantityRequired: number; quantityPurchased: number; status: string; manualItemId: string | null }[];
   overallStatus: string;
   usedInRecipes: string[];
+  source: string;
+  manualItemId: string | null;
 }
 
 function mergeItemsByIngredient(items: ShoppingListItemResponse[]): MergedShoppingItem[] {
@@ -1098,29 +1135,39 @@ function mergeItemsByIngredient(items: ShoppingListItemResponse[]): MergedShoppi
     const isOrphan = item.quantityRequired === 0 && item.quantityPurchased === 0;
     if (isOrphan) continue;
 
-    const existing = grouped.get(item.ingredientId);
-    if (existing) {
+    // Manual items are never merged — use unique key
+    const key = item.manualItemId
+      ? `manual-${item.manualItemId}`
+      : item.ingredientId!;
+
+    const existing = grouped.get(key);
+    if (existing && !item.manualItemId) {
       existing.entries.push({
         unit: item.unit,
         quantityRequired: item.quantityRequired,
         quantityPurchased: item.quantityPurchased,
         status: item.status,
+        manualItemId: item.manualItemId,
       });
       for (const r of item.usedInRecipes) {
         if (!existing.usedInRecipes.includes(r)) existing.usedInRecipes.push(r);
       }
     } else {
-      grouped.set(item.ingredientId, {
+      grouped.set(key, {
         ingredientId: item.ingredientId,
         ingredientName: item.ingredientName,
+        description: item.description,
         entries: [{
           unit: item.unit,
           quantityRequired: item.quantityRequired,
           quantityPurchased: item.quantityPurchased,
           status: item.status,
+          manualItemId: item.manualItemId,
         }],
         overallStatus: item.status,
         usedInRecipes: [...item.usedInRecipes],
+        source: item.source,
+        manualItemId: item.manualItemId,
       });
     }
   }
@@ -1163,8 +1210,54 @@ function statusLabel(status: string): string {
 
 function ShoppingListView({
   shoppingList, mealPlan, onTogglePurchase, onResetPurchases,
-  resetConfirm, setResetConfirm,
+  resetConfirm, setResetConfirm, onAddManualItem, onRemoveManualItem, ingredients,
 }: ShoppingListProps) {
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [addMode, setAddMode] = useState<'ingredient' | 'freeform'>('ingredient');
+  const [addSearch, setAddSearch] = useState('');
+  const [selectedIngredient, setSelectedIngredient] = useState<IngredientResponse | null>(null);
+  const [addQuantity, setAddQuantity] = useState('');
+  const [addUnit, setAddUnit] = useState('');
+  const [addDescription, setAddDescription] = useState('');
+  const [adding, setAdding] = useState(false);
+
+  const resetAddForm = () => {
+    setAddSearch('');
+    setSelectedIngredient(null);
+    setAddQuantity('');
+    setAddUnit('');
+    setAddDescription('');
+  };
+
+  const handleSubmit = async () => {
+    setAdding(true);
+    try {
+      if (addMode === 'ingredient' && selectedIngredient) {
+        await onAddManualItem({
+          ingredientId: selectedIngredient.id,
+          quantity: parseFloat(addQuantity),
+          unit: addUnit,
+        });
+      } else if (addMode === 'freeform' && addDescription.trim()) {
+        await onAddManualItem({
+          description: addDescription.trim(),
+        });
+      }
+      resetAddForm();
+      setShowAddForm(false);
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const canSubmit = addMode === 'ingredient'
+    ? selectedIngredient && addQuantity && parseFloat(addQuantity) > 0 && addUnit
+    : addDescription.trim().length > 0;
+
+  const filteredIngredients = addSearch
+    ? ingredients.filter(i => i.name.toLowerCase().includes(addSearch.toLowerCase())).slice(0, 8)
+    : [];
+
   if (!mealPlan) {
     return (
       <div className="mp-shopping-empty">
@@ -1173,90 +1266,224 @@ function ShoppingListView({
     );
   }
 
-  if (!shoppingList || shoppingList.totalItems === 0) {
-    return (
-      <div className="mp-shopping-empty">
-        <p>Add recipes to your meal plan to generate a shopping list.</p>
-      </div>
-    );
-  }
+  const hasItems = shoppingList && shoppingList.totalItems > 0;
 
-  const progressPct = shoppingList.totalItems > 0
+  const progressPct = shoppingList && shoppingList.totalItems > 0
     ? (shoppingList.fullyPurchasedCount / shoppingList.totalItems) * 100
     : 0;
 
   return (
     <div className="mp-shopping">
-      {/* Progress */}
-      <div className="mp-shopping-progress">
-        <div className="mp-shopping-progress-text">
-          {shoppingList.fullyPurchasedCount} of {shoppingList.totalItems} purchased
-        </div>
-        <div className="mp-shopping-progress-bar">
-          <div className="mp-shopping-progress-fill" style={{ width: `${progressPct}%` }} />
-        </div>
-      </div>
+      {/* Add item button / form */}
+      {showAddForm ? (
+        <div className="mp-shopping-add-form">
+          <div className="mp-shopping-add-mode-toggle">
+            <button
+              className={`mp-shopping-add-mode-btn ${addMode === 'ingredient' ? 'mp-shopping-add-mode-btn--active' : ''}`}
+              onClick={() => { setAddMode('ingredient'); resetAddForm(); }}
+            >
+              Ingredient
+            </button>
+            <button
+              className={`mp-shopping-add-mode-btn ${addMode === 'freeform' ? 'mp-shopping-add-mode-btn--active' : ''}`}
+              onClick={() => { setAddMode('freeform'); resetAddForm(); }}
+            >
+              Free-form
+            </button>
+          </div>
 
-      {/* Categories */}
-      {shoppingList.categories.map(cat => {
-        const mergedItems = mergeItemsByIngredient(cat.items);
-        return (
-          <div key={cat.category} className="mp-shopping-category">
-            <h4 className="mp-shopping-category-title">{cat.category}</h4>
-            {mergedItems.map(item => {
-              const isDone = item.overallStatus === 'done';
-              const isNoLongerNeeded = item.overallStatus === 'no_longer_needed';
-
-              return (
-                <div key={item.ingredientId} className={`mp-shopping-item ${isDone ? 'mp-shopping-item--done' : ''} ${isNoLongerNeeded ? 'mp-shopping-item--done' : ''}`}>
-                  <button
-                    className={`mp-shopping-check ${isDone ? 'mp-shopping-check--checked' : ''}`}
-                    onClick={() => onTogglePurchase(item.entries.map(e => ({
-                      ingredientId: item.ingredientId,
-                      unit: e.unit,
-                      quantityRequired: e.quantityRequired,
-                      quantityPurchased: e.quantityPurchased,
-                    })))}
-                  >
-                    {isDone && (
-                      <svg width="12" height="12" viewBox="0 0 12 12">
-                        <path d="M2,6 L5,9 L10,3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      </svg>
-                    )}
+          {addMode === 'ingredient' ? (
+            <div className="mp-shopping-add-ingredient">
+              {selectedIngredient ? (
+                <div className="mp-shopping-add-selected">
+                  <span className="mp-shopping-add-selected-name">{selectedIngredient.name}</span>
+                  <button className="mp-shopping-add-selected-clear" onClick={() => { setSelectedIngredient(null); setAddSearch(''); setAddUnit(''); }}>
+                    <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2,2 L8,8 M8,2 L2,8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" /></svg>
                   </button>
-                  <span className={`mp-shopping-name ${isNoLongerNeeded ? 'mp-shopping-name--struck' : ''}`}>{item.ingredientName}</span>
-                  <span className="mp-shopping-qty">
-                    {item.entries.map((e, i) => (
-                      <span key={e.unit}>
-                        {i > 0 && ' + '}
-                        {fmt(e.quantityPurchased)}/{fmt(e.quantityRequired)} {e.unit}
-                      </span>
-                    ))}
-                  </span>
-                  <span className={`mp-shopping-status ${statusClass(item.overallStatus)}`}>
-                    {statusLabel(item.overallStatus)}
-                  </span>
                 </div>
-              );
-            })}
-          </div>
-        );
-      })}
+              ) : (
+                <div className="mp-shopping-add-search-wrap">
+                  <input
+                    className="mp-shopping-add-search"
+                    value={addSearch}
+                    onChange={e => setAddSearch(e.target.value)}
+                    placeholder="Search ingredients..."
+                    autoFocus
+                  />
+                  {addSearch && filteredIngredients.length > 0 && (
+                    <div className="mp-shopping-add-dropdown">
+                      {filteredIngredients.map(ing => (
+                        <button
+                          key={ing.id}
+                          className="mp-shopping-add-dropdown-item"
+                          onClick={() => {
+                            setSelectedIngredient(ing);
+                            setAddSearch('');
+                            setAddUnit(ing.defaultUnit);
+                          }}
+                        >
+                          <span>{ing.name}</span>
+                          <span className="mp-shopping-add-dropdown-cat">{ing.category}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {addSearch && filteredIngredients.length === 0 && (
+                    <div className="mp-shopping-add-dropdown">
+                      <span className="mp-shopping-add-dropdown-empty">No ingredients found</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="mp-shopping-add-qty-row">
+                <input
+                  className="mp-shopping-add-qty"
+                  type="number"
+                  min="0.01"
+                  step="any"
+                  value={addQuantity}
+                  onChange={e => setAddQuantity(e.target.value)}
+                  placeholder="Qty"
+                />
+                <select
+                  className="mp-shopping-add-unit"
+                  value={addUnit}
+                  onChange={e => setAddUnit(e.target.value)}
+                >
+                  <option value="">Unit...</option>
+                  {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
+              </div>
+            </div>
+          ) : (
+            <input
+              className="mp-shopping-add-desc"
+              value={addDescription}
+              onChange={e => setAddDescription(e.target.value)}
+              placeholder="e.g. paper plates, trash bags..."
+              autoFocus
+              onKeyDown={e => { if (e.key === 'Enter' && canSubmit) handleSubmit(); }}
+            />
+          )}
 
-      {/* Reset */}
-      <div className="mp-shopping-reset">
-        {resetConfirm ? (
-          <div className="mp-reset-confirm">
-            <span>Reset all purchases?</span>
-            <Button variant="danger" className="mp-reset-yes" onClick={onResetPurchases}>Yes, Reset</Button>
-            <Button variant="secondary" className="mp-reset-no" onClick={() => setResetConfirm(false)}>Cancel</Button>
+          <div className="mp-shopping-add-actions">
+            <Button onClick={handleSubmit} disabled={!canSubmit || adding}>
+              {adding ? 'Adding...' : 'Add Item'}
+            </Button>
+            <Button variant="secondary" onClick={() => { setShowAddForm(false); resetAddForm(); }}>
+              Cancel
+            </Button>
           </div>
-        ) : (
-          <Button variant="secondary" className="mp-reset-btn" onClick={() => setResetConfirm(true)}>
-            Reset All Purchases
-          </Button>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="mp-shopping-add-trigger">
+          <button className="mp-shopping-add-btn" onClick={() => setShowAddForm(true)}>
+            + Add Item
+          </button>
+        </div>
+      )}
+
+      {hasItems && (
+        <>
+          {/* Progress */}
+          <div className="mp-shopping-progress">
+            <div className="mp-shopping-progress-text">
+              {shoppingList.fullyPurchasedCount} of {shoppingList.totalItems} purchased
+            </div>
+            <div className="mp-shopping-progress-bar">
+              <div className="mp-shopping-progress-fill" style={{ width: `${progressPct}%` }} />
+            </div>
+          </div>
+
+          {/* Categories */}
+          {shoppingList.categories.map(cat => {
+            const mergedItems = mergeItemsByIngredient(cat.items);
+            return (
+              <div key={cat.category} className="mp-shopping-category">
+                <h4 className="mp-shopping-category-title">{cat.category}</h4>
+                {mergedItems.map(item => {
+                  const isDone = item.overallStatus === 'done';
+                  const isNoLongerNeeded = item.overallStatus === 'no_longer_needed';
+                  const isManual = item.source === 'manual';
+                  const itemKey = item.manualItemId ?? item.ingredientId ?? item.description ?? '';
+                  const displayName = item.ingredientName ?? item.description ?? '';
+
+                  return (
+                    <div key={itemKey} className={`mp-shopping-item ${isDone ? 'mp-shopping-item--done' : ''} ${isNoLongerNeeded ? 'mp-shopping-item--done' : ''}`}>
+                      <button
+                        className={`mp-shopping-check ${isDone ? 'mp-shopping-check--checked' : ''}`}
+                        onClick={() => onTogglePurchase(item.entries.map(e => ({
+                          ingredientId: item.ingredientId,
+                          manualItemId: e.manualItemId,
+                          unit: e.unit,
+                          quantityRequired: e.quantityRequired,
+                          quantityPurchased: e.quantityPurchased,
+                        })))}
+                      >
+                        {isDone && (
+                          <svg width="12" height="12" viewBox="0 0 12 12">
+                            <path d="M2,6 L5,9 L10,3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        )}
+                      </button>
+                      <span className={`mp-shopping-name ${isNoLongerNeeded ? 'mp-shopping-name--struck' : ''}`}>
+                        {displayName}
+                        {isManual && <span className="mp-shopping-manual-badge">manual</span>}
+                      </span>
+                      <span className="mp-shopping-qty">
+                        {item.entries.map((e, i) => (
+                          <span key={e.unit ?? 'no-unit'}>
+                            {i > 0 && ' + '}
+                            {e.unit
+                              ? `${fmt(e.quantityPurchased)}/${fmt(e.quantityRequired)} ${e.unit}`
+                              : `${fmt(e.quantityPurchased)}/${fmt(e.quantityRequired)}`
+                            }
+                          </span>
+                        ))}
+                      </span>
+                      <span className={`mp-shopping-status ${statusClass(item.overallStatus)}`}>
+                        {statusLabel(item.overallStatus)}
+                      </span>
+                      {isManual && item.manualItemId && (
+                        <button
+                          className="mp-shopping-remove"
+                          onClick={() => onRemoveManualItem(item.manualItemId!)}
+                          title="Remove item"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 12 12">
+                            <path d="M3,3 L9,9 M9,3 L3,9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
+
+          {/* Reset */}
+          <div className="mp-shopping-reset">
+            {resetConfirm ? (
+              <div className="mp-reset-confirm">
+                <span>Reset all purchases?</span>
+                <Button variant="danger" className="mp-reset-yes" onClick={onResetPurchases}>Yes, Reset</Button>
+                <Button variant="secondary" className="mp-reset-no" onClick={() => setResetConfirm(false)}>Cancel</Button>
+              </div>
+            ) : (
+              <Button variant="secondary" className="mp-reset-btn" onClick={() => setResetConfirm(true)}>
+                Reset All Purchases
+              </Button>
+            )}
+          </div>
+        </>
+      )}
+
+      {!hasItems && !showAddForm && (
+        <div className="mp-shopping-empty" style={{ minHeight: 0 }}>
+          <p>Add recipes to your meal plan or add items manually.</p>
+        </div>
+      )}
     </div>
   );
 }
