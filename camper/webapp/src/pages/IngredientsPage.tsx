@@ -9,8 +9,7 @@ import { AppHeader } from '../components/AppHeader';
 import './IngredientsPage.css';
 import './RecipesPage.css';
 import '../components/Modal.css';
-
-const UNITS = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'pieces', 'whole', 'bunch', 'can', 'clove', 'pinch', 'slice', 'sprig'] as const;
+import { UNITS } from '../lib/constants';
 const CATEGORIES = ['produce', 'dairy', 'meat', 'seafood', 'pantry', 'spice', 'condiment', 'frozen', 'bakery', 'other'] as const;
 
 export function IngredientsPage() {
