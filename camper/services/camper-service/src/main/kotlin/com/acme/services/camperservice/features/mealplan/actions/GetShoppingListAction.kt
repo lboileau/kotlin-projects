@@ -171,11 +171,14 @@ internal class GetShoppingListAction(
             ShoppingListItemResponse(
                 ingredientId = row.ingredientId,
                 ingredientName = row.ingredientName,
+                description = null,
                 quantityRequired = row.quantityRequired,
                 quantityPurchased = quantityPurchased,
                 unit = row.unit,
                 status = status,
                 usedInRecipes = row.usedInRecipes,
+                source = "recipe",
+                manualItemId = null,
             )
         }
 
@@ -213,11 +216,14 @@ internal class GetShoppingListAction(
                 ShoppingListItemResponse(
                     ingredientId = purchase.ingredientId,
                     ingredientName = ingredientInfo.name,
+                    description = null,
                     quantityRequired = BigDecimal.ZERO,
                     quantityPurchased = purchase.quantityPurchased,
                     unit = purchase.unit,
                     status = PurchaseStatus.NO_LONGER_NEEDED.name.lowercase(),
                     usedInRecipes = emptyList(),
+                    source = "recipe",
+                    manualItemId = null,
                 )
             }
 

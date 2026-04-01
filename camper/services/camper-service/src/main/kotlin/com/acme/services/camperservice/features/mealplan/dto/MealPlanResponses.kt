@@ -79,13 +79,28 @@ data class ShoppingListCategoryResponse(
 )
 
 data class ShoppingListItemResponse(
-    val ingredientId: UUID,
-    val ingredientName: String,
+    val ingredientId: UUID?,
+    val ingredientName: String?,
+    val description: String?,
     val quantityRequired: BigDecimal,
     val quantityPurchased: BigDecimal,
-    val unit: String,
+    val unit: String?,
     val status: String,
-    val usedInRecipes: List<String>
+    val usedInRecipes: List<String>,
+    val source: String,
+    val manualItemId: UUID?,
+)
+
+data class ManualItemResponse(
+    val id: UUID,
+    val ingredientId: UUID?,
+    val ingredientName: String?,
+    val description: String?,
+    val quantity: BigDecimal,
+    val unit: String?,
+    val quantityPurchased: BigDecimal,
+    val status: String,
+    val category: String,
 )
 
 data class ShoppingListPurchaseResponse(

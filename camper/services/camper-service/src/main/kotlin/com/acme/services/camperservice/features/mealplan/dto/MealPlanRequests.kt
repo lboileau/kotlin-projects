@@ -36,7 +36,15 @@ data class SaveAsTemplateRequest(
 )
 
 data class UpdatePurchaseRequest(
-    val ingredientId: UUID,
-    val unit: String,
-    val quantityPurchased: BigDecimal
+    val ingredientId: UUID? = null,
+    val manualItemId: UUID? = null,
+    val unit: String? = null,
+    val quantityPurchased: BigDecimal,
+)
+
+data class AddManualItemRequest(
+    val ingredientId: UUID? = null,
+    val description: String? = null,
+    val quantity: BigDecimal? = null,
+    val unit: String? = null,
 )

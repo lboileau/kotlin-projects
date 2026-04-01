@@ -1210,6 +1210,7 @@ class MealPlanServiceTest {
                 mealPlanId = mealPlan.id,
                 userId = userId,
                 ingredientId = ingredientId,
+                manualItemId = null,
                 unit = "g",
                 quantityPurchased = BigDecimal("500"),
             ))
@@ -1232,6 +1233,7 @@ class MealPlanServiceTest {
                 mealPlanId = mealPlan.id,
                 userId = userId,
                 ingredientId = ingredientId,
+                manualItemId = null,
                 unit = "g",
                 quantityPurchased = BigDecimal("500"),
             ))
@@ -1241,6 +1243,7 @@ class MealPlanServiceTest {
                 mealPlanId = mealPlan.id,
                 userId = userId,
                 ingredientId = ingredientId,
+                manualItemId = null,
                 unit = "g",
                 quantityPurchased = BigDecimal("750"),
             ))
@@ -1255,6 +1258,7 @@ class MealPlanServiceTest {
                 mealPlanId = UUID.randomUUID(),
                 userId = userId,
                 ingredientId = UUID.randomUUID(),
+                manualItemId = null,
                 unit = "g",
                 quantityPurchased = BigDecimal("500"),
             ))
@@ -1271,6 +1275,7 @@ class MealPlanServiceTest {
                 mealPlanId = mealPlan.id,
                 userId = userId,
                 ingredientId = UUID.randomUUID(),
+                manualItemId = null,
                 unit = "g",
                 quantityPurchased = BigDecimal("-1"),
             ))
