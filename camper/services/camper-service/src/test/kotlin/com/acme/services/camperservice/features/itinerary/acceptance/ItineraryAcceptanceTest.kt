@@ -138,7 +138,12 @@ class ItineraryAcceptanceTest {
                 title = "Morning Hike",
                 description = "Trail through the forest",
                 details = "Bring water and snacks",
-                eventAt = eventAt
+                eventAt = eventAt,
+                category = "activity",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val response = restTemplate.exchange(
@@ -163,7 +168,12 @@ class ItineraryAcceptanceTest {
                 title = "First Event",
                 description = null,
                 details = null,
-                eventAt = eventAt
+                eventAt = eventAt,
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val response = restTemplate.exchange(
@@ -191,7 +201,12 @@ class ItineraryAcceptanceTest {
                 title = "",
                 description = null,
                 details = null,
-                eventAt = Instant.now().plus(1, ChronoUnit.DAYS)
+                eventAt = Instant.now().plus(1, ChronoUnit.DAYS),
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val response = restTemplate.exchange(
@@ -210,7 +225,12 @@ class ItineraryAcceptanceTest {
                 title = "Event",
                 description = null,
                 details = null,
-                eventAt = Instant.now().plus(1, ChronoUnit.DAYS)
+                eventAt = Instant.now().plus(1, ChronoUnit.DAYS),
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val response = restTemplate.exchange(
@@ -242,7 +262,12 @@ class ItineraryAcceptanceTest {
                 title = "New Title",
                 description = "Updated description",
                 details = "Updated details",
-                eventAt = newEventAt
+                eventAt = newEventAt,
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val response = restTemplate.exchange(
@@ -267,7 +292,12 @@ class ItineraryAcceptanceTest {
                 title = "Nope",
                 description = null,
                 details = null,
-                eventAt = Instant.now().plus(1, ChronoUnit.DAYS)
+                eventAt = Instant.now().plus(1, ChronoUnit.DAYS),
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val response = restTemplate.exchange(
@@ -293,7 +323,12 @@ class ItineraryAcceptanceTest {
                 title = "",
                 description = null,
                 details = null,
-                eventAt = Instant.now().plus(1, ChronoUnit.DAYS)
+                eventAt = Instant.now().plus(1, ChronoUnit.DAYS),
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val response = restTemplate.exchange(
@@ -353,9 +388,9 @@ class ItineraryAcceptanceTest {
             val event2At = Instant.now().plus(1, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MILLIS)
             val event3At = Instant.now().plus(2, ChronoUnit.DAYS).truncatedTo(ChronoUnit.MILLIS)
 
-            val request1 = AddEventRequest(title = "Third Day", description = null, details = null, eventAt = event1At)
-            val request2 = AddEventRequest(title = "First Day", description = null, details = null, eventAt = event2At)
-            val request3 = AddEventRequest(title = "Second Day", description = null, details = null, eventAt = event3At)
+            val request1 = AddEventRequest(title = "Third Day", description = null, details = null, eventAt = event1At, category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null)
+            val request2 = AddEventRequest(title = "First Day", description = null, details = null, eventAt = event2At, category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null)
+            val request3 = AddEventRequest(title = "Second Day", description = null, details = null, eventAt = event3At, category = "other", estimatedCost = null, location = null, eventEndAt = null, links = null)
 
             val post1 = restTemplate.exchange(
                 "/api/plans/$planId/itinerary/events",
@@ -393,7 +428,12 @@ class ItineraryAcceptanceTest {
                 title = "Campfire",
                 description = "Evening campfire",
                 details = "Bring marshmallows",
-                eventAt = eventAt
+                eventAt = eventAt,
+                category = "meal",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val postResponse = restTemplate.exchange(
@@ -425,7 +465,12 @@ class ItineraryAcceptanceTest {
                 title = "Doomed Event",
                 description = null,
                 details = null,
-                eventAt = Instant.now().plus(1, ChronoUnit.DAYS)
+                eventAt = Instant.now().plus(1, ChronoUnit.DAYS),
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val postResponse = restTemplate.exchange(
@@ -460,7 +505,12 @@ class ItineraryAcceptanceTest {
                 title = "Original",
                 description = "Original desc",
                 details = null,
-                eventAt = originalEventAt
+                eventAt = originalEventAt,
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val postResponse = restTemplate.exchange(
@@ -477,7 +527,12 @@ class ItineraryAcceptanceTest {
                 title = "Updated",
                 description = "Updated desc",
                 details = "New details",
-                eventAt = updatedEventAt
+                eventAt = updatedEventAt,
+                category = "other",
+                estimatedCost = null,
+                location = null,
+                eventEndAt = null,
+                links = null
             )
 
             val putResponse = restTemplate.exchange(

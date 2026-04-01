@@ -206,7 +206,7 @@ class WebSocketIntegrationTest {
             restTemplate.exchange(
                 "/api/plans/$planId/itinerary/events",
                 HttpMethod.POST,
-                entityWithUser(mapOf("title" to "Hike", "eventAt" to "2026-06-15T09:00:00Z"), ownerId),
+                entityWithUser(mapOf("title" to "Hike", "eventAt" to "2026-06-15T09:00:00Z", "category" to "activity", "estimatedCost" to null, "location" to null, "eventEndAt" to null, "links" to null), ownerId),
                 Map::class.java
             )
 

@@ -26,7 +26,11 @@ internal class UpdateEventAction(private val itineraryClient: ItineraryClient) {
                 title = param.title,
                 description = param.description,
                 details = param.details,
-                eventAt = param.eventAt
+                eventAt = param.eventAt,
+                category = param.category,
+                estimatedCost = param.estimatedCost,
+                location = param.location,
+                eventEndAt = param.eventEndAt
             )
         )) {
             is Result.Success -> Result.Success(ItineraryMapper.fromClient(result.value))
