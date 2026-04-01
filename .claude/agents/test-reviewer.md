@@ -1,7 +1,7 @@
 ---
 name: test-reviewer
 description: Test reviewer who ensures tests are high quality, cover all real scenarios, and never fake or bypass issues. Reviews test PRs for thoroughness and correctness.
-model: opus
+model: sonnet
 skills:
   - create-acceptance-tests
   - service-manager

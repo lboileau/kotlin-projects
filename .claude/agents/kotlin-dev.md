@@ -1,7 +1,7 @@
 ---
 name: kotlin-dev
 description: Kotlin developer who implements clients, services, and libraries in a Gradle monorepo. Follows the plan and coding patterns from service-manager skill precisely.
-model: opus
+model: sonnet
 skills:
   - service-manager
 ---
