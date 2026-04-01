@@ -121,14 +121,17 @@ CREATE TABLE items (
     name       VARCHAR(255) NOT NULL,
     category   VARCHAR(50)  NOT NULL,
     quantity   INTEGER      NOT NULL DEFAULT 1,
-    packed     BOOLEAN      NOT NULL DEFAULT false,
-    created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    updated_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    CONSTRAINT chk_items_owner CHECK (plan_id IS NOT NULL)
+    packed       BOOLEAN      NOT NULL DEFAULT false,
+    gear_pack_id UUID,
+    created_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    CONSTRAINT chk_items_owner CHECK (plan_id IS NOT NULL),
+    CONSTRAINT fk_items_gear_pack FOREIGN KEY (gear_pack_id) REFERENCES gear_packs (id) ON DELETE SET NULL
 );
 CREATE INDEX idx_items_plan_id ON items(plan_id);
 CREATE INDEX idx_items_user_id ON items(user_id);
 CREATE INDEX idx_items_plan_id_user_id ON items (plan_id, user_id) WHERE user_id IS NOT NULL;
+CREATE INDEX idx_items_gear_pack_id ON items (gear_pack_id);
 ```
 
 ### itineraries
@@ -432,6 +435,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_
 - `plan_members.user_id` → `users.id` (FK)
 - `items.plan_id` → `plans.id` (FK, CASCADE on delete)
 - `items.user_id` → `users.id` (FK, CASCADE on delete)
+- `items.gear_pack_id` → `gear_packs.id` (FK, SET NULL on delete — nullable)
 - `itineraries.plan_id` → `plans.id` (FK, CASCADE on delete, UNIQUE — 1:1 with plans)
 - `itinerary_events.itinerary_id` → `itineraries.id` (FK, CASCADE on delete)
 - `itinerary_event_links.event_id` → `itinerary_events.id` (FK, CASCADE on delete)
@@ -470,6 +474,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_
 - Deleting a user cascades to items and assignment_members.
 - `username` in users is nullable (auto-created users may not have one).
 - Each item must belong to a plan (`plan_id` is required). `user_id` is optional — set for personal gear (enforced by `chk_items_owner`).
+- `gear_pack_id` is nullable — items without a gear pack are ungrouped. Deleting a gear pack sets `gear_pack_id` to NULL on its items (SET NULL on delete).
 - Each plan has at most one itinerary (enforced by `uq_itineraries_plan_id`).
 - Deleting a plan cascades to itineraries, which cascades to itinerary_events.
 - `description` and `details` in itinerary_events are nullable.
