@@ -7,7 +7,7 @@ API service for camping trip planning — user registration, authentication, pla
 
 ## Architecture
 - Spring Boot 3.4.3 application on port 8080
-- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `gear-pack-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, and `meal-plan-client` for data access
+- Consumes `world-client`, `user-client`, `plan-client`, `item-client`, `itinerary-client`, `assignment-client`, `invitation-client`, `email-client`, `gear-pack-client`, `ingredient-client`, `recipe-client`, `recipe-scraper-client`, `meal-plan-client`, and `log-book-client` for data access
 - Uses `meal-plan-calculator` lib for shopping list computation and unit conversion
 - Uses `avatar-generator` lib for deterministic avatar generation from seed strings
 - Database: `camper-db` (port 5433, database `camper_db`)
@@ -82,28 +82,31 @@ API service for camping trip planning — user registration, authentication, pla
   - `DELETE /api/plans/{planId}/members/{memberId}` — remove member (204)
 
 ### Item (`features/item/`)
-- **Model:** `Item(id, planId?, userId?, name, category, quantity, packed, createdAt, updatedAt)`
-- **DTOs:** `CreateItemRequest(name, category, quantity, packed, ownerType, ownerId, planId?)`, `UpdateItemRequest(name, category, quantity, packed)`, `ItemResponse(...)`
+- **Model:** `Item(id, planId?, userId?, name, category, quantity, packed, gearPackId?, gearPackName?, createdAt, updatedAt)`
+- **DTOs:**
+  - Requests: `CreateItemRequest(name, category, quantity, packed, ownerType, ownerId, planId?, gearPackId?)`, `UpdateItemRequest(name, category, quantity, packed, gearPackId?)`
+  - Responses: `ItemResponse(id, planId?, userId?, name, category, quantity, packed, gearPackId?, gearPackName?, createdAt, updatedAt)`
 - **Error:** `ItemError` sealed class — `NotFound(itemId)`, `Invalid(field, reason)`
-- **Service params:** `CreateItemParam(name, category, quantity, packed, ownerType, ownerId, planId?, requestingUserId)`, `GetItemParam(id, requestingUserId)`, `GetItemsByOwnerParam(ownerType, ownerId, planId?, requestingUserId)`, `UpdateItemParam(id, name, category, quantity, packed, requestingUserId)`, `DeleteItemParam(id, requestingUserId)`
+- **Service params:** `CreateItemParam(name, category, quantity, packed, ownerType, ownerId, planId?, gearPackId?, requestingUserId)`, `GetItemParam(id, requestingUserId)`, `GetItemsByOwnerParam(ownerType, ownerId, planId?, requestingUserId)`, `UpdateItemParam(id, name, category, quantity, packed, gearPackId?, requestingUserId)`, `DeleteItemParam(id, requestingUserId)`
 - **Actions:**
-  - `CreateItemAction`: Validates, converts ownerType/ownerId to planId/userId, creates item
-  - `GetItemAction`: Fetches item by ID
-  - `GetItemsByOwnerAction`: Lists items by plan or user owner; for user items, optionally filters by planId
-  - `UpdateItemAction`: Updates item fields
+  - `CreateItemAction`: Validates, converts ownerType/ownerId to planId/userId, threads gearPackId through to client, creates item
+  - `GetItemAction`: Fetches item by ID with gear pack name resolved via LEFT JOIN
+  - `GetItemsByOwnerAction`: Lists items by plan or user owner with gear pack names resolved
+  - `UpdateItemAction`: Updates item fields including optional gearPackId (nullable to remove from pack)
   - `DeleteItemAction`: Deletes item
 - **Service:** `ItemService` facade (takes ItemClient)
 - **Routes:** (all require `X-User-Id` header)
-  - `POST /api/items` — create item (201)
-  - `GET /api/items?ownerType={type}&ownerId={id}&planId={planId?}` — list items by owner (planId scopes personal items to a plan)
-  - `GET /api/items/{id}` — get item by ID
-  - `PUT /api/items/{id}` — update item
+  - `POST /api/items` — create item with optional gearPackId (201)
+  - `GET /api/items?ownerType={type}&ownerId={id}&planId={planId?}` — list items by owner with gearPackId and gearPackName resolved
+  - `GET /api/items/{id}` — get item by ID with gearPackId and gearPackName
+  - `PUT /api/items/{id}` — update item including optional gearPackId
   - `DELETE /api/items/{id}` — delete item (204)
+- **Gear pack grouping:** Items with a gearPackId are grouped together on the frontend via their shared pack reference. gearPackName is resolved via LEFT JOIN to gear_packs table for UI display. Items can be created with an optional gearPackId to join an existing gear pack group, or updated to remove their gearPackId (setting it to null). When a gear pack is deleted, gearPackId is SET NULL on its items via FK ON DELETE SET NULL.
 - **Polymorphic ownership:** Items have nullable FK columns (`plan_id`, `user_id`). Shared gear: `plan_id` only. Personal gear per plan: both `plan_id` + `user_id`. At least one must be set (DB CHECK constraint). Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
 
 ### Gear Pack (`features/gearpack/`)
-- **Model:** `GearPack(id, name, description, items, createdAt, updatedAt)`, `GearPackItem(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackResult(appliedCount, items)`, `AppliedItem(id, planId, name, category, quantity, packed, createdAt, updatedAt)`
-- **DTOs:** `GearPackSummaryResponse(id, name, description, itemCount, createdAt, updatedAt)`, `GearPackDetailResponse(id, name, description, items, createdAt, updatedAt)`, `GearPackItemResponse(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackRequest(planId, groupSize)`, `ApplyGearPackResponse(appliedCount, items)`, `AppliedItemResponse(id, planId, userId?, name, category, quantity, packed, createdAt, updatedAt)`
+- **Model:** `GearPack(id, name, description, items, createdAt, updatedAt)`, `GearPackItem(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackResult(appliedCount, items)`, `AppliedItem(id, planId, name, category, quantity, packed, gearPackId?, createdAt, updatedAt)`
+- **DTOs:** `GearPackSummaryResponse(id, name, description, itemCount, createdAt, updatedAt)`, `GearPackDetailResponse(id, name, description, items, createdAt, updatedAt)`, `GearPackItemResponse(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackRequest(planId, groupSize)`, `ApplyGearPackResponse(appliedCount, items)`, `AppliedItemResponse(id, planId, userId?, name, category, quantity, packed, gearPackId?, createdAt, updatedAt)`
 - **Error:** `GearPackError` sealed class — `NotFound(packId)`, `Invalid(field, reason)`, `Forbidden(planId, userId)`, `ApplyFailed(packName, reason)`
 - **Service params:** `ListGearPacksParam(requestingUserId)`, `GetGearPackParam(id, requestingUserId)`, `ApplyGearPackParam(gearPackId, planId, groupSize, requestingUserId)`
 - **Validations:** 1:1 with actions in `validations/`
@@ -112,33 +115,41 @@ API service for camping trip planning — user registration, authentication, pla
 - **Actions:**
   - `ListGearPacksAction`: Lists all available gear packs via GearPackClient
   - `GetGearPackAction`: Fetches gear pack with items by ID
-  - `ApplyGearPackAction`: Authorizes (OWNER/MANAGER), fetches pack, creates items via ItemClient with quantity scaling (scalable items multiply by groupSize). Short-circuits on first item creation failure.
+  - `ApplyGearPackAction`: Authorizes (OWNER/MANAGER), fetches pack, creates items via ItemClient with quantity scaling (scalable items multiply by groupSize) and sets gearPackId on each created item so the frontend can group them. Short-circuits on first item creation failure.
 - **Mapper:** `GearPackMapper` — fromClient, toSummaryResponse (itemCount from items.size), toDetailResponse, toApplyResponse
 - **Service:** `GearPackService` facade (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - **Routes:** (all require `X-User-Id` header)
   - `GET /api/gear-packs` — list all available gear packs
   - `GET /api/gear-packs/{id}` — get gear pack detail with items
-  - `POST /api/gear-packs/{id}/apply` — apply gear pack to a plan (201, publishes WebSocket `items/updated` event)
-- **Key design:** Gear packs are read-only templates seeded via migration (V032). Applying a pack creates regular items via the existing item system. Once applied, items are independent.
+  - `POST /api/gear-packs/{id}/apply` — apply gear pack to a plan (201, publishes WebSocket `items/updated` event with gearPackId set on applied items)
+- **Key design:** Gear packs are read-only templates seeded via migration (V034). Applying a pack creates regular items via the existing item system with gearPackId set to the pack's ID for grouping. Once applied, items are independent but retain their gear pack reference for visual grouping in the UI.
 
 ### Itinerary (`features/itinerary/`)
-- **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
-- **DTOs:** `AddEventRequest(title, description?, details?, eventAt)`, `UpdateEventRequest(title, description?, details?, eventAt)`, `ItineraryResponse(id, planId, events, createdAt, updatedAt)`, `ItineraryEventResponse(id, itineraryId, title, description?, details?, eventAt, createdAt, updatedAt)`
+- **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, createdAt, updatedAt)`, `ItineraryEventLink(id, eventId, url, label?, createdAt)`
+- **DTOs:**
+  - Requests: `AddEventRequest(title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `UpdateEventRequest(title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `LinkInput(url, label?)`
+  - Responses: `ItineraryResponse(id, planId, events, totalEstimatedCost?, createdAt, updatedAt)`, `ItineraryEventResponse(id, itineraryId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links, createdAt, updatedAt)`, `LinkResponse(id, url, label?, createdAt)`
 - **Error:** `ItineraryError` sealed class — `PlanNotFound(planId)`, `NotFound(planId)`, `EventNotFound(eventId)`, `Invalid(field, reason)`
-- **Service params:** `GetItineraryParam(planId)`, `DeleteItineraryParam(planId)`, `AddEventParam(planId, title, description?, details?, eventAt)`, `UpdateEventParam(planId, eventId, title, description?, details?, eventAt)`, `DeleteEventParam(planId, eventId)`
+- **Service params:** `GetItineraryParam(planId)`, `DeleteItineraryParam(planId)`, `AddEventParam(planId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `UpdateEventParam(planId, eventId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, links?)`, `DeleteEventParam(planId, eventId)`
+- **Validations:**
+  - `category` must be one of: travel, accommodation, activity, meal, other
+  - `estimatedCost` must be >= 0 if provided
+  - `eventEndAt` must be after `eventAt` if provided
+  - Max 10 links per event; each `link.url` must not be blank
 - **Actions:**
-  - `GetItineraryAction`: Fetches itinerary by planId with events ordered by eventAt
+  - `GetItineraryAction`: Fetches itinerary by planId with events ordered by eventAt, fetches links for all events. Returns `Triple<Itinerary, List<ItineraryEvent>, Map<UUID, List<ItineraryEventLink>>>`
   - `DeleteItineraryAction`: Deletes itinerary and all events (cascade)
-  - `AddEventAction`: Auto-creates itinerary if none exists, then adds event
-  - `UpdateEventAction`: Updates event fields
-  - `DeleteEventAction`: Deletes a single event
+  - `AddEventAction`: Auto-creates itinerary if none exists, adds event, replaces links if provided. Returns `Pair<ItineraryEvent, List<ItineraryEventLink>>`
+  - `UpdateEventAction`: Updates event fields, replaces links if provided (null = keep existing, empty list = delete all). Returns `Pair<ItineraryEvent, List<ItineraryEventLink>>`
+  - `DeleteEventAction`: Deletes a single event (links cascade)
 - **Service:** `ItineraryService` facade (takes ItineraryClient + PlanClient)
 - **Routes:** (all require `X-User-Id` header)
-  - `GET /api/plans/{planId}/itinerary` — get itinerary with events
+  - `GET /api/plans/{planId}/itinerary` — get itinerary with events, links, and totalEstimatedCost
   - `DELETE /api/plans/{planId}/itinerary` — delete itinerary (204)
-  - `POST /api/plans/{planId}/itinerary/events` — add event (201, auto-creates itinerary)
-  - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event
+  - `POST /api/plans/{planId}/itinerary/events` — add event with optional links (201, auto-creates itinerary)
+  - `PUT /api/plans/{planId}/itinerary/events/{eventId}` — update event with optional link replacement
   - `DELETE /api/plans/{planId}/itinerary/events/{eventId}` — delete event (204)
+- **Link semantics:** Links are managed inline via nested writes (no separate endpoints). Update: `null` = keep existing links, `[]` = delete all, populated list = full replacement (delete + insert). Links use a "replace-all" pattern — no individual link CRUD.
 
 ### Assignment (`features/assignment/`)
 - **Model:** `Assignment(id, planId, name, type, maxOccupancy, ownerId, createdAt, updatedAt)`, `AssignmentMember(assignmentId, userId, username?, createdAt)`, `AssignmentDetail(id, planId, name, type, maxOccupancy, ownerId, members, createdAt, updatedAt)`
@@ -305,8 +316,8 @@ API service for camping trip planning — user registration, authentication, pla
 - `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest`, `AssignmentServiceTest`, `GearPackServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest`, `ItineraryAcceptanceTest`, `AssignmentAcceptanceTest`, `GearPackAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest` (includes event metadata and link management tests), `AssignmentServiceTest`, `GearPackServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest` (includes gearPackId tests), `ItineraryAcceptanceTest` (includes event metadata, links, cost summary, and link replacement tests), `AssignmentAcceptanceTest`, `GearPackAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
 - **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `GearPackFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
 - **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
 - **Clean slate:** Tables truncated via `@BeforeEach`

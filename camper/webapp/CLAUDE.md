@@ -85,7 +85,7 @@ All UI primitives are defined once and reused everywhere. Never create ad-hoc st
 - **`AppHeader`** — shared page header with logo, page title, user avatar, logout. Used by `PlanPage`, `AccountPage`, `HomePage`, `RecipesPage`.
 
 ### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item`, `Assignment`, `AssignmentDetail`, `AssignmentMember`, `GearPackSummary`, `GearPackDetail`, `GearPackItem`, `ApplyGearPackResponse`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse`, `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
+- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item` (includes `gearPackId`, `gearPackName`), `Assignment`, `AssignmentDetail`, `AssignmentMember`, `GearPackSummary`, `GearPackDetail`, `GearPackItem`, `ApplyGearPackResponse`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse`, `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
 - `request<T>()` helper auto-injects `X-User-Id` from localStorage
 - All methods return typed promises; throws on non-OK responses
 
