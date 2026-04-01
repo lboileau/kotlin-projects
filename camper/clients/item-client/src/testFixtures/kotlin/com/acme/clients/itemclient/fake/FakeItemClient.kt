@@ -35,6 +35,8 @@ class FakeItemClient : ItemClient {
             category = param.category,
             quantity = param.quantity,
             packed = param.packed,
+            gearPackId = param.gearPackId,
+            gearPackName = null,
             createdAt = Instant.now(),
             updatedAt = Instant.now()
         )
@@ -84,6 +86,7 @@ class FakeItemClient : ItemClient {
             category = param.category,
             quantity = param.quantity,
             packed = param.packed,
+            gearPackId = param.gearPackId,
             updatedAt = Instant.now()
         )
         store[param.id] = updated

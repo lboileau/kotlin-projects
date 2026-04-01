@@ -18,6 +18,8 @@ object ItemRowAdapter {
         category = rs.getString("category"),
         quantity = rs.getInt("quantity"),
         packed = rs.getBoolean("packed"),
+        gearPackId = rs.getObject("gear_pack_id", UUID::class.java),
+        gearPackName = rs.getString("gear_pack_name"),
         createdAt = rs.getTimestamp("created_at").toInstant(),
         updatedAt = rs.getTimestamp("updated_at").toInstant()
     )

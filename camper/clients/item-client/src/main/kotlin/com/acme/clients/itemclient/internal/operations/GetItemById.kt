@@ -22,7 +22,14 @@ internal class GetItemById(private val jdbi: Jdbi) {
 
         logger.debug("Finding item by id={}", param.id)
         val entity = jdbi.withHandle<Item?, Exception> { handle ->
-            handle.createQuery("SELECT id, plan_id, user_id, name, category, quantity, packed, created_at, updated_at FROM items WHERE id = :id")
+            handle.createQuery(
+                """
+                SELECT i.id, i.plan_id, i.user_id, i.name, i.category, i.quantity, i.packed, i.gear_pack_id, gp.name AS gear_pack_name, i.created_at, i.updated_at
+                FROM items i
+                LEFT JOIN gear_packs gp ON gp.id = i.gear_pack_id
+                WHERE i.id = :id
+                """.trimIndent()
+            )
                 .bind("id", param.id)
                 .map { rs, _ -> ItemRowAdapter.fromResultSet(rs) }
                 .findOne()

@@ -10,6 +10,7 @@ data class CreateItemParam(
     val category: String,
     val quantity: Int,
     val packed: Boolean,
+    val gearPackId: UUID? = null,
 )
 
 /** Parameter for retrieving an item by ID. */
@@ -31,6 +32,7 @@ data class UpdateItemParam(
     val category: String,
     val quantity: Int,
     val packed: Boolean,
+    val gearPackId: UUID? = null,
 )
 
 /** Parameter for deleting an item by ID. */

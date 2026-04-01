@@ -22,10 +22,11 @@ internal class GetItemsByPlanIdAndUserId(private val jdbi: Jdbi) {
         val entities = jdbi.withHandle<List<Item>, Exception> { handle ->
             handle.createQuery(
                 """
-                SELECT id, plan_id, user_id, name, category, quantity, packed, created_at, updated_at
-                FROM items
-                WHERE plan_id = :planId AND user_id = :userId
-                ORDER BY created_at
+                SELECT i.id, i.plan_id, i.user_id, i.name, i.category, i.quantity, i.packed, i.gear_pack_id, gp.name AS gear_pack_name, i.created_at, i.updated_at
+                FROM items i
+                LEFT JOIN gear_packs gp ON gp.id = i.gear_pack_id
+                WHERE i.plan_id = :planId AND i.user_id = :userId
+                ORDER BY i.created_at
                 """.trimIndent()
             )
                 .bind("planId", param.planId)

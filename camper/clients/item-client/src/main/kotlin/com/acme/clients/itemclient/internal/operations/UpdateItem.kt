@@ -30,7 +30,7 @@ internal class UpdateItem(
                 jdbi.withHandle<Unit, Exception> { handle ->
                     handle.createUpdate(
                         """
-                        UPDATE items SET name = :name, category = :category, quantity = :quantity, packed = :packed, updated_at = :updatedAt
+                        UPDATE items SET name = :name, category = :category, quantity = :quantity, packed = :packed, gear_pack_id = CAST(:gearPackId AS uuid), updated_at = :updatedAt
                         WHERE id = :id
                         """.trimIndent()
                     )
@@ -39,6 +39,7 @@ internal class UpdateItem(
                         .bind("category", param.category)
                         .bind("quantity", param.quantity)
                         .bind("packed", param.packed)
+                        .bind("gearPackId", param.gearPackId?.toString())
                         .bind("updatedAt", now)
                         .execute()
                 }
@@ -48,6 +49,7 @@ internal class UpdateItem(
                         category = param.category,
                         quantity = param.quantity,
                         packed = param.packed,
+                        gearPackId = param.gearPackId,
                         updatedAt = now
                     )
                 )
