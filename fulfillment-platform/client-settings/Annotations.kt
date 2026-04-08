@@ -35,21 +35,20 @@ annotation class SettingsLoader(
 /**
  * Marks a class as a contextual setting backed by REDB.
  *
- * This is the "magic" annotation — it wires up:
- *   1. REDB entity fetching (via the redbTypeKey)
- *   2. Hierarchical resolution (via the setting definition's policy)
- *   3. Proto deserialization
+ * This annotation wires up:
+ *   1. REDB entity fetching (via the proto descriptor reference)
+ *   2. Proto deserialization
  *
- * The loader only needs to annotate a class and provide the
- * setting definition reference. All resolution internals are
- * handled by the base implementation.
+ * The resolution POLICY is NOT in the annotation — it's defined
+ * statically in the contextual settings module (SettingsDefinitions)
+ * alongside the setting definition. This keeps policy logic in code
+ * where it can be reviewed and tested, not scattered across annotations.
  *
- * @param definition Reference to the ContextualSettingDefinition
- *                   in SettingsDefinitions that defines the REDB key
- *                   and resolution policy for this setting.
+ * @param redbReference The full proto descriptor name used as the REDB
+ *                      type key (e.g., "com.acme.fulfillment.RecipientDetailsSettings")
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RegisteredContextualSetting(
-    val definitionName: String, // references ContextualSettingDefinition.name
+    val redbReference: String, // full proto descriptor name
 )

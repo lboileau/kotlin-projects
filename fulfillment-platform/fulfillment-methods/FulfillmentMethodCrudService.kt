@@ -26,7 +26,7 @@ class FulfillmentMethodCrudService(
         // Write the fulfillment method entity to REDB
         val entity = RedbEntity(
             id = generateId(),
-            typeKey = "fulfillment_method_v1",
+            typeKey = "com.acme.fulfillment.FulfillmentMethod",
             scopeKeys = mapOf("merchant_id" to params.merchantId),
             data = mapOf(
                 "name" to params.name,

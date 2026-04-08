@@ -79,14 +79,13 @@ message FulfillmentMethod {
 
 ```protobuf
 message RecipientDetailsSettings {
-    repeated FieldConfig fields = 1;        // which fields to collect
-    GuestIdentifierSettings guest_identifier = 2;  // sub-behaviour
-}
-
-message FieldConfig {
-    string field_name = 1;
-    bool required = 2;
-    bool visible = 3;
+    string customer_name = 1;
+    string phone_number = 2;
+    string email = 3;
+    bool customer_name_required = 4;
+    bool phone_number_required = 5;
+    // ... explicit named fields, not generic FieldConfig
+    GuestIdentifierSettings guest_identifier = 10;  // sub-behaviour
 }
 
 // Generic guest identifier — powers drive-thru car details,
@@ -159,13 +158,18 @@ val brandingPolicy = ResolutionPolicy(
 
 ### Resolution Flow
 
+All scope variants are batch-loaded from REDB in a single read. Resolution then happens in-memory — we walk the policy's scope vectors and return the first match:
+
 ```
 Request: Get recipient_details for
          merchant=M1, location=L1, channel=POS
 
+Step 0: Batch load ALL recipient_details entities for merchant M1
+        → Returns entities at scopes: (M1), (M1,L1), (M1,POS), (M1,L1,POS), ...
+
 Policy: [location+channel] → [channel] → [location] → [merchant]
 
-Step 1: Look up recipient_details @ (L1, POS)
+Step 1: In-memory: find entity with scope (M1, L1, POS)
         ┌─────────────────────────┐
         │  (L1, POS) → FOUND ✓   │  ← Most specific scope matches
         └─────────────────────────┘
@@ -173,24 +177,13 @@ Step 1: Look up recipient_details @ (L1, POS)
 
 ─── OR if not defined at that scope: ───
 
-Step 1: Look up recipient_details @ (L1, POS)
+Step 1: In-memory: find entity with scope (M1, L1, POS) → not found
+Step 2: In-memory: find entity with scope (M1, POS)     → not found
+Step 3: In-memory: find entity with scope (M1, L1)      → not found
+Step 4: In-memory: find entity with scope (M1)           → FOUND ✓
         ┌─────────────────────────┐
-        │  (L1, POS) → not found  │
-        └─────────────────────────┘
-
-Step 2: Look up recipient_details @ (POS)
-        ┌─────────────────────────┐
-        │  (POS)     → not found  │
-        └─────────────────────────┘
-
-Step 3: Look up recipient_details @ (L1)
-        ┌─────────────────────────┐
-        │  (L1)      → not found  │
-        └─────────────────────────┘
-
-Step 4: Look up recipient_details @ (M1)
-        ┌─────────────────────────┐
-        │  (M1)      → FOUND ✓   │  ← Sparse merchant-level default
+        │  Sparse merchant-level  │
+        │  default                │
         └─────────────────────────┘
         Return this value.
 
@@ -200,21 +193,25 @@ Result: Merchant defines once, all contexts inherit.
 
 ## Annotation-Based Loader Registration
 
-### Settings Loader — DAG Dependencies
+### DAG Dependency Flow
+
+The dependency graph flows:
+**raw setting loaders → fulfillment methods → fulfillment methods profile (collection)**
 
 ```kotlin
 // General resource loader — declares dependencies by enum reference
 // The Client Settings Service builds a DAG and loads in order
 @SettingsLoader(
     domain = SettingsDomain.CONTEXTUAL_FULFILLMENT_METHODS,
-    dependsOn = [SettingsDomain.MERCHANT_INFO, SettingsDomain.LOCATION_INFO]
+    dependsOn = [SettingsDomain.MERCHANT_INFO, SettingsDomain.LOCATION_INFO,
+                 SettingsDomain.RECIPIENT_DETAILS, SettingsDomain.SCHEDULING]
 )
 class FulfillmentMethodLoader : Loader<FulfillmentMethodsResponse> {
 
     override fun load(context: SettingsContext, dependencies: DependencyMap): FulfillmentMethodsResponse {
         val merchant = dependencies.get<MerchantInfo>(SettingsDomain.MERCHANT_INFO)
-        val location = dependencies.get<LocationInfo>(SettingsDomain.LOCATION_INFO)
-        // ... build response using resolved settings
+        val recipientDetails = dependencies.get<RecipientDetailsSettings>(SettingsDomain.RECIPIENT_DETAILS)
+        // ... compose behaviours from pre-loaded settings
     }
 }
 ```
@@ -223,17 +220,19 @@ class FulfillmentMethodLoader : Loader<FulfillmentMethodsResponse> {
 
 ```kotlin
 // For contextual settings backed by REDB — annotation wires up
-// all resolution internals automatically
+// REDB fetching + deserialization automatically.
+// The resolution POLICY lives in the contextual settings module (in code),
+// not in the annotation — policies are defined statically alongside the
+// setting definitions.
 @RegisteredSetting(
-    redbReference = "recipient_details_v1",
-    resolutionPolicy = recipientDetailsPolicy
+    redbReference = "com.acme.fulfillment.RecipientDetailsSettings",  // full proto descriptor
 )
 class RecipientDetailsSetting : ContextualSetting<RecipientDetailsSettings>
 
 // Complex behaviours: adapter composes multiple registered settings
 @SettingsLoader(
-    domain = SettingsDomain.CONTEXTUAL_FULFILLMENT_METHODS,
-    dependsOn = [SettingsDomain.MERCHANT_INFO]
+    domain = SettingsDomain.RECIPIENT_DETAILS_BEHAVIOUR,
+    dependsOn = [SettingsDomain.RECIPIENT_DETAILS, SettingsDomain.GUEST_IDENTIFIER]
 )
 class RecipientDetailsBehaviourLoader : Loader<RecipientDetailsBehaviour> {
 
@@ -250,27 +249,28 @@ class RecipientDetailsBehaviourLoader : Loader<RecipientDetailsBehaviour> {
 
 ## Composability in Action: Drive-Through Example
 
+The client never sees scoping — it just gets the resolved values for its context:
+
 ```
+Client request: { merchant: M1, location: L1, channel: POS }
+
+Response: Fulfillment Method "Drive Through"
 ┌──────────────────────────────────────────────────────────┐
-│  Fulfillment Method: "Drive Through"                      │
-│                                                            │
-│  Behaviours:                                               │
-│  ├── recipient_details                                     │
-│  │   └── guest_identifier: { display_text: "Car Details" } │
-│  │       (generic field → specific UX)                     │
-│  ├── prep_time: { default: 5 min }                         │
-│  ├── order_status_tracking: { show_window_number: true }   │
-│  └── scheduling: { enabled: false }                        │
-│                                                            │
-│  Context overrides:                                        │
-│  ├── Merchant M1 (all locations):                          │
-│  │   └── prep_time: { default: 7 min }                     │
-│  ├── Location L1, Channel POS:                             │
-│  │   └── prep_time: { default: 3 min }  ← override        │
-│  └── Location L2:                                          │
-│       └── (inherits merchant default → 7 min)              │
-│                                                            │
+│  Behaviours (fully resolved for this context):            │
+│  ├── recipient_details                                    │
+│  │   └── guest_identifier: { display_text: "Car Details" }│
+│  │       (generic field → specific UX)                    │
+│  ├── prep_time: { default: 3 min }                        │
+│  │   (resolved: L1+POS override won over merchant default)│
+│  ├── order_status_tracking: { show_window_number: true }  │
+│  └── scheduling: { enabled: false }                       │
 └──────────────────────────────────────────────────────────┘
+
+Behind the scenes (invisible to client):
+  Merchant M1 default:    prep_time = 7 min
+  Location L1 + POS:      prep_time = 3 min  ← winning scope
+  Location L2:            (no override → inherits 7 min)
+```
 
 No DRIVE_THROUGH enum value.
 No DriveThroughSettings proto.
@@ -279,7 +279,6 @@ No new switch statement branches.
 
 Just a fulfillment method with composed behaviours
 and context-scoped configuration.
-```
 
 ## Controlled Rollout: Templates + Constrained Admin
 

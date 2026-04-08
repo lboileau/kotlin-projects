@@ -49,10 +49,9 @@ message DiningOption {
     string label = 2;  // "Dine In", "Take Out", "Para llevar", anything
 }
 
-// On the order — just a stamp
+// On the order — just a nested dining option
 message Order {
-    string dining_option_id = 1;
-    string dining_option_label = 2;
+    DiningOption dining_option = 1;
     // ... rest of order
 }
 ```
@@ -133,25 +132,19 @@ A cross-platform initiative to unify POS onto Fulfillment Types had been **in fl
 - No one could articulate how far along we were or when we'd deliver
 
 **What I did:**
-- Ramped by working closely with tech leads across mobile, web, and server
+- Ramped by working closely with tech leads across iOS, Android, web, and server
 - Decomposed the project into ~8 workstreams with assigned DRIs:
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                    Workstreams                            │
-├──────────────────────────┬───────────────────────────────┤
-│  iOS                     │  Android                      │
-├──────────────────────────┼───────────────────────────────┤
-│  Pre-paid checkouts      │  Open-order checkouts         │
-├──────────────────────────┼───────────────────────────────┤
-│  Order state (paid)      │  Order state (open)           │
-├──────────────────────────┼───────────────────────────────┤
-│  Data migration          │  Reporting                    │
-│  (dining opts → types)   │                               │
-├──────────────────────────┼───────────────────────────────┤
-│  Legacy POS systems      │  ...                          │
-└──────────────────────────┴───────────────────────────────┘
-Each workstream had an assigned DRI → focus + accountability
+Workstreams (each with an assigned DRI):
+  - Pre-paid checkouts
+  - Open-order checkouts
+  - Order state management (paid orders)
+  - Order state management (open orders)
+  - Data migration (dining options → fulfillment types)
+  - Reporting
+  - Legacy POS systems
+  - ...
 ```
 
-We successfully delivered the unification project. But in the process, I realized the architecture we'd just unified onto was fundamentally broken.
+We successfully delivered the unification project. But in the process, I realized the architecture we'd just unified onto was fundamentally broken. At the time, the team wasn't thinking about this — the focus was purely on shipping the foundation.

@@ -1,7 +1,5 @@
 package com.acme.fulfillmentmethods
 
-import com.acme.contextualsettings.FieldConfig
-
 // ──────────────────────────────────────────────────────────────────
 // Fulfillment Method Templates
 //
@@ -29,17 +27,16 @@ object FulfillmentMethodTemplates {
         ),
         behaviourDefaults = listOf(
             BehaviourDefault(
-                redbTypeKey = "recipient_details_v1",
+                redbTypeKey = "com.acme.fulfillment.RecipientDetailsSettings",
                 defaultValues = mapOf(
-                    "fields" to listOf(
-                        FieldConfig(fieldName = "customer_name", required = true, visible = true),
-                    ),
+                    "customer_name_required" to true,
+                    "phone_number_required" to false,
                 ),
             ),
-            // ⭐ Generic guest identifier → specific drive-thru UX
+            // Generic guest identifier → specific drive-thru UX
             // No DriveThroughGuestIdentifier class needed
             BehaviourDefault(
-                redbTypeKey = "guest_identifier_v1",
+                redbTypeKey = "com.acme.fulfillment.GuestIdentifierSettings",
                 defaultValues = mapOf(
                     "client_id" to "car_details",
                     "display_text" to "Car Details",
@@ -47,14 +44,14 @@ object FulfillmentMethodTemplates {
                 ),
             ),
             BehaviourDefault(
-                redbTypeKey = "prep_time_v1",
+                redbTypeKey = "com.acme.fulfillment.PrepTimeSettings",
                 defaultValues = mapOf(
                     "default_minutes" to 5,
                     "show_estimate_to_customer" to true,
                 ),
             ),
             BehaviourDefault(
-                redbTypeKey = "order_status_tracking_v1",
+                redbTypeKey = "com.acme.fulfillment.OrderStatusTrackingSettings",
                 defaultValues = mapOf(
                     "show_window_number" to true,
                     "show_driver_location" to false,
@@ -78,17 +75,15 @@ object FulfillmentMethodTemplates {
         ),
         behaviourDefaults = listOf(
             BehaviourDefault(
-                redbTypeKey = "recipient_details_v1",
+                redbTypeKey = "com.acme.fulfillment.RecipientDetailsSettings",
                 defaultValues = mapOf(
-                    "fields" to listOf(
-                        FieldConfig(fieldName = "customer_name", required = true, visible = true),
-                        FieldConfig(fieldName = "phone_number", required = true, visible = true),
-                        FieldConfig(fieldName = "delivery_address", required = true, visible = true),
-                    ),
+                    "customer_name_required" to true,
+                    "phone_number_required" to true,
+                    "email_required" to false,
                 ),
             ),
             BehaviourDefault(
-                redbTypeKey = "scheduling_v1",
+                redbTypeKey = "com.acme.fulfillment.SchedulingSettings",
                 defaultValues = mapOf(
                     "enabled" to true,
                     "min_lead_time_minutes" to 30,
@@ -96,14 +91,14 @@ object FulfillmentMethodTemplates {
                 ),
             ),
             BehaviourDefault(
-                redbTypeKey = "prep_time_v1",
+                redbTypeKey = "com.acme.fulfillment.PrepTimeSettings",
                 defaultValues = mapOf(
                     "default_minutes" to 30,
                     "show_estimate_to_customer" to true,
                 ),
             ),
             BehaviourDefault(
-                redbTypeKey = "order_status_tracking_v1",
+                redbTypeKey = "com.acme.fulfillment.OrderStatusTrackingSettings",
                 defaultValues = mapOf(
                     "show_window_number" to false,
                     "show_driver_location" to true,
@@ -125,15 +120,13 @@ object FulfillmentMethodTemplates {
         ),
         behaviourDefaults = listOf(
             BehaviourDefault(
-                redbTypeKey = "recipient_details_v1",
+                redbTypeKey = "com.acme.fulfillment.RecipientDetailsSettings",
                 defaultValues = mapOf(
-                    "fields" to listOf(
-                        FieldConfig(fieldName = "customer_name", required = true, visible = true),
-                    ),
+                    "customer_name_required" to true,
                 ),
             ),
             BehaviourDefault(
-                redbTypeKey = "prep_time_v1",
+                redbTypeKey = "com.acme.fulfillment.PrepTimeSettings",
                 defaultValues = mapOf(
                     "default_minutes" to 15,
                     "show_estimate_to_customer" to true,

@@ -27,9 +27,23 @@ import com.acme.contextualsettings.SettingsDefinitions
 //   - REDB (entity storage)
 // ──────────────────────────────────────────────────────────────────
 
+// DAG dependency flow:
+//   MERCHANT_INFO, LOCATION_INFO (raw resources)
+//     → RECIPIENT_DETAILS, SCHEDULING, PREP_TIME, ... (raw contextual settings)
+//       → FULFILLMENT_METHODS (composes settings into behaviours)
+//         → CONTEXTUAL_FULFILLMENT_METHODS (the profile / collection)
+
 @SettingsLoader(
     domain = SettingsDomain.CONTEXTUAL_FULFILLMENT_METHODS,
-    dependsOn = [SettingsDomain.MERCHANT_INFO, SettingsDomain.LOCATION_INFO],
+    dependsOn = [
+        SettingsDomain.MERCHANT_INFO,
+        SettingsDomain.LOCATION_INFO,
+        SettingsDomain.RECIPIENT_DETAILS,
+        SettingsDomain.GUEST_IDENTIFIER,
+        SettingsDomain.SCHEDULING,
+        SettingsDomain.PREP_TIME,
+        SettingsDomain.ORDER_STATUS_TRACKING,
+    ],
 )
 class FulfillmentMethodLoader(
     private val resolver: HierarchicalResolver,
@@ -40,7 +54,7 @@ class FulfillmentMethodLoader(
         context: SettingsContext,
         dependencies: DependencyMap,
     ): List<FulfillmentMethod> {
-        // Dependencies are available from the DAG
+        // Dependencies are pre-loaded by the DAG in topological order
         val merchantInfo = dependencies.get<MerchantInfo>(SettingsDomain.MERCHANT_INFO)
         val locationInfo = dependencies.get<LocationInfo>(SettingsDomain.LOCATION_INFO)
 

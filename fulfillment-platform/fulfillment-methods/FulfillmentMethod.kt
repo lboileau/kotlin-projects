@@ -42,14 +42,13 @@ enum class BehaviourType {
 // ──────────────────────────────────────────────────────────────────
 
 data class RecipientDetailsBehaviour(
-    val fields: List<FieldRequirement>,
+    val customerName: String?,
+    val phoneNumber: String?,
+    val email: String?,
+    val customerNameRequired: Boolean,
+    val phoneNumberRequired: Boolean,
+    val emailRequired: Boolean,
     val guestIdentifier: GuestIdentifierBehaviour?,
-)
-
-data class FieldRequirement(
-    val fieldName: String,
-    val required: Boolean,
-    val visible: Boolean,
 )
 
 /**

@@ -14,6 +14,17 @@ enum class SettingsDomain {
     LOCATION_INFO,
     CHANNEL_INFO,
 
-    // Composed settings — depend on resource loaders
-    CONTEXTUAL_FULFILLMENT_METHODS,
+    // Raw contextual settings — loaded from REDB + resolved
+    RECIPIENT_DETAILS,
+    GUEST_IDENTIFIER,
+    SCHEDULING,
+    PREP_TIME,
+    ORDER_STATUS_TRACKING,
+
+    // Composed behaviours — adapt raw settings into client-facing models
+    RECIPIENT_DETAILS_BEHAVIOUR,
+
+    // Top-level — depends on methods + all raw settings
+    FULFILLMENT_METHODS,
+    CONTEXTUAL_FULFILLMENT_METHODS,  // the collection (profile)
 }

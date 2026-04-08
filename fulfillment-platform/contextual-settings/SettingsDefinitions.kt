@@ -22,9 +22,9 @@ import com.acme.contextualsettings.ScopeDimension.LOCATION_ID
  */
 data class ContextualSettingDefinition<T : Any>(
     val name: String,
-    val redbTypeKey: String,
+    val redbTypeKey: String,           // full proto descriptor name
     val modelClass: Class<T>,
-    val resolutionPolicy: ResolutionPolicy,
+    val resolutionPolicy: ResolutionPolicy,  // defined here in code, not in annotations
 )
 
 /**
@@ -42,7 +42,7 @@ object SettingsDefinitions {
     // Resolves bottom-up: most specific context wins entirely.
     val RECIPIENT_DETAILS = ContextualSettingDefinition(
         name = "recipient_details",
-        redbTypeKey = "recipient_details_v1",
+        redbTypeKey = "com.acme.fulfillment.RecipientDetailsSettings",
         modelClass = RecipientDetailsProto::class.java,
         resolutionPolicy = ResolutionPolicy(
             scopes = listOf(
@@ -61,7 +61,7 @@ object SettingsDefinitions {
     // Same resolution as recipient_details (it's a sub-behaviour).
     val GUEST_IDENTIFIER = ContextualSettingDefinition(
         name = "guest_identifier",
-        redbTypeKey = "guest_identifier_v1",
+        redbTypeKey = "com.acme.fulfillment.GuestIdentifierSettings",
         modelClass = GuestIdentifierProto::class.java,
         resolutionPolicy = ResolutionPolicy(
             scopes = listOf(
@@ -79,7 +79,7 @@ object SettingsDefinitions {
     // Resolves bottom-up: a location+channel can override entirely.
     val SCHEDULING = ContextualSettingDefinition(
         name = "scheduling",
-        redbTypeKey = "scheduling_v1",
+        redbTypeKey = "com.acme.fulfillment.SchedulingSettings",
         modelClass = SchedulingProto::class.java,
         resolutionPolicy = ResolutionPolicy(
             scopes = listOf(
@@ -99,7 +99,7 @@ object SettingsDefinitions {
     // without re-specifying everything.
     val PREP_TIME = ContextualSettingDefinition(
         name = "prep_time",
-        redbTypeKey = "prep_time_v1",
+        redbTypeKey = "com.acme.fulfillment.PrepTimeSettings",
         modelClass = PrepTimeProto::class.java,
         resolutionPolicy = ResolutionPolicy(
             scopes = listOf(
@@ -118,7 +118,7 @@ object SettingsDefinitions {
     // delivery shows driver location, etc.
     val ORDER_STATUS_TRACKING = ContextualSettingDefinition(
         name = "order_status_tracking",
-        redbTypeKey = "order_status_tracking_v1",
+        redbTypeKey = "com.acme.fulfillment.OrderStatusTrackingSettings",
         modelClass = OrderStatusTrackingProto::class.java,
         resolutionPolicy = ResolutionPolicy(
             scopes = listOf(
@@ -146,13 +146,12 @@ object SettingsDefinitions {
 // ──────────────────────────────────────────────────────────────────
 
 data class RecipientDetailsProto(
-    val fields: List<FieldConfig> = emptyList(),
-)
-
-data class FieldConfig(
-    val fieldName: String,
-    val required: Boolean = false,
-    val visible: Boolean = true,
+    val customerName: String? = null,
+    val phoneNumber: String? = null,
+    val email: String? = null,
+    val customerNameRequired: Boolean = false,
+    val phoneNumberRequired: Boolean = false,
+    val emailRequired: Boolean = false,
 )
 
 data class GuestIdentifierProto(

@@ -28,7 +28,8 @@ abstract class ContextualSettingLoader<T : Any>(
     private val resolver: HierarchicalResolver,
 ) : Loader<T> {
 
-    // Lazily resolved from the annotation
+    // Lazily resolved: annotation provides the REDB reference (proto descriptor),
+    // the definition (with resolution policy) lives in SettingsDefinitions.
     private val definition: ContextualSettingDefinition<T> by lazy {
         val annotation = this::class.java.getAnnotation(RegisteredContextualSetting::class.java)
             ?: throw IllegalStateException(
@@ -37,10 +38,10 @@ abstract class ContextualSettingLoader<T : Any>(
             )
 
         @Suppress("UNCHECKED_CAST")
-        SettingsDefinitions.ALL.find { it.name == annotation.definitionName }
+        SettingsDefinitions.ALL.find { it.redbTypeKey == annotation.redbReference }
             as? ContextualSettingDefinition<T>
             ?: throw IllegalStateException(
-                "No setting definition found for '${annotation.definitionName}'"
+                "No setting definition found for REDB reference '${annotation.redbReference}'"
             )
     }
 

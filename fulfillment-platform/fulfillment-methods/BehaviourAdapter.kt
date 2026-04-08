@@ -45,13 +45,12 @@ class BehaviourAdapter {
         details ?: return null
 
         return RecipientDetailsBehaviour(
-            fields = details.fields.map { field ->
-                FieldRequirement(
-                    fieldName = field.fieldName,
-                    required = field.required,
-                    visible = field.visible,
-                )
-            },
+            customerName = details.customerName,
+            phoneNumber = details.phoneNumber,
+            email = details.email,
+            customerNameRequired = details.customerNameRequired,
+            phoneNumberRequired = details.phoneNumberRequired,
+            emailRequired = details.emailRequired,
             guestIdentifier = guestIdentifier?.let {
                 GuestIdentifierBehaviour(
                     clientId = it.clientId,

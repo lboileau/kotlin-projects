@@ -1,15 +1,19 @@
 # Task — The Insight
 
+## From Foundation to Re-Architecture
+
+The initial task was just to deliver the foundation — unify POS onto fulfillment types. After successfully delivering that, I identified a deeper problem with the architecture itself and created the initiative to rebuild the platform.
+
 ## Why the Enum Architecture Breaks Down
 
-We'd just unified POS onto Fulfillment Types. But the feature roadmap ahead required:
+A key immediate requirement was **separate settings for web and POS orders**. The existing model had no concept of platform — settings were keyed only by `(merchant_id, fulfillment_type)`. Beyond that, the feature roadmap required:
 
-- **Drive-through** ordering (car details, window assignment)
-- **Curbside pickup** (different from in-store pickup)
-- **Scheduled orders** on POS (not just web)
-- **New kiosk product** (different UI, different flow)
+- **Drive-through** ordering (car details, direct-to-kitchen order chits as the order is being created)
+- **Curbside pickup** (car details, different from in-store pickup)
+- **Scheduled orders** on both POS and web
+- **New kiosk product** (orders editable in both client app and POS, ordered via web but behave more like in-store)
 - **QR code ordering** (yet another channel)
-- **Courier vs. customer pickup** (sub-workflows within PICKUP)
+- **Courier-powered and seller-powered delivery** (delivery zones, fees, availability)
 
 ### The Enum Explosion Problem
 
@@ -18,10 +22,10 @@ Current state:
     PICKUP, DELIVERY, IN_STORE, SHIPPING
                     │
                     │  Now add drive-through, curbside, kiosk,
-                    │  QR ordering, courier pickup...
+                    │  QR ordering, courier delivery...
                     ▼
     PICKUP_IN_STORE, PICKUP_CURBSIDE, PICKUP_DRIVE_THROUGH,
-    PICKUP_COURIER, DELIVERY_STANDARD, DELIVERY_SCHEDULED,
+    PICKUP_COURIER, DELIVERY_COURIER, DELIVERY_SELLER,
     KIOSK_DINE_IN, KIOSK_TAKEOUT, QR_DINE_IN, QR_TAKEOUT...
 
                     │
@@ -30,10 +34,10 @@ Current state:
                     ▼
     PICKUP_CURBSIDE_WEB, PICKUP_CURBSIDE_POS,
     PICKUP_CURBSIDE_KIOSK, PICKUP_DRIVE_THROUGH_POS,
-    DELIVERY_SCHEDULED_WEB, DELIVERY_SCHEDULED_POS...
+    DELIVERY_COURIER_WEB, DELIVERY_SELLER_POS...
                     │
                     ▼
-              💥 Combinatorial explosion
+              Combinatorial explosion
 ```
 
 ### The Settings Problem
@@ -132,7 +136,7 @@ But what we NEED:
 │              │
 └─────────────┘
 
-❌ Not possible with the current model
+Not possible with the current model
 ```
 
 ## The Realization
