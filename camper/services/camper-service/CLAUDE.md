@@ -105,24 +105,48 @@ API service for camping trip planning — user registration, authentication, pla
 - **Polymorphic ownership:** Items have nullable FK columns (`plan_id`, `user_id`). Shared gear: `plan_id` only. Personal gear per plan: both `plan_id` + `user_id`. At least one must be set (DB CHECK constraint). Categories are free-form strings (no DB validation). Known categories: canoe, kitchen, camp, personal, misc, food_item.
 
 ### Gear Pack (`features/gearpack/`)
-- **Model:** `GearPack(id, name, description, items, createdAt, updatedAt)`, `GearPackItem(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackResult(appliedCount, items)`, `AppliedItem(id, planId, name, category, quantity, packed, gearPackId?, createdAt, updatedAt)`
-- **DTOs:** `GearPackSummaryResponse(id, name, description, itemCount, createdAt, updatedAt)`, `GearPackDetailResponse(id, name, description, items, createdAt, updatedAt)`, `GearPackItemResponse(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackRequest(planId, groupSize)`, `ApplyGearPackResponse(appliedCount, items)`, `AppliedItemResponse(id, planId, userId?, name, category, quantity, packed, gearPackId?, createdAt, updatedAt)`
-- **Error:** `GearPackError` sealed class — `NotFound(packId)`, `Invalid(field, reason)`, `Forbidden(planId, userId)`, `ApplyFailed(packName, reason)`
-- **Service params:** `ListGearPacksParam(requestingUserId)`, `GetGearPackParam(id, requestingUserId)`, `ApplyGearPackParam(gearPackId, planId, groupSize, requestingUserId)`
+- **Model:** `GearPack(id, name, description, items, createdBy?, createdAt, updatedAt)`, `GearPackItem(id, name, category, defaultQuantity, scalable, sortOrder)`, `ApplyGearPackResult(appliedCount, items)`, `AppliedItem(id, planId, name, category, quantity, packed, gearPackId?, createdAt, updatedAt)`
+- **DTOs:**
+  - Requests: `CreateGearPackRequest(name, description?)`, `UpdateGearPackRequest(name?, description?)`, `AddGearPackItemRequest(name, category, defaultQuantity?, scalable?)`, `UpdateGearPackItemRequest(name?, category?, defaultQuantity?, scalable?)`
+  - Responses: `GearPackSummaryResponse(id, name, description, itemCount, createdBy?, createdAt, updatedAt)`, `GearPackDetailResponse(id, name, description, items, createdBy?, createdAt, updatedAt)`, `GearPackItemResponse(id, name, category, defaultQuantity, scalable, sortOrder)`, `GearPackItemSearchResultResponse(id, gearPackId, gearPackName, name, category, defaultQuantity, scalable)`, `ApplyGearPackRequest(planId, groupSize)`, `ApplyGearPackResponse(appliedCount, items)`, `AppliedItemResponse(id, planId, userId?, name, category, quantity, packed, gearPackId?, createdAt, updatedAt)`
+- **Error:** `GearPackError` sealed class — `NotFound(packId)`, `Invalid(field, reason)`, `Forbidden(planId, userId)`, `ApplyFailed(packName, reason)`, `NotCreator(packId, userId)`, `SystemPack(packId)`, `DuplicateName(name)`, `DuplicateItemName(name, packName)`, `ItemNotFound(itemId)`
+- **Service params:**
+  - Queries: `ListGearPacksParam(requestingUserId)`, `GetGearPackParam(id, requestingUserId)`, `SearchGearPackItemsParam(query, requestingUserId)`
+  - Mutations: `CreateGearPackParam(name, description, requestingUserId)`, `UpdateGearPackParam(id, name?, description?, requestingUserId)`, `DeleteGearPackParam(id, requestingUserId)`, `AddGearPackItemParam(gearPackId, name, category, defaultQuantity?, scalable?, requestingUserId)`, `UpdateGearPackItemParam(id, gearPackId, name?, category?, defaultQuantity?, scalable?, requestingUserId)`, `RemoveGearPackItemParam(id, gearPackId, requestingUserId)`, `ApplyGearPackParam(gearPackId, planId, groupSize, requestingUserId)`
 - **Validations:** 1:1 with actions in `validations/`
-  - `ValidateListGearPacks`, `ValidateGetGearPack`: no-op
-  - `ValidateApplyGearPack`: groupSize must be > 0
+  - `ValidateListGearPacks`, `ValidateGetGearPack`, `ValidateApplyGearPack`: standard
+  - `ValidateCreateGearPack`: name not blank (≤100 chars), description ≤500 chars
+  - `ValidateUpdateGearPack`: name length ≤100 if provided, description ≤500 if provided
+  - `ValidateDeleteGearPack`, `ValidateSearchGearPackItems`: standard
+  - `ValidateAddGearPackItem`: name not blank, category not blank, defaultQuantity ≥ 1
+  - `ValidateUpdateGearPackItem`: field lengths if provided
+  - `ValidateRemoveGearPackItem`: standard
 - **Actions:**
-  - `ListGearPacksAction`: Lists all available gear packs via GearPackClient
+  - `ListGearPacksAction`: Lists all available gear packs (both system-seeded and user-created)
   - `GetGearPackAction`: Fetches gear pack with items by ID
-  - `ApplyGearPackAction`: Authorizes (OWNER/MANAGER), fetches pack, creates items via ItemClient with quantity scaling (scalable items multiply by groupSize) and sets gearPackId on each created item so the frontend can group them. Short-circuits on first item creation failure.
-- **Mapper:** `GearPackMapper` — fromClient, toSummaryResponse (itemCount from items.size), toDetailResponse, toApplyResponse
+  - `CreateGearPackAction`: Validates name/description, creates pack with `createdBy=userId`, returns detail response
+  - `UpdateGearPackAction`: Validates fields, gets pack, checks creator (NotCreator/SystemPack), updates, returns detail response
+  - `DeleteGearPackAction`: Gets pack, checks creator, deletes (DB FK `ON DELETE SET NULL` ungroups items)
+  - `AddGearPackItemAction`: Validates fields, gets pack, checks creator, assigns `sort_order = MAX + 1`, creates item, returns item response
+  - `UpdateGearPackItemAction`: Validates fields, gets pack, checks creator, updates item, returns item response
+  - `RemoveGearPackItemAction`: Gets pack, checks creator, removes item
+  - `ApplyGearPackAction`: Authorizes (OWNER/MANAGER), fetches pack, creates items via ItemClient with quantity scaling (scalable items multiply by groupSize) and sets gearPackId on each created item. Short-circuits on first failure.
+  - `SearchGearPackItemsAction`: Validates query not blank, searches across all packs by case-insensitive substring match, returns search results with pack names
+- **Mapper:** `GearPackMapper` — fromClient, toSummaryResponse, toDetailResponse, toItemResponse, toSearchResultResponse, toApplyResponse
 - **Service:** `GearPackService` facade (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - **Routes:** (all require `X-User-Id` header)
   - `GET /api/gear-packs` — list all available gear packs
   - `GET /api/gear-packs/{id}` — get gear pack detail with items
-  - `POST /api/gear-packs/{id}/apply` — apply gear pack to a plan (201, publishes WebSocket `items/updated` event with gearPackId set on applied items)
-- **Key design:** Gear packs are read-only templates seeded via migration (V034). Applying a pack creates regular items via the existing item system with gearPackId set to the pack's ID for grouping. Once applied, items are independent but retain their gear pack reference for visual grouping in the UI.
+  - `POST /api/gear-packs` — create gear pack (201, requires creator authorization)
+  - `PUT /api/gear-packs/{id}` — update gear pack name/description (creator only)
+  - `DELETE /api/gear-packs/{id}` — delete gear pack; items ungrouped via FK constraint (204, creator only)
+  - `POST /api/gear-packs/{id}/items` — add item to pack (201, creator only)
+  - `PUT /api/gear-packs/{id}/items/{itemId}` — update item in pack (creator only)
+  - `DELETE /api/gear-packs/{id}/items/{itemId}` — remove item from pack (204, creator only)
+  - `GET /api/gear-pack-items/search?q={query}` — search items by name across all packs (substring match)
+  - `POST /api/gear-packs/{id}/apply` — apply gear pack to a plan (201, publishes WebSocket `items/updated` event)
+- **Authorization:** `createdBy` field (nullable) determines editability. `NULL` = system-seeded (immutable). Mutation actions check: if `createdBy == null` → `SystemPack` error; if `createdBy != userId` → `NotCreator` error.
+- **Key design:** Gear packs can be seeded via migration (null `createdBy`) or created by users (`createdBy = userId`). User-created packs are globally visible but only the creator can edit/delete. Applying a pack creates regular items with gearPackId set for grouping. Item names are unique within a pack (case-insensitive). Deleting a pack cascades to items via FK `ON DELETE SET NULL`.
 
 ### Itinerary (`features/itinerary/`)
 - **Model:** `Itinerary(id, planId, createdAt, updatedAt)`, `ItineraryEvent(id, itineraryId, title, description?, details?, eventAt, category, estimatedCost?, location?, eventEndAt?, createdAt, updatedAt)`, `ItineraryEventLink(id, eventId, url, label?, createdAt)`
