@@ -39,9 +39,9 @@ class AssignmentServiceTest {
         fakeUserClient.reset()
 
         fakeUserClient.seed(
-            User(id = planOwnerId, email = "planowner@example.com", username = "planowner", createdAt = Instant.now(), updatedAt = Instant.now()),
-            User(id = assignmentOwnerId, email = "assignowner@example.com", username = "assignowner", createdAt = Instant.now(), updatedAt = Instant.now()),
-            User(id = otherUserId, email = "other@example.com", username = "other", createdAt = Instant.now(), updatedAt = Instant.now())
+            User(id = planOwnerId, externalId = UUID.randomUUID(), email = "planowner@example.com", username = "planowner", createdAt = Instant.now(), updatedAt = Instant.now()),
+            User(id = assignmentOwnerId, externalId = UUID.randomUUID(), email = "assignowner@example.com", username = "assignowner", createdAt = Instant.now(), updatedAt = Instant.now()),
+            User(id = otherUserId, externalId = UUID.randomUUID(), email = "other@example.com", username = "other", createdAt = Instant.now(), updatedAt = Instant.now())
         )
 
         fakePlanClient.seedPlan(
@@ -381,7 +381,7 @@ class AssignmentServiceTest {
 
             val fourthUserId = UUID.randomUUID()
             fakeUserClient.seed(
-                User(id = fourthUserId, email = "fourth@example.com", username = "fourth", createdAt = Instant.now(), updatedAt = Instant.now())
+                User(id = fourthUserId, externalId = UUID.randomUUID(), email = "fourth@example.com", username = "fourth", createdAt = Instant.now(), updatedAt = Instant.now())
             )
 
             assignmentService.addMember(AddAssignmentMemberParam(assignmentId = created.id, memberUserId = assignmentOwnerId, userId = assignmentOwnerId))

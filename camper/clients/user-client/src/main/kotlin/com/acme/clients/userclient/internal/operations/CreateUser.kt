@@ -43,6 +43,7 @@ internal class CreateUser(private val jdbi: Jdbi) {
                     .execute()
                 User(
                     id = id,
+                    externalId = UUID.randomUUID(),
                     email = normalizedEmail,
                     username = param.username,
                     experienceLevel = null,

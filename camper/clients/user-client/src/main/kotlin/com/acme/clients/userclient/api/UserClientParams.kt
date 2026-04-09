@@ -29,3 +29,9 @@ data class GetDietaryRestrictionsParam(val userId: UUID)
 
 /** Parameter for replacing all dietary restrictions for a user. */
 data class SetDietaryRestrictionsParam(val userId: UUID, val restrictions: List<String>)
+
+/** Parameter for retrieving a user by external ID. */
+data class GetByExternalIdParam(val externalId: UUID)
+
+/** Parameter for bulk lookup of external IDs for a set of internal user IDs. */
+data class GetExternalIdsParam(val internalIds: Set<UUID>)

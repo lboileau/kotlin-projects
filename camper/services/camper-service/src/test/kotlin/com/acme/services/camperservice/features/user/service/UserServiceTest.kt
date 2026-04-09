@@ -313,6 +313,7 @@ class UserServiceTest {
             val now = Instant.now()
             fakeUserClient.seed(ClientUser(
                 id = userId,
+                externalId = UUID.randomUUID(),
                 email = "invited@example.com",
                 username = null,
                 avatarSeed = null,
@@ -352,6 +353,7 @@ class UserServiceTest {
             val now = Instant.now()
             fakeUserClient.seed(ClientUser(
                 id = userId,
+                externalId = UUID.randomUUID(),
                 email = "noseed@example.com",
                 username = "noseed",
                 avatarSeed = null,

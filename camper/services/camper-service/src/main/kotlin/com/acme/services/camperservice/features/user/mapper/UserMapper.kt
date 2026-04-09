@@ -10,6 +10,7 @@ object UserMapper {
 
     fun fromClient(clientUser: ClientUser): User = User(
         id = clientUser.id,
+        externalId = clientUser.externalId,
         email = clientUser.email,
         username = clientUser.username,
         experienceLevel = clientUser.experienceLevel,

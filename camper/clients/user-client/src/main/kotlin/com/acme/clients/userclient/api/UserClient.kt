@@ -3,6 +3,7 @@ package com.acme.clients.userclient.api
 import com.acme.clients.common.Result
 import com.acme.clients.common.error.AppError
 import com.acme.clients.userclient.model.User
+import java.util.UUID
 
 /**
  * Client interface for User entity operations.
@@ -31,4 +32,10 @@ interface UserClient {
 
     /** Replace all dietary restrictions for a user (idempotent). */
     fun setDietaryRestrictions(param: SetDietaryRestrictionsParam): Result<List<String>, AppError>
+
+    /** Look up a user by external_id. */
+    fun getByExternalId(param: GetByExternalIdParam): Result<User, AppError>
+
+    /** Bulk lookup: internal user IDs -> external IDs. */
+    fun getExternalIds(param: GetExternalIdsParam): Result<Map<UUID, UUID>, AppError>
 }

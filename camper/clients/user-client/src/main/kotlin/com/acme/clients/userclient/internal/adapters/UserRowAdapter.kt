@@ -8,6 +8,7 @@ object UserRowAdapter {
 
     fun fromResultSet(rs: ResultSet): User = User(
         id = rs.getObject("id", UUID::class.java),
+        externalId = rs.getObject("external_id", UUID::class.java),
         email = rs.getString("email"),
         username = rs.getString("username"),
         experienceLevel = rs.getString("experience_level"),
