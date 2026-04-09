@@ -10,9 +10,19 @@ import com.acme.clients.planclient.model.Plan
 import com.acme.clients.planclient.model.PlanMember
 import com.acme.services.camperservice.common.auth.PlanRoleAuthorizer
 import com.acme.services.camperservice.features.gearpack.error.GearPackError
+import com.acme.services.camperservice.features.gearpack.dto.GearPackItemResponse
+import com.acme.services.camperservice.features.gearpack.dto.GearPackItemSearchResultResponse
+import com.acme.services.camperservice.features.gearpack.model.GearPack
+import com.acme.services.camperservice.features.gearpack.params.AddGearPackItemParam
 import com.acme.services.camperservice.features.gearpack.params.ApplyGearPackParam
+import com.acme.services.camperservice.features.gearpack.params.CreateGearPackParam
+import com.acme.services.camperservice.features.gearpack.params.DeleteGearPackParam
 import com.acme.services.camperservice.features.gearpack.params.GetGearPackParam
 import com.acme.services.camperservice.features.gearpack.params.ListGearPacksParam
+import com.acme.services.camperservice.features.gearpack.params.RemoveGearPackItemParam
+import com.acme.services.camperservice.features.gearpack.params.SearchGearPackItemsParam
+import com.acme.services.camperservice.features.gearpack.params.UpdateGearPackItemParam
+import com.acme.services.camperservice.features.gearpack.params.UpdateGearPackParam
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -59,12 +69,13 @@ class GearPackServiceTest {
         name: String = "Cooking Equipment",
         description: String = "Essential cooking gear",
         items: List<ClientGearPackItem> = emptyList(),
+        createdBy: UUID? = null,
     ) = ClientGearPack(
         id = id,
         name = name,
         description = description,
         items = items,
-        createdBy = null,
+        createdBy = createdBy,
         createdAt = now,
         updatedAt = now,
     )
@@ -413,6 +424,506 @@ class GearPackServiceTest {
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(GearPackError.Invalid::class.java)
             assertThat((error as GearPackError.Invalid).field).isEqualTo("groupSize")
+        }
+    }
+
+    @Nested
+    inner class CreateGearPack {
+
+        @Test
+        fun `successfully creates a gear pack and returns it`() {
+            val result = gearPackService.create(
+                CreateGearPackParam(name = "My Pack", description = "A custom pack", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val pack = (result as Result.Success).value
+            assertThat(pack.name).isEqualTo("My Pack")
+            assertThat(pack.description).isEqualTo("A custom pack")
+            assertThat(pack.items).isEmpty()
+        }
+
+        @Test
+        fun `returns Invalid error when name is blank`() {
+            val result = gearPackService.create(
+                CreateGearPackParam(name = "   ", description = "desc", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(GearPackError.Invalid::class.java)
+            assertThat((error as GearPackError.Invalid).field).isEqualTo("name")
+        }
+
+        @Test
+        fun `returns DuplicateName error when name already exists`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(name = "Existing Pack", createdBy = ownerId))
+
+            val result = gearPackService.create(
+                CreateGearPackParam(name = "Existing Pack", description = "desc", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.DuplicateName::class.java)
+        }
+    }
+
+    @Nested
+    inner class UpdateGearPack {
+
+        @Test
+        fun `successfully updates a gear pack when caller is the creator`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = ownerId))
+
+            val result = gearPackService.update(
+                UpdateGearPackParam(id = packId, name = "Updated Name", description = null, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val pack = (result as Result.Success).value
+            assertThat(pack.name).isEqualTo("Updated Name")
+        }
+
+        @Test
+        fun `returns NotCreator error when caller is not the creator`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = ownerId))
+
+            val result = gearPackService.update(
+                UpdateGearPackParam(id = packId, name = "New Name", description = null, requestingUserId = memberId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(GearPackError.NotCreator::class.java)
+            assertThat((error as GearPackError.NotCreator).userId).isEqualTo(memberId)
+        }
+
+        @Test
+        fun `returns SystemPack error when updating a pack with null createdBy`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = null))
+
+            val result = gearPackService.update(
+                UpdateGearPackParam(id = packId, name = "New Name", description = null, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.SystemPack::class.java)
+        }
+
+        @Test
+        fun `returns NotFound error when pack does not exist`() {
+            val result = gearPackService.update(
+                UpdateGearPackParam(id = UUID.randomUUID(), name = "New Name", description = null, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotFound::class.java)
+        }
+    }
+
+    @Nested
+    inner class DeleteGearPack {
+
+        @Test
+        fun `successfully deletes a gear pack when caller is the creator`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = ownerId))
+
+            val result = gearPackService.delete(
+                DeleteGearPackParam(id = packId, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+        @Test
+        fun `returns NotCreator error when caller is not the creator`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = ownerId))
+
+            val result = gearPackService.delete(
+                DeleteGearPackParam(id = packId, requestingUserId = memberId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(GearPackError.NotCreator::class.java)
+            assertThat((error as GearPackError.NotCreator).userId).isEqualTo(memberId)
+        }
+
+        @Test
+        fun `returns SystemPack error when deleting a system pack`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = null))
+
+            val result = gearPackService.delete(
+                DeleteGearPackParam(id = packId, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.SystemPack::class.java)
+        }
+
+        @Test
+        fun `returns NotFound error when pack does not exist`() {
+            val result = gearPackService.delete(
+                DeleteGearPackParam(id = UUID.randomUUID(), requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotFound::class.java)
+        }
+    }
+
+    @Nested
+    inner class AddGearPackItem {
+
+        @Test
+        fun `successfully adds an item to a pack when caller is the creator`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = ownerId))
+
+            val result = gearPackService.addItem(
+                AddGearPackItemParam(
+                    gearPackId = packId,
+                    name = "Tent",
+                    category = "camp",
+                    defaultQuantity = 1,
+                    scalable = false,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val item = (result as Result.Success).value
+            assertThat(item.name).isEqualTo("Tent")
+            assertThat(item.category).isEqualTo("camp")
+            assertThat(item.defaultQuantity).isEqualTo(1)
+            assertThat(item.scalable).isFalse()
+        }
+
+        @Test
+        fun `returns NotCreator error when caller is not the creator`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = ownerId))
+
+            val result = gearPackService.addItem(
+                AddGearPackItemParam(
+                    gearPackId = packId,
+                    name = "Tent",
+                    category = "camp",
+                    defaultQuantity = 1,
+                    scalable = false,
+                    requestingUserId = memberId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotCreator::class.java)
+        }
+
+        @Test
+        fun `returns SystemPack error when adding to a system pack`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(createdBy = null))
+
+            val result = gearPackService.addItem(
+                AddGearPackItemParam(
+                    gearPackId = packId,
+                    name = "Tent",
+                    category = "camp",
+                    defaultQuantity = 1,
+                    scalable = false,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.SystemPack::class.java)
+        }
+
+        @Test
+        fun `returns DuplicateItemName error when item name already exists in pack`() {
+            val existingItem = clientGearPackItem(name = "Tent")
+            fakeGearPackClient.seedGearPack(clientGearPack(items = listOf(existingItem), createdBy = ownerId))
+
+            val result = gearPackService.addItem(
+                AddGearPackItemParam(
+                    gearPackId = packId,
+                    name = "Tent",
+                    category = "camp",
+                    defaultQuantity = 1,
+                    scalable = false,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.DuplicateItemName::class.java)
+        }
+
+        @Test
+        fun `returns NotFound when pack does not exist`() {
+            val result = gearPackService.addItem(
+                AddGearPackItemParam(
+                    gearPackId = UUID.randomUUID(),
+                    name = "Tent",
+                    category = "camp",
+                    defaultQuantity = 1,
+                    scalable = false,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotFound::class.java)
+        }
+    }
+
+    @Nested
+    inner class UpdateGearPackItem {
+
+        private val itemId = UUID.fromString("dd000000-0001-4000-8000-000000000001")
+
+        private fun seededItemInCreatorPack(): ClientGearPackItem {
+            val item = clientGearPackItem(name = "Sleeping Bag").copy(id = itemId)
+            fakeGearPackClient.seedGearPack(clientGearPack(items = listOf(item), createdBy = ownerId))
+            return item
+        }
+
+        @Test
+        fun `successfully updates an item when caller is the creator`() {
+            seededItemInCreatorPack()
+
+            val result = gearPackService.updateItem(
+                UpdateGearPackItemParam(
+                    id = itemId,
+                    gearPackId = packId,
+                    name = "Sleeping Bag Pro",
+                    category = null,
+                    defaultQuantity = null,
+                    scalable = null,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val item = (result as Result.Success).value
+            assertThat(item.name).isEqualTo("Sleeping Bag Pro")
+        }
+
+        @Test
+        fun `returns NotCreator error when caller is not the creator`() {
+            seededItemInCreatorPack()
+
+            val result = gearPackService.updateItem(
+                UpdateGearPackItemParam(
+                    id = itemId,
+                    gearPackId = packId,
+                    name = "New Name",
+                    category = null,
+                    defaultQuantity = null,
+                    scalable = null,
+                    requestingUserId = memberId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotCreator::class.java)
+        }
+
+        @Test
+        fun `returns ItemNotFound when item does not exist in the pack`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(items = emptyList(), createdBy = ownerId))
+
+            val result = gearPackService.updateItem(
+                UpdateGearPackItemParam(
+                    id = UUID.randomUUID(),
+                    gearPackId = packId,
+                    name = "New Name",
+                    category = null,
+                    defaultQuantity = null,
+                    scalable = null,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.ItemNotFound::class.java)
+        }
+
+        @Test
+        fun `returns SystemPack when pack is system-created`() {
+            val item = clientGearPackItem(name = "Sleeping Bag").copy(id = itemId)
+            fakeGearPackClient.seedGearPack(clientGearPack(items = listOf(item), createdBy = null))
+
+            val result = gearPackService.updateItem(
+                UpdateGearPackItemParam(
+                    id = itemId,
+                    gearPackId = packId,
+                    name = "New Name",
+                    category = null,
+                    defaultQuantity = null,
+                    scalable = null,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.SystemPack::class.java)
+        }
+
+        @Test
+        fun `returns NotFound when pack does not exist`() {
+            val result = gearPackService.updateItem(
+                UpdateGearPackItemParam(
+                    id = itemId,
+                    gearPackId = UUID.randomUUID(),
+                    name = "New Name",
+                    category = null,
+                    defaultQuantity = null,
+                    scalable = null,
+                    requestingUserId = ownerId,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotFound::class.java)
+        }
+    }
+
+    @Nested
+    inner class RemoveGearPackItem {
+
+        private val itemId = UUID.fromString("ee000000-0001-4000-8000-000000000001")
+
+        private fun seededItemInCreatorPack(): ClientGearPackItem {
+            val item = clientGearPackItem(name = "Trekking Poles").copy(id = itemId)
+            fakeGearPackClient.seedGearPack(clientGearPack(items = listOf(item), createdBy = ownerId))
+            return item
+        }
+
+        @Test
+        fun `successfully removes an item when caller is the creator`() {
+            seededItemInCreatorPack()
+
+            val result = gearPackService.removeItem(
+                RemoveGearPackItemParam(id = itemId, gearPackId = packId, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+        @Test
+        fun `returns NotCreator error when caller is not the creator`() {
+            seededItemInCreatorPack()
+
+            val result = gearPackService.removeItem(
+                RemoveGearPackItemParam(id = itemId, gearPackId = packId, requestingUserId = memberId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotCreator::class.java)
+        }
+
+        @Test
+        fun `returns ItemNotFound when item does not exist in the pack`() {
+            fakeGearPackClient.seedGearPack(clientGearPack(items = emptyList(), createdBy = ownerId))
+
+            val result = gearPackService.removeItem(
+                RemoveGearPackItemParam(id = UUID.randomUUID(), gearPackId = packId, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.ItemNotFound::class.java)
+        }
+
+        @Test
+        fun `returns SystemPack when pack is system-created`() {
+            val item = clientGearPackItem(name = "Trekking Poles").copy(id = itemId)
+            fakeGearPackClient.seedGearPack(clientGearPack(items = listOf(item), createdBy = null))
+
+            val result = gearPackService.removeItem(
+                RemoveGearPackItemParam(id = itemId, gearPackId = packId, requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.SystemPack::class.java)
+        }
+
+        @Test
+        fun `returns NotFound when pack does not exist`() {
+            val result = gearPackService.removeItem(
+                RemoveGearPackItemParam(id = itemId, gearPackId = UUID.randomUUID(), requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            assertThat((result as Result.Failure).error).isInstanceOf(GearPackError.NotFound::class.java)
+        }
+    }
+
+    @Nested
+    inner class SearchGearPackItems {
+
+        @BeforeEach
+        fun seedPacks() {
+            fakeGearPackClient.seedGearPack(
+                clientGearPack(
+                    id = packId,
+                    name = "Cooking Equipment",
+                    items = listOf(
+                        clientGearPackItem(name = "Cast Iron Pan"),
+                        clientGearPackItem(name = "Portable Stove"),
+                    ),
+                ),
+                clientGearPack(
+                    id = UUID.randomUUID(),
+                    name = "Sleeping Gear",
+                    items = listOf(
+                        clientGearPackItem(name = "Sleeping Bag"),
+                    ),
+                ),
+            )
+        }
+
+        @Test
+        fun `returns matching items across all packs`() {
+            val result = gearPackService.searchItems(
+                SearchGearPackItemsParam(query = "pan", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val items = (result as Result.Success).value
+            assertThat(items).hasSize(1)
+            assertThat(items.first().name).isEqualTo("Cast Iron Pan")
+            assertThat(items.first().gearPackName).isEqualTo("Cooking Equipment")
+        }
+
+        @Test
+        fun `returns empty list when no items match the query`() {
+            val result = gearPackService.searchItems(
+                SearchGearPackItemsParam(query = "hammock", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat((result as Result.Success).value).isEmpty()
+        }
+
+        @Test
+        fun `returns all matching items when query matches multiple packs`() {
+            val result = gearPackService.searchItems(
+                SearchGearPackItemsParam(query = "s", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            val items = (result as Result.Success).value
+            assertThat(items.map { it.name }).containsExactlyInAnyOrder("Cast Iron Pan", "Portable Stove", "Sleeping Bag")
+        }
+
+        @Test
+        fun `returns Invalid error when query is blank`() {
+            val result = gearPackService.searchItems(
+                SearchGearPackItemsParam(query = "   ", requestingUserId = ownerId)
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(GearPackError.Invalid::class.java)
+            assertThat((error as GearPackError.Invalid).field).isEqualTo("q")
         }
     }
 }
