@@ -15,6 +15,7 @@ object GearPackRowAdapter {
         name = rs.getString("name"),
         description = rs.getString("description"),
         items = emptyList(),
+        createdBy = rs.getObject("created_by", UUID::class.java),
         createdAt = rs.getTimestamp("created_at").toInstant(),
         updatedAt = rs.getTimestamp("updated_at").toInstant(),
     )
