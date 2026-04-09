@@ -24,4 +24,6 @@ internal class JdbiUserClient(jdbi: Jdbi) : UserClient {
     override fun update(param: UpdateUserParam): Result<User, AppError> = updateUser.execute(param)
     override fun getDietaryRestrictions(param: GetDietaryRestrictionsParam): Result<List<String>, AppError> = getDietaryRestrictions.execute(param)
     override fun setDietaryRestrictions(param: SetDietaryRestrictionsParam): Result<List<String>, AppError> = setDietaryRestrictions.execute(param)
+    override fun getByExternalId(param: GetByExternalIdParam): Result<User, AppError> = TODO()
+    override fun getExternalIds(param: GetExternalIdsParam): Result<Map<java.util.UUID, java.util.UUID>, AppError> = TODO()
 }

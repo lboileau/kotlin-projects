@@ -36,8 +36,8 @@ class PlanServiceTest {
         fakeEmailClient.reset()
         fakeInvitationClient.reset()
         fakeUserClient.seed(
-            User(id = ownerId, email = "owner@example.com", username = "owner", createdAt = Instant.now(), updatedAt = Instant.now()),
-            User(id = otherUserId, email = "other@example.com", username = "other", createdAt = Instant.now(), updatedAt = Instant.now())
+            User(id = ownerId, externalId = UUID.randomUUID(), email = "owner@example.com", username = "owner", createdAt = Instant.now(), updatedAt = Instant.now()),
+            User(id = otherUserId, externalId = UUID.randomUUID(), email = "other@example.com", username = "other", createdAt = Instant.now(), updatedAt = Instant.now())
         )
     }
 
@@ -359,7 +359,7 @@ class PlanServiceTest {
             planService.addMember(AddPlanMemberParam(planId = plan.id, email = "other@example.com", requestingUserId = ownerId))
             val thirdUserId = UUID.randomUUID()
             fakeUserClient.seed(
-                User(id = thirdUserId, email = "third@example.com", username = "third", createdAt = Instant.now(), updatedAt = Instant.now())
+                User(id = thirdUserId, externalId = UUID.randomUUID(), email = "third@example.com", username = "third", createdAt = Instant.now(), updatedAt = Instant.now())
             )
             planService.addMember(AddPlanMemberParam(planId = plan.id, email = "third@example.com", requestingUserId = ownerId))
 
@@ -486,7 +486,7 @@ class PlanServiceTest {
             val plan = (planService.create(CreatePlanParam(name = "Trip", userId = ownerId)) as Result.Success).value
             val nonMemberId = UUID.randomUUID()
             fakeUserClient.seed(
-                User(id = nonMemberId, email = "nonmember@example.com", username = "nonmember", createdAt = Instant.now(), updatedAt = Instant.now())
+                User(id = nonMemberId, externalId = UUID.randomUUID(), email = "nonmember@example.com", username = "nonmember", createdAt = Instant.now(), updatedAt = Instant.now())
             )
 
             val result = planService.updateMemberRole(

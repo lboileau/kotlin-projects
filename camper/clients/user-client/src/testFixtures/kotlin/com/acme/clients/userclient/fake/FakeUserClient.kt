@@ -65,6 +65,7 @@ class FakeUserClient : UserClient {
         }
         val entity = User(
             id = UUID.randomUUID(),
+            externalId = UUID.randomUUID(),
             email = normalizedEmail,
             username = param.username,
             experienceLevel = null,
@@ -108,6 +109,10 @@ class FakeUserClient : UserClient {
 
         return success(dietaryRestrictionsStore[param.userId] ?: emptyList())
     }
+
+    override fun getByExternalId(param: GetByExternalIdParam): Result<User, AppError> = TODO()
+
+    override fun getExternalIds(param: GetExternalIdsParam): Result<Map<java.util.UUID, java.util.UUID>, AppError> = TODO()
 
     override fun setDietaryRestrictions(param: SetDietaryRestrictionsParam): Result<List<String>, AppError> {
         val validation = validateSetDietaryRestrictions.execute(param)
