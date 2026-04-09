@@ -8,6 +8,7 @@ class GearPackFixture(private val jdbcTemplate: JdbcTemplate) {
 
     companion object {
         val COOKING_EQUIPMENT_PACK_ID: UUID = UUID.fromString("cc000000-0001-4000-8000-000000000001")
+        val COOKING_EQUIPMENT_ITEM_ID: UUID = UUID.fromString("cc000000-0001-4000-8000-000000000101") // Cast Iron Pan
     }
 
     fun insertUser(
@@ -49,6 +50,70 @@ class GearPackFixture(private val jdbcTemplate: JdbcTemplate) {
         )
     }
 
+    fun insertGearPack(
+        id: UUID = UUID.randomUUID(),
+        name: String = "Pack-${UUID.randomUUID().toString().take(8)}",
+        description: String = "",
+        createdBy: UUID,
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now()
+    ): UUID {
+        jdbcTemplate.update(
+            "INSERT INTO gear_packs (id, name, description, created_by, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+            id, name, description, createdBy,
+            java.sql.Timestamp.from(createdAt), java.sql.Timestamp.from(updatedAt)
+        )
+        return id
+    }
+
+    fun insertGearPackItem(
+        id: UUID = UUID.randomUUID(),
+        gearPackId: UUID,
+        name: String = "Item-${UUID.randomUUID().toString().take(8)}",
+        category: String = "kitchen",
+        defaultQuantity: Int = 1,
+        scalable: Boolean = false,
+        sortOrder: Int = 1,
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now()
+    ): UUID {
+        jdbcTemplate.update(
+            """
+            INSERT INTO gear_pack_items (id, gear_pack_id, name, category, default_quantity, scalable, sort_order, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            id, gearPackId, name, category, defaultQuantity, scalable, sortOrder,
+            java.sql.Timestamp.from(createdAt), java.sql.Timestamp.from(updatedAt)
+        )
+        return id
+    }
+
+    fun insertItemWithGearPackId(
+        planId: UUID,
+        gearPackId: UUID,
+        id: UUID = UUID.randomUUID(),
+        name: String = "Item-${UUID.randomUUID().toString().take(8)}",
+        createdAt: Instant = Instant.now(),
+        updatedAt: Instant = Instant.now()
+    ): UUID {
+        jdbcTemplate.update(
+            """
+            INSERT INTO items (id, plan_id, name, category, quantity, packed, gear_pack_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
+            id, planId, name, "kitchen", 1, false, gearPackId,
+            java.sql.Timestamp.from(createdAt), java.sql.Timestamp.from(updatedAt)
+        )
+        return id
+    }
+
+    fun getGearPackItemsByPackId(gearPackId: UUID): List<Map<String, Any?>> {
+        return jdbcTemplate.queryForList(
+            "SELECT id, gear_pack_id, name, category, default_quantity, scalable, sort_order FROM gear_pack_items WHERE gear_pack_id = ? ORDER BY sort_order",
+            gearPackId
+        )
+    }
+
     fun getItemsByPlanId(planId: UUID): List<Map<String, Any?>> {
         return jdbcTemplate.queryForList(
             "SELECT id, plan_id, user_id, name, category, quantity, packed, gear_pack_id FROM items WHERE plan_id = ? ORDER BY name",
@@ -57,9 +122,9 @@ class GearPackFixture(private val jdbcTemplate: JdbcTemplate) {
     }
 
     fun truncateAll() {
-        // TRUNCATE users CASCADE now cascades to gear_packs via the V038 FK (gear_packs.created_by -> users.id)
-        // Re-seed gear_packs and gear_pack_items after truncation since they are migration-managed reference data
-        jdbcTemplate.execute("TRUNCATE TABLE items, plan_members, plans, users CASCADE")
+        // Truncate user-created gear packs and items, then re-seed system reference data.
+        // gear_pack_items must come before gear_packs (FK cascade), items before plans/users.
+        jdbcTemplate.execute("TRUNCATE TABLE items, plan_members, plans, gear_pack_items, gear_packs, users CASCADE")
         reseedGearPackReferenceData()
     }
 
