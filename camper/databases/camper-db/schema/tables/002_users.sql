@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     experience_level  VARCHAR(20),
     avatar_seed       VARCHAR(64),
     profile_completed BOOLEAN      NOT NULL    DEFAULT false,
+    external_id       UUID         NOT NULL    DEFAULT gen_random_uuid(),
     created_at        TIMESTAMPTZ  NOT NULL    DEFAULT now(),
     updated_at        TIMESTAMPTZ  NOT NULL    DEFAULT now(),
 
@@ -13,3 +14,4 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_external_id ON users (external_id);
