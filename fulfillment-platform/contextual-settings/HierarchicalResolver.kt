@@ -25,13 +25,28 @@ class HierarchicalResolver(
      * Resolve a single setting for a given context.
      *
      * 1. Batch-fetch all scope variants of this setting from REDB
-     * 2. Walk the policy's scope vectors in order
+     * 2. Walk the policy's scope vectors in order (in-memory)
      * 3. Return the first (or merged) match based on the strategy
      */
     fun <T : Any> resolve(
         definition: ContextualSettingDefinition<T>,
         context: SettingsContext,
     ): T? {
+        return resolveWithAudit(definition, context)?.value
+    }
+
+    /**
+     * Resolve with audit information — returns the resolved value
+     * along with the query scope and matching scope.
+     *
+     * The audit info enables callers to match results back to their
+     * originating context (e.g., which fulfillment method a setting
+     * belongs to, since fulfillment_method_id is part of the query).
+     */
+    fun <T : Any> resolveWithAudit(
+        definition: ContextualSettingDefinition<T>,
+        context: SettingsContext,
+    ): ResolvedSettingWithAudit<T>? {
         // Fetch all scope variants for this setting in one batch call
         val entities = redbClient.batchQuery(
             RedbBatchQuery(
@@ -41,8 +56,8 @@ class HierarchicalResolver(
         )
 
         return when (definition.resolutionPolicy.strategy) {
-            ResolutionStrategy.OVERRIDE_WINS -> resolveOverrideWins(definition, context, entities)
-            ResolutionStrategy.DEFAULTS_WITH_OVERRIDES -> resolveDefaultsWithOverrides(definition, context, entities)
+            ResolutionStrategy.OVERRIDE_WINS -> resolveOverrideWinsWithAudit(definition, context, entities)
+            ResolutionStrategy.DEFAULTS_WITH_OVERRIDES -> resolveDefaultsWithOverridesWithAudit(definition, context, entities)
         }
     }
 
@@ -162,6 +177,70 @@ class HierarchicalResolver(
         }
     }
 
+    // ── Audit-returning variants ────────────────────────────────
+
+    private fun <T : Any> resolveOverrideWinsWithAudit(
+        definition: ContextualSettingDefinition<T>,
+        context: SettingsContext,
+        entities: List<RedbEntity>,
+    ): ResolvedSettingWithAudit<T>? {
+        val policy = definition.resolutionPolicy
+
+        for (scopeVector in policy.scopes) {
+            val scopeKeys = context.buildScopeKeys(scopeVector) ?: continue
+
+            val match = entities.find { entity ->
+                entity.scopeKeys == scopeKeys
+            }
+
+            if (match != null) {
+                val value = deserializer.deserialize(match, definition.modelClass)
+                return ResolvedSettingWithAudit(
+                    value = value,
+                    queryContext = context.toScopeMap(),
+                    matchingContext = match.scopeKeys,
+                )
+            }
+        }
+
+        return null
+    }
+
+    private fun <T : Any> resolveDefaultsWithOverridesWithAudit(
+        definition: ContextualSettingDefinition<T>,
+        context: SettingsContext,
+        entities: List<RedbEntity>,
+    ): ResolvedSettingWithAudit<T>? {
+        val policy = definition.resolutionPolicy
+        var accumulated: Map<String, Any>? = null
+        val matchedScopes = mutableListOf<Map<String, String>>()
+
+        for (scopeVector in policy.scopes) {
+            val scopeKeys = context.buildScopeKeys(scopeVector) ?: continue
+
+            val match = entities.find { entity ->
+                entity.scopeKeys == scopeKeys
+            }
+
+            if (match != null) {
+                accumulated = if (accumulated == null) {
+                    match.data
+                } else {
+                    accumulated + match.data
+                }
+                matchedScopes.add(match.scopeKeys)
+            }
+        }
+
+        return accumulated?.let {
+            ResolvedSettingWithAudit(
+                value = deserializer.deserializeFromMap(it, definition.modelClass),
+                queryContext = context.toScopeMap(),
+                matchingContext = matchedScopes.lastOrNull() ?: emptyMap(),
+            )
+        }
+    }
+
     private fun <T : Any> resolveForDefinition(
         definition: ContextualSettingDefinition<*>,
         context: SettingsContext,
@@ -175,6 +254,17 @@ class HierarchicalResolver(
         }
     }
 }
+
+/**
+ * A resolved setting with audit information showing what was queried
+ * and what scope actually matched. This enables callers to match
+ * results back to their originating context.
+ */
+data class ResolvedSettingWithAudit<T>(
+    val value: T,
+    val queryContext: Map<String, String>,    // what we queried for
+    val matchingContext: Map<String, String>, // what scope actually matched
+)
 
 /**
  * Deserializer interface — abstracts proto deserialization.

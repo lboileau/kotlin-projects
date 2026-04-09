@@ -35,7 +35,7 @@ Our POS and Web platforms used two incompatible systems to describe how an order
                     │  "Dine In" = ???     │
                     │  PICKUP   = ???      │
                     │                     │
-                    │  ❌ Cannot aggregate │
+                    │  Cannot aggregate   │
                     │  across platforms    │
                     └─────────────────────┘
 ```
@@ -78,7 +78,7 @@ message FulfillmentSettings {
     DeliverySettings delivery_settings = 3;
     ShippingSettings shipping_settings = 4;
     InStoreSettings in_store_settings = 5;
-    // Only one populated based on type ☝️
+    // Only one populated based on type
 }
 
 // Order — per-type info objects with duplicated fields
@@ -88,7 +88,7 @@ message Fulfillment {
     DeliveryInfo delivery_info = 3;
     ShippingInfo shipping_info = 4;
     InStoreInfo in_store_info = 5;
-    // Only one populated based on type ☝️
+    // Only one populated based on type
 }
 
 // Each info type duplicates common fields
@@ -96,16 +96,45 @@ message PickupInfo {
     string customer_name = 1;
     string phone_number = 2;
     string pickup_at = 3;
-    // ... pickup-specific fields
 }
 
 message DeliveryInfo {
     string customer_name = 1;  // duplicated!
     string phone_number = 2;   // duplicated!
     Address delivery_address = 3;
-    // ... delivery-specific fields
 }
 ```
+
+## The Project I Joined
+
+A cross-platform initiative to unify POS onto Fulfillment Types had been **in flight for 1.5 years** and appeared stalled. Teams involved: iOS, Android, web, and server.
+
+**What I found:**
+- No single owner or lead across the full project
+- Work was not broken into discrete deliverables
+- No one was accountable to specific outcomes
+- No one could articulate how far along we were or when we'd deliver
+
+**What I did:**
+- Ramped by working closely with tech leads across all four teams
+- Decomposed the project into ~8 workstreams with assigned DRIs:
+
+```
+Workstreams (each with an assigned DRI):
+  - Pre-paid checkouts
+  - Open-order checkouts
+  - Order state management (paid and open orders)
+  - Data migration (dining options → fulfillment types)
+  - Reporting
+  - Legacy POS systems
+  - ...
+```
+
+We successfully delivered the unification project.
+
+## The Eureka Moment
+
+In the process of delivering, I realized the architecture we'd just unified onto was fundamentally broken. The team wasn't thinking about this — the focus was purely on shipping the foundation. But the enum-based fulfillment types with their static, per-type settings could not support where the product needed to go.
 
 **Every code path needs to branch on the type:**
 
@@ -121,30 +150,5 @@ fun getCustomerName(fulfillment: Fulfillment): String {
 }
 ```
 
-## The Project I Joined
-
-A cross-platform initiative to unify POS onto Fulfillment Types had been **in flight for 1.5 years** and appeared stalled.
-
-**What I found:**
-- No single owner or lead across the full project
-- Work was not broken into discrete deliverables
-- No one was accountable to specific outcomes
-- No one could articulate how far along we were or when we'd deliver
-
-**What I did:**
-- Ramped by working closely with tech leads across iOS, Android, web, and server
-- Decomposed the project into ~8 workstreams with assigned DRIs:
-
-```
-Workstreams (each with an assigned DRI):
-  - Pre-paid checkouts
-  - Open-order checkouts
-  - Order state management (paid orders)
-  - Order state management (open orders)
-  - Data migration (dining options → fulfillment types)
-  - Reporting
-  - Legacy POS systems
-  - ...
-```
-
-We successfully delivered the unification project. But in the process, I realized the architecture we'd just unified onto was fundamentally broken. At the time, the team wasn't thinking about this — the focus was purely on shipping the foundation.
+> This architecture can't scale to where product needs to go.
+> We don't need more enum values — we need a fundamentally different model.

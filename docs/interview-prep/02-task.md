@@ -139,6 +139,10 @@ But what we NEED:
 Not possible with the current model
 ```
 
+### No Shared Settings
+
+Settings can't be shared across fulfillment types. If a merchant wants to set prep time to 20 minutes, they have to update every fulfillment type's settings individually. With item-level settings, that could mean thousands of updates just to change one value. There's no way to set a value once at the merchant level and have it inherited.
+
 ## The Realization
 
 > This architecture can't scale to where product needs to go.

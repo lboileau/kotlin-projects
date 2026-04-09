@@ -31,36 +31,3 @@ The key challenge wasn't just technical — it was organizational. I needed buy-
 4. **Embed with integrating teams** — worked closely with tech leads of drive-through, web, and other teams to bring them along
 5. **Clear contract: don't slow them down** — committed to not blocking existing team roadmaps while introducing the new platform
 
-## What the POC Included
-
-```
-┌──────────────────────────────────────────────────┐
-│                    POC Scope                      │
-│                                                  │
-│  ┌────────────────────────────────────────────┐  │
-│  │  Core Resolution Engine                    │  │
-│  │  • Context-based settings lookup           │  │
-│  │  • Hierarchical scope resolution           │  │
-│  │  • Per-behaviour resolution policies       │  │
-│  └────────────────────────────────────────────┘  │
-│                                                  │
-│  ┌────────────────────────────────────────────┐  │
-│  │  Management APIs                           │  │
-│  │  • CRUD for fulfillment methods            │  │
-│  │  • Scope-aware settings management         │  │
-│  └────────────────────────────────────────────┘  │
-│                                                  │
-│  ┌────────────────────────────────────────────┐  │
-│  │  Example Behaviours                        │  │
-│  │  • Demonstrated composability              │  │
-│  └────────────────────────────────────────────┘  │
-│                                                  │
-│  ┌────────────────────────────────────────────┐  │
-│  │  Admin GUI                                 │  │
-│  │  • Manage settings across scopes           │  │
-│  │  • Visualize inheritance + resolution      │  │
-│  │  • "Show don't tell" for stakeholders      │  │
-│  └────────────────────────────────────────────┘  │
-│                                                  │
-└──────────────────────────────────────────────────┘
-```

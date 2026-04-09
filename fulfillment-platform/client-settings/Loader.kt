@@ -3,37 +3,42 @@ package com.acme.clientsettings
 import com.acme.contextualsettings.SettingsContext
 
 // ──────────────────────────────────────────────────────────────────
-// Loader interface — the contract for all settings loaders.
-//
-// Each loader receives the request context and a map of already-loaded
-// dependencies (from upstream loaders in the DAG).
+// Loader interfaces — contracts for ConfigManagers and DataLoaders.
 // ──────────────────────────────────────────────────────────────────
 
 /**
- * A settings loader that produces a result of type T.
- * Loaders are discovered via @SettingsLoader annotation and
- * executed in dependency order by the LoaderDag.
+ * A settings data loader that produces a result of type T.
+ * Loaders are discovered via @SettingsDataLoader annotation and
+ * executed in dependency order by the DAG.
  */
 interface Loader<T> {
-    fun load(context: SettingsContext, dependencies: DependencyMap): T
+    fun load(context: SettingsContext, dependencies: DataResourceMap): T
 }
 
 /**
- * Type-safe container for dependency results from upstream loaders.
- * Populated by the DAG executor as it walks the dependency graph.
+ * A config manager that builds the final computed response from
+ * all pre-loaded data resources.
  */
-class DependencyMap(
+interface ConfigHandler<T> {
+    fun handle(context: SettingsContext, data: DataResourceMap): T
+}
+
+/**
+ * Type-safe container for data resources loaded by the DAG.
+ * Populated as the DAG executor walks the dependency graph.
+ */
+class DataResourceMap(
     private val results: Map<SettingsDomain, Any>,
 ) {
     /**
-     * Retrieve a dependency result by domain.
-     * Throws if the dependency was not declared in @SettingsLoader.dependsOn.
+     * Retrieve a data resource by domain.
+     * Throws if the dependency was not declared in @SettingsDataLoader.dependsOn.
      */
     @Suppress("UNCHECKED_CAST")
     fun <T> get(domain: SettingsDomain): T {
         return results[domain] as? T
             ?: throw IllegalStateException(
-                "Dependency $domain not found. Did you declare it in @SettingsLoader.dependsOn?"
+                "Data resource $domain not found. Did you declare it in dependsOn?"
             )
     }
 }

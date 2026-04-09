@@ -36,6 +36,15 @@ data class SettingsContext(
         }
         return keys
     }
+
+    /** Convert the full context to a scope map for audit purposes. */
+    fun toScopeMap(): Map<String, String> {
+        val map = mutableMapOf("merchant_id" to merchantId)
+        locationId?.let { map["location_id"] = it }
+        channelId?.let { map["channel_id"] = it }
+        fulfillmentMethodId?.let { map["fulfillment_method_id"] = it }
+        return map
+    }
 }
 
 enum class ScopeDimension(val key: String) {

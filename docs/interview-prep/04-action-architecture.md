@@ -11,43 +11,41 @@
                                  │
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
-│              1. Client Settings Service                              │
+│              1. Client Settings Service                               │
+│                 We built this in partnership with the client           │
+│                 platform team — writing a lot of the code.            │
 │                                                                      │
-│  • Receives request with context + settings domain enum              │
-│  • Builds DAG of dependencies from annotated loader classes          │
+│  • Receives request with context + settings domain identifier        │
+│  • Builds DAG of data dependencies to load                           │
 │  • Loads all required resources in dependency order                  │
-│  • Calls loaders to run business logic → build response              │
+│  • Calls settings handler to run business logic → build response     │
+│  • Kafka feeds for change detection                                  │
+│  • Push notifications for client cache invalidation                  │
 │                                                                      │
-│  ┌────────────────────────────────────────────────────────────┐      │
-│  │  @SettingsLoader(                                          │      │
-│  │      domain = CONTEXTUAL_FULFILLMENT_METHODS,              │      │
-│  │      dependsOn = [MERCHANT_INFO, LOCATION_INFO]            │      │
-│  │  )                                                         │      │
-│  │  class FulfillmentMethodLoader : Loader<...> { ... }       │      │
-│  └────────────────────────────────────────────────────────────┘      │
 └────────────────────────────────┬─────────────────────────────────────┘
                                  │
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │         2. Hierarchical Settings Resolution Service                  │
-│                      ⭐ NEW — we built this                          │
+│            We built this with the settings platform team —            │
+│            writing a lot of the code.                                │
 │                                                                      │
-│  • Settings registered with resolution policies                      │
+│  • Settings registered with resolution policies (defined in code)    │
 │  • Each behaviour defines its own scope vector precedence            │
-│  • Resolves values by walking the hierarchy                          │
+│  • Batch query for all contexts, return first matching result        │
+│    based on the policy order                                         │
 │  • Returns fully resolved settings for the given context             │
+│  • Also returns audit info: query scope + matching scope             │
 │                                                                      │
 └────────────────────────────────┬─────────────────────────────────────┘
                                  │
                                  ▼
 ┌──────────────────────────────────────────────────────────────────────┐
 │         3. Relationship-Entity Store (REDB / DynamoDB)                │
-│                      📦 Already existed                              │
+│            Already existed                                           │
 │                                                                      │
 │  • Graph-style relational entity storage                             │
 │  • Existing sync protocol for mobile clients                         │
-│  • Kafka feeds for change detection                                  │
-│  • Push notifications for client cache invalidation                  │
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
 ```
@@ -84,7 +82,7 @@ message RecipientDetailsSettings {
     string email = 3;
     bool customer_name_required = 4;
     bool phone_number_required = 5;
-    // ... explicit named fields, not generic FieldConfig
+    // ... explicit named fields
     GuestIdentifierSettings guest_identifier = 10;  // sub-behaviour
 }
 
@@ -132,7 +130,7 @@ message SettingsContext {
 
 ### Hierarchical Resolution — Per Behaviour
 
-Each behaviour registers its own resolution policy — an ordered list of scope vectors:
+Each behaviour registers its own resolution policy — an ordered list of scope vectors. Policies are defined statically in code in the contextual settings module:
 
 ```kotlin
 // Resolution policy: ordered list of scope vectors to check
@@ -158,7 +156,7 @@ val brandingPolicy = ResolutionPolicy(
 
 ### Resolution Flow
 
-All scope variants are batch-loaded from REDB in a single read. Resolution then happens in-memory — we walk the policy's scope vectors and return the first match:
+All scope variants are batch-loaded from REDB in a single read. Resolution then happens in-memory — we walk the policy's scope vectors and return the first matching result. We also return audit information: the query scope and the matching scope.
 
 ```
 Request: Get recipient_details for
@@ -171,80 +169,126 @@ Policy: [location+channel] → [channel] → [location] → [merchant]
 
 Step 1: In-memory: find entity with scope (M1, L1, POS)
         ┌─────────────────────────┐
-        │  (L1, POS) → FOUND ✓   │  ← Most specific scope matches
+        │  (L1, POS) → FOUND     │  ← Most specific scope matches
         └─────────────────────────┘
-        Return this value.
+        Return this value + audit: { query: (M1,L1,POS), match: (M1,L1,POS) }
 
 ─── OR if not defined at that scope: ───
 
 Step 1: In-memory: find entity with scope (M1, L1, POS) → not found
 Step 2: In-memory: find entity with scope (M1, POS)     → not found
 Step 3: In-memory: find entity with scope (M1, L1)      → not found
-Step 4: In-memory: find entity with scope (M1)           → FOUND ✓
+Step 4: In-memory: find entity with scope (M1)           → FOUND
         ┌─────────────────────────┐
         │  Sparse merchant-level  │
         │  default                │
         └─────────────────────────┘
-        Return this value.
+        Return this value + audit: { query: (M1,L1,POS), match: (M1) }
 
 Result: Merchant defines once, all contexts inherit.
         Override only where behavior should differ.
+        Audit trail shows exactly which scope won.
 ```
 
-## Annotation-Based Loader Registration
+## Multi-Phase Data Loading
 
-### DAG Dependency Flow
+The client settings service orchestrates a multi-phase load via a ConfigManager and annotated data loaders. There are two types of annotated classes:
 
-The dependency graph flows:
-**raw setting loaders → fulfillment methods → fulfillment methods profile (collection)**
+- **`@ConfigManager`** — orchestrates the final computed response (e.g., `CONTEXTUAL_FULFILLMENT_METHODS`)
+- **`@SettingsDataLoader`** — a specialized data loader that leverages the hierarchical settings service. Each is annotated with a domain identifier, and `dependsOn` references the identifier of other data loaders.
 
-```kotlin
-// General resource loader — declares dependencies by enum reference
-// The Client Settings Service builds a DAG and loads in order
-@SettingsLoader(
-    domain = SettingsDomain.CONTEXTUAL_FULFILLMENT_METHODS,
-    dependsOn = [SettingsDomain.MERCHANT_INFO, SettingsDomain.LOCATION_INFO,
-                 SettingsDomain.RECIPIENT_DETAILS, SettingsDomain.SCHEDULING]
-)
-class FulfillmentMethodLoader : Loader<FulfillmentMethodsResponse> {
+### Dependency Chain
 
-    override fun load(context: SettingsContext, dependencies: DependencyMap): FulfillmentMethodsResponse {
-        val merchant = dependencies.get<MerchantInfo>(SettingsDomain.MERCHANT_INFO)
-        val recipientDetails = dependencies.get<RecipientDetailsSettings>(SettingsDomain.RECIPIENT_DETAILS)
-        // ... compose behaviours from pre-loaded settings
-    }
-}
+```
+Phase 1: Load the PROFILE
+          A list of fulfillment methods available for this context.
+          (Lets us assign different fulfillment methods per context.)
+              │
+              ▼
+Phase 2: Load the FULFILLMENT METHODS
+          Each method contains references to its set of behaviours.
+          We now know which behaviour settings we need.
+              │
+              ▼
+Phase 3: Load all BEHAVIOUR SETTINGS
+          All individual settings required by the fulfillment methods.
+          Each setting is independently resolved via the hierarchical
+          settings service for the given context.
+
+All data is fetched BEFORE processing. The ConfigManager receives
+all loaded data as resources, then builds the computed fulfillment
+methods returned to the client.
 ```
 
-### Registered Setting — REDB-Backed with Built-In Resolution
+### Code Example
 
 ```kotlin
-// For contextual settings backed by REDB — annotation wires up
-// REDB fetching + deserialization automatically.
-// The resolution POLICY lives in the contextual settings module (in code),
-// not in the annotation — policies are defined statically alongside the
-// setting definitions.
-@RegisteredSetting(
-    redbReference = "com.acme.fulfillment.RecipientDetailsSettings",  // full proto descriptor
-)
-class RecipientDetailsSetting : ContextualSetting<RecipientDetailsSettings>
+// ConfigManager — builds the final computed response from pre-loaded data
+@ConfigManager(domain = SettingsDomain.CONTEXTUAL_FULFILLMENT_METHODS)
+class FulfillmentMethodConfigManager : ConfigHandler<List<FulfillmentMethod>> {
 
-// Complex behaviours: adapter composes multiple registered settings
-@SettingsLoader(
-    domain = SettingsDomain.RECIPIENT_DETAILS_BEHAVIOUR,
-    dependsOn = [SettingsDomain.RECIPIENT_DETAILS, SettingsDomain.GUEST_IDENTIFIER]
-)
-class RecipientDetailsBehaviourLoader : Loader<RecipientDetailsBehaviour> {
+    override fun handle(context: SettingsContext, data: DataResourceMap): List<FulfillmentMethod> {
+        val profile = data.get<FulfillmentMethodProfile>(SettingsDomain.FM_PROFILE)
+        val methods = data.get<List<FulfillmentMethodEntity>>(SettingsDomain.FM_METHODS)
+        val recipientDetails = data.get<ResolvedSetting<RecipientDetailsSettings>>(SettingsDomain.RECIPIENT_DETAILS)
+        // ... all data already loaded and resolved
 
-    @Inject lateinit var recipientDetails: RecipientDetailsSetting
-    @Inject lateinit var guestIdentifier: GuestIdentifierSetting
-
-    override fun load(context: SettingsContext, dependencies: DependencyMap): RecipientDetailsBehaviour {
-        val details = recipientDetails.resolve(context)
-        val guest = guestIdentifier.resolve(context)
-        return RecipientDetailsBehaviourAdapter.adapt(details, guest)
+        // Build computed fulfillment methods from the pre-loaded data.
+        // The resolved settings include both value and audit info
+        // (query context + matching context), which lets us match
+        // each setting result to its corresponding fulfillment method
+        // (since FM ID is part of the query context).
+        return methods.map { method ->
+            composeFulfillmentMethod(method, recipientDetails, ...)
+        }
     }
 }
+
+// SettingsDataLoader — fetches + resolves a setting via the hierarchical service
+// The annotation wires up REDB fetching + resolution automatically.
+// Resolution POLICY is defined in code in the contextual settings module.
+@SettingsDataLoader(
+    domain = SettingsDomain.RECIPIENT_DETAILS,
+    redbReference = "com.acme.fulfillment.RecipientDetailsSettings",
+    dependsOn = [SettingsDomain.FM_METHODS],
+)
+class RecipientDetailsDataLoader : ContextualSettingLoader<RecipientDetailsSettings>
+
+@SettingsDataLoader(
+    domain = SettingsDomain.GUEST_IDENTIFIER,
+    redbReference = "com.acme.fulfillment.GuestIdentifierSettings",
+    dependsOn = [SettingsDomain.FM_METHODS],
+)
+class GuestIdentifierDataLoader : ContextualSettingLoader<GuestIdentifierSettings>
+
+@SettingsDataLoader(
+    domain = SettingsDomain.FM_METHODS,
+    redbReference = "com.acme.fulfillment.FulfillmentMethod",
+    dependsOn = [SettingsDomain.FM_PROFILE],
+)
+class FulfillmentMethodDataLoader : ContextualSettingLoader<FulfillmentMethodEntity>
+
+@SettingsDataLoader(
+    domain = SettingsDomain.FM_PROFILE,
+    redbReference = "com.acme.fulfillment.FulfillmentMethodProfile",
+    dependsOn = [],  // loaded first — no dependencies
+)
+class FulfillmentMethodProfileDataLoader : ContextualSettingLoader<FulfillmentMethodProfile>
+```
+
+### Resolved Setting — Value + Audit
+
+```kotlin
+// Each resolved setting includes the value AND audit information
+data class ResolvedSetting<T>(
+    val value: T,
+    val queryContext: Map<String, String>,    // what we queried for
+    val matchingContext: Map<String, String>, // what scope actually matched
+)
+
+// This lets the ConfigManager match setting results back to
+// their corresponding fulfillment method — since fulfillment_method_id
+// is part of the query context.
 ```
 
 ## Composability in Action: Drive-Through Example
@@ -261,7 +305,6 @@ Response: Fulfillment Method "Drive Through"
 │  │   └── guest_identifier: { display_text: "Car Details" }│
 │  │       (generic field → specific UX)                    │
 │  ├── prep_time: { default: 3 min }                        │
-│  │   (resolved: L1+POS override won over merchant default)│
 │  ├── order_status_tracking: { show_window_number: true }  │
 │  └── scheduling: { enabled: false }                       │
 └──────────────────────────────────────────────────────────┘

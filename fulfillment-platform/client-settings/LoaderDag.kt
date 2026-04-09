@@ -3,29 +3,32 @@ package com.acme.clientsettings
 import com.acme.contextualsettings.SettingsContext
 
 // ──────────────────────────────────────────────────────────────────
-// DAG-Based Loader Executor
+// DAG-Based Data Loading
 //
 // At startup, the client settings service:
-//   1. Discovers all @SettingsLoader-annotated classes
-//   2. Builds a directed acyclic graph from their dependency declarations
-//   3. Validates no cycles exist
+//   1. Discovers all @SettingsDataLoader-annotated classes
+//   2. Discovers the @ConfigManager for each domain
+//   3. Builds a directed acyclic graph from dependency declarations
+//   4. Validates no cycles exist
 //
 // At request time:
 //   1. Client sends a domain key + context
-//   2. The DAG executor identifies the target loader and all transitive deps
-//   3. Executes loaders in topological order
-//   4. Each loader receives results from its upstream dependencies
-//   5. Returns the final result
+//   2. The DAG executor identifies the ConfigManager and all transitive deps
+//   3. Executes data loaders in topological order (multi-phase)
+//   4. All data is fetched BEFORE processing
+//   5. Passes all loaded data to the ConfigManager
+//   6. Returns the final computed response
 //
-// This means adding a new settings loader is just:
-//   1. Annotate a class with @SettingsLoader
-//   2. Declare dependencies
-//   3. Implement the load() method
+// Adding a new data loader:
+//   1. Annotate a class with @SettingsDataLoader
+//   2. Declare dependencies (other loader domain identifiers)
+//   3. Extend ContextualSettingLoader (or implement Loader directly)
 // The DAG takes care of ordering and dependency injection.
 // ──────────────────────────────────────────────────────────────────
 
 class LoaderDag(
     private val loaders: Map<SettingsDomain, LoaderNode>,
+    private val configManagers: Map<SettingsDomain, ConfigHandler<*>>,
 ) {
     data class LoaderNode(
         val domain: SettingsDomain,
@@ -35,16 +38,19 @@ class LoaderDag(
 
     companion object {
         /**
-         * Build the DAG from a list of discovered loaders.
+         * Build the DAG from discovered loaders and config managers.
          * Called once at startup — validates the graph is acyclic.
          */
-        fun build(loaderInstances: List<Loader<*>>): LoaderDag {
+        fun build(
+            loaderInstances: List<Loader<*>>,
+            configManagerInstances: List<ConfigHandler<*>>,
+        ): LoaderDag {
             val nodes = mutableMapOf<SettingsDomain, LoaderNode>()
 
             for (loader in loaderInstances) {
-                val annotation = loader::class.java.getAnnotation(SettingsLoader::class.java)
+                val annotation = loader::class.java.getAnnotation(SettingsDataLoader::class.java)
                     ?: throw IllegalStateException(
-                        "${loader::class.simpleName} implements Loader but is missing @SettingsLoader"
+                        "${loader::class.simpleName} implements Loader but is missing @SettingsDataLoader"
                     )
 
                 nodes[annotation.domain] = LoaderNode(
@@ -54,14 +60,22 @@ class LoaderDag(
                 )
             }
 
+            val managers = mutableMapOf<SettingsDomain, ConfigHandler<*>>()
+            for (manager in configManagerInstances) {
+                val annotation = manager::class.java.getAnnotation(ConfigManager::class.java)
+                    ?: throw IllegalStateException(
+                        "${manager::class.simpleName} implements ConfigHandler but is missing @ConfigManager"
+                    )
+                managers[annotation.domain] = manager
+            }
+
             // Validate: no cycles, all dependencies exist
             validateDag(nodes)
 
-            return LoaderDag(nodes)
+            return LoaderDag(nodes, managers)
         }
 
         private fun validateDag(nodes: Map<SettingsDomain, LoaderNode>) {
-            // Topological sort with cycle detection
             val visited = mutableSetOf<SettingsDomain>()
             val inProgress = mutableSetOf<SettingsDomain>()
 
@@ -86,18 +100,21 @@ class LoaderDag(
     }
 
     /**
-     * Execute the loader DAG for a target domain.
-     * Loads all transitive dependencies first, then the target.
+     * Execute the full load cycle for a target domain:
+     * 1. Load all data dependencies in topological order
+     * 2. Pass all loaded data to the ConfigManager
+     * 3. Return the computed response
      */
-    fun execute(targetDomain: SettingsDomain, context: SettingsContext): Any {
+    fun <T> execute(targetDomain: SettingsDomain, context: SettingsContext): T {
         val results = mutableMapOf<SettingsDomain, Any>()
         val executed = mutableSetOf<SettingsDomain>()
 
+        // Phase: load all data dependencies
         fun executeNode(domain: SettingsDomain) {
             if (domain in executed) return
 
             val node = loaders[domain]
-                ?: throw IllegalStateException("No loader registered for $domain")
+                ?: throw IllegalStateException("No data loader registered for $domain")
 
             // Execute dependencies first (topological order)
             for (dep in node.dependsOn) {
@@ -105,17 +122,24 @@ class LoaderDag(
             }
 
             // Execute this loader with its resolved dependencies
-            val dependencyMap = DependencyMap(
+            val dataMap = DataResourceMap(
                 results.filterKeys { it in node.dependsOn }
             )
-            val result = node.loader.load(context, dependencyMap)
-                ?: throw IllegalStateException("Loader for $domain returned null")
+            val result = node.loader.load(context, dataMap)
+                ?: throw IllegalStateException("Data loader for $domain returned null")
 
             results[domain] = result
             executed.add(domain)
         }
 
-        executeNode(targetDomain)
-        return results[targetDomain]!!
+        // Load all data
+        loaders.keys.forEach { executeNode(it) }
+
+        // Pass all data to the ConfigManager
+        val manager = configManagers[targetDomain]
+            ?: throw IllegalStateException("No ConfigManager registered for $targetDomain")
+
+        @Suppress("UNCHECKED_CAST")
+        return manager.handle(context, DataResourceMap(results)) as T
     }
 }

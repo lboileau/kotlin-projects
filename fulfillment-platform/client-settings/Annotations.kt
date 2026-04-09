@@ -1,54 +1,56 @@
 package com.acme.clientsettings
 
-import com.acme.contextualsettings.ContextualSettingDefinition
-
 // ──────────────────────────────────────────────────────────────────
 // Annotations for loader registration.
 //
-// @SettingsLoader: General-purpose loader — declares which domain
-// it serves and what it depends on. The client settings service
-// builds a DAG from these annotations and loads in topological order.
+// @ConfigManager: Top-level handler that builds the computed response
+// from pre-loaded data resources. Receives all data after the DAG
+// has executed.
 //
-// @RegisteredContextualSetting: Specialized annotation for settings
-// backed by REDB + contextual resolution. Wires up all the
-// resolution internals automatically — you just annotate a class
-// and get hierarchical resolution for free.
+// @SettingsDataLoader: Specialized data loader that leverages the
+// hierarchical settings service. Annotated with a domain identifier
+// and the REDB proto descriptor reference. Resolution policy is NOT
+// in the annotation — it lives in code in the contextual settings
+// module (SettingsDefinitions).
 // ──────────────────────────────────────────────────────────────────
 
 /**
- * Marks a class as a settings loader for a given domain.
- * The client settings service discovers these at startup,
- * builds a DAG from the dependency declarations, and executes
- * loaders in topological order.
+ * Marks a class as a ConfigManager — the top-level handler that
+ * builds the final computed response from pre-loaded data.
  *
- * @param domain The settings domain this loader serves.
- * @param dependsOn Domains that must be loaded before this one.
- *                  Their results are available via the DependencyMap.
+ * The client settings service discovers the ConfigManager for the
+ * requested domain and passes it all the data loaded by the DAG.
+ *
+ * @param domain The settings domain this config manager handles.
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class SettingsLoader(
+annotation class ConfigManager(
     val domain: SettingsDomain,
-    val dependsOn: Array<SettingsDomain> = [],
 )
 
 /**
- * Marks a class as a contextual setting backed by REDB.
+ * Marks a class as a settings data loader in the DAG.
  *
- * This annotation wires up:
- *   1. REDB entity fetching (via the proto descriptor reference)
- *   2. Proto deserialization
+ * Each data loader declares:
+ *   - domain: its identifier in the DAG
+ *   - redbReference: the full proto descriptor name for REDB lookup
+ *   - dependsOn: other data loader domain identifiers that must
+ *     load before this one
  *
- * The resolution POLICY is NOT in the annotation — it's defined
- * statically in the contextual settings module (SettingsDefinitions)
- * alongside the setting definition. This keeps policy logic in code
- * where it can be reviewed and tested, not scattered across annotations.
+ * The base implementation (ContextualSettingLoader) automatically
+ * wires up REDB fetching, hierarchical resolution, and proto
+ * deserialization. The resolution POLICY lives in the contextual
+ * settings module (SettingsDefinitions), not here.
  *
- * @param redbReference The full proto descriptor name used as the REDB
- *                      type key (e.g., "com.acme.fulfillment.RecipientDetailsSettings")
+ * @param domain This loader's identifier in the DAG.
+ * @param redbReference Full proto descriptor name (e.g., "com.acme.fulfillment.RecipientDetailsSettings")
+ * @param dependsOn Domain identifiers of loaders that must complete first.
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class RegisteredContextualSetting(
-    val redbReference: String, // full proto descriptor name
+annotation class SettingsDataLoader(
+    val domain: SettingsDomain,
+    val redbReference: String,
+    val dependsOn: Array<SettingsDomain> = [],
 )
