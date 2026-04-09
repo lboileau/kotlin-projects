@@ -218,6 +218,16 @@ fun GearPackError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("FORBIDDEN", message))
     is GearPackError.ApplyFailed -> ResponseEntity.status(500)
         .body(ApiResponse.ErrorBody("INTERNAL_ERROR", message))
+    is GearPackError.NotCreator -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is GearPackError.SystemPack -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is GearPackError.DuplicateName -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is GearPackError.DuplicateItemName -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is GearPackError.ItemNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
 }
 
 @JvmName("gearPackResultToResponseEntity")

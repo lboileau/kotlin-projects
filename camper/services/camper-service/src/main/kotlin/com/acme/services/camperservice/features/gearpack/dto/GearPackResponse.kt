@@ -8,6 +8,7 @@ data class GearPackSummaryResponse(
     val name: String,
     val description: String,
     val itemCount: Int,
+    val createdBy: UUID?,
     val createdAt: Instant,
     val updatedAt: Instant,
 )
@@ -17,6 +18,7 @@ data class GearPackDetailResponse(
     val name: String,
     val description: String,
     val items: List<GearPackItemResponse>,
+    val createdBy: UUID?,
     val createdAt: Instant,
     val updatedAt: Instant,
 )
@@ -46,4 +48,14 @@ data class AppliedItemResponse(
     val gearPackId: UUID? = null,
     val createdAt: Instant,
     val updatedAt: Instant,
+)
+
+data class GearPackItemSearchResultResponse(
+    val id: UUID,
+    val gearPackId: UUID,
+    val gearPackName: String,
+    val name: String,
+    val category: String,
+    val defaultQuantity: Int,
+    val scalable: Boolean,
 )
