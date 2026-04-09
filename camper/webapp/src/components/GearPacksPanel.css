@@ -285,3 +285,419 @@
   color: var(--lavender-deep);
   opacity: 0.7;
 }
+
+/* ── Create Pack Button ──────────────────── */
+
+.gear-pack-create-btn {
+  display: block;
+  width: 100%;
+  padding: 6px var(--space-sm);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--lavender-deep);
+  background: rgba(184, 165, 204, 0.08);
+  border: 1px dashed rgba(184, 165, 204, 0.4);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.gear-pack-create-btn:hover {
+  background: rgba(184, 165, 204, 0.14);
+  border-color: rgba(184, 165, 204, 0.6);
+}
+
+/* ── Create / Edit Forms ─────────────────── */
+
+.gear-pack-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+  padding: var(--space-sm);
+  background: rgba(184, 165, 204, 0.07);
+  border: 1px solid rgba(184, 165, 204, 0.2);
+  border-radius: var(--radius-sm);
+}
+
+.gear-pack-input {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--charcoal);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(168, 139, 91, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  width: 100%;
+  transition: border-color 0.2s ease;
+}
+
+.gear-pack-input:focus {
+  outline: none;
+  border-color: var(--lavender-deep);
+}
+
+.gear-pack-input:disabled {
+  opacity: 0.6;
+}
+
+.gear-pack-form-actions {
+  display: flex;
+  gap: var(--space-xs);
+  margin-top: 2px;
+}
+
+/* ── Edit Pack Card ──────────────────────── */
+
+.gear-pack-card--editing {
+  border-color: rgba(184, 165, 204, 0.4);
+  background: rgba(184, 165, 204, 0.06);
+}
+
+.gear-pack-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.gear-pack-edit-title {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--lavender-deep);
+}
+
+.gear-pack-cancel-icon-btn {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s;
+}
+
+.gear-pack-cancel-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.gear-pack-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-sm);
+}
+
+.gear-pack-error-inline {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--flame);
+  margin: 0;
+}
+
+/* ── Edit / Delete Buttons on Cards ─────── */
+
+.gear-pack-edit-btn,
+.gear-pack-delete-btn {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.gear-pack-edit-btn {
+  background: rgba(184, 165, 204, 0.12);
+  border: 1px solid rgba(184, 165, 204, 0.3);
+  color: var(--lavender-deep);
+}
+
+.gear-pack-edit-btn:hover {
+  background: rgba(184, 165, 204, 0.22);
+  border-color: var(--lavender-deep);
+}
+
+.gear-pack-delete-btn {
+  background: rgba(232, 93, 58, 0.06);
+  border: 1px solid rgba(232, 93, 58, 0.2);
+  color: var(--flame);
+}
+
+.gear-pack-delete-btn:hover {
+  background: rgba(232, 93, 58, 0.12);
+  border-color: var(--flame);
+}
+
+/* ── Save / Cancel Buttons ───────────────── */
+
+.gear-pack-cancel-btn {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(168, 139, 91, 0.2);
+  color: var(--charcoal-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gear-pack-cancel-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--charcoal);
+}
+
+/* ── Delete Confirmation Card ────────────── */
+
+.gear-pack-card--confirm {
+  border-color: rgba(232, 93, 58, 0.25);
+  background: rgba(232, 93, 58, 0.04);
+}
+
+.gear-pack-delete-message {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal);
+  margin: var(--space-xs) 0;
+  line-height: 1.4;
+}
+
+.gear-pack-delete-confirm-btn {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background: var(--flame);
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.gear-pack-delete-confirm-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.gear-pack-delete-confirm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Item Manager ────────────────────────── */
+
+.gear-pack-items-manager {
+  border-top: 1px solid rgba(168, 139, 91, 0.12);
+  padding-top: var(--space-sm);
+}
+
+.gear-pack-items-title {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--charcoal-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 var(--space-xs);
+}
+
+.gear-pack-item-row--manage {
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  padding: 4px 8px;
+}
+
+.gear-pack-item-cat-badge {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  color: var(--charcoal-light);
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 5px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.gear-pack-remove-item-btn {
+  font-size: 0.72rem;
+  color: var(--charcoal-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: auto;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.gear-pack-remove-item-btn:hover {
+  color: var(--flame);
+  background: rgba(232, 93, 58, 0.08);
+}
+
+/* ── Add Item Form ───────────────────────── */
+
+.gear-pack-add-item-form {
+  display: flex;
+  gap: var(--space-xs);
+  align-items: flex-start;
+  margin-top: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.gear-pack-search-wrapper {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.gear-pack-input--search {
+  width: 100%;
+}
+
+.gear-pack-suggestions {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: var(--parchment, #fdf8ef);
+  border: 1px solid rgba(168, 139, 91, 0.25);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.gear-pack-suggestion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(168, 139, 91, 0.08);
+  cursor: pointer;
+  text-align: left;
+  gap: var(--space-sm);
+  transition: background 0.15s;
+}
+
+.gear-pack-suggestion:last-child {
+  border-bottom: none;
+}
+
+.gear-pack-suggestion:hover {
+  background: rgba(184, 165, 204, 0.12);
+}
+
+.gear-pack-suggestion-name {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal);
+}
+
+.gear-pack-suggestion-meta {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--charcoal-light);
+  font-style: italic;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gear-pack-category-select {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--charcoal);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(168, 139, 91, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 5px 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.gear-pack-category-select:disabled {
+  opacity: 0.6;
+}
+
+.gear-pack-qty-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(168, 139, 91, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+
+.gear-pack-qty-btn {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.gear-pack-qty-btn:hover:not(:disabled) {
+  background: rgba(184, 165, 204, 0.2);
+}
+
+.gear-pack-qty-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.gear-pack-qty-value {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal);
+  min-width: 16px;
+  text-align: center;
+}
+
+.gear-pack-scalable-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--charcoal);
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 4px 6px;
+}
+
+.gear-pack-scalable-label input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.gear-pack-item-qty {
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  color: var(--charcoal-light);
+  font-style: italic;
+  flex-shrink: 0;
+}

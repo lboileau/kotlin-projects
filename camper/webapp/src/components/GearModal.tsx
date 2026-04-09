@@ -622,6 +622,7 @@ function ChecklistModal({ isOpen, onClose, planId, planOwnerId, members, current
                   memberCount={members.length}
                   canEdit={canEditShared}
                   onItemsChanged={loadItems}
+                  currentUserId={currentUserId}
                 />
               )}
 
