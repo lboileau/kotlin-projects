@@ -5,11 +5,11 @@ VALUES
     ('c2aade11-be2d-6a1a-dd8f-8ddbdf5a2c33', 'Vulcan', 'Hello, Vulcan!', now(), now())
 ON CONFLICT (name) DO NOTHING;
 
-INSERT INTO users (id, email, username, created_at, updated_at)
+INSERT INTO users (id, email, username, external_id, created_at, updated_at)
 VALUES
-    ('d3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'alice@example.com', 'Alice', now(), now()),
-    ('e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'bob@example.com', 'Bob', now(), now()),
-    ('f5dda144-e150-9d4d-00b2-b00e118d5f66', 'charlie@example.com', NULL, now(), now())
+    ('d3bbef22-cf3e-7b2b-ee90-9eece66b3d44', 'alice@example.com',   'Alice', '00000000-0000-0000-0000-000000000a01', now(), now()),
+    ('e4ccf033-d04f-8c3c-ffa1-affd007c4e55', 'bob@example.com',     'Bob',   '00000000-0000-0000-0000-000000000b02', now(), now()),
+    ('f5dda144-e150-9d4d-00b2-b00e118d5f66', 'charlie@example.com', NULL,    '00000000-0000-0000-0000-000000000c03', now(), now())
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================
