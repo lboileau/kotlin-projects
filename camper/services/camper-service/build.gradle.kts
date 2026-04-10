@@ -6,6 +6,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":clients:activity-ladder-client"))
     implementation(project(":clients:client-common"))
     implementation(project(":clients:world-client"))
     implementation(project(":clients:user-client"))

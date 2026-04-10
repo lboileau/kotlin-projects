@@ -13,6 +13,7 @@ import com.acme.services.camperservice.features.gearpack.error.GearPackError
 import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.user.error.UserError
 import com.acme.services.camperservice.features.world.error.WorldError
+import com.acme.services.camperservice.features.activityladder.error.LadderError
 import org.springframework.http.ResponseEntity
 
 fun WorldError.toResponseEntity(): ResponseEntity<Any> = when (this) {
@@ -268,6 +269,38 @@ fun RecipeError.toResponseEntity(): ResponseEntity<Any> = when (this) {
 fun <T> Result<T, RecipeError>.toResponseEntity(
     successStatus: Int = 200,
     transform: (T) -> Any = { it as Any }
+): ResponseEntity<Any> = when (this) {
+    is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
+    is Result.Failure -> error.toResponseEntity()
+}
+
+fun LadderError.toResponseEntity(): ResponseEntity<Any> = when (this) {
+    is LadderError.NotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is LadderError.ActivityNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is LadderError.NotCreator -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is LadderError.NotEligibleVoter -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is LadderError.IllegalState -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is LadderError.AlreadyVoted -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is LadderError.NotEnoughActivities -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is LadderError.NoPresentUsers -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is LadderError.Invalid -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is LadderError.InvalidVoteTarget -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+}
+
+@JvmName("activityLadderResultToResponseEntity")
+fun <T> Result<T, LadderError>.toResponseEntity(
+    successStatus: Int = 200,
+    transform: (T) -> Any = { it as Any },
 ): ResponseEntity<Any> = when (this) {
     is Result.Success -> ResponseEntity.status(successStatus).body(transform(value))
     is Result.Failure -> error.toResponseEntity()
