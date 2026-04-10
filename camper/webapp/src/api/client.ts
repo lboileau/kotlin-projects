@@ -438,6 +438,85 @@ export interface GearPackItemSearchResult {
   scalable: boolean;
 }
 
+// ── Activity Ladder Types ──────────────────────────
+
+export type LadderStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED';
+export type LadderBracket = 'WINNERS' | 'LOSERS' | 'ELIMINATED';
+
+export interface LadderSummary {
+  id: string;
+  title: string;
+  status: LadderStatus;
+  creatorId: string;
+  activityCount: number;
+  participantCount: number;
+  winnerActivityId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LadderActivity {
+  id: string;
+  name: string;
+  imageUrl: string;
+  distanceMinutes: number;
+  costPerPerson: number;
+  losses: number;
+  bracket: LadderBracket;
+  displayOrder: number;
+}
+
+export interface LadderParticipant {
+  userId: string;
+  username: string | null;
+  avatarSeed: string | null;
+}
+
+export interface CurrentRoundView {
+  roundNumber: number;
+  activityAId: string;
+  activityBId: string;
+  votesCast: number;
+  totalVoters: number;
+  votedUserIds: string[];
+}
+
+export interface LadderDetail {
+  id: string;
+  title: string;
+  status: LadderStatus;
+  creatorId: string;
+  activities: LadderActivity[];
+  participants: LadderParticipant[];
+  currentRound: CurrentRoundView | null;
+  winnerActivityId: string | null;
+  isFinalRound: boolean;
+  isGrandFinalReset: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LadderActivityInput {
+  name: string;
+  imageUrl: string;
+  distanceMinutes: number;
+  costPerPerson: number;
+}
+
+export interface CreateLadderRequest {
+  title: string;
+  activities: LadderActivityInput[];
+}
+
+export interface CastVoteRequest {
+  votedForActivityId: string;
+}
+
+export interface CastVoteResponse {
+  voteCount: number;
+  votersRemaining: number;
+}
+
 // ── Log Book Types ──────────────────────────
 
 export interface LogBookFaqResponse {
@@ -1023,5 +1102,56 @@ export const api = {
 
   searchGearPackItems(query: string): Promise<GearPackItemSearchResult[]> {
     return request(`/api/gear-pack-items/search?q=${encodeURIComponent(query)}`);
+  },
+
+  // ── Activity Ladders ──────────────────────────
+
+  ladders: {
+    list(): Promise<LadderSummary[]> {
+      return request('/api/ladders');
+    },
+
+    get(id: string): Promise<LadderDetail> {
+      return request(`/api/ladders/${id}`);
+    },
+
+    create(payload: CreateLadderRequest): Promise<LadderDetail> {
+      return request('/api/ladders', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+
+    addActivity(id: string, payload: LadderActivityInput): Promise<LadderActivity> {
+      return request(`/api/ladders/${id}/activities`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+
+    removeActivity(id: string, activityId: string): Promise<void> {
+      return request(`/api/ladders/${id}/activities/${activityId}`, {
+        method: 'DELETE',
+      });
+    },
+
+    start(id: string): Promise<LadderDetail> {
+      return request(`/api/ladders/${id}/start`, {
+        method: 'POST',
+      });
+    },
+
+    vote(id: string, payload: CastVoteRequest): Promise<CastVoteResponse> {
+      return request(`/api/ladders/${id}/vote`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+    },
+
+    restart(id: string): Promise<LadderDetail> {
+      return request(`/api/ladders/${id}/restart`, {
+        method: 'POST',
+      });
+    },
   },
 };

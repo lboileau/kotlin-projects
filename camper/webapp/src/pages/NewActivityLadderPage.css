@@ -1,0 +1,132 @@
+.new-ladder-page {
+  min-height: 100vh;
+  position: relative;
+}
+
+.new-ladder-content {
+  position: relative;
+  z-index: 10;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 56px;
+}
+
+.new-ladder-main {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-xl);
+  flex: 1;
+}
+
+.new-ladder-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+/* Activities section */
+.new-ladder-activities {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.new-ladder-activities__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+}
+
+.new-ladder-activities__title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  color: var(--parchment);
+  margin: 0;
+}
+
+.new-ladder-activities__hint {
+  font-size: 0.75rem;
+  color: rgba(250, 245, 235, 0.4);
+  font-family: var(--font-body);
+}
+
+.new-ladder-activities__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* Activity row */
+.new-ladder-activity-row {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  background: rgba(250, 245, 235, 0.04);
+  border: 1px solid rgba(255, 248, 231, 0.08);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+
+.new-ladder-activity-row__num {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  color: rgba(250, 245, 235, 0.3);
+  width: 18px;
+  text-align: center;
+  padding-top: 28px;
+  flex-shrink: 0;
+}
+
+.new-ladder-activity-row__fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.new-ladder-activity-row__row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.new-ladder-activity-row__remove {
+  flex-shrink: 0;
+  margin-top: 24px;
+}
+
+.new-ladder-add-btn {
+  align-self: flex-start;
+}
+
+/* Error */
+.new-ladder-error {
+  color: var(--flame);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  padding: var(--space-xs) 0;
+}
+
+/* Missing-fields hint */
+.new-ladder-missing {
+  color: var(--ember);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  margin: 0;
+  padding: var(--space-xs) 0 0 var(--space-md);
+  list-style: disc;
+  opacity: 0.85;
+}
+.new-ladder-missing li {
+  margin: 2px 0;
+}
+
+/* Actions */
+.new-ladder-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  padding-top: var(--space-sm);
+}

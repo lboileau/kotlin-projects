@@ -1,0 +1,100 @@
+.ladder-draft-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.ladder-draft-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.ladder-draft-list__title {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--parchment);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.ladder-draft-list__count {
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  background: rgba(255, 248, 231, 0.1);
+  border-radius: 10px;
+  padding: 0 8px;
+  color: rgba(250, 245, 235, 0.5);
+}
+
+.ladder-draft-list__empty {
+  font-size: 0.85rem;
+  color: rgba(250, 245, 235, 0.4);
+  font-style: italic;
+  font-family: var(--font-body);
+  padding: var(--space-sm) 0;
+}
+
+.ladder-draft-list__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ladder-draft-list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.ladder-draft-list__item .ladder-activity-card {
+  flex: 1;
+}
+
+.ladder-draft-list__remove-btn {
+  flex-shrink: 0;
+}
+
+/* Add form */
+.ladder-draft-list__add-form {
+  background: rgba(250, 245, 235, 0.04);
+  border: 1px solid rgba(255, 248, 231, 0.1);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ladder-draft-list__form-title {
+  font-family: var(--font-heading);
+  font-size: 0.9rem;
+  color: var(--parchment);
+  margin: 0;
+}
+
+.ladder-draft-list__error {
+  font-size: 0.8rem;
+  color: var(--flame);
+  font-family: var(--font-body);
+}
+
+.ladder-draft-list__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+
+.ladder-draft-list__form-actions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  margin-top: var(--space-xs);
+}

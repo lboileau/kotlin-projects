@@ -1,0 +1,51 @@
+.ladder-outcome-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  animation: bannerFadeIn 0.3s ease forwards;
+}
+
+.ladder-outcome-banner--fade-out {
+  animation: bannerFadeOut 0.5s ease forwards;
+}
+
+.ladder-outcome-banner--tie {
+  background: rgba(212, 197, 226, 0.15);
+  border: 1px solid rgba(212, 197, 226, 0.3);
+  color: var(--lavender-light);
+}
+
+.ladder-outcome-banner--decided {
+  background: rgba(244, 164, 96, 0.12);
+  border: 1px solid rgba(244, 164, 96, 0.3);
+  color: var(--parchment);
+}
+
+.ladder-outcome-banner--winner {
+  background: rgba(244, 164, 96, 0.18);
+  border: 2px solid rgba(244, 164, 96, 0.5);
+  color: var(--parchment);
+  font-size: 1.1rem;
+  font-family: var(--font-heading);
+  padding: var(--space-md) var(--space-xl);
+  box-shadow: 0 0 30px rgba(244, 164, 96, 0.25);
+}
+
+.ladder-outcome-banner__text {
+  font-weight: 500;
+}
+
+@keyframes bannerFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bannerFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-6px); }
+}
