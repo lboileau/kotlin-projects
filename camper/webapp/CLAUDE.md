@@ -149,6 +149,13 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | DELETE | `/api/items/:id` | X-User-Id | GearModal (delete item) |
 | GET | `/api/gear-packs` | X-User-Id | GearPacksPanel (list packs) |
 | GET | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (preview pack items) |
+| POST | `/api/gear-packs` | X-User-Id | GearPacksPanel (create pack) |
+| PUT | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (edit pack) |
+| DELETE | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (delete pack) |
+| POST | `/api/gear-packs/:id/items` | X-User-Id | GearPacksPanel (add item to pack) |
+| PUT | `/api/gear-packs/:id/items/:itemId` | X-User-Id | GearPacksPanel (edit item) |
+| DELETE | `/api/gear-packs/:id/items/:itemId` | X-User-Id | GearPacksPanel (remove item) |
+| GET | `/api/gear-pack-items/search?q=` | X-User-Id | GearPacksPanel (search items) |
 | POST | `/api/gear-packs/:id/apply` | X-User-Id | GearPacksPanel (apply pack to plan) |
 | GET | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (list) |
 | GET | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (detail) |
