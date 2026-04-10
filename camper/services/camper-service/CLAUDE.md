@@ -131,7 +131,7 @@ API service for camping trip planning — user registration, authentication, pla
   - `UpdateGearPackItemAction`: Validates fields, gets pack, checks creator, updates item, returns item response
   - `RemoveGearPackItemAction`: Gets pack, checks creator, removes item
   - `ApplyGearPackAction`: Authorizes (OWNER/MANAGER), fetches pack, creates items via ItemClient with quantity scaling (scalable items multiply by groupSize) and sets gearPackId on each created item. Short-circuits on first failure.
-  - `SearchGearPackItemsAction`: Validates query not blank, searches across all packs by case-insensitive substring match, returns search results with pack names
+  - `SearchGearPackItemsAction`: Validates query not blank, searches across all packs using hybrid LIKE + Levenshtein (distance ≤ 3) via PostgreSQL `fuzzystrmatch` extension; orders exact → prefix → substring → fuzzy, limited to 20 results
 - **Mapper:** `GearPackMapper` — fromClient, toSummaryResponse, toDetailResponse, toItemResponse, toSearchResultResponse, toApplyResponse
 - **Service:** `GearPackService` facade (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - **Routes:** (all require `X-User-Id` header)
@@ -143,7 +143,7 @@ API service for camping trip planning — user registration, authentication, pla
   - `POST /api/gear-packs/{id}/items` — add item to pack (201, creator only)
   - `PUT /api/gear-packs/{id}/items/{itemId}` — update item in pack (creator only)
   - `DELETE /api/gear-packs/{id}/items/{itemId}` — remove item from pack (204, creator only)
-  - `GET /api/gear-pack-items/search?q={query}` — search items by name across all packs (substring match)
+  - `GET /api/gear-pack-items/search?q={query}` — search items by name across all packs (hybrid substring + fuzzy match, Levenshtein distance ≤ 3)
   - `POST /api/gear-packs/{id}/apply` — apply gear pack to a plan (201, publishes WebSocket `items/updated` event)
 - **Authorization:** `createdBy` field (nullable) determines editability. `NULL` = system-seeded (immutable). Mutation actions check: if `createdBy == null` → `SystemPack` error; if `createdBy != userId` → `NotCreator` error.
 - **Key design:** Gear packs can be seeded via migration (null `createdBy`) or created by users (`createdBy = userId`). User-created packs are globally visible but only the creator can edit/delete. Applying a pack creates regular items with gearPackId set for grouping. Item names are unique within a pack (case-insensitive). Deleting a pack cascades to items via FK `ON DELETE SET NULL`.

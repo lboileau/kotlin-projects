@@ -26,7 +26,16 @@ internal class SearchGearPackItems(private val jdbi: Jdbi) {
                 FROM gear_pack_items gpi
                 JOIN gear_packs gp ON gp.id = gpi.gear_pack_id
                 WHERE LOWER(gpi.name) LIKE LOWER('%' || :query || '%')
-                ORDER BY gpi.name
+                   OR levenshtein(LOWER(gpi.name), LOWER(:query)) <= 3
+                ORDER BY
+                  CASE
+                    WHEN LOWER(gpi.name) = LOWER(:query) THEN 0
+                    WHEN LOWER(gpi.name) LIKE LOWER(:query || '%') THEN 1
+                    WHEN LOWER(gpi.name) LIKE LOWER('%' || :query || '%') THEN 2
+                    ELSE 3
+                  END,
+                  levenshtein(LOWER(gpi.name), LOWER(:query)) ASC
+                LIMIT 20
                 """.trimIndent()
             )
                 .bind("query", param.query)

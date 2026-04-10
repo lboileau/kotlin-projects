@@ -879,6 +879,80 @@ class GearPackClientIntegrationTest {
             assertThat(error).isInstanceOf(ValidationError::class.java)
             assertThat((error as ValidationError).field).isEqualTo("query")
         }
+
+        @Test
+        fun `searchItems returns fuzzy matches within Levenshtein distance`() {
+            val packId = UUID.randomUUID()
+            insertPack(packId, "Camping Kit")
+            insertItem(UUID.randomUUID(), packId, "tent", "shelter", sortOrder = 1)
+            insertItem(UUID.randomUUID(), packId, "spatula", "kitchen", sortOrder = 2)
+
+            // "tnet" is distance 2 from "tent" (transposition) — should match
+            // "tnet" is distance > 3 from "spatula" — should not match
+            val result = client.searchItems(SearchGearPackItemsParam("tnet"))
+
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val names = (result as Result.Success).value.map { it.name }
+            assertThat(names).contains("tent")
+            assertThat(names).doesNotContain("spatula")
+        }
+
+        @Test
+        fun `searchItems orders exact match before substring`() {
+            val packId = UUID.randomUUID()
+            insertPack(packId, "Cooking Kit")
+            insertItem(UUID.randomUUID(), packId, "pan", "kitchen", sortOrder = 1)
+            insertItem(UUID.randomUUID(), packId, "frying pan", "kitchen", sortOrder = 2)
+
+            val result = client.searchItems(SearchGearPackItemsParam("pan"))
+
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val names = (result as Result.Success).value.map { it.name }
+            assertThat(names).containsExactly("pan", "frying pan")
+        }
+
+        @Test
+        fun `searchItems orders prefix match before substring`() {
+            val packId = UUID.randomUUID()
+            insertPack(packId, "Cooking Kit")
+            insertItem(UUID.randomUUID(), packId, "frying pan", "kitchen", sortOrder = 1)
+            insertItem(UUID.randomUUID(), packId, "pan lid", "kitchen", sortOrder = 2)
+
+            val result = client.searchItems(SearchGearPackItemsParam("pan"))
+
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val names = (result as Result.Success).value.map { it.name }
+            assertThat(names).containsExactly("pan lid", "frying pan")
+        }
+
+        @Test
+        fun `searchItems limits results to 20`() {
+            val packId = UUID.randomUUID()
+            insertPack(packId, "Big Kit")
+            repeat(25) { i ->
+                insertItem(UUID.randomUUID(), packId, "item $i", "misc", sortOrder = i)
+            }
+
+            val result = client.searchItems(SearchGearPackItemsParam("item"))
+
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            assertThat((result as Result.Success).value).hasSize(20)
+        }
+
+        @Test
+        fun `searchItems orders fuzzy matches by ascending Levenshtein distance`() {
+            val packId = UUID.randomUUID()
+            insertPack(packId, "Camping Kit")
+            // "cap" has distance 1 from "cup", "map" has distance 2 from "cup"
+            insertItem(UUID.randomUUID(), packId, "cap", "misc", sortOrder = 1)
+            insertItem(UUID.randomUUID(), packId, "map", "misc", sortOrder = 2)
+
+            val result = client.searchItems(SearchGearPackItemsParam("cup"))
+
+            assertThat(result).isInstanceOf(Result.Success::class.java)
+            val names = (result as Result.Success).value.map { it.name }
+            assertThat(names).containsExactly("cap", "map")
+        }
     }
 
     @Nested

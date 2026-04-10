@@ -162,7 +162,10 @@ class FakeGearPackClient : GearPackClient {
         val query = param.query.lowercase()
         val results = store.values.flatMap { pack ->
             pack.items
-                .filter { it.name.lowercase().contains(query) }
+                .filter { item ->
+                    val name = item.name.lowercase()
+                    name.contains(query) || levenshtein(name, query) <= 3
+                }
                 .map { item ->
                     GearPackItemSearchResult(
                         id = item.id,
@@ -174,8 +177,34 @@ class FakeGearPackClient : GearPackClient {
                         scalable = item.scalable,
                     )
                 }
-        }.sortedBy { it.name }
+        }.sortedWith(
+            compareBy(
+                { item ->
+                    val name = item.name.lowercase()
+                    when {
+                        name == query -> 0
+                        name.startsWith(query) -> 1
+                        name.contains(query) -> 2
+                        else -> 3
+                    }
+                },
+                { item -> levenshtein(item.name.lowercase(), query) },
+            )
+        ).take(20)
         return success(results)
+    }
+
+    private fun levenshtein(a: String, b: String): Int {
+        val dp = Array(a.length + 1) { IntArray(b.length + 1) }
+        for (i in 0..a.length) dp[i][0] = i
+        for (j in 0..b.length) dp[0][j] = j
+        for (i in 1..a.length) {
+            for (j in 1..b.length) {
+                dp[i][j] = if (a[i - 1] == b[j - 1]) dp[i - 1][j - 1]
+                else 1 + minOf(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1])
+            }
+        }
+        return dp[a.length][b.length]
     }
 
     fun reset() = store.clear()
