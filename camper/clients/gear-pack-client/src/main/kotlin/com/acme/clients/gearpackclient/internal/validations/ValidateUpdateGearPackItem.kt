@@ -19,6 +19,7 @@ internal class ValidateUpdateGearPackItem {
 
     private fun validate(param: UpdateGearPackItemParam): Result<Unit, AppError> {
         if (param.name != null && param.name.isBlank()) return failure(ValidationError("name", "must not be blank"))
+        if (param.name != null && param.name.length > 100) return failure(ValidationError("name", "must not exceed 100 characters"))
         if (param.category != null && param.category.isBlank()) return failure(ValidationError("category", "must not be blank"))
         if (param.defaultQuantity != null && param.defaultQuantity < 1) return failure(ValidationError("defaultQuantity", "must be at least 1"))
         return success(Unit)
