@@ -507,6 +507,26 @@ When a reviewer returns `CHANGES REQUESTED`:
 3. After fixes, rebuild the module
 4. Re-spawn the reviewer, noting this is a re-review and including prior issues
 
+---
+
+## Common Pitfalls
+
+### Cascade Truncation in Tests
+
+When a new foreign key is added from a seeded reference table (e.g., `gear_packs`) to a user-truncated table (e.g., `users`), `TRUNCATE users CASCADE` in test fixtures will wipe the seeded reference data. Every test fixture that truncates users (or any parent table in the FK chain) must re-seed the reference data after truncation.
+
+This pattern has caused multiple test failures in Gradle monorepos:
+- Fixture truncates `users` but `TRUNCATE users CASCADE` also deletes `gear_packs` (FK: `gear_packs.created_by → users.id`)
+- Test setup then tries to use seeded gear_packs but they're gone
+- Result: FK violations or missing test data
+
+**Prevention:** When the architect plans a feature that adds an FK to a user-truncated table, the plan MUST include a "test fixture impact" note listing:
+1. All fixtures that truncate the parent table
+2. Which seeded data needs re-insertion after truncation
+3. The correct truncation order (children first, parents last) or FK disabling approach
+
+---
+
 ## Retro Collection
 
 Each developer teammate (kotlin-dev, web-dev, db-dev, test-engineer) provides a retro report on completion.
