@@ -8,8 +8,19 @@ data class GearPack(
     val name: String,
     val description: String,
     val items: List<GearPackItem>,
+    val createdBy: UUID?,
     val createdAt: Instant,
     val updatedAt: Instant,
+)
+
+data class GearPackItemSearchResult(
+    val id: UUID,
+    val gearPackId: UUID,
+    val gearPackName: String,
+    val name: String,
+    val category: String,
+    val defaultQuantity: Int,
+    val scalable: Boolean,
 )
 
 data class GearPackItem(

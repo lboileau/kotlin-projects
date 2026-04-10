@@ -23,7 +23,7 @@ internal class GetAllGearPacks(private val jdbi: Jdbi) {
         val entities = jdbi.withHandle<List<GearPack>, Exception> { handle ->
             val packs = handle.createQuery(
                 """
-                SELECT gp.id, gp.name, gp.description, gp.created_at, gp.updated_at
+                SELECT gp.id, gp.name, gp.description, gp.created_by, gp.created_at, gp.updated_at
                 FROM gear_packs gp
                 ORDER BY gp.name
                 """.trimIndent()

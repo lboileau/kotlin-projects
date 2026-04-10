@@ -24,7 +24,7 @@ internal class GetGearPackById(private val jdbi: Jdbi) {
         logger.debug("Finding gear pack by id={}", param.id)
         val pack = jdbi.withHandle<GearPack?, Exception> { handle ->
             val gearPack = handle.createQuery(
-                "SELECT id, name, description, created_at, updated_at FROM gear_packs WHERE id = :id"
+                "SELECT id, name, description, created_by, created_at, updated_at FROM gear_packs WHERE id = :id"
             )
                 .bind("id", param.id)
                 .map { rs, _ -> GearPackRowAdapter.fromResultSet(rs) }
