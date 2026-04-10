@@ -80,6 +80,20 @@ For each endpoint, test:
 5. **Edge cases** — empty collections, boundary values
 6. **Read-your-own-writes** — multi-call workflows verifying data consistency
 
+### Authorization Pattern Tests
+
+When a feature uses nullable creator-based authorization (e.g., `NULL = system-owned, non-NULL = user-owned`), every mutating endpoint must have THREE authorization tests:
+
+- **Happy path:** Creator can mutate the resource (201, 200, or 204 response)
+- **Non-creator cannot mutate:** Different user attempts mutation → 403 Forbidden
+- **System resource is immutable:** Null `createdBy` (system-owned) → 403 Forbidden when user attempts mutation
+
+Additionally, every read endpoint that exposes the `createdBy` field must test BOTH cases:
+- Read with `createdBy = null` (system-created resource)
+- Read with `createdBy = <uuid>` (user-created resource)
+
+This pattern ensures that authorization propagates correctly through nested resources (e.g., item mutations must check parent pack ownership, not just item ownership).
+
 ---
 
 ## Scaffold

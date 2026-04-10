@@ -108,6 +108,24 @@ When a feature modifies existing data classes, DTOs, or param objects (adding fi
 
 **Why this matters:** Contract PRs that modify a data class without updating all call sites cause compilation failures that block the entire stack. The plan must account for this so the developer knows the full scope upfront.
 
+## Model Changes Checklist
+
+When planning a feature that adds or modifies fields on an existing data class, run through this checklist before finalizing the plan. The plan's "Cascade Impact" section must enumerate EVERY file that touches the class:
+
+1. **Model definition** — client + service layer if separate
+2. **Row adapter** — reads ResultSet → model instance
+3. **SQL queries** — all SELECT, INSERT, UPDATE, DELETE that touch the table
+4. **Fake client** — in-memory store and lookup logic
+5. **Operations** — all INSERT, UPDATE, UPDATE-specific operations that bind the field
+6. **Mappers** — fromClient(), toResponse(), any conversion between layers
+7. **Test fixtures** — insertX() helpers that construct the model
+8. **Service tests** — test data construction (from fake client results)
+9. **Integration tests** — insertX() helpers and assertion builders
+10. **Acceptance tests** — response shape assertions and test data setup
+11. **All other call sites** — grep for `ClassName(` across the module to find remaining constructor calls
+
+The plan MUST list all affected files in the contract PR file list. This prevents surprise compilation failures when developers start implementation.
+
 ## Rules
 
 - **Be precise.** Developers implement exactly what's in the plan. Ambiguity causes rework.

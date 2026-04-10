@@ -111,6 +111,24 @@ clients/   →  databases/  (testFixtures dependency for migration runner)
 - **Nullable UUID binding in JDBI:** When binding a nullable `UUID?` in JDBI SQL, use `CAST(:param AS uuid)` in the SQL and `.bind("param", value?.toString())` in Kotlin. Without the CAST, JDBI sends null as varchar which causes a PostgreSQL type mismatch error. This applies to any nullable UUID column (FK columns, optional references, etc.).
 - **Contract PR stubs:** When creating client contract PRs, add `NotImplementedError` stubs in BOTH the `FakeClient` AND the `JdbiClient` (or any concrete implementation). This ensures the project compiles at the contract stage.
 
+### Kotlin Contract PR Scope: Type System Enforces Completeness
+
+When a contract PR modifies an existing interface (e.g., adding 7 new methods to `GearPackClient`), Kotlin's type system enforces that ALL concrete implementors be updated immediately in the SAME PR:
+
+- **Adding methods to an interface** breaks `FakeClient`, `JdbiClient`, and all test files simultaneously. You cannot defer implementation to a later PR without breaking the build.
+- **Solution:** The contract PR must include `TODO()` stubs on all concrete classes to keep the build green. Do not use `NotImplementedError` for stubs — use `TODO("Implementation in next PR")` so the code compiles without throwing at runtime during contract phase testing.
+- **Test fixtures:** If the interface changes invalidate test helper methods or fixture constructors, the contract PR must also update those in `testFixtures/` to keep integration tests building.
+
+**When adding a field to an existing data class** (e.g., adding `createdBy: UUID?` to `GearPack`), the contract PR must update in lockstep:
+
+1. **Model definition** — add the new field with correct nullability
+2. **Row adapter** — add extraction from ResultSet for the new column
+3. **SQL queries** — include the new column in SELECT and bind it in INSERT/UPDATE
+4. **Fake client** — store the new field in the in-memory map
+5. **All constructor call sites** — in actions, tests, service layer, and fixtures (grep for `ClassName(`)
+
+Failing to do this causes surprise compilation failures in the implementation phase. The plan must list all affected files upfront.
+
 ### Service Patterns
 - **Action classes:** 1:1 with service methods in `features/<feature>/actions/`. Each action takes a service param, validates, converts to client param, calls client
 - **Validation classes:** 1:1 with actions in `features/<feature>/validations/`. Intentionally duplicates client validation at the service boundary
