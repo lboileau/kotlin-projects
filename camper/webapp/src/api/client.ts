@@ -375,6 +375,7 @@ export interface GearPackSummary {
   name: string;
   description: string;
   itemCount: number;
+  createdBy: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -384,6 +385,7 @@ export interface GearPackDetail {
   name: string;
   description: string;
   items: GearPackItem[];
+  createdBy: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -400,6 +402,40 @@ export interface GearPackItem {
 export interface ApplyGearPackResponse {
   appliedCount: number;
   items: Item[];
+}
+
+export interface CreateGearPackRequest {
+  name: string;
+  description?: string;
+}
+
+export interface UpdateGearPackRequest {
+  name?: string;
+  description?: string;
+}
+
+export interface AddGearPackItemRequest {
+  name: string;
+  category: string;
+  defaultQuantity?: number;
+  scalable?: boolean;
+}
+
+export interface UpdateGearPackItemRequest {
+  name?: string;
+  category?: string;
+  defaultQuantity?: number;
+  scalable?: boolean;
+}
+
+export interface GearPackItemSearchResult {
+  id: string;
+  gearPackId: string;
+  gearPackName: string;
+  name: string;
+  category: string;
+  defaultQuantity: number;
+  scalable: boolean;
 }
 
 // ── Log Book Types ──────────────────────────
@@ -943,5 +979,49 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+
+  createGearPack(data: CreateGearPackRequest): Promise<GearPackDetail> {
+    return request('/api/gear-packs', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateGearPack(id: string, data: UpdateGearPackRequest): Promise<GearPackDetail> {
+    return request(`/api/gear-packs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  deleteGearPack(id: string): Promise<void> {
+    return request(`/api/gear-packs/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  addGearPackItem(packId: string, data: AddGearPackItemRequest): Promise<GearPackItem> {
+    return request(`/api/gear-packs/${packId}/items`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateGearPackItem(packId: string, itemId: string, data: UpdateGearPackItemRequest): Promise<GearPackItem> {
+    return request(`/api/gear-packs/${packId}/items/${itemId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  removeGearPackItem(packId: string, itemId: string): Promise<void> {
+    return request(`/api/gear-packs/${packId}/items/${itemId}`, {
+      method: 'DELETE',
+    });
+  },
+
+  searchGearPackItems(query: string): Promise<GearPackItemSearchResult[]> {
+    return request(`/api/gear-pack-items/search?q=${encodeURIComponent(query)}`);
   },
 };

@@ -1,6 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
-import { api, type GearPackSummary, type GearPackDetail } from '../api/client';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { api, type GearPackSummary, type GearPackDetail, type GearPackItemSearchResult } from '../api/client';
 import './GearPacksPanel.css';
+
+const ITEM_CATEGORIES = [
+  { value: 'camp', label: 'Camp' },
+  { value: 'canoe', label: 'Canoe' },
+  { value: 'kitchen', label: 'Kitchen' },
+  { value: 'personal', label: 'Personal' },
+  { value: 'food_item', label: 'Food' },
+  { value: 'misc', label: 'Misc' },
+];
 
 function PackIcon({ packName }: { packName: string }) {
   const name = packName.toLowerCase();
@@ -47,12 +56,15 @@ interface GearPacksPanelProps {
   memberCount: number;
   canEdit: boolean;
   onItemsChanged: () => void;
+  currentUserId: string;
 }
 
-export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged }: GearPacksPanelProps) {
+export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, currentUserId }: GearPacksPanelProps) {
   const [expanded, setExpanded] = useState(false);
   const [packs, setPacks] = useState<GearPackSummary[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Preview state
   const [previewPackId, setPreviewPackId] = useState<string | null>(null);
   const [packDetail, setPackDetail] = useState<GearPackDetail | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -60,6 +72,37 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged }:
   const [applying, setApplying] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
   const [applySuccess, setApplySuccess] = useState<string | null>(null);
+
+  // Create form state
+  const [createFormOpen, setCreateFormOpen] = useState(false);
+  const [createName, setCreateName] = useState('');
+  const [createDescription, setCreateDescription] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
+
+  // Edit state
+  const [editingPackId, setEditingPackId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editDetail, setEditDetail] = useState<GearPackDetail | null>(null);
+  const [loadingEditDetail, setLoadingEditDetail] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+
+  // Delete confirm state
+  const [deleteConfirmPackId, setDeleteConfirmPackId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // Add item state
+  const [addItemName, setAddItemName] = useState('');
+  const [addItemCategory, setAddItemCategory] = useState('camp');
+  const [addItemQuantity, setAddItemQuantity] = useState(1);
+  const [addItemScalable, setAddItemScalable] = useState(false);
+  const [addingItem, setAddingItem] = useState(false);
+  const [addItemError, setAddItemError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<GearPackItemSearchResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const loadPacks = useCallback(async () => {
     setLoading(true);
@@ -82,6 +125,8 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged }:
   useEffect(() => {
     setGroupSize(memberCount || 1);
   }, [memberCount]);
+
+  // ── Preview ──────────────────────────────
 
   const handlePreview = async (packId: string) => {
     if (previewPackId === packId) {
@@ -124,6 +169,187 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged }:
     return scalable ? defaultQuantity * groupSize : defaultQuantity;
   };
 
+  // ── Create ───────────────────────────────
+
+  const handleCreateSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createName.trim()) return;
+    setCreating(true);
+    setCreateError(null);
+    try {
+      await api.createGearPack({ name: createName.trim(), description: createDescription.trim() });
+      setCreateFormOpen(false);
+      setCreateName('');
+      setCreateDescription('');
+      setPacks([]); // force reload
+      loadPacks();
+    } catch (err) {
+      setCreateError(err instanceof Error ? err.message : 'Failed to create gear pack');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleCreateCancel = () => {
+    setCreateFormOpen(false);
+    setCreateName('');
+    setCreateDescription('');
+    setCreateError(null);
+  };
+
+  // ── Edit ─────────────────────────────────
+
+  const handleEditStart = async (pack: GearPackSummary) => {
+    setEditingPackId(pack.id);
+    setEditName(pack.name);
+    setEditDescription(pack.description);
+    setEditDetail(null);
+    setEditError(null);
+    setAddItemName('');
+    setAddItemCategory('camp');
+    setAddItemError(null);
+    setSearchResults([]);
+    setShowSuggestions(false);
+    // Close preview for this pack
+    if (previewPackId === pack.id) {
+      setPreviewPackId(null);
+      setPackDetail(null);
+    }
+
+    setLoadingEditDetail(true);
+    try {
+      const detail = await api.getGearPack(pack.id);
+      setEditDetail(detail);
+    } catch {
+      // fail silently
+    } finally {
+      setLoadingEditDetail(false);
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingPackId(null);
+    setEditDetail(null);
+    setEditError(null);
+    setAddItemName('');
+    setAddItemCategory('camp');
+    setAddItemError(null);
+    setSearchResults([]);
+    setShowSuggestions(false);
+  };
+
+  const handleEditSave = async () => {
+    if (!editingPackId || !editName.trim()) return;
+    setSaving(true);
+    setEditError(null);
+    try {
+      await api.updateGearPack(editingPackId, { name: editName.trim(), description: editDescription.trim() });
+      loadPacks();
+    } catch (err) {
+      setEditError(err instanceof Error ? err.message : 'Failed to save changes');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ── Delete ───────────────────────────────
+
+  const handleDeleteConfirm = async (packId: string) => {
+    setDeleting(true);
+    try {
+      await api.deleteGearPack(packId);
+      setDeleteConfirmPackId(null);
+      if (editingPackId === packId) {
+        setEditingPackId(null);
+        setEditDetail(null);
+      }
+      if (previewPackId === packId) {
+        setPreviewPackId(null);
+        setPackDetail(null);
+      }
+      loadPacks();
+      onItemsChanged();
+    } catch {
+      // fail silently
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // ── Item management ──────────────────────
+
+  const handleAddItemNameChange = (value: string) => {
+    setAddItemName(value);
+    setShowSuggestions(false);
+
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+
+    if (value.trim().length >= 2) {
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const results = await api.searchGearPackItems(value.trim());
+          setSearchResults(results);
+          setShowSuggestions(results.length > 0);
+        } catch {
+          setSearchResults([]);
+        }
+      }, 300);
+    } else {
+      setSearchResults([]);
+    }
+  };
+
+  const handleSelectSuggestion = (result: GearPackItemSearchResult) => {
+    setAddItemName(result.name);
+    setAddItemCategory(result.category);
+    setAddItemQuantity(result.defaultQuantity);
+    setAddItemScalable(result.scalable);
+    setShowSuggestions(false);
+    setSearchResults([]);
+  };
+
+  const handleAddItem = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPackId || !addItemName.trim()) return;
+    setAddingItem(true);
+    setAddItemError(null);
+    setShowSuggestions(false);
+    try {
+      await api.addGearPackItem(editingPackId, {
+        name: addItemName.trim(),
+        category: addItemCategory,
+        defaultQuantity: addItemQuantity,
+        scalable: addItemScalable,
+      });
+      setAddItemName('');
+      setAddItemCategory('camp');
+      setAddItemQuantity(1);
+      setAddItemScalable(false);
+      setSearchResults([]);
+      const detail = await api.getGearPack(editingPackId);
+      setEditDetail(detail);
+      loadPacks();
+    } catch (err) {
+      setAddItemError(err instanceof Error ? err.message : 'Failed to add item');
+    } finally {
+      setAddingItem(false);
+    }
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    if (!editingPackId) return;
+    try {
+      await api.removeGearPackItem(editingPackId, itemId);
+      const detail = await api.getGearPack(editingPackId);
+      setEditDetail(detail);
+      loadPacks();
+    } catch {
+      // fail silently
+    }
+  };
+
+  // ── Render ───────────────────────────────
+
   return (
     <div className="gear-packs-panel">
       <button className="gear-packs-header" onClick={() => setExpanded(!expanded)}>
@@ -146,9 +372,43 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged }:
 
       {expanded && (
         <div className="gear-packs-body">
+          {/* Create Pack */}
+          {!createFormOpen ? (
+            <button className="gear-pack-create-btn" onClick={() => setCreateFormOpen(true)}>
+              + New Pack
+            </button>
+          ) : (
+            <form className="gear-pack-create-form" onSubmit={handleCreateSubmit}>
+              <input
+                className="gear-pack-input"
+                value={createName}
+                onChange={e => setCreateName(e.target.value)}
+                placeholder="Pack name"
+                autoFocus
+                disabled={creating}
+              />
+              <input
+                className="gear-pack-input"
+                value={createDescription}
+                onChange={e => setCreateDescription(e.target.value)}
+                placeholder="Description (optional)"
+                disabled={creating}
+              />
+              {createError && <p className="gear-packs-error">{createError}</p>}
+              <div className="gear-pack-form-actions">
+                <button type="submit" className="gear-pack-apply-btn" disabled={creating || !createName.trim()}>
+                  {creating ? '...' : 'Create'}
+                </button>
+                <button type="button" className="gear-pack-cancel-btn" onClick={handleCreateCancel}>
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
           {loading ? (
             <p className="gear-packs-loading">Loading gear packs...</p>
-          ) : packs.length === 0 ? (
+          ) : packs.length === 0 && !createFormOpen ? (
             <p className="gear-packs-empty">No gear packs available.</p>
           ) : (
             <>
@@ -158,81 +418,283 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged }:
               {applyError && (
                 <div className="gear-packs-error">{applyError}</div>
               )}
-              {packs.map(pack => (
-                <div key={pack.id} className="gear-pack-card">
-                  <div className="gear-pack-card-header">
-                    <div className="gear-pack-card-info">
-                      <PackIcon packName={pack.name} />
-                      <span className="gear-pack-card-name">{pack.name}</span>
-                      <span className="gear-pack-card-count">{pack.itemCount} items</span>
-                    </div>
-                    <div className="gear-pack-card-actions">
-                      <button
-                        className="gear-pack-preview-btn"
-                        onClick={() => handlePreview(pack.id)}
-                      >
-                        {previewPackId === pack.id ? 'Hide' : 'Preview'}
-                      </button>
-                      {canEdit && (
-                        <button
-                          className="gear-pack-apply-btn"
-                          onClick={() => handleApply(pack.id)}
-                          disabled={applying}
-                        >
-                          {applying ? '...' : 'Apply'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  <p className="gear-pack-card-description">{pack.description}</p>
+              {packs.map(pack => {
+                const isEditing = editingPackId === pack.id;
+                const isDeleteConfirm = deleteConfirmPackId === pack.id;
+                const isOwned = pack.createdBy === currentUserId;
 
-                  {previewPackId === pack.id && (
-                    <div className="gear-pack-preview">
-                      {loadingDetail ? (
-                        <p className="gear-packs-loading">Loading items...</p>
-                      ) : packDetail ? (
-                        <>
-                          <div className="gear-pack-group-size">
-                            <label className="gear-pack-group-label">Group size:</label>
-                            <div className="gear-pack-group-stepper">
-                              <button
-                                className="gear-qty-btn"
-                                onClick={() => setGroupSize(Math.max(1, groupSize - 1))}
-                                disabled={groupSize <= 1}
+                if (isEditing) {
+                  return (
+                    <div key={pack.id} className="gear-pack-card gear-pack-card--editing">
+                      {/* Edit name/description */}
+                      <div className="gear-pack-edit-header">
+                        <span className="gear-pack-edit-title">Editing: {pack.name}</span>
+                        <button className="gear-pack-cancel-icon-btn" onClick={handleEditCancel} title="Close">
+                          ✕
+                        </button>
+                      </div>
+                      <div className="gear-pack-edit-fields">
+                        <input
+                          className="gear-pack-input"
+                          value={editName}
+                          onChange={e => setEditName(e.target.value)}
+                          placeholder="Pack name"
+                        />
+                        <input
+                          className="gear-pack-input"
+                          value={editDescription}
+                          onChange={e => setEditDescription(e.target.value)}
+                          placeholder="Description (optional)"
+                        />
+                        {editError && <p className="gear-pack-error-inline">{editError}</p>}
+                        <div className="gear-pack-form-actions">
+                          <button
+                            className="gear-pack-apply-btn"
+                            onClick={handleEditSave}
+                            disabled={saving || !editName.trim()}
+                          >
+                            {saving ? '...' : 'Save'}
+                          </button>
+                          <button className="gear-pack-cancel-btn" onClick={handleEditCancel}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Item management */}
+                      <div className="gear-pack-items-manager">
+                        <h5 className="gear-pack-items-title">Items</h5>
+                        {loadingEditDetail ? (
+                          <p className="gear-packs-loading">Loading items...</p>
+                        ) : editDetail ? (
+                          <>
+                            {editDetail.items.length === 0 ? (
+                              <p className="gear-packs-empty">No items yet — add one below.</p>
+                            ) : (
+                              <div className="gear-pack-items-list">
+                                {editDetail.items.map(item => (
+                                  <div key={item.id} className="gear-pack-item-row gear-pack-item-row--manage">
+                                    <span className="gear-pack-item-name">{item.name}</span>
+                                    <span className="gear-pack-item-cat-badge">{item.category}</span>
+                                    <span className="gear-pack-item-qty">
+                                      ×{item.defaultQuantity}{item.scalable ? '/person' : ''}
+                                    </span>
+                                    <button
+                                      className="gear-pack-remove-item-btn"
+                                      onClick={() => handleRemoveItem(item.id)}
+                                      title="Remove item"
+                                    >
+                                      ✕
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Add item form */}
+                            <form className="gear-pack-add-item-form" onSubmit={handleAddItem}>
+                              <div className="gear-pack-search-wrapper">
+                                <input
+                                  className="gear-pack-input gear-pack-input--search"
+                                  value={addItemName}
+                                  onChange={e => handleAddItemNameChange(e.target.value)}
+                                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                                  placeholder="Item name..."
+                                  disabled={addingItem}
+                                />
+                                {showSuggestions && searchResults.length > 0 && (
+                                  <div className="gear-pack-suggestions">
+                                    {searchResults.map(r => (
+                                      <button
+                                        key={r.id}
+                                        type="button"
+                                        className="gear-pack-suggestion"
+                                        onMouseDown={() => handleSelectSuggestion(r)}
+                                      >
+                                        <span className="gear-pack-suggestion-name">{r.name}</span>
+                                        <span className="gear-pack-suggestion-meta">from {r.gearPackName}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <select
+                                className="gear-pack-category-select"
+                                value={addItemCategory}
+                                onChange={e => setAddItemCategory(e.target.value)}
+                                disabled={addingItem}
                               >
-                                −
-                              </button>
-                              <span className="gear-qty-value">{groupSize}</span>
+                                {ITEM_CATEGORIES.map(c => (
+                                  <option key={c.value} value={c.value}>{c.label}</option>
+                                ))}
+                              </select>
+                              <div className="gear-pack-qty-stepper">
+                                <button
+                                  type="button"
+                                  className="gear-pack-qty-btn"
+                                  onClick={() => setAddItemQuantity(q => Math.max(1, q - 1))}
+                                  disabled={addingItem || addItemQuantity <= 1}
+                                  title="Decrease quantity"
+                                >
+                                  −
+                                </button>
+                                <span className="gear-pack-qty-value">{addItemQuantity}</span>
+                                <button
+                                  type="button"
+                                  className="gear-pack-qty-btn"
+                                  onClick={() => setAddItemQuantity(q => q + 1)}
+                                  disabled={addingItem}
+                                  title="Increase quantity"
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <label className="gear-pack-scalable-label" title="Multiply quantity by group size when applied">
+                                <input
+                                  type="checkbox"
+                                  checked={addItemScalable}
+                                  onChange={e => setAddItemScalable(e.target.checked)}
+                                  disabled={addingItem}
+                                />
+                                <span>Scale w/ group</span>
+                              </label>
                               <button
-                                className="gear-qty-btn"
-                                onClick={() => setGroupSize(groupSize + 1)}
+                                type="submit"
+                                className="gear-pack-apply-btn"
+                                disabled={addingItem || !addItemName.trim()}
                               >
-                                +
+                                {addingItem ? '...' : 'Add'}
                               </button>
-                            </div>
-                          </div>
-                          <div className="gear-pack-items-list">
-                            {packDetail.items.map(item => {
-                              const qty = computeQuantity(item.defaultQuantity, item.scalable);
-                              return (
-                                <div key={item.id} className="gear-pack-item-row">
-                                  <span className="gear-pack-item-name">{item.name}</span>
-                                  <span className="gear-pack-item-qty">
-                                    ×{qty}
-                                    {item.scalable && (
-                                      <span className="gear-pack-item-scaled" title="Scales with group size">↕</span>
-                                    )}
-                                  </span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </>
-                      ) : null}
+                            </form>
+                            {addItemError && <p className="gear-packs-error">{addItemError}</p>}
+                          </>
+                        ) : null}
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                  );
+                }
+
+                if (isDeleteConfirm) {
+                  return (
+                    <div key={pack.id} className="gear-pack-card gear-pack-card--confirm">
+                      <div className="gear-pack-card-info">
+                        <PackIcon packName={pack.name} />
+                        <span className="gear-pack-card-name">{pack.name}</span>
+                      </div>
+                      <p className="gear-pack-delete-message">
+                        This will ungroup all items from plans that use this pack. Are you sure?
+                      </p>
+                      <div className="gear-pack-form-actions">
+                        <button
+                          className="gear-pack-delete-confirm-btn"
+                          onClick={() => handleDeleteConfirm(pack.id)}
+                          disabled={deleting}
+                        >
+                          {deleting ? '...' : 'Delete'}
+                        </button>
+                        <button
+                          className="gear-pack-cancel-btn"
+                          onClick={() => setDeleteConfirmPackId(null)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={pack.id} className="gear-pack-card">
+                    <div className="gear-pack-card-header">
+                      <div className="gear-pack-card-info">
+                        <PackIcon packName={pack.name} />
+                        <span className="gear-pack-card-name">{pack.name}</span>
+                        <span className="gear-pack-card-count">{pack.itemCount} items</span>
+                      </div>
+                      <div className="gear-pack-card-actions">
+                        {isOwned && (
+                          <>
+                            <button
+                              className="gear-pack-edit-btn"
+                              onClick={() => handleEditStart(pack)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="gear-pack-delete-btn"
+                              onClick={() => setDeleteConfirmPackId(pack.id)}
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
+                        <button
+                          className="gear-pack-preview-btn"
+                          onClick={() => handlePreview(pack.id)}
+                        >
+                          {previewPackId === pack.id ? 'Hide' : 'Preview'}
+                        </button>
+                        {canEdit && (
+                          <button
+                            className="gear-pack-apply-btn"
+                            onClick={() => handleApply(pack.id)}
+                            disabled={applying}
+                          >
+                            {applying ? '...' : 'Apply'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className="gear-pack-card-description">{pack.description}</p>
+
+                    {previewPackId === pack.id && (
+                      <div className="gear-pack-preview">
+                        {loadingDetail ? (
+                          <p className="gear-packs-loading">Loading items...</p>
+                        ) : packDetail ? (
+                          <>
+                            <div className="gear-pack-group-size">
+                              <label className="gear-pack-group-label">Group size:</label>
+                              <div className="gear-pack-group-stepper">
+                                <button
+                                  className="gear-qty-btn"
+                                  onClick={() => setGroupSize(Math.max(1, groupSize - 1))}
+                                  disabled={groupSize <= 1}
+                                >
+                                  −
+                                </button>
+                                <span className="gear-qty-value">{groupSize}</span>
+                                <button
+                                  className="gear-qty-btn"
+                                  onClick={() => setGroupSize(groupSize + 1)}
+                                >
+                                  +
+                                </button>
+                              </div>
+                            </div>
+                            <div className="gear-pack-items-list">
+                              {packDetail.items.map(item => {
+                                const qty = computeQuantity(item.defaultQuantity, item.scalable);
+                                return (
+                                  <div key={item.id} className="gear-pack-item-row">
+                                    <span className="gear-pack-item-name">{item.name}</span>
+                                    <span className="gear-pack-item-qty">
+                                      ×{qty}
+                                      {item.scalable && (
+                                        <span className="gear-pack-item-scaled" title="Scales with group size">↕</span>
+                                      )}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
         </div>
