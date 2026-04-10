@@ -64,6 +64,7 @@ class GearPackServiceTest {
         name = name,
         description = description,
         items = items,
+        createdBy = null,
         createdAt = now,
         updatedAt = now,
     )

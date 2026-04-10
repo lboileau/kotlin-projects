@@ -1,6 +1,7 @@
 package com.acme.services.camperservice.features.gearpack.error
 
 import com.acme.clients.common.error.AppError
+import com.acme.clients.common.error.ConflictError
 import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.common.error.ValidationError
 import java.util.UUID
@@ -10,11 +11,17 @@ sealed class GearPackError(override val message: String) : AppError {
     data class Invalid(val field: String, val reason: String) : GearPackError("Invalid $field: $reason")
     data class Forbidden(val planId: String, val userId: String) : GearPackError("User $userId is not authorized to apply gear packs to plan $planId")
     data class ApplyFailed(val packName: String, val reason: String) : GearPackError("Failed to apply gear pack '$packName': $reason")
+    data class NotCreator(val packId: UUID, val userId: UUID) : GearPackError("User $userId is not the creator of gear pack $packId")
+    data class SystemPack(val packId: UUID) : GearPackError("Gear pack $packId is a system pack and cannot be modified")
+    data class DuplicateName(val name: String) : GearPackError("Gear pack name already exists: $name")
+    data class DuplicateItemName(val name: String, val packName: String) : GearPackError("Item '$name' already exists in pack '$packName'")
+    data class ItemNotFound(val itemId: UUID) : GearPackError("Gear pack item not found: $itemId")
 
     companion object {
         fun fromClientError(error: AppError): GearPackError = when (error) {
             is NotFoundError -> NotFound(UUID.fromString(error.id))
             is ValidationError -> Invalid(error.field, error.reason)
+            is ConflictError -> DuplicateName(error.detail)
             else -> Invalid("unknown", error.message)
         }
     }

@@ -2,10 +2,12 @@ package com.acme.services.camperservice.features.gearpack.mapper
 
 import com.acme.clients.gearpackclient.model.GearPack as ClientGearPack
 import com.acme.clients.gearpackclient.model.GearPackItem as ClientGearPackItem
+import com.acme.clients.gearpackclient.model.GearPackItemSearchResult as ClientGearPackItemSearchResult
 import com.acme.services.camperservice.features.gearpack.dto.AppliedItemResponse
 import com.acme.services.camperservice.features.gearpack.dto.ApplyGearPackResponse
 import com.acme.services.camperservice.features.gearpack.dto.GearPackDetailResponse
 import com.acme.services.camperservice.features.gearpack.dto.GearPackItemResponse
+import com.acme.services.camperservice.features.gearpack.dto.GearPackItemSearchResultResponse
 import com.acme.services.camperservice.features.gearpack.dto.GearPackSummaryResponse
 import com.acme.services.camperservice.features.gearpack.model.AppliedItem
 import com.acme.services.camperservice.features.gearpack.model.ApplyGearPackResult
@@ -19,6 +21,7 @@ object GearPackMapper {
         name = client.name,
         description = client.description,
         items = client.items.map { fromClientItem(it) },
+        createdBy = client.createdBy,
         createdAt = client.createdAt,
         updatedAt = client.updatedAt,
     )
@@ -37,6 +40,7 @@ object GearPackMapper {
         name = pack.name,
         description = pack.description,
         itemCount = pack.items.size,
+        createdBy = pack.createdBy,
         createdAt = pack.createdAt,
         updatedAt = pack.updatedAt,
     )
@@ -45,19 +49,31 @@ object GearPackMapper {
         id = pack.id,
         name = pack.name,
         description = pack.description,
-        items = pack.items.map { item ->
-            GearPackItemResponse(
-                id = item.id,
-                name = item.name,
-                category = item.category,
-                defaultQuantity = item.defaultQuantity,
-                scalable = item.scalable,
-                sortOrder = item.sortOrder,
-            )
-        },
+        items = pack.items.map { toItemResponse(it) },
+        createdBy = pack.createdBy,
         createdAt = pack.createdAt,
         updatedAt = pack.updatedAt,
     )
+
+    fun toItemResponse(item: GearPackItem): GearPackItemResponse = GearPackItemResponse(
+        id = item.id,
+        name = item.name,
+        category = item.category,
+        defaultQuantity = item.defaultQuantity,
+        scalable = item.scalable,
+        sortOrder = item.sortOrder,
+    )
+
+    fun toSearchResultResponse(result: ClientGearPackItemSearchResult): GearPackItemSearchResultResponse =
+        GearPackItemSearchResultResponse(
+            id = result.id,
+            gearPackId = result.gearPackId,
+            gearPackName = result.gearPackName,
+            name = result.name,
+            category = result.category,
+            defaultQuantity = result.defaultQuantity,
+            scalable = result.scalable,
+        )
 
     fun toApplyResponse(result: ApplyGearPackResult): ApplyGearPackResponse = ApplyGearPackResponse(
         appliedCount = result.appliedCount,
