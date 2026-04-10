@@ -14,3 +14,4 @@ CREATE TABLE IF NOT EXISTS gear_pack_items (
 );
 
 CREATE INDEX IF NOT EXISTS idx_gear_pack_items_gear_pack_id ON gear_pack_items (gear_pack_id);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_gear_pack_items_pack_name ON gear_pack_items (gear_pack_id, LOWER(name));
