@@ -13,6 +13,10 @@ interface LadderMatchupViewProps {
   isFinalRound: boolean;
   isGrandFinalReset: boolean;
   onVote: (activityId: string) => void;
+  /** When set, highlight that card as the round winner and dim the other. */
+  celebratingWinnerId?: string | null;
+  /** When true, show the centered "Tie — reshuffling..." overlay. */
+  tieOverlay?: boolean;
 }
 
 export function LadderMatchupView({
@@ -25,8 +29,21 @@ export function LadderMatchupView({
   isFinalRound,
   isGrandFinalReset,
   onVote,
+  celebratingWinnerId,
+  tieOverlay = false,
 }: LadderMatchupViewProps) {
   const voteDisabled = !canVote || hasVoted || isSpectator;
+  const isCelebrating = !!celebratingWinnerId;
+  const resolutionA: 'winner' | 'loser' | null = isCelebrating
+    ? celebratingWinnerId === activityA.id
+      ? 'winner'
+      : 'loser'
+    : null;
+  const resolutionB: 'winner' | 'loser' | null = isCelebrating
+    ? celebratingWinnerId === activityB.id
+      ? 'winner'
+      : 'loser'
+    : null;
 
   let roundLabel = `Round ${currentRound.roundNumber}`;
   if (isGrandFinalReset) roundLabel = 'Grand Final Reset';
@@ -61,19 +78,15 @@ export function LadderMatchupView({
           You are watching — voting was locked at start
         </div>
       )}
-      {hasVoted && !isSpectator && (
-        <div className="ladder-matchup-view__voted-notice" role="note">
-          Vote cast — waiting for others...
-        </div>
-      )}
 
-      <div className="ladder-matchup-view__cards">
+      <div className={`ladder-matchup-view__cards ${isCelebrating ? 'ladder-matchup-view__cards--celebrating' : ''}`}>
         <LadderActivityCard
           activity={activityA}
           variant="matchup"
           onVote={() => onVote(activityA.id)}
-          voteDisabled={voteDisabled}
+          voteDisabled={voteDisabled || isCelebrating || tieOverlay}
           voteLabel={hasVoted ? 'Voted' : 'Vote'}
+          matchupResolution={resolutionA}
         />
 
         <div className="ladder-matchup-view__vs" aria-hidden="true">VS</div>
@@ -82,9 +95,30 @@ export function LadderMatchupView({
           activity={activityB}
           variant="matchup"
           onVote={() => onVote(activityB.id)}
-          voteDisabled={voteDisabled}
+          voteDisabled={voteDisabled || isCelebrating || tieOverlay}
           voteLabel={hasVoted ? 'Voted' : 'Vote'}
+          matchupResolution={resolutionB}
         />
+
+        {tieOverlay && (
+          <div
+            className="ladder-matchup-view__tie-overlay"
+            role="status"
+            aria-live="polite"
+          >
+            <svg
+              className="ladder-matchup-view__tie-icon"
+              width="40"
+              height="40"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" fill="none" stroke="var(--lavender-light)" strokeWidth="1.6" />
+              <line x1="6" y1="12" x2="18" y2="12" stroke="var(--lavender-light)" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+            <div className="ladder-matchup-view__tie-text">Tie — reshuffling...</div>
+          </div>
+        )}
       </div>
 
       <div className="ladder-matchup-view__progress">

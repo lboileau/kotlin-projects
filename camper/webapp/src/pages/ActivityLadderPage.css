@@ -160,10 +160,12 @@
 }
 
 /* Responsive */
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .ladder-page-main {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr;
+    padding: var(--space-md);
+    gap: var(--space-md);
   }
 
   .ladder-page-panel {
@@ -175,5 +177,32 @@
   .ladder-page-body {
     grid-column: 1;
     grid-row: 2;
+  }
+
+  .ladder-page-active,
+  .ladder-page-draft,
+  .ladder-page-completed {
+    align-items: stretch;
+    max-width: none;
+    gap: var(--space-md);
+  }
+}
+
+@media (max-width: 640px) {
+  .ladder-page-main {
+    padding: var(--space-sm) var(--space-sm) var(--space-lg);
+  }
+
+  .ladder-page-status-badge {
+    font-size: 0.62rem;
+    padding: 2px 8px;
+  }
+
+  .ladder-page-final-label {
+    font-size: 0.7rem;
+  }
+
+  .ladder-page-restart-btn {
+    align-self: center;
   }
 }

@@ -11,6 +11,12 @@ interface LadderActivityCardProps {
   voteDisabled?: boolean;
   voteLabel?: string;
   isWinner?: boolean;
+  /**
+   * Transient round-end state used to celebrate the matchup outcome:
+   * 'winner' animates the card with a pulse/glow and shows a WINNER overlay;
+   * 'loser' dims the card. Only applies to the `matchup` variant.
+   */
+  matchupResolution?: 'winner' | 'loser' | null;
 }
 
 export function LadderActivityCard({
@@ -20,11 +26,14 @@ export function LadderActivityCard({
   voteDisabled = false,
   voteLabel = 'Vote',
   isWinner = false,
+  matchupResolution = null,
 }: LadderActivityCardProps) {
   const cardClass = [
     'ladder-activity-card',
     `ladder-activity-card--${variant}`,
     isWinner ? 'ladder-activity-card--winner-highlight' : '',
+    matchupResolution === 'winner' ? 'ladder-activity-card--celebrate-winner' : '',
+    matchupResolution === 'loser' ? 'ladder-activity-card--celebrate-loser' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -43,6 +52,19 @@ export function LadderActivityCard({
 
   return (
     <div className={cardClass}>
+      {matchupResolution === 'winner' && (
+        <div className="ladder-activity-card__celebrate-overlay" aria-hidden="true">
+          <svg className="ladder-activity-card__celebrate-star" width="48" height="48" viewBox="0 0 24 24">
+            <polygon
+              points="12,2 15,9 22,9 16.5,14 18.5,22 12,18 5.5,22 7.5,14 2,9 9,9"
+              fill="var(--ember)"
+              stroke="var(--ember-bright)"
+              strokeWidth="0.8"
+            />
+          </svg>
+          <div className="ladder-activity-card__celebrate-text">Winner!</div>
+        </div>
+      )}
       {variant === 'winner' && (
         <div className="ladder-activity-card__badge ladder-activity-card__badge--winner">
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">

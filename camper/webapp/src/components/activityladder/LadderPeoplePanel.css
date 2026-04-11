@@ -123,3 +123,9 @@
   font-family: var(--font-body);
   flex-shrink: 0;
 }
+
+@media (max-width: 900px) {
+  .ladder-people-panel {
+    width: 100%;
+  }
+}
