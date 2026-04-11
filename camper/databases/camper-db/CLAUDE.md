@@ -428,6 +428,96 @@ CREATE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_id ON log_book_jour
 CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_book_journal_entries (plan_id, page_number);
 ```
 
+### activity_ladders
+
+```sql
+CREATE TABLE IF NOT EXISTS activity_ladders (
+    id                            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    creator_id                    UUID         NOT NULL,
+    title                         VARCHAR(200) NOT NULL,
+    status                        VARCHAR(16)  NOT NULL DEFAULT 'DRAFT',
+    current_round_number          INT,
+    current_match_activity_a_id   UUID,
+    current_match_activity_b_id   UUID,
+    is_final_round                BOOLEAN      NOT NULL DEFAULT false,
+    is_grand_final_reset          BOOLEAN      NOT NULL DEFAULT false,
+    winner_activity_id            UUID,
+    created_at                    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at                    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_activity_ladders_status  CHECK (status IN ('DRAFT', 'ACTIVE', 'COMPLETED')),
+    CONSTRAINT fk_activity_ladders_creator FOREIGN KEY (creator_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_activity_ladders_match_a FOREIGN KEY (current_match_activity_a_id) REFERENCES ladder_activities (id) ON DELETE SET NULL,
+    CONSTRAINT fk_activity_ladders_match_b FOREIGN KEY (current_match_activity_b_id) REFERENCES ladder_activities (id) ON DELETE SET NULL,
+    CONSTRAINT fk_activity_ladders_winner  FOREIGN KEY (winner_activity_id) REFERENCES ladder_activities (id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_activity_ladders_creator_id ON activity_ladders (creator_id);
+CREATE INDEX IF NOT EXISTS idx_activity_ladders_status     ON activity_ladders (status);
+```
+
+### ladder_activities
+
+```sql
+CREATE TABLE IF NOT EXISTS ladder_activities (
+    id               UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+    ladder_id        UUID          NOT NULL,
+    name             VARCHAR(200)  NOT NULL,
+    image_url        VARCHAR(2000) NOT NULL,
+    distance_minutes INT           NOT NULL,
+    cost_per_person  DECIMAL(10,2) NOT NULL,
+    losses           INT           NOT NULL DEFAULT 0,
+    bracket          VARCHAR(16)   NOT NULL DEFAULT 'WINNERS',
+    display_order    INT           NOT NULL,
+    created_at       TIMESTAMPTZ   NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_ladder_activities_distance CHECK (distance_minutes >= 0),
+    CONSTRAINT ck_ladder_activities_cost     CHECK (cost_per_person >= 0),
+    CONSTRAINT ck_ladder_activities_losses   CHECK (losses >= 0 AND losses <= 2),
+    CONSTRAINT ck_ladder_activities_bracket  CHECK (bracket IN ('WINNERS', 'LOSERS', 'ELIMINATED')),
+    CONSTRAINT fk_ladder_activities_ladder   FOREIGN KEY (ladder_id) REFERENCES activity_ladders (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_ladder_activities_ladder_id      ON ladder_activities (ladder_id);
+CREATE INDEX IF NOT EXISTS idx_ladder_activities_ladder_bracket ON ladder_activities (ladder_id, bracket);
+```
+
+No `updated_at` on `ladder_activities` — mutations (losses/bracket updates) are server-driven and do not require tracking.
+
+### ladder_participants
+
+```sql
+CREATE TABLE IF NOT EXISTS ladder_participants (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    ladder_id  UUID        NOT NULL,
+    user_id    UUID        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT uq_ladder_participants_ladder_user UNIQUE (ladder_id, user_id),
+    CONSTRAINT fk_ladder_participants_ladder FOREIGN KEY (ladder_id) REFERENCES activity_ladders (id) ON DELETE CASCADE,
+    CONSTRAINT fk_ladder_participants_user   FOREIGN KEY (user_id)   REFERENCES users (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_ladder_participants_ladder_id ON ladder_participants (ladder_id);
+CREATE INDEX IF NOT EXISTS idx_ladder_participants_user_id   ON ladder_participants (user_id);
+```
+
+### ladder_votes
+
+```sql
+CREATE TABLE IF NOT EXISTS ladder_votes (
+    id                    UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    ladder_id             UUID        NOT NULL,
+    round_number          INT         NOT NULL,
+    user_id               UUID        NOT NULL,
+    voted_for_activity_id UUID        NOT NULL,
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT uq_ladder_votes_round_user UNIQUE (ladder_id, round_number, user_id),
+    CONSTRAINT fk_ladder_votes_ladder   FOREIGN KEY (ladder_id)             REFERENCES activity_ladders (id)  ON DELETE CASCADE,
+    CONSTRAINT fk_ladder_votes_user     FOREIGN KEY (user_id)               REFERENCES users (id)             ON DELETE CASCADE,
+    CONSTRAINT fk_ladder_votes_activity FOREIGN KEY (voted_for_activity_id) REFERENCES ladder_activities (id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_ladder_votes_ladder_round ON ladder_votes (ladder_id, round_number);
+```
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -462,6 +552,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_
 - `log_book_faqs.answered_by_id` → `users.id` (FK, nullable)
 - `log_book_journal_entries.plan_id` → `plans.id` (FK, CASCADE on delete)
 - `log_book_journal_entries.user_id` → `users.id` (FK)
+- `activity_ladders.creator_id` → `users.id` (FK, CASCADE on delete — matches test-fixture truncate pattern)
+- `activity_ladders.current_match_activity_a_id` → `ladder_activities.id` (FK, SET NULL on delete — nullable; added via ALTER in V041)
+- `activity_ladders.current_match_activity_b_id` → `ladder_activities.id` (FK, SET NULL on delete — nullable; added via ALTER in V041)
+- `activity_ladders.winner_activity_id` → `ladder_activities.id` (FK, SET NULL on delete — nullable; added via ALTER in V041)
+- `ladder_activities.ladder_id` → `activity_ladders.id` (FK, CASCADE on delete)
+- `ladder_participants.ladder_id` → `activity_ladders.id` (FK, CASCADE on delete)
+- `ladder_participants.user_id` → `users.id` (FK, CASCADE on delete)
+- `ladder_votes.ladder_id` → `activity_ladders.id` (FK, CASCADE on delete)
+- `ladder_votes.user_id` → `users.id` (FK, CASCADE on delete)
+- `ladder_votes.voted_for_activity_id` → `ladder_activities.id` (FK, CASCADE on delete)
 
 ## Invariants
 
@@ -511,3 +611,18 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_log_book_journal_entries_plan_page ON log_
 - `answer` and `answered_by_id` in log_book_faqs are nullable (unanswered until a manager replies).
 - Journal entry page numbers are unique per plan (enforced by unique index `idx_log_book_journal_entries_plan_page`).
 - Page numbers are not renumbered on deletion — gaps are expected.
+- Ladder status must be 'DRAFT', 'ACTIVE', or 'COMPLETED' (enforced by `ck_activity_ladders_status`). Defaults to 'DRAFT'.
+- `current_round_number` is nullable — null in DRAFT; set to 1 at Start (ACTIVE transition).
+- `current_match_activity_a_id`, `current_match_activity_b_id`, and `winner_activity_id` are nullable UUIDs — FKs added via ALTER in V041 after `ladder_activities` is created. Deleted activities set these to NULL (SET NULL on delete).
+- `is_final_round` and `is_grand_final_reset` default to false. Not null.
+- Deleting the creator of a ladder cascades to the ladder row (creator_id FK is ON DELETE CASCADE — required for test-fixture `TRUNCATE users CASCADE`).
+- Ladder activity bracket must be 'WINNERS', 'LOSERS', or 'ELIMINATED' (enforced by `ck_ladder_activities_bracket`). Defaults to 'WINNERS'.
+- `distance_minutes` must be >= 0 (enforced by `ck_ladder_activities_distance`).
+- `cost_per_person` must be >= 0 (enforced by `ck_ladder_activities_cost`).
+- `losses` must be >= 0 and <= 2 (enforced by `ck_ladder_activities_losses`). Defaults to 0.
+- `ladder_activities` has no `updated_at` — server-side mutation (losses/bracket) does not need update tracking.
+- A user can participate in a given ladder at most once (enforced by `uq_ladder_participants_ladder_user`). Rows exist only after Start.
+- A user can cast at most one vote per round per ladder (enforced by `uq_ladder_votes_round_user`).
+- Votes are immutable once cast — no `updated_at` on `ladder_votes`.
+- Deleting a ladder cascades to its ladder_activities, ladder_participants, and ladder_votes.
+- Deleting a user cascades to ladder_participants and ladder_votes referencing them.
