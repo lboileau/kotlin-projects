@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api, type LadderDetail } from '../api/client';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +8,7 @@ import { ParallaxBackground } from '../components/ParallaxBackground';
 import { Button } from '../components/ui/Button';
 import { LadderPeoplePanel } from '../components/activityladder/LadderPeoplePanel';
 import { LadderMatchupView } from '../components/activityladder/LadderMatchupView';
-import { LadderOutcomeBanner, type OutcomePayload } from '../components/activityladder/LadderOutcomeBanner';
+import { LadderOutcomeBanner } from '../components/activityladder/LadderOutcomeBanner';
 import { LadderDraftActivityList } from '../components/activityladder/LadderDraftActivityList';
 import { LadderActivityCard } from '../components/activityladder/LadderActivityCard';
 import './ActivityLadderPage.css';
@@ -25,8 +25,23 @@ export function ActivityLadderPage() {
   // Live presence state (sourced from presence-changed WS events)
   const [presentUserIds, setPresentUserIds] = useState<Set<string>>(new Set());
 
-  // Last round outcome (for transient banner)
-  const [lastResolvedOutcome, setLastResolvedOutcome] = useState<OutcomePayload | null>(null);
+  // Round-end celebration: while this is set, we highlight the winning card
+  // with an animation. Crucially, during the celebration we DEFER any refetch
+  // that would advance `ladder.currentRound` — so the displayed pair stays put
+  // and the cards animate in place without swapping or flashing to the next
+  // round. A pending refetch flag catches us up when the animation ends.
+  const [celebratingWinnerId, setCelebratingWinnerId] = useState<string | null>(null);
+  const celebratingRef = useRef(false);
+  // Tie overlay: mirrors the winner celebration — pauses refetches and shows
+  // a centered "Tie — reshuffling..." overlay on top of the matchup cards.
+  const [tieActive, setTieActive] = useState(false);
+  const tieActiveRef = useRef(false);
+  const pendingRefetchRef = useRef(false);
+  const celebrationTimerRef = useRef<number | null>(null);
+  const tieTimerRef = useRef<number | null>(null);
+
+  // Duration of the round-resolution overlays (winner + tie).
+  const ROUND_RESOLUTION_MS = 2800;
 
   // Action states
   const [startLoading, setStartLoading] = useState(false);
@@ -52,6 +67,18 @@ export function ActivityLadderPage() {
     loadLadder();
   }, [loadLadder]);
 
+  // Clean up any pending overlay timers on unmount
+  useEffect(() => {
+    return () => {
+      if (celebrationTimerRef.current !== null) {
+        window.clearTimeout(celebrationTimerRef.current);
+      }
+      if (tieTimerRef.current !== null) {
+        window.clearTimeout(tieTimerRef.current);
+      }
+    };
+  }, []);
+
   // WebSocket subscription
   useLadderUpdates(
     ladderId,
@@ -68,25 +95,70 @@ export function ActivityLadderPage() {
           case 'activity-removed':
           case 'started':
           case 'restarted':
-          case 'completed':
             loadLadder();
             break;
+          case 'completed':
           case 'round-started':
-            loadLadder();
-            setLastResolvedOutcome(null);
+            // Defer refetches that advance the round until any resolution
+            // overlay (winner or tie) finishes. Otherwise ladder.currentRound
+            // would jump to the next pair mid-animation.
+            if (celebratingRef.current || tieActiveRef.current) {
+              pendingRefetchRef.current = true;
+            } else {
+              loadLadder();
+            }
             break;
           case 'vote-cast':
-            // Refetch to get updated vote counts
-            loadLadder();
+            // Increment the vote count locally — avoids a refetch race where
+            // the final vote's loadLadder would land (with new-round data)
+            // before round-resolved arrives.
+            setLadder((prev) => {
+              if (!prev || !prev.currentRound) return prev;
+              return {
+                ...prev,
+                currentRound: {
+                  ...prev.currentRound,
+                  votesCast: prev.currentRound.votesCast + 1,
+                },
+              };
+            });
             break;
           case 'round-resolved': {
             const outcome = msg.payload?.outcome as 'tie' | 'decided' | undefined;
-            if (outcome) {
-              setLastResolvedOutcome({
-                outcome,
-                winnerActivityId: (msg.payload?.winnerActivityId as string | null) ?? null,
-                voteTotals: (msg.payload?.voteTotals as Record<string, number> | null) ?? null,
-              });
+            if (!outcome) break;
+            const winnerId = (msg.payload?.winnerActivityId as string | null) ?? null;
+            if (outcome === 'decided' && winnerId) {
+              celebratingRef.current = true;
+              setCelebratingWinnerId(winnerId);
+              if (celebrationTimerRef.current !== null) {
+                window.clearTimeout(celebrationTimerRef.current);
+              }
+              celebrationTimerRef.current = window.setTimeout(() => {
+                celebratingRef.current = false;
+                setCelebratingWinnerId(null);
+                celebrationTimerRef.current = null;
+                // Catch up on whatever round-started / completed event we
+                // deferred during the animation.
+                if (pendingRefetchRef.current) {
+                  pendingRefetchRef.current = false;
+                  loadLadder();
+                }
+              }, ROUND_RESOLUTION_MS);
+            } else if (outcome === 'tie') {
+              tieActiveRef.current = true;
+              setTieActive(true);
+              if (tieTimerRef.current !== null) {
+                window.clearTimeout(tieTimerRef.current);
+              }
+              tieTimerRef.current = window.setTimeout(() => {
+                tieActiveRef.current = false;
+                setTieActive(false);
+                tieTimerRef.current = null;
+                if (pendingRefetchRef.current) {
+                  pendingRefetchRef.current = false;
+                  loadLadder();
+                }
+              }, ROUND_RESOLUTION_MS);
             }
             break;
           }
@@ -139,12 +211,14 @@ export function ActivityLadderPage() {
     activityNames[a.id] = a.name;
   });
 
-  // Current match activities
+  // Current match activities. During a celebration, ladder.currentRound still
+  // points to the just-resolved round (round-started/completed refetches are
+  // deferred), so this lookup naturally keeps the pair frozen in place.
   const activityA = ladder.currentRound
-    ? ladder.activities.find((a) => a.id === ladder.currentRound!.activityAId)
+    ? ladder.activities.find((a) => a.id === ladder.currentRound!.activityAId) ?? null
     : null;
   const activityB = ladder.currentRound
-    ? ladder.activities.find((a) => a.id === ladder.currentRound!.activityBId)
+    ? ladder.activities.find((a) => a.id === ladder.currentRound!.activityBId) ?? null
     : null;
 
   const handleStart = async () => {
@@ -169,7 +243,19 @@ export function ActivityLadderPage() {
     try {
       await api.ladders.restart(ladderId);
       await loadLadder();
-      setLastResolvedOutcome(null);
+      setCelebratingWinnerId(null);
+      setTieActive(false);
+      celebratingRef.current = false;
+      tieActiveRef.current = false;
+      pendingRefetchRef.current = false;
+      if (celebrationTimerRef.current !== null) {
+        window.clearTimeout(celebrationTimerRef.current);
+        celebrationTimerRef.current = null;
+      }
+      if (tieTimerRef.current !== null) {
+        window.clearTimeout(tieTimerRef.current);
+        tieTimerRef.current = null;
+      }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to restart ladder.');
     } finally {
@@ -183,7 +269,22 @@ export function ActivityLadderPage() {
     setActionError('');
     try {
       await api.ladders.vote(ladderId, { votedForActivityId: activityId });
-      await loadLadder();
+      // Optimistically mark self as having voted. We intentionally don't
+      // refetch here — that would race with round-resolved and swap the
+      // displayed pair before the celebration animation runs. The vote-cast
+      // WS event will bump votesCast, and round-started (deferred until after
+      // the celebration) will refresh the rest.
+      setLadder((prev) => {
+        if (!prev || !prev.currentRound) return prev;
+        if (prev.currentRound.votedUserIds.includes(currentUserId)) return prev;
+        return {
+          ...prev,
+          currentRound: {
+            ...prev.currentRound,
+            votedUserIds: [...prev.currentRound.votedUserIds, currentUserId],
+          },
+        };
+      });
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to cast vote.');
     } finally {
@@ -277,26 +378,21 @@ export function ActivityLadderPage() {
             {/* ─── ACTIVE ─── */}
             {ladder.status === 'ACTIVE' && activityA && activityB && ladder.currentRound && (
               <div className="ladder-page-active">
-                {lastResolvedOutcome && (
-                  <LadderOutcomeBanner
-                    outcome={lastResolvedOutcome}
-                    activityNames={activityNames}
-                  />
-                )}
-
                 <LadderMatchupView
                   activityA={activityA}
                   activityB={activityB}
                   currentRound={ladder.currentRound}
-                  canVote={isVoter && !hasVotedThisRound && !voteLoading}
+                  canVote={!celebratingWinnerId && !tieActive && isVoter && !hasVotedThisRound && !voteLoading}
                   hasVoted={hasVotedThisRound}
                   isSpectator={isSpectator}
                   isFinalRound={ladder.isFinalRound}
                   isGrandFinalReset={ladder.isGrandFinalReset}
                   onVote={handleVote}
+                  celebratingWinnerId={celebratingWinnerId}
+                  tieOverlay={tieActive}
                 />
 
-                {isCreator && (
+                {isCreator && !celebratingWinnerId && !tieActive && (
                   <Button
                     variant="secondary"
                     size="sm"

@@ -167,3 +167,148 @@
   margin-top: var(--space-sm);
   width: 100%;
 }
+
+/* ─── Round-end celebration states ───
+ * Applied transiently (~2.8s) to the matchup cards when a round resolves.
+ * The winner pulses with a warm ember glow and shows a centered overlay;
+ * the loser dims and desaturates.
+ */
+.ladder-activity-card--celebrate-winner {
+  animation: ladder-winner-celebrate 2.8s ease-out forwards;
+  border-color: var(--ember);
+  z-index: 2;
+}
+
+.ladder-activity-card--celebrate-loser {
+  animation: ladder-loser-fade 2.8s ease-out forwards;
+  pointer-events: none;
+}
+
+.ladder-activity-card__celebrate-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  background: rgba(44, 36, 68, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 3;
+  border-radius: inherit;
+  animation: ladder-celebrate-overlay-in 0.4s ease-out forwards;
+  pointer-events: none;
+}
+
+.ladder-activity-card__celebrate-star {
+  filter: drop-shadow(0 0 12px rgba(244, 164, 96, 0.7));
+  animation: ladder-celebrate-star 2.4s ease-out forwards;
+}
+
+.ladder-activity-card__celebrate-text {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--parchment);
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 0 16px rgba(244, 164, 96, 0.8),
+    0 2px 6px rgba(0, 0, 0, 0.6);
+  animation: ladder-celebrate-text 2.4s ease-out forwards;
+}
+
+@keyframes ladder-winner-celebrate {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 rgba(244, 164, 96, 0);
+    border-color: var(--ember);
+  }
+  20% {
+    transform: scale(1.06);
+    box-shadow: 0 0 48px rgba(244, 164, 96, 0.75);
+  }
+  40% {
+    transform: scale(1.03);
+    box-shadow: 0 0 36px rgba(244, 164, 96, 0.55);
+  }
+  60% {
+    transform: scale(1.05);
+    box-shadow: 0 0 42px rgba(244, 164, 96, 0.65);
+  }
+  100% {
+    transform: scale(1.03);
+    box-shadow: 0 0 32px rgba(244, 164, 96, 0.5);
+  }
+}
+
+@keyframes ladder-loser-fade {
+  0% { opacity: 1; filter: grayscale(0); transform: scale(1); }
+  40% { opacity: 0.45; filter: grayscale(0.5); transform: scale(0.97); }
+  100% { opacity: 0.35; filter: grayscale(0.7); transform: scale(0.96); }
+}
+
+@keyframes ladder-celebrate-overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ladder-celebrate-star {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  30% { transform: scale(1.4) rotate(15deg); opacity: 1; }
+  50% { transform: scale(1) rotate(-5deg); }
+  70% { transform: scale(1.1) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes ladder-celebrate-text {
+  0% { transform: translateY(12px) scale(0.8); opacity: 0; }
+  25% { transform: translateY(0) scale(1.15); opacity: 1; }
+  40% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+/* Prefer reduced motion — still show the highlight but skip the scale pulse */
+@media (prefers-reduced-motion: reduce) {
+  .ladder-activity-card--celebrate-winner,
+  .ladder-activity-card--celebrate-loser,
+  .ladder-activity-card__celebrate-overlay,
+  .ladder-activity-card__celebrate-star,
+  .ladder-activity-card__celebrate-text {
+    animation: none;
+  }
+  .ladder-activity-card--celebrate-winner {
+    box-shadow: 0 0 32px rgba(244, 164, 96, 0.5);
+  }
+  .ladder-activity-card--celebrate-loser {
+    opacity: 0.4;
+    filter: grayscale(0.6);
+  }
+  .ladder-activity-card__celebrate-overlay {
+    opacity: 1;
+  }
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 640px) {
+  .ladder-activity-card--matchup {
+    max-width: none;
+  }
+
+  .ladder-activity-card__image-wrap {
+    height: 140px;
+  }
+
+  .ladder-activity-card--matchup .ladder-activity-card__name {
+    font-size: 1rem;
+  }
+
+  .ladder-activity-card__celebrate-text {
+    font-size: 1.6rem;
+  }
+
+  .ladder-activity-card__celebrate-star {
+    width: 40px;
+    height: 40px;
+  }
+}
