@@ -49,7 +49,7 @@ class WebSocketIntegrationTest {
 
     @BeforeEach
     fun setUp() {
-        jdbcTemplate.execute("TRUNCATE TABLE assignment_members, assignments, itinerary_events, itineraries, items, plan_members, plans, users CASCADE")
+        jdbcTemplate.execute("TRUNCATE TABLE assignment_members, assignments, itinerary_events, itineraries, items, plan_members, plans, ladder_votes, ladder_participants, ladder_activities, activity_ladders, users CASCADE")
         ownerId = insertUser("owner@example.com", "owner")
         capturedMessages.clear()
 
