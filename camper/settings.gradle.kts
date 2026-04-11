@@ -24,6 +24,7 @@ include(":clients:recipe-client")
 include(":clients:recipe-scraper-client")
 include(":clients:meal-plan-client")
 include(":clients:log-book-client")
+include(":clients:activity-ladder-client")
 include(":services:common")
 project(":services:common").name = "service-common"
 include(":services:camper-service")
