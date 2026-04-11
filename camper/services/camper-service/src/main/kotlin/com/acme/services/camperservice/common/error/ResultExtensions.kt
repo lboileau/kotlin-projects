@@ -277,8 +277,6 @@ fun <T> Result<T, RecipeError>.toResponseEntity(
 fun LadderError.toResponseEntity(): ResponseEntity<Any> = when (this) {
     is LadderError.NotFound -> ResponseEntity.status(404)
         .body(ApiResponse.ErrorBody("NOT_FOUND", message))
-    is LadderError.ActivityNotFound -> ResponseEntity.status(404)
-        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
     is LadderError.NotCreator -> ResponseEntity.status(403)
         .body(ApiResponse.ErrorBody("FORBIDDEN", message))
     is LadderError.NotEligibleVoter -> ResponseEntity.status(403)

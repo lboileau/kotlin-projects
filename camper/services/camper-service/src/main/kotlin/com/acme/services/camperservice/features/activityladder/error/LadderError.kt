@@ -9,7 +9,6 @@ import java.util.UUID
 sealed class LadderError(override val message: String) : AppError {
 
     data class NotFound(val ladderId: String) : LadderError("Ladder not found: $ladderId")
-    data class ActivityNotFound(val activityId: String) : LadderError("Activity not found: $activityId")
     data class NotCreator(val ladderId: UUID, val userId: UUID) :
         LadderError("User $userId is not creator of ladder $ladderId")
     data class Invalid(val field: String, val reason: String) : LadderError("Invalid $field: $reason")

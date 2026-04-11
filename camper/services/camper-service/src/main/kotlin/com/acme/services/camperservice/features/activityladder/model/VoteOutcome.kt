@@ -22,6 +22,8 @@ sealed class VoteOutcome {
         val newRoundNumber: Int,
         val nextMatchAId: UUID,
         val nextMatchBId: UUID,
+        val isFinalRound: Boolean,
+        val isGrandFinalReset: Boolean,
     ) : VoteOutcome()
 
     /** All votes are in and one activity won — proceed to next round. */

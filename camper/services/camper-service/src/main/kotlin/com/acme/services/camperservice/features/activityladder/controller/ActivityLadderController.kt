@@ -142,8 +142,55 @@ class ActivityLadderController(
         val param = CastVoteParam(ladderId = id, requestingUserId = userId, votedForActivityId = req.votedForActivityId)
         val result = ladderService.castVote(param)
         if (result is Result.Success) {
-            // TODO(PR 5c): Publish the appropriate sequence of events based on VoteOutcome variant
-            // (vote-cast, round-resolved, round-started, completed)
+            when (val outcome = result.value) {
+                is VoteOutcome.VoteRecorded -> {
+                    eventPublisher.voteCast(
+                        ladderId = id,
+                        voterId = outcome.voterId,
+                        voteCount = outcome.voteCount,
+                        votersRemaining = outcome.votersRemaining,
+                    )
+                }
+                is VoteOutcome.RoundTied -> {
+                    eventPublisher.voteCast(ladderId = id, voterId = userId, voteCount = outcome.voteCount, votersRemaining = 0)
+                    eventPublisher.roundResolved(ladderId = id, outcome = "tie", winnerActivityId = null, voteTotals = null)
+                    eventPublisher.roundStarted(
+                        ladderId = id,
+                        roundNumber = outcome.newRoundNumber,
+                        activityAId = outcome.nextMatchAId,
+                        activityBId = outcome.nextMatchBId,
+                        isFinal = outcome.isFinalRound,
+                        isReset = outcome.isGrandFinalReset,
+                    )
+                }
+                is VoteOutcome.RoundDecided -> {
+                    eventPublisher.voteCast(ladderId = id, voterId = userId, voteCount = 0, votersRemaining = 0)
+                    eventPublisher.roundResolved(
+                        ladderId = id,
+                        outcome = "decided",
+                        winnerActivityId = outcome.winnerActivityId,
+                        voteTotals = outcome.voteTotals,
+                    )
+                    eventPublisher.roundStarted(
+                        ladderId = id,
+                        roundNumber = outcome.newRoundNumber,
+                        activityAId = outcome.nextMatchAId,
+                        activityBId = outcome.nextMatchBId,
+                        isFinal = outcome.isFinalRound,
+                        isReset = outcome.isGrandFinalReset,
+                    )
+                }
+                is VoteOutcome.LadderCompleted -> {
+                    eventPublisher.voteCast(ladderId = id, voterId = userId, voteCount = 0, votersRemaining = 0)
+                    eventPublisher.roundResolved(
+                        ladderId = id,
+                        outcome = "decided",
+                        winnerActivityId = outcome.winnerActivityId,
+                        voteTotals = outcome.voteTotals,
+                    )
+                    eventPublisher.completed(ladderId = id, winnerActivityId = outcome.winnerActivityId)
+                }
+            }
         }
         return result.toResponseEntity { outcome ->
             when (outcome) {
