@@ -24,7 +24,8 @@ webapp/
 │   ├── api/
 │   │   └── client.ts       # API client (typed fetch wrapper)
 │   ├── hooks/
-│   │   └── usePlanUpdates.ts # STOMP WebSocket hook for live plan updates
+│   │   ├── usePlanUpdates.ts # STOMP WebSocket hook for live plan updates
+│   │   └── useLadderUpdates.ts # STOMP WebSocket hook for live ladder updates + presence tracking
 │   ├── context/
 │   │   └── AuthContext.tsx  # Auth state (localStorage-persisted)
 │   ├── lib/
@@ -53,12 +54,19 @@ webapp/
 │   │   ├── ComingSoonModal.tsx         # Themed "not ready" modal with flavor text
 │   │   ├── AddMemberModal.tsx          # Form modal to invite member by email
 │   │   ├── Modal.css                   # Shared modal styles (parchment aesthetic)
+│   │   ├── activityladder/             # Activity ladder components
+│   │   │   ├── LadderPeoplePanel.tsx/css # People sidebar: voters + spectators, online/offline + voted indicators
+│   │   │   ├── MatchupDisplay.tsx/css   # Current matchup with two activity cards
+│   │   │   └── VoteProgress.tsx/css     # "N of M voted" progress bar
 │   │   └── ProtectedRoute.tsx          # Auth guard (redirect to /login)
 │   ├── pages/
 │   │   ├── LoginPage.tsx/css           # Login/register with night-sky parallax
 │   │   ├── HomePage.tsx/css            # Trip list with dusk parallax, flag trail markers
 │   │   ├── PlanPage.tsx/css            # THE CENTERPIECE — campsite scene
-│   │   └── RecipesPage.tsx/css         # Recipe book — list, detail, create, import, review
+│   │   ├── RecipesPage.tsx/css         # Recipe book — list, detail, create, import, review
+│   │   ├── LadderListPage.tsx/css      # Activity ladder list page at `/activities` — all ladders with status badges
+│   │   ├── NewLadderPage.tsx/css       # Create ladder form at `/activities/new` — title + add/remove activities inline
+│   │   └── LadderPage.tsx/css          # Live ladder detail page at `/activities/:ladderId` — matchup display, voting, presence
 │   └── styles/
 │       ├── theme.css                   # Design tokens (colors, typography, spacing, shadows)
 │       └── animations.css              # All @keyframes (fire, float, twinkle, fade, etc.)
@@ -190,6 +198,62 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 | GET | `/api/meal-plans/templates` | X-User-Id | MealPlanModal (list templates) |
 | POST | `/api/meal-plans/:id/save-as-template` | X-User-Id | MealPlanModal (save as template) |
 | POST | `/api/meal-plans/:id/copy-to-trip` | X-User-Id | MealPlanModal (load template) |
+| POST | `/api/ladders` | X-User-Id | NewLadderPage (create ladder) |
+| GET | `/api/ladders` | X-User-Id | LadderListPage (list ladders) |
+| GET | `/api/ladders/:id` | X-User-Id | LadderPage (ladder detail) |
+| POST | `/api/ladders/:id/activities` | X-User-Id | NewLadderPage / LadderPage (add activity; DRAFT only, creator only) |
+| DELETE | `/api/ladders/:id/activities/:activityId` | X-User-Id | NewLadderPage / LadderPage (remove activity; DRAFT only, creator only) |
+| POST | `/api/ladders/:id/start` | X-User-Id | LadderPage (start ladder; DRAFT only, creator only) |
+| POST | `/api/ladders/:id/vote` | X-User-Id | LadderPage (cast vote; ACTIVE only, eligible voter only) |
+| POST | `/api/ladders/:id/restart` | X-User-Id | LadderPage (restart ladder; creator only) |
+| GET | `/api/users/:userId/avatar` | X-User-Id | LadderPeoplePanel (fetch avatar for participant if needed) |
+
+## Activity Ladder Feature
+
+### Pages
+- **`LadderListPage` (`/activities`)** — Lists all ladders with status badges (DRAFT/ACTIVE/COMPLETED). Create new ladder CTA button.
+- **`NewLadderPage` (`/activities/new`)** — Create ladder form: title input, add/remove activities inline (name, imageUrl, distanceMinutes, costPerPerson fields). Submit creates ladder in DRAFT status.
+- **`LadderPage` (`/activities/:ladderId`)** — Live ladder detail:
+  - **DRAFT (creator):** Activity list with add/remove, "Start Ladder" button, people panel.
+  - **DRAFT (non-creator):** Activity list (read-only), people panel, waiting message.
+  - **ACTIVE (voter, not voted):** Current matchup display (two activity cards), vote buttons, progress bar (N of M voted), final-round/reset banners, people panel, creator's restart button.
+  - **ACTIVE (voter, voted):** Same matchup (voting locked), progress, people panel, creator's restart button.
+  - **ACTIVE (spectator):** Matchup, progress, "You are watching" message, people panel.
+  - **COMPLETED:** Winning activity highlighted, people panel, creator's restart button available.
+
+### Components
+- **`LadderPeoplePanel`** — Sidebar showing:
+  - **DRAFT:** Single section "In the room" with all connected users (from `useLadderUpdates`).
+  - **ACTIVE/COMPLETED:** Two sections: Voters (from `ladder_participants`, with online/offline + voted indicators), Watching (currently connected spectators, no persistence).
+  - Reuses `AvatarHead` (compact variant) for avatars, not full `CamperAvatar`.
+  - Updates live via presence-changed and vote events.
+  
+- **`MatchupDisplay`** — Shows two current-match activities as side-by-side cards:
+  - Activity name, image, distanceMinutes, costPerPerson (purely informational).
+  - Vote buttons (A/B) if voter has not voted; buttons disabled if already voted.
+  
+- **`VoteProgress`** — Displays "N of M voted" with progress bar. Updates as votes arrive.
+
+### Live Updates Hook
+- **`useLadderUpdates(ladderId, onUpdate)`** — Connects to `/ws` via STOMP, subscribes to `/topic/ladders/{ladderId}` with `X-User-Id` in STOMP `connectHeaders` (required for server to associate session with user).
+  - Receives: `presence-changed`, `started`, `round-resolved`, `round-started`, `completed`, `restarted`.
+  - Frontend subscribes and refetches ladder detail + participants on most events.
+  - Vote progress updates incrementally on each vote event (no full refetch needed).
+
+### API Namespace (`api.ladders`)
+- `createLadder(title, activities)` — POST /api/ladders
+- `getLadderList()` — GET /api/ladders
+- `getLadderDetail(id)` — GET /api/ladders/{id}
+- `addActivity(ladderId, name, imageUrl, distanceMinutes, costPerPerson)` — POST /api/ladders/{id}/activities
+- `removeActivity(ladderId, activityId)` — DELETE /api/ladders/{id}/activities/{activityId}
+- `startLadder(ladderId)` — POST /api/ladders/{id}/start
+- `castVote(ladderId, votedForActivityId)` — POST /api/ladders/{id}/vote
+- `restartLadder(ladderId)` — POST /api/ladders/{id}/restart
+
+### Key Implementation Notes
+- **Avatar resolution:** `LadderParticipantResponse` carries `avatarSeed?`. Frontend fetches full avatar on-demand via `api.getAvatar(userId)` if seed is present (causes N HTTP round-trips for N participants). Consider caching fetched avatars in component state.
+- **First render bug fix:** `useEffect` for avatar fetching must run AFTER the participant list is populated; don't pre-seed with `avatar: null` in initial state.
+- **Validation fix:** Create form must check `name.trim()`, `imageUrl.trim()`, and numeric fields for negative values.
 
 ## Running
 

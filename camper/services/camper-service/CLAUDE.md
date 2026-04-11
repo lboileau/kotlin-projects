@@ -294,6 +294,49 @@ API service for camping trip planning — user registration, authentication, pla
   - `DELETE /api/meal-plans/{id}/shopping-list` — reset all purchases (204)
 - **Key design:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles scaling and unit conversion. Only purchase records are stored.
 
+### Activity Ladder (`features/activityladder/`)
+- **Models:** Uses `Ladder`, `LadderActivity`, `LadderBracket`, `LadderStatus`, `LadderParticipant`, `LadderVote` from activity-ladder-client
+- **DTOs:**
+  - Requests: `CreateLadderRequest(title, activities: [{ name, imageUrl, distanceMinutes, costPerPerson }])`, `AddActivityRequest(name, imageUrl, distanceMinutes, costPerPerson)`, `CastVoteRequest(votedForActivityId)`
+  - Responses: `LadderSummaryResponse(id, creatorId, title, status, activityCount, participantCount, createdAt)`, `LadderDetailResponse(id, creatorId, title, status, currentRoundNumber?, currentMatchActivityA?, currentMatchActivityB?, isFinalRound, isGrandFinalReset, activities, participants, currentRoundVotes?, votedUserIds?, winnerActivityId?)`, `LadderActivityResponse(id, name, imageUrl, distanceMinutes, costPerPerson, losses, bracket, displayOrder, createdAt)`, `LadderParticipantResponse(userId, avatarSeed?)`, `VoteOutcomeResponse` (sealed: `RoundTied`, `RoundDecided(winnerActivityId, loserActivityId, voteTotals)`, `RoundStarted(...)`, `LadderCompleted(winnerActivityId)`)
+- **Error:** `ActivityLadderError` sealed class — `NotFound(ladderId)`, `NotCreator(ladderId)`, `NotEligibleVoter(ladderId)`, `NotEnoughActivities`, `Invalid(field, reason)`, `ConflictError` for duplicate votes, `InvalidState(status, operation)`
+- **Service params:** `CreateLadderParam(title, activities, creatorId)`, `GetLadderListParam(limit?, offset?)`, `GetLadderDetailParam(id, userId)`, `AddActivityParam(ladderId, name, imageUrl, distanceMinutes, costPerPerson, creatorId)`, `RemoveActivityParam(ladderId, activityId, creatorId)`, `StartLadderParam(ladderId, creatorId, presentUserIds)`, `CastVoteParam(ladderId, userId, votedForActivityId)`, `RestartLadderParam(ladderId, creatorId)`
+- **Validations:** 1:1 with actions in `validations/`
+  - `ValidateCreateLadder`: title not blank, ≥2 activities, each activity has valid fields (name, imageUrl, distanceMinutes ≥0, costPerPerson ≥0)
+  - `ValidateAddActivity`: title/imageUrl/fields not blank, distanceMinutes/costPerPerson ≥0, only in DRAFT status
+  - `ValidateRemoveActivity`: activity exists, ladder in DRAFT
+  - `ValidateStartLadder`: creator only, status is DRAFT, ≥2 activities exist
+  - `ValidateGetLadderDetail`, `ValidateCastVote`, `ValidateRestartLadder`: standard
+- **Actions:**
+  - `CreateLadderAction`: Creates ladder in DRAFT, inserts activities with atomic displayOrder assignment
+  - `ListLaddersAction`: Lists all ladders, newest first
+  - `GetLadderDetailAction`: Fetches ladder detail; if ACTIVE, includes participant list + current-round votes + voted user IDs (for UI progress indicator)
+  - `AddActivityAction`: Adds activity with auto-assigned displayOrder (MAX+1)
+  - `RemoveActivityAction`: Removes activity from DRAFT ladder
+  - `StartLadderAction`: **Holds FOR UPDATE lock via `withLadderLocked`**. Snapshots in-memory presence via `LadderPresenceTracker.getPresence(ladderId)`. Bulk-inserts participants from snapshot. Sets status ACTIVE, currentRoundNumber=1. Selects first random matchup via `RoundResolver.selectNextPair()`. Broadcasts `ladder/started` event.
+  - `CastVoteAction`: **Executes inside `withLadderLocked`**. Validates voter eligibility (row in ladder_participants), inserts vote. If all voters have now voted, calls `RoundResolver.resolveRound()`, which returns a `VoteOutcome` sealed class. Fan-outs into controller events: `round-resolved` (with outcome details), then `round-started` or `completed` based on ladder state post-resolution. Broadcasts each event via `LadderEventPublisher`.
+  - `RestartLadderAction`: Deletes all votes + participants, resets activities (losses=0, bracket=WINNERS), resets ladder state (status=DRAFT, round/matches/flags cleared). Broadcasts `ladder/restarted` event.
+- **Mapper:** `ActivityLadderMapper` — fromClient, toSummaryResponse, toDetailResponse, toActivityResponse, toParticipantResponse (avatar fetched separately if avatarSeed is present)
+- **Service:** `ActivityLadderService` facade (takes ActivityLadderClient + LadderPresenceTracker + LadderEventPublisher)
+- **RoundResolver:** Stateless logic that takes a ladder + vote tallies and returns `VoteOutcome`. Implements bracket selection (alternates brackets when both have ≥2 activities, else picks larger bracket; Grand Final when both have 1). Handles tie, loser bracket transition, elimination, Grand Final Reset trigger (loser finalist beats winner finalist in first Grand Final).
+- **LadderPresenceTracker:** In-memory `ConcurrentHashMap<UUID, Set<UUID>>` (ladderId → connected userIds). Listens to Spring `SessionSubscribeEvent` / `SessionUnsubscribeEvent` / `SessionDisconnectEvent` (via `LadderStompSessionListener`). Provides `getPresence(ladderId)` snapshot for Start action. Broadcasts `presence-changed` events via `LadderEventPublisher` on connect/disconnect.
+- **LadderEventPublisher:** Publishes `LadderUpdateMessage(resource="ladder", action, payload)` to `/topic/ladders/{ladderId}` via Spring messaging broker. Called after `StartLadderAction`, `CastVoteAction`, and `RestartLadderAction`.
+- **Routes:** (all require `X-User-Id` header)
+  - `POST /api/ladders` — create ladder (201, generates UUID)
+  - `GET /api/ladders` — list all ladders
+  - `GET /api/ladders/{id}` — get ladder detail
+  - `POST /api/ladders/{id}/activities` — add activity (201, creator only, DRAFT only)
+  - `DELETE /api/ladders/{id}/activities/{activityId}` — remove activity (204, creator only, DRAFT only)
+  - `POST /api/ladders/{id}/start` — start ladder (creator only, DRAFT only, ≥2 activities required, snapshots presence)
+  - `POST /api/ladders/{id}/vote` — cast vote (ACTIVE only, eligible voter only)
+  - `POST /api/ladders/{id}/restart` — restart ladder (creator only, ACTIVE or COMPLETED)
+- **WebSocket:** Subscribe to `/topic/ladders/{id}` (STOMP). Receives events: `presence-changed`, `started`, `round-resolved` (with outcome + vote totals), `round-started`, `completed`, `restarted`.
+- **Key design notes:**
+  - **Concurrency:** `withLadderLocked` holds a JDBC-level FOR UPDATE lock on the ladder row during Start (to atomically snapshot presence + insert participants + select matchup) and during vote casting + round resolution (to ensure only one thread resolves any given round).
+  - **Grand Final Reset:** When the losers-bracket finalist beats the winners-bracket finalist in the first Grand Final, the trigger is: `ladder.isFinalRound && !ladder.isGrandFinalReset && winnersBracket.isEmpty() && losersBracket.size == 2` (the winners-bracket finalist now has 1 loss and moves to losers bracket, so winners bracket is empty). The second Grand Final has `isGrandFinalReset=true`.
+  - **Presence tracking:** In-memory only. Users "join" by opening the WebSocket connection; no explicit join action. At Start, the server snapshots the presence set and freezes it as the voter list. Late joiners are spectators (not in ladder_participants).
+  - **Avatar resolution:** `LadderParticipantResponse` carries `avatarSeed?` (optional because some test ladders have null seeds). Frontend fetches full `AvatarResponse` on-demand via `api.getAvatar(userId)` if seed is present.
+
 ### Invite Email Flow (cross-cutting: Plan + Webhook)
 - When a member is added to a plan, an invitation email is sent via the `EmailClient`
 - **Dedup logic:** If invitation already has status sent/delivered/delayed/complained, skip re-sending
@@ -338,10 +381,12 @@ API service for camping trip planning — user registration, authentication, pla
 - `GearPackServiceConfig` — wires GearPackService (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - `MealPlanClientConfig` — creates meal plan client via factory function
 - `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
+- `ActivityLadderClientConfig` — creates activity ladder client via factory function
+- `ActivityLadderServiceConfig` — wires ActivityLadderService (takes ActivityLadderClient + LadderPresenceTracker + LadderEventPublisher)
 
 ## Testing
-- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest` (includes event metadata and link management tests), `AssignmentServiceTest`, `GearPackServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `HandleResendWebhookActionTest` use FakeClient from testFixtures
-- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest` (includes gearPackId tests), `ItineraryAcceptanceTest` (includes event metadata, links, cost summary, and link replacement tests), `AssignmentAcceptanceTest`, `GearPackAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest` with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
-- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `GearPackFixture`, `RecipeFixture`, `MealPlanFixture` use direct SQL for test setup
-- **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor
-- **Clean slate:** Tables truncated via `@BeforeEach`
+- **Unit:** `WorldServiceTest`, `UserServiceTest` (20 tests — profile update, avatar, dietary restrictions, experience level), `PlanServiceTest`, `ItemServiceTest`, `ItineraryServiceTest` (includes event metadata and link management tests), `AssignmentServiceTest`, `GearPackServiceTest`, `RecipeServiceTest` (35 tests), `MealPlanServiceTest`, `ActivityLadderServiceTest` (66 tests — all actions including round resolver state machine, Grand Final Reset, restart from ACTIVE and COMPLETED), `HandleResendWebhookActionTest`, `RoundResolverTest`, `LadderPresenceTrackerTest` use FakeClient from testFixtures
+- **Acceptance:** `WorldAcceptanceTest`, `UserAcceptanceTest` (43 tests — profile CRUD, avatar endpoints, dietary restrictions, plan member avatar enrichment), `PlanAcceptanceTest`, `ItemAcceptanceTest` (includes gearPackId tests), `ItineraryAcceptanceTest` (includes event metadata, links, cost summary, and link replacement tests), `AssignmentAcceptanceTest`, `GearPackAcceptanceTest`, `InviteEmailAcceptanceTest`, `IngredientAcceptanceTest`, `RecipeAcceptanceTest`, `MealPlanAcceptanceTest`, `ActivityLadderAcceptanceTest` (28 tests — create, start, vote, complete, tie handling, late joiners, waiting for disconnected voters), `LadderWebSocketIntegrationTest` (12 tests — presence tracking, event broadcasts) with `@SpringBootTest(RANDOM_PORT)` + Testcontainers
+- **Fixtures:** `WorldFixture`, `UserFixture`, `PlanFixture`, `ItemFixture`, `ItineraryFixture`, `AssignmentFixture`, `GearPackFixture`, `RecipeFixture`, `MealPlanFixture`, `ActivityLadderFixture` use direct SQL for test setup
+- **WebSocket:** `WebSocketIntegrationTest` verifies controllers publish STOMP messages via broker channel interceptor; `LadderWebSocketIntegrationTest` verifies presence events and round events broadcast correctly
+- **Clean slate:** Tables truncated via `@BeforeEach` in order: `ladder_votes, ladder_participants, ladder_activities, activity_ladders, users` (child-first)
