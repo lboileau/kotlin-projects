@@ -14,6 +14,7 @@ export function SideNav() {
 
   const isActive = (path: string) => location.pathname === path;
   const isFoodActive = location.pathname === '/recipes' || location.pathname === '/ingredients';
+  const isActivitiesActive = location.pathname.startsWith('/activities');
 
   return (
     <>
@@ -89,6 +90,17 @@ export function SideNav() {
                 </li>
               </ul>
             </div>
+          </li>
+          <li>
+            <button
+              className={`sidenav__item ${isActivitiesActive ? 'sidenav__item--active' : ''}`}
+              onClick={() => go('/activities')}
+            >
+              <svg width="18" height="18" viewBox="0 0 18 18" className="sidenav__icon">
+                <polygon points="9,2 11.5,7.5 17.5,7.5 12.5,11.5 14.5,17.5 9,14 3.5,17.5 5.5,11.5 0.5,7.5 6.5,7.5" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+              </svg>
+              Activities
+            </button>
           </li>
         </ul>
       </nav>

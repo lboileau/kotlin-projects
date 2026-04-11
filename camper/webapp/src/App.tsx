@@ -7,6 +7,9 @@ import { PlanPage } from './pages/PlanPage';
 import { AccountPage } from './pages/AccountPage';
 import { RecipesPage } from './pages/RecipesPage';
 import { IngredientsPage } from './pages/IngredientsPage';
+import { ActivitiesListPage } from './pages/ActivitiesListPage';
+import { NewActivityLadderPage } from './pages/NewActivityLadderPage';
+import { ActivityLadderPage } from './pages/ActivityLadderPage';
 
 export default function App() {
   return (
@@ -51,6 +54,30 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <IngredientsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activities"
+            element={
+              <ProtectedRoute>
+                <ActivitiesListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activities/new"
+            element={
+              <ProtectedRoute>
+                <NewActivityLadderPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activities/:ladderId"
+            element={
+              <ProtectedRoute>
+                <ActivityLadderPage />
               </ProtectedRoute>
             }
           />
