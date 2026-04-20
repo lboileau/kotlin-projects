@@ -13,6 +13,7 @@ import {
 } from '../api/client';
 import { Button } from './ui/Button';
 import { IngredientSearch } from './ui/IngredientSearch';
+import { buildMealPlanSummary } from '../lib/mealPlanSummary';
 import { Modal } from './ui/Modal';
 import './MealPlanModal.css';
 import { UNITS } from '../lib/constants';
@@ -531,8 +532,11 @@ function OverviewView({
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
   const [inlineSearch, setInlineSearch] = useState('');
   const [editName, setEditName] = useState(mealPlan?.name ?? '');
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Sync editName when mealPlan name changes externally
   useEffect(() => { if (mealPlan) setEditName(mealPlan.name); }, [mealPlan?.name]);
+  useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
   if (!mealPlan) {
     return (
       <div className="mp-empty-state">
@@ -730,6 +734,30 @@ function OverviewView({
                     onClick={() => setShowLoadTemplate(true)}
                   >
                     Load from Template
+                  </button>
+                </>
+              )}
+              {mealPlan.days.flatMap(d => [
+                ...d.meals.breakfast, ...d.meals.lunch, ...d.meals.dinner, ...d.meals.snack,
+              ]).length > 0 && (
+                <>
+                  <span className="mp-template-sep">|</span>
+                  <button
+                    className="mp-template-link"
+                    onClick={() => {
+                      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+                      navigator.clipboard.writeText(buildMealPlanSummary(mealPlan))
+                        .then(() => {
+                          setCopyState('copied');
+                          copyTimerRef.current = setTimeout(() => setCopyState('idle'), 2000);
+                        })
+                        .catch(() => {
+                          setCopyState('failed');
+                          copyTimerRef.current = setTimeout(() => setCopyState('idle'), 2000);
+                        });
+                    }}
+                  >
+                    {copyState === 'copied' ? 'Copied!' : copyState === 'failed' ? 'Copy failed' : 'Copy Summary'}
                   </button>
                 </>
               )}
