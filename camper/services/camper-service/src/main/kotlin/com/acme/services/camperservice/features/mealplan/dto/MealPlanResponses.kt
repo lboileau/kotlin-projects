@@ -48,6 +48,7 @@ data class MealPlanRecipeDetailResponse(
     val id: UUID,
     val recipeId: UUID,
     val recipeName: String,
+    val recipeWebLink: String?,
     val baseServings: Int,
     val scaleFactor: BigDecimal,
     val isFullyPurchased: Boolean,

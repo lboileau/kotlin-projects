@@ -60,14 +60,15 @@ class MealPlanFixture(private val jdbcTemplate: JdbcTemplate) {
         name: String = "Recipe-${UUID.randomUUID().toString().take(8)}",
         baseServings: Int = 4,
         status: String = "published",
-        createdBy: UUID
+        createdBy: UUID,
+        webLink: String? = null
     ): UUID {
         jdbcTemplate.update(
             """
             INSERT INTO recipes (id, name, description, web_link, base_servings, status, created_by, duplicate_of_id, created_at, updated_at)
-            VALUES (?, ?, NULL, NULL, ?, ?, ?, NULL, ?, ?)
+            VALUES (?, ?, NULL, ?, ?, ?, ?, NULL, ?, ?)
             """.trimIndent(),
-            id, name, baseServings, status, createdBy,
+            id, name, webLink, baseServings, status, createdBy,
             java.sql.Timestamp.from(Instant.now()), java.sql.Timestamp.from(Instant.now())
         )
         return id
