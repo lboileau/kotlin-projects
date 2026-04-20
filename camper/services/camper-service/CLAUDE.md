@@ -255,7 +255,7 @@ API service for camping trip planning — user registration, authentication, pla
 - **Models:** Uses `MealPlan`, `MealPlanDay`, `MealPlanRecipe`, `ShoppingListPurchase` from meal-plan-client; `Recipe`, `RecipeIngredient` from recipe-client; `Ingredient` from ingredient-client
 - **DTOs:**
   - Requests: `CreateMealPlanRequest(name, servings, scalingMode?, isTemplate?, planId?)`, `UpdateMealPlanRequest(name?, servings?, scalingMode?)`, `AddDayRequest(dayNumber)`, `AddRecipeRequest(mealType, recipeId)`, `CopyToTripRequest(planId, servings?)`, `SaveAsTemplateRequest(name)`, `UpdatePurchaseRequest(ingredientId, unit, quantityPurchased)`
-  - Responses: `MealPlanDetailResponse` (nested days → meals → recipes with scaled ingredients), `ShoppingListResponse` (computed categories → items with purchase status)
+  - Responses: `MealPlanDetailResponse` (nested days → meals → recipes with scaled ingredients), `MealPlanRecipeDetailResponse` (id, recipeId, recipeName, recipeWebLink, baseServings, scaleFactor, isFullyPurchased, ingredients), `ShoppingListResponse` (computed categories → items with purchase status)
 - **Error:** `MealPlanError` sealed class — `MealPlanNotFound(id)`, `DayNotFound(id)`, `RecipeNotFound(id)`, `DuplicateDayNumber(dayNumber)`, `PlanAlreadyHasMealPlan(planId)`, `NotATemplate(id)`, `IsATemplate(id)`, `Invalid(field, reason)`
 - **Service params:** `CreateMealPlanParam`, `GetMealPlanDetailParam`, `GetMealPlanByPlanIdParam`, `GetTemplatesParam`, `UpdateMealPlanParam`, `DeleteMealPlanParam`, `CopyToTripParam`, `SaveAsTemplateParam`, `AddDayParam`, `RemoveDayParam`, `AddRecipeToMealParam`, `RemoveRecipeFromMealParam`, `GetShoppingListParam`, `UpdatePurchaseParam`, `ResetPurchasesParam`
 - **Actions:**
