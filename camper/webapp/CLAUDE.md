@@ -261,12 +261,23 @@ All calls go through Vite proxy (`/api` → `localhost:8080`).
 # Dev (requires API running on :8080)
 npm run dev        # → http://localhost:3000
 
-# Build
+# Build (canonical type-check gate)
 npm run build      # → dist/
-
-# Type check
-npx tsc --noEmit
 ```
+
+## Testing
+
+```bash
+# Run tests once (for CI)
+npm run test
+
+# Run tests in watch mode (for development)
+npm run test:watch
+```
+
+Test files use Vitest and are co-located with source code using `.test.ts` / `.test.tsx` suffix. The test runner is configured with `environment: 'node'` (appropriate for pure functions; component tests would use `jsdom`).
+
+**Important:** `npm run build` is the authoritative type-check gate, not `npx tsc --noEmit`. The build runs `tsc -b` which enforces `verbatimModuleSyntax`, whereas `--noEmit` does not. Always use `npm run build` for final verification.
 
 ## Conventions
 

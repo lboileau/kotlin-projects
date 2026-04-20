@@ -262,17 +262,61 @@ export function MyPage() {
 
 ---
 
+## Testing — Unit Tests with Vitest
+
+Unit tests use **Vitest** as the test runner. Test files are co-located with source code using the `.test.ts` / `.test.tsx` suffix.
+
+### Configuration
+
+`vitest.config.ts`:
+```typescript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    globals: false,
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+  },
+});
+```
+
+`package.json` scripts:
+```json
+{
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
+```
+
+### Running Tests
+
+```bash
+npm run test        # One-shot run (for CI)
+npm run test:watch  # Watch mode (for development)
+```
+
+### Important Notes
+
+- **Test environment:** `environment: 'node'` is correct for pure function tests (no DOM). If testing React components, you would use `jsdom` instead.
+- **Type coupling:** Test files are picked up by the app's `tsconfig.json` by default. A type error in a test helper (e.g., wrong field name) will fail the production build. This is expected — test fixtures must match production types.
+- **Fresh worktree setup:** New worktrees may require `npm install` before running tests or build commands.
+
+---
+
 ## Build & Verify
 
 ```bash
 # Dev server (requires API on :8080)
 cd webapp && npm run dev
 
-# Type check
-cd webapp && npx tsc --noEmit
-
-# Production build
+# Production build (canonical type-check gate)
 cd webapp && npm run build
+
+# Run tests
+cd webapp && npm run test
 ```
 
-Always run `npx tsc --noEmit` after changes to verify types. Run `npm run build` for final verification.
+**Important:** `npm run build` is the authoritative type-check gate for this project, not `npx tsc --noEmit`. The build command runs `tsc -b` (which enforces `verbatimModuleSyntax`) plus `vite build`. Use `npm run build` for final verification.

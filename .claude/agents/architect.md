@@ -133,3 +133,5 @@ The plan MUST list all affected files in the contract PR file list. This prevent
 - **Be pattern-aware.** Every design decision must align with established conventions.
 - **Flag deviations.** If a feature requires breaking an existing pattern, call it out explicitly with rationale.
 - **List cascade files.** When modifying existing types, list all files that construct them. Missing call sites cause compilation failures.
+- **Explain scope constraints.** When the plan narrows scope relative to the handoff (e.g., "no client-layer changes needed because data already flows through service composition"), explicitly include a "What We Decided NOT to Do" section that explains the reasoning. This preempts implementation confusion when the handoff suggests a different approach.
+- **Flag infrastructure gaps upfront.** If the plan discovers a missing framework (e.g., no test runner, missing migration tooling, missing CI config), don't leave it as an open question for implementers. Make an explicit decision in the plan: add it, skip it, or defer it. Propose a default; the user can override at the plan gate.
