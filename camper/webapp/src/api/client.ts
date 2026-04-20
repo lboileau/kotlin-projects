@@ -271,6 +271,7 @@ export interface MealPlanRecipeDetailResponse {
   id: string;
   recipeId: string;
   recipeName: string;
+  recipeWebLink: string | null;
   baseServings: number;
   scaleFactor: number;
   isFullyPurchased: boolean;
