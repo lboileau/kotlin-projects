@@ -266,6 +266,41 @@ class MealPlanAcceptanceTest {
         }
 
         @Test
+        fun `GET by ID returns recipeWebLink populated for recipes with a web link and null for those without`() {
+            val recipeWithLink = fixture.insertRecipe(
+                name = "Campfire Chili",
+                baseServings = 4,
+                createdBy = userId,
+                webLink = "https://example.com/chili"
+            )
+            val recipeWithoutLink = fixture.insertRecipe(
+                name = "Pancakes",
+                baseServings = 4,
+                createdBy = userId,
+                webLink = null
+            )
+
+            val mealPlan = createMealPlanViaApi(name = "Web Link Test", servings = 4, planId = planId)
+            val day = addDayViaApi(mealPlan.id, 1)
+            addRecipeViaApi(mealPlan.id, day.id, "dinner", recipeWithLink)
+            addRecipeViaApi(mealPlan.id, day.id, "snack", recipeWithoutLink)
+
+            val response = restTemplate.exchange(
+                "/api/meal-plans/${mealPlan.id}",
+                HttpMethod.GET,
+                entityWithUser(null, userId),
+                MealPlanDetailResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            val meals = response.body!!.days[0].meals
+            val chili = meals.dinner.first { it.recipeId == recipeWithLink }
+            val pancakes = meals.snack.first { it.recipeId == recipeWithoutLink }
+            assertThat(chili.recipeWebLink).isEqualTo("https://example.com/chili")
+            assertThat(pancakes.recipeWebLink).isNull()
+        }
+
+        @Test
         fun `GET templates returns 200 with template list`() {
             createMealPlanViaApi(name = "Template A", isTemplate = true)
             createMealPlanViaApi(name = "Template B", isTemplate = true)
