@@ -59,6 +59,8 @@ If overlap is found, present it to the user and ask whether to extend, reuse, or
 
 Once requirements are gathered and scope is confirmed, write a handoff file to `docs/<feature>/handoff.md` inside the project directory.
 
+**Before writing the handoff:** Grep-verify any data-flow claims in your handoff description. If you write something like "wire it from the `X` column in the `Y` client" or "fetch data via `ClientZ.method()`," confirm the claim by searching the codebase for the actual read path. Include the grep output or at least a file:line reference as proof. Unverified data-flow claims force the architect to correct them during planning, wasting time that could be spent on implementation.
+
 **Handoff file format:**
 
 ```markdown
