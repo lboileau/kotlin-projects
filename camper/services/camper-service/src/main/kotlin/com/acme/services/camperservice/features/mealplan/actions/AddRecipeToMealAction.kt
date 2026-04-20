@@ -96,6 +96,7 @@ internal class AddRecipeToMealAction(
                 id = mpr.id,
                 recipeId = recipe.id,
                 recipeName = recipe.name,
+                recipeWebLink = recipe.webLink,
                 baseServings = recipe.baseServings,
                 scaleFactor = scaleFactor,
                 isFullyPurchased = false,
