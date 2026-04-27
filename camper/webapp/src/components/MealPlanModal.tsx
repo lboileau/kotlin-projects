@@ -15,6 +15,7 @@ import { Button } from './ui/Button';
 import { IngredientSearch } from './ui/IngredientSearch';
 import { buildMealPlanSummary } from '../lib/mealPlanSummary';
 import { Modal } from './ui/Modal';
+import { useToast } from '../context/ToastContext';
 import './MealPlanModal.css';
 import { UNITS } from '../lib/constants';
 
@@ -35,6 +36,7 @@ interface MealPlanModalProps {
 }
 
 export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
+  const toast = useToast();
   const [activeView, setActiveView] = useState<ViewTab>('overview');
   const [mealPlan, setMealPlan] = useState<MealPlanDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -332,6 +334,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
       setShowLoadTemplate(false);
       setReplaceTemplateId(null);
       setTemplatePreview(null);
+      toast.success('Template loaded');
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load template');
       // Reload in case the delete succeeded but copy failed

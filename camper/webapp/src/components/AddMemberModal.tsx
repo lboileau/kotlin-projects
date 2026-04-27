@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import { Modal } from './ui/Modal';
+import { useToast } from '../context/ToastContext';
 
 interface Props {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<number, string>>({});
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const toast = useToast();
 
   const addRow = () => {
     setEmails([...emails, '']);
@@ -63,6 +65,7 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
       if (!em) continue;
       try {
         await onAdd(em);
+        toast.success(`Invitation sent to ${em}`);
       } catch (err) {
         newErrors[i] = err instanceof Error ? err.message : 'Failed to invite';
       }

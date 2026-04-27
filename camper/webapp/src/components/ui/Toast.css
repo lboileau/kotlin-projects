@@ -1,0 +1,152 @@
+/* ─── Toast container ────────────────────────────────────────────────────── */
+
+/*
+ * z-index hierarchy (canonical reference):
+ *   ParallaxBackground / campsite items  ≤  10
+ *   Modal overlay                            100   (Modal.css)
+ *   SideNav                                  1100  (SideNav.css)
+ *   Toast container                          1200  ← must sit above everything
+ */
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 320px;
+  pointer-events: none; /* let clicks fall through the gap between toasts */
+}
+
+/* ─── Individual toast item ──────────────────────────────────────────────── */
+
+.toast-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 36px 12px 14px; /* right padding reserves space for close btn */
+  background: var(--parchment);
+  border: 1px solid var(--parchment-dark);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-medium);
+  pointer-events: all;
+  animation: toast-slide-in 220ms ease-out both;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  color: var(--charcoal);
+  border-left-width: 4px;
+}
+
+/* Variant accent colours — left border + icon tint */
+.toast-item--success { border-left-color: var(--mint-deep); }
+.toast-item--error   { border-left-color: var(--ember-bright); }
+.toast-item--info    { border-left-color: var(--lavender-deep); }
+
+/* ─── Variant icon ───────────────────────────────────────────────────────── */
+
+.toast-icon {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.toast-item--success .toast-icon { color: var(--mint-deep); }
+.toast-item--error   .toast-icon { color: var(--ember-bright); }
+.toast-item--info    .toast-icon { color: var(--lavender-deep); }
+
+/* ─── Body ───────────────────────────────────────────────────────────────── */
+
+.toast-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toast-message {
+  line-height: 1.4;
+}
+
+/* ─── Action button ──────────────────────────────────────────────────────── */
+
+.toast-action {
+  align-self: flex-start;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 120ms;
+}
+
+.toast-action:hover { opacity: 1; }
+
+.toast-item--success .toast-action { color: var(--mint-deep); }
+.toast-item--error   .toast-action { color: var(--ember-bright); }
+.toast-item--info    .toast-action { color: var(--lavender-deep); }
+
+/* ─── Close button ───────────────────────────────────────────────────────── */
+
+.toast-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--charcoal-light);
+  opacity: 0.5;
+  transition: opacity 120ms;
+}
+
+.toast-close:hover { opacity: 1; }
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(110%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Respect user's reduced-motion preference: drop the slide, keep the fade */
+@media (prefers-reduced-motion: reduce) {
+  .toast-item {
+    animation-name: toast-fade-in;
+  }
+}
+
+@keyframes toast-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Mobile: dock to bottom, full-width ─────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .toast-container {
+    top: auto;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+  }
+}
