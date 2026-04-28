@@ -90,6 +90,14 @@ describe('ToastContext', () => {
     expect(screen.getByText('hi there')).toBeInTheDocument();
   });
 
+  it('error() renders a toast with the error CSS class', () => {
+    render(<TestApp msg="Something failed" variant="error" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Add toast' }));
+    const toastEl = screen.getByRole('alert');
+    expect(toastEl).toHaveClass('toast-item--error');
+    expect(screen.getByText('Something failed')).toBeInTheDocument();
+  });
+
   it('auto-dismisses after durationMs (vi.useFakeTimers)', async () => {
     vi.useFakeTimers();
     render(<TestApp msg="bye" durationMs={2000} />);
@@ -101,7 +109,7 @@ describe('ToastContext', () => {
     expect(screen.queryByText('bye')).not.toBeInTheDocument();
   });
 
-  it(`stacking ${MAX_VISIBLE} + 1 toasts evicts the first`, () => {
+  it(`stacking ${MAX_VISIBLE} + 1 toasts evicts exactly the first; ${MAX_VISIBLE} remain`, () => {
     render(
       <ToastProvider>
         <MultiConsumer count={MAX_VISIBLE + 1} />
@@ -116,8 +124,8 @@ describe('ToastContext', () => {
     // First toast should be gone; last should be visible
     expect(screen.queryByText('Toast 1')).not.toBeInTheDocument();
     expect(screen.getByText(`Toast ${MAX_VISIBLE + 1}`)).toBeInTheDocument();
-    // Total visible ≤ MAX_VISIBLE
-    expect(screen.getAllByRole('alert').length).toBeLessThanOrEqual(MAX_VISIBLE);
+    // Exactly MAX_VISIBLE toasts remain — not fewer
+    expect(screen.getAllByRole('alert').length).toBe(MAX_VISIBLE);
   });
 
   it('toast with action renders the action button; clicking dismisses + invokes handler', () => {
@@ -133,25 +141,39 @@ describe('ToastContext', () => {
     expect(screen.queryByText('Do something')).not.toBeInTheDocument();
   });
 
-  it('hovering pauses dismissal; leaving resumes (vi.useFakeTimers)', async () => {
+  it('hovering pauses dismissal; leaving resumes with remaining time (vi.useFakeTimers)', async () => {
     vi.useFakeTimers();
     render(<TestApp msg="hover me" durationMs={DEFAULT_DURATION} />);
     fireEvent.click(screen.getByRole('button', { name: 'Add toast' }));
 
     const toastEl = screen.getByRole('alert');
 
-    // Hover — advance past the full duration; toast should still be visible
-    fireEvent.mouseEnter(toastEl);
-    await act(async () => { vi.advanceTimersByTime(DEFAULT_DURATION + 100); });
+    // Advance half the duration — toast still visible
+    await act(async () => { vi.advanceTimersByTime(DEFAULT_DURATION / 2); });
     expect(screen.getByText('hover me')).toBeInTheDocument();
 
-    // Un-hover — resume; advance enough for remaining to fire
+    // Hover — timer paused; remaining ≈ DEFAULT_DURATION / 2
+    fireEvent.mouseEnter(toastEl);
+
+    // Advance past the ORIGINAL expiry — if pause doesn't work, the toast would
+    // be gone; with pause, it must still be present
+    await act(async () => { vi.advanceTimersByTime(DEFAULT_DURATION); });
+    expect(screen.getByText('hover me')).toBeInTheDocument(); // paused — still there
+
+    // Un-hover — resume with remaining ≈ DEFAULT_DURATION / 2
     fireEvent.mouseLeave(toastEl);
-    await act(async () => { vi.advanceTimersByTime(DEFAULT_DURATION + 100); });
+
+    // Advance slightly less than remaining — should still be visible
+    // (proves the timer uses remaining time, not full DEFAULT_DURATION)
+    await act(async () => { vi.advanceTimersByTime(DEFAULT_DURATION / 2 - 100); });
+    expect(screen.getByText('hover me')).toBeInTheDocument(); // not yet expired
+
+    // Advance past remaining — now dismissed
+    await act(async () => { vi.advanceTimersByTime(200); });
     expect(screen.queryByText('hover me')).not.toBeInTheDocument();
   });
 
-  it('dismiss(id) removes the matching toast immediately', async () => {
+  it('close button removes the matching toast immediately', async () => {
     render(<TestApp msg="dismissible" />);
     fireEvent.click(screen.getByRole('button', { name: 'Add toast' }));
     expect(screen.getByText('dismissible')).toBeInTheDocument();
@@ -161,5 +183,37 @@ describe('ToastContext', () => {
     await waitFor(() => {
       expect(screen.queryByText('dismissible')).not.toBeInTheDocument();
     });
+  });
+
+  it('useToast().dismiss(id) programmatically removes the matching toast', async () => {
+    let capturedId = '';
+    function DismissConsumer() {
+      const toast = useToast();
+      return (
+        <>
+          <button onClick={() => { capturedId = toast.success('to dismiss'); }}>Add</button>
+          <button onClick={() => toast.dismiss(capturedId)}>Dismiss it</button>
+        </>
+      );
+    }
+    render(<ToastProvider><DismissConsumer /><Toast /></ToastProvider>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add' }));
+    expect(screen.getByText('to dismiss')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss it' }));
+    await waitFor(() => {
+      expect(screen.queryByText('to dismiss')).not.toBeInTheDocument();
+    });
+  });
+
+  it('useToast() throws when called outside <ToastProvider>', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    function BadComponent() {
+      useToast();
+      return null;
+    }
+    expect(() => render(<BadComponent />)).toThrow('useToast must be used within <ToastProvider>');
+    consoleSpy.mockRestore();
   });
 });

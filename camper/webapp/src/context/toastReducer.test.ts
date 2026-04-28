@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
   toastReducer,
   MAX_VISIBLE,
@@ -90,5 +90,14 @@ describe('toastReducer', () => {
     const b = next.toasts.find(t => t.id === 'b')!;
     expect(a.paused).toBe(false);
     expect(b.paused).toBe(true); // unchanged
+  });
+
+  it('ADD preserves the action field intact through the reducer', () => {
+    const onClick = vi.fn();
+    const toast = makeToast('a1', { action: { label: 'Undo', onClick } });
+    const next = toastReducer(empty, { type: 'ADD', payload: toast });
+    expect(next.toasts[0].action).toBeDefined();
+    expect(next.toasts[0].action?.label).toBe('Undo');
+    expect(next.toasts[0].action?.onClick).toBe(onClick);
   });
 });
