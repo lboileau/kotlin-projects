@@ -12,6 +12,7 @@ import {
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
 import { Button } from '../components/ui/Button';
+import { useToast } from '../context/ToastContext';
 import './RecipesPage.css';
 import '../components/Modal.css';
 import { UNITS } from '../lib/constants';
@@ -30,6 +31,7 @@ interface DraftIngredient {
 
 export function RecipesPage() {
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [view, setView] = useState<View>('list');
   const [recipes, setRecipes] = useState<RecipeResponse[]>([]);
@@ -231,6 +233,7 @@ export function RecipesPage() {
       });
       setRecipes(prev => [recipe, ...prev]);
       setView('list');
+      toast.success('Recipe saved as draft');
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Failed to create recipe');
     } finally {
@@ -581,6 +584,7 @@ export function RecipesPage() {
       const updated = await api.publishRecipe(selectedRecipe.id);
       setRecipes(prev => prev.map(r => r.id === updated.id ? updated : r));
       await refreshDetail(updated.id);
+      toast.success('Recipe published');
     } catch (err) {
       setResolveError(err instanceof Error ? err.message : 'Failed to publish recipe');
     } finally {

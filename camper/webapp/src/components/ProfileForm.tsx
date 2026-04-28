@@ -7,6 +7,7 @@ import { Select } from './ui/Select';
 import { CheckboxGroup } from './ui/CheckboxGroup';
 import { FormField } from './ui/FormField';
 import { Button } from './ui/Button';
+import { useToast } from '../context/ToastContext';
 import './ProfileForm.css';
 
 interface ProfileFormProps {
@@ -27,6 +28,7 @@ export function ProfileForm({ user, onSave, submitLabel = 'Save Profile', showEm
   const [randomizing, setRandomizing] = useState(false);
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
+  const toast = useToast();
 
   const isDirty =
     avatarSeed !== null ||
@@ -65,6 +67,7 @@ export function ProfileForm({ user, onSave, submitLabel = 'Save Profile', showEm
       setAvatarSeed(null);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
+      toast.success('Profile saved');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save profile');
     } finally {
