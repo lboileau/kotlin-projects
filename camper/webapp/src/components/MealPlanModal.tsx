@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, Fragment, type Dispatch, type SetStateAction } from 'react';
 import {
   api,
   type MealPlanDetailResponse,
@@ -95,8 +95,11 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   const [mealFilter, setMealFilter] = useState<string | null>(null);
   const [themeFilter, setThemeFilter] = useState<string | null>(null);
   const [addingToMeal, setAddingToMeal] = useState<{ recipeId: string; recipeName: string } | null>(null);
-  const [addDay, setAddDay] = useState('');
-  const [addMealType, setAddMealType] = useState<MealType>('breakfast');
+  const [selectedCells, setSelectedCells] = useState<Set<string>>(new Set());
+  // addMealType is kept as state so it can later be updated to "remember the last picked
+  // meal type" as a pre-check nicety (e.g., after a successful submit). No setter needed
+  // now that the dropdown is replaced by the grid — the default ('breakfast') is the seed.
+  const [addMealType] = useState<MealType>('breakfast');
 
   // Shopping List state
   const [shoppingList, setShoppingList] = useState<ShoppingListResponse | null>(null);
@@ -265,16 +268,44 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   };
 
   const handleAddRecipeToMeal = async () => {
-    if (!mealPlan || !addingToMeal || !addDay) return;
+    if (!mealPlan || !addingToMeal || selectedCells.size === 0) return;
+    // Materialize cells as a deterministic array (top-to-bottom, breakfast→snack).
+    // Sequential — preserves STOMP event ordering. Do NOT Promise.all.
+    // Partial-success note: if cell N fails, cells 0..N-1 are committed;
+    // cells N+1..end are unattempted. The error toast surfaces the failure;
+    // the user can retry the remaining unchecked cells without closing the popover.
+    const orderedCells: { dayId: string; mealType: MealType }[] = [];
+    for (const day of mealPlan.days) {
+      for (const mt of MEAL_TYPES) {
+        if (selectedCells.has(`${day.id}:${mt.key}`)) {
+          orderedCells.push({ dayId: day.id, mealType: mt.key });
+        }
+      }
+    }
     try {
-      await api.addRecipeToMeal(mealPlan.id, addDay, {
-        mealType: addMealType,
-        recipeId: addingToMeal.recipeId,
-      });
+      for (const cell of orderedCells) {
+        await api.addRecipeToMeal(mealPlan.id, cell.dayId, {
+          mealType: cell.mealType,
+          recipeId: addingToMeal.recipeId,
+        });
+      }
+      if (orderedCells.length === 1) {
+        const cell = orderedCells[0];
+        const day = mealPlan.days.find(d => d.id === cell.dayId);
+        const mt = MEAL_TYPES.find(m => m.key === cell.mealType);
+        toast.success(`Added "${addingToMeal.recipeName}" to Day ${day?.dayNumber} ${mt?.label}`);
+      } else {
+        toast.success(`Added "${addingToMeal.recipeName}" to ${orderedCells.length} meals`);
+      }
       setAddingToMeal(null);
-      setAddDay('');
+      setSelectedCells(new Set());
       await loadMealPlan();
-    } catch { /* */ }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to add recipe');
+      // Leave the popover open with selectedCells intact so the user can retry.
+      // Note: already-committed cells (before the failure) remain added to the meal plan —
+      // re-submitting will duplicate them (accepted limitation; see phase-3-plan.md §W12).
+    }
   };
 
   const handleAddRecipeInline = async (dayId: string, mealType: MealType, recipeId: string) => {
@@ -497,10 +528,9 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
               uniqueThemes={uniqueThemes}
               addingToMeal={addingToMeal}
               setAddingToMeal={setAddingToMeal}
-              addDay={addDay}
-              setAddDay={setAddDay}
+              selectedCells={selectedCells}
+              setSelectedCells={setSelectedCells}
               addMealType={addMealType}
-              setAddMealType={setAddMealType}
               onAddRecipeToMeal={handleAddRecipeToMeal}
               mealPlan={mealPlan}
               activeDay={activeDay}
@@ -1049,7 +1079,7 @@ function TemplatePreview({ preview, onConfirm, onBack, loading, isReplace }: Tem
 
 // ── View 2: Recipe Book ──────────────────────
 
-interface RecipeBookProps {
+export interface RecipeBookProps {
   recipes: RecipeResponse[];
   selectedRecipe: RecipeDetailResponse | null;
   onSelectRecipe: (r: RecipeResponse) => void;
@@ -1063,26 +1093,34 @@ interface RecipeBookProps {
   uniqueThemes: string[];
   addingToMeal: { recipeId: string; recipeName: string } | null;
   setAddingToMeal: (v: { recipeId: string; recipeName: string } | null) => void;
-  addDay: string;
-  setAddDay: (v: string) => void;
+  selectedCells: Set<string>;
+  setSelectedCells: Dispatch<SetStateAction<Set<string>>>;
   addMealType: MealType;
-  setAddMealType: (v: MealType) => void;
   onAddRecipeToMeal: () => void;
   mealPlan: MealPlanDetailResponse | null;
   activeDay: number;
 }
 
-function RecipeBookView({
+export function RecipeBookView({
   recipes, selectedRecipe, onSelectRecipe,
   recipeSearch, setRecipeSearch,
   mealFilter, setMealFilter,
   themeFilter, setThemeFilter,
   uniqueMeals, uniqueThemes,
   addingToMeal, setAddingToMeal,
-  addDay, setAddDay, addMealType, setAddMealType,
+  selectedCells, setSelectedCells,
+  addMealType,
   onAddRecipeToMeal, mealPlan, activeDay,
 }: RecipeBookProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  const toggleCell = (key: string) => {
+    setSelectedCells(prev => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  };
 
   return (
     <div className="mp-book">
@@ -1172,30 +1210,50 @@ function RecipeBookView({
             <div className="mp-book-add-area" ref={popoverRef}>
               {addingToMeal?.recipeId === selectedRecipe.id ? (
                 <div className="mp-add-popover">
-                  <select
-                    className="mp-add-select"
-                    value={addDay}
-                    onChange={e => setAddDay(e.target.value)}
-                  >
-                    <option value="">Select day...</option>
-                    {mealPlan.days.map(day => (
-                      <option key={day.id} value={day.id}>Day {day.dayNumber}</option>
-                    ))}
-                  </select>
-                  <select
-                    className="mp-add-select"
-                    value={addMealType}
-                    onChange={e => setAddMealType(e.target.value as MealType)}
-                  >
+                  <div className="mp-add-grid" role="grid" aria-label="Pick days and meal types">
+                    <div className="mp-add-grid-corner" />
                     {MEAL_TYPES.map(mt => (
-                      <option key={mt.key} value={mt.key}>{mt.icon} {mt.label}</option>
+                      <div key={mt.key} className="mp-add-grid-col-header" role="columnheader">
+                        <span aria-hidden="true">{mt.icon}</span> {mt.label}
+                      </div>
                     ))}
-                  </select>
+                    {mealPlan.days.map(day => (
+                      <Fragment key={day.id}>
+                        <div className="mp-add-grid-row-header" role="rowheader">Day {day.dayNumber}</div>
+                        {MEAL_TYPES.map(mt => {
+                          const cellKey = `${day.id}:${mt.key}`;
+                          const checked = selectedCells.has(cellKey);
+                          return (
+                            <label
+                              key={cellKey}
+                              className={`mp-add-grid-cell${checked ? ' mp-add-grid-cell--checked' : ''}`}
+                              role="gridcell"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleCell(cellKey)}
+                                aria-label={`Day ${day.dayNumber} ${mt.label}`}
+                              />
+                            </label>
+                          );
+                        })}
+                      </Fragment>
+                    ))}
+                  </div>
                   <div className="mp-add-popover-actions">
-                    <Button className="mp-add-confirm" onClick={onAddRecipeToMeal} disabled={!addDay}>
-                      Add
+                    <Button
+                      className="mp-add-confirm"
+                      onClick={onAddRecipeToMeal}
+                      disabled={selectedCells.size === 0}
+                    >
+                      {selectedCells.size <= 1 ? 'Add' : `Add to ${selectedCells.size} meals`}
                     </Button>
-                    <Button variant="secondary" className="mp-add-cancel" onClick={() => setAddingToMeal(null)}>
+                    <Button
+                      variant="secondary"
+                      className="mp-add-cancel"
+                      onClick={() => { setAddingToMeal(null); setSelectedCells(new Set()); }}
+                    >
                       Cancel
                     </Button>
                   </div>
@@ -1206,7 +1264,9 @@ function RecipeBookView({
                   onClick={() => {
                     setAddingToMeal({ recipeId: selectedRecipe.id, recipeName: selectedRecipe.name });
                     const currentDay = mealPlan.days[activeDay] ?? mealPlan.days[0];
-                    if (currentDay) setAddDay(currentDay.id);
+                    if (currentDay) {
+                      setSelectedCells(new Set([`${currentDay.id}:${addMealType}`]));
+                    }
                   }}
                 >
                   Add to Meal Plan
