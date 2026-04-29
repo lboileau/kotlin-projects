@@ -1,11 +1,12 @@
 /**
- * W4 — MealPlanModal external recipe link in OverviewView
+ * W1 — MealPlanModal in-app "View recipe" link in OverviewView
  *
  * Verifies:
- *  (1) Recipe row with non-null recipeWebLink renders an <a target="_blank">
- *      with the correct href and rel="noopener noreferrer".
- *  (2) Recipe row with null recipeWebLink does not render the anchor.
- *  (3) aria-label includes the hostname extracted from the URL.
+ *  (1) Recipe row renders a "View recipe" anchor with href="/recipes/{recipeId}",
+ *      target="_blank", and rel="noopener noreferrer".
+ *  (2) The anchor's aria-label contains the recipe name.
+ *  (3) The viewlink anchor sits before the existing recipeWebLink external-link
+ *      anchor in DOM order.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
@@ -22,8 +23,8 @@ import type {
 
 const mockToast = vi.hoisted(() => ({
   success: vi.fn(),
-  error:   vi.fn(),
-  info:    vi.fn(),
+  error: vi.fn(),
+  info: vi.fn(),
   dismiss: vi.fn(),
 }));
 
@@ -33,7 +34,7 @@ vi.mock('../context/ToastContext', () => ({
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
-const recipeWithLink: MealPlanRecipeDetailResponse = {
+const recipeWithBothLinks: MealPlanRecipeDetailResponse = {
   id: 'mpr1',
   recipeId: 'r1',
   recipeName: 'Trail Pasta',
@@ -44,24 +45,13 @@ const recipeWithLink: MealPlanRecipeDetailResponse = {
   ingredients: [],
 };
 
-const recipeWithoutLink: MealPlanRecipeDetailResponse = {
-  id: 'mpr2',
-  recipeId: 'r2',
-  recipeName: 'Camp Oatmeal',
-  recipeWebLink: null,
-  baseServings: 2,
-  scaleFactor: 1,
-  isFullyPurchased: false,
-  ingredients: [],
-};
-
 const mockDay: MealPlanDayResponse = {
   id: 'day1',
   dayNumber: 1,
   meals: {
-    breakfast: [recipeWithoutLink],
+    breakfast: [],
     lunch: [],
-    dinner: [recipeWithLink],
+    dinner: [recipeWithBothLinks],
     snack: [],
   },
 };
@@ -126,47 +116,51 @@ function makeProps(overrides?: Partial<OverviewProps>): OverviewProps {
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
-describe('OverviewView — external recipe link (W4)', () => {
+describe('OverviewView — in-app "View recipe" link (W1)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders an <a target="_blank"> with the URL and rel="noopener noreferrer" when recipeWebLink is set', () => {
+  it('(1) renders a viewlink anchor with correct href, target, and rel', () => {
     render(<OverviewView {...makeProps()} />);
 
-    const link = screen.getByRole('link', {
-      name: /open original recipe at/i,
+    const viewLink = screen.getByRole('link', {
+      name: /view trail pasta in the recipe chest/i,
     });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', 'https://www.allrecipes.com/trail-pasta');
-    expect(link).toHaveAttribute('target', '_blank');
-    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(viewLink).toBeInTheDocument();
+    expect(viewLink).toHaveAttribute('href', '/recipes/r1');
+    expect(viewLink).toHaveAttribute('target', '_blank');
+    expect(viewLink).toHaveAttribute('rel', 'noopener noreferrer');
   });
 
-  it('does not render the extlink anchor when recipeWebLink is null', () => {
+  it('(2) aria-label contains the recipe name', () => {
     render(<OverviewView {...makeProps()} />);
 
-    // Camp Oatmeal (breakfast, null recipeWebLink) has no external link.
-    // Trail Pasta (dinner, non-null recipeWebLink) has an external link.
-    // Both recipes have an in-app viewlink (added by W1), so total links = 3:
-    //   viewlink(Camp Oatmeal) + viewlink(Trail Pasta) + extlink(Trail Pasta)
-    const extLinks = screen.getAllByRole('link', {
-      name: /open original recipe at/i,
+    const viewLink = screen.getByRole('link', {
+      name: /view trail pasta in the recipe chest/i,
     });
-    expect(extLinks).toHaveLength(1);
-    expect(extLinks[0]).toHaveAttribute('href', 'https://www.allrecipes.com/trail-pasta');
-  });
-
-  it('aria-label includes the hostname from the URL', () => {
-    render(<OverviewView {...makeProps()} />);
-
-    const link = screen.getByRole('link', {
-      name: /open original recipe at www\.allrecipes\.com/i,
-    });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute(
+    expect(viewLink).toHaveAttribute(
       'aria-label',
-      'Open original recipe at www.allrecipes.com',
+      'View Trail Pasta in the recipe chest'
     );
+  });
+
+  it('(3) viewlink sits before the extlink in DOM order', () => {
+    render(<OverviewView {...makeProps()} />);
+
+    const links = screen.getAllByRole('link');
+    // Two links in this row: viewlink (in-app) first, extlink (external) second
+    expect(links.length).toBeGreaterThanOrEqual(2);
+
+    const viewLinkIdx = links.findIndex(l =>
+      l.getAttribute('href') === '/recipes/r1'
+    );
+    const extLinkIdx = links.findIndex(l =>
+      l.getAttribute('href') === 'https://www.allrecipes.com/trail-pasta'
+    );
+    expect(viewLinkIdx).toBeGreaterThanOrEqual(0);
+    expect(extLinkIdx).toBeGreaterThanOrEqual(0);
+    // viewlink comes before extlink in document order
+    expect(viewLinkIdx).toBeLessThan(extLinkIdx);
   });
 });

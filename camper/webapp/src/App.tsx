@@ -46,7 +46,7 @@ export default function App() {
             }
           />
           <Route
-            path="/recipes"
+            path="/recipes/*"
             element={
               <ProtectedRoute>
                 <RecipesPage />
