@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, type Dispatch, type SetStateAction } from 'react';
-import { useNavigate, useParams, Routes, Route, Navigate, Link } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Routes, Route, Navigate, Link } from 'react-router-dom';
 import {
   api,
   type RecipeResponse,
@@ -47,8 +47,20 @@ function RecipesListView({
   error: string;
 }) {
   const navigate = useNavigate();
-  const [search, setSearch] = useState('');
-  const [mealTab, setMealTab] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const search = searchParams.get('q') ?? '';
+  const mealTab = searchParams.get('meal'); // null if absent
+
+  const updateSearch = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set('q', value); else next.delete('q');
+    setSearchParams(next, { replace: true });
+  };
+  const updateMealTab = (value: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set('meal', value); else next.delete('meal');
+    setSearchParams(next, { replace: true });
+  };
 
   const filteredRecipes = recipes.filter(r =>
     r.name.toLowerCase().includes(search.toLowerCase()) &&
@@ -81,7 +93,7 @@ function RecipesListView({
             className="recipes-search"
             placeholder="Search provisions..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => updateSearch(e.target.value)}
           />
         </div>
         <button className="recipes-import-btn" onClick={() => navigate('/recipes/import')}>
@@ -114,7 +126,7 @@ function RecipesListView({
             <div className="recipes-meal-tabs">
               <button
                 className={`recipes-meal-tab ${mealTab === null ? 'recipes-meal-tab--active' : ''}`}
-                onClick={() => setMealTab(null)}
+                onClick={() => updateMealTab(null)}
               >
                 All
               </button>
@@ -122,7 +134,7 @@ function RecipesListView({
                 <button
                   key={m}
                   className={`recipes-meal-tab ${mealTab === m ? 'recipes-meal-tab--active' : ''}`}
-                  onClick={() => setMealTab(m)}
+                  onClick={() => updateMealTab(m)}
                 >
                   {m === 'uncategorized' ? 'Other' : m}
                 </button>
