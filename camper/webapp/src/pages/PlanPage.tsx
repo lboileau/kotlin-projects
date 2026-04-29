@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { api, type Plan, type PlanMember } from '../api/client';
+import { api, type Plan, type PlanMember, type MealPlanDetailResponse } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { usePlanUpdates } from '../hooks/usePlanUpdates';
 import { ParallaxBackground } from '../components/ParallaxBackground';
@@ -17,6 +17,7 @@ import { LogBookModal } from '../components/LogBookModal';
 import { ProfileSetupModal } from '../components/ProfileSetupModal';
 import { AppHeader } from '../components/AppHeader';
 import { Button } from '../components/ui/Button';
+import { MealPlanReconcileBanner } from '../components/MealPlanReconcileBanner';
 import './PlanPage.css';
 
 type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'logbook' | 'addMember' | 'managePlan' | null;
@@ -26,6 +27,8 @@ export function PlanPage() {
   const { user, login } = useAuth();
   const [plan, setPlan] = useState<Plan | null>(null);
   const [members, setMembers] = useState<PlanMember[]>([]);
+  // Meal plan state — introduced by W17; reused by W16 for kitchen badge.
+  const [mealPlan, setMealPlan] = useState<MealPlanDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
@@ -39,12 +42,14 @@ export function PlanPage() {
   const loadData = useCallback(async () => {
     if (!planId) return;
     try {
-      const [plans, memberData] = await Promise.all([
+      const [plans, memberData, mealPlanData] = await Promise.all([
         api.getPlans(),
         api.getPlanMembers(planId),
+        api.getMealPlanForTrip(planId),
       ]);
       setPlan(plans.find(p => p.id === planId) || null);
       setMembers(memberData);
+      setMealPlan(mealPlanData);
     } catch {
       // handle error silently for now
     } finally {
@@ -151,6 +156,9 @@ export function PlanPage() {
   };
 
   const memberCount = members.length;
+  // Count only registered members (username truthy) for reconcile banner.
+  // Pending invites haven't joined yet — counting them would inflate desired servings.
+  const memberCountForServings = members.filter(m => m.username).length;
 
   return (
     <div className="plan-page">
@@ -202,6 +210,16 @@ export function PlanPage() {
         ) : undefined}
         onProfileClick={() => setShowProfileSetup(true)}
       />
+
+      {/* Reconcile banner — shown when meal plan servings ≠ registered member count */}
+      {planId && (
+        <MealPlanReconcileBanner
+          mealPlan={mealPlan}
+          memberCount={memberCountForServings}
+          planId={planId}
+          onUpdated={() => loadData()}
+        />
+      )}
 
       {/* Campsite scene */}
       <div className="campsite-scene">
