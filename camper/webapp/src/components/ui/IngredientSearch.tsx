@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, forwardRef } from 'react';
 import type { IngredientResponse, CreateIngredientRequest } from '../../api/client';
 import { INGREDIENT_CATEGORIES, UNITS } from '../../lib/constants';
 import './IngredientSearch.css';
@@ -12,14 +12,20 @@ interface IngredientSearchProps {
   onCreateIngredient?: (data: CreateIngredientRequest) => Promise<IngredientResponse>;
 }
 
-export function IngredientSearch({
+/**
+ * Search-as-you-type ingredient picker. Accepts a forwarded ref that targets
+ * the inner search <input>, allowing callers to programmatically refocus after
+ * clearing the selection (e.g. keep-open add-item form).
+ */
+export const IngredientSearch = forwardRef<HTMLInputElement, IngredientSearchProps>(
+  function IngredientSearch({
   ingredients,
   onSelect,
   placeholder = 'Search ingredients...',
   selectedIngredient = null,
   onClear,
   onCreateIngredient,
-}: IngredientSearchProps) {
+}, ref) {
   const [search, setSearch] = useState('');
   const [createMode, setCreateMode] = useState(false);
   const [newName, setNewName] = useState('');
@@ -89,6 +95,7 @@ export function IngredientSearch({
   return (
     <div className="ingredient-search__wrap">
       <input
+        ref={ref}
         className="ingredient-search__input"
         value={search}
         onChange={e => { setSearch(e.target.value); setCreateMode(false); }}
@@ -168,4 +175,5 @@ export function IngredientSearch({
       )}
     </div>
   );
-}
+},
+);

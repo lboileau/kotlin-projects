@@ -1245,10 +1245,12 @@ function statusLabel(status: string): string {
   }
 }
 
-function ShoppingListView({
+// Exported for isolated unit testing (MealPlanModal.shoppingAdd.test.tsx).
+export function ShoppingListView({
   shoppingList, mealPlan, onTogglePurchase, onResetPurchases,
   resetConfirm, setResetConfirm, onAddManualItem, onRemoveManualItem, ingredients, onCreateIngredient,
 }: ShoppingListProps) {
+  const toast = useToast();
   const [showAddForm, setShowAddForm] = useState(false);
   const [addMode, setAddMode] = useState<'ingredient' | 'freeform'>('ingredient');
   const [selectedIngredient, setSelectedIngredient] = useState<IngredientResponse | null>(null);
@@ -1257,6 +1259,11 @@ function ShoppingListView({
   const [addDescription, setAddDescription] = useState('');
   const [adding, setAdding] = useState(false);
 
+  // Refs for refocusing after a successful keep-open add.
+  const descriptionRef = useRef<HTMLInputElement>(null);
+  const ingredientSearchRef = useRef<HTMLInputElement>(null);
+
+  /** Full reset used by Cancel / Escape — clears all fields and closes the form. */
   const resetAddForm = () => {
     setSelectedIngredient(null);
     setAddQuantity('');
@@ -1268,18 +1275,31 @@ function ShoppingListView({
     setAdding(true);
     try {
       if (addMode === 'ingredient' && selectedIngredient) {
+        const displayName = selectedIngredient.name;
         await onAddManualItem({
           ingredientId: selectedIngredient.id,
           quantity: parseFloat(addQuantity),
           unit: addUnit,
         });
+        // Stay open: only clear the ingredient selection; preserve qty + unit
+        // so the next item can be added with one tap.
+        setSelectedIngredient(null);
+        toast.success(`Added "${displayName}"`, { durationMs: 1500 });
+        // Refocus after re-render (IngredientSearch input mounts once
+        // selectedIngredient becomes null; autoFocus handles most browsers,
+        // setTimeout 0 covers jsdom / edge cases).
+        setTimeout(() => ingredientSearchRef.current?.focus(), 0);
       } else if (addMode === 'freeform' && addDescription.trim()) {
+        const displayName = addDescription.trim();
         await onAddManualItem({
-          description: addDescription.trim(),
+          description: displayName,
         });
+        // Stay open: only clear the description; preserve qty + unit state
+        // so it survives a mid-session switch back to ingredient mode.
+        setAddDescription('');
+        toast.success(`Added "${displayName}"`, { durationMs: 1500 });
+        descriptionRef.current?.focus();
       }
-      resetAddForm();
-      setShowAddForm(false);
     } finally {
       setAdding(false);
     }
@@ -1307,7 +1327,16 @@ function ShoppingListView({
     <div className="mp-shopping">
       {/* Add item button / form */}
       {showAddForm ? (
-        <div className="mp-shopping-add-form">
+        <div
+          className="mp-shopping-add-form"
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+              e.preventDefault();
+              setShowAddForm(false);
+              resetAddForm();
+            }
+          }}
+        >
           <div className="mp-shopping-add-mode-toggle">
             <button
               className={`mp-shopping-add-mode-btn ${addMode === 'ingredient' ? 'mp-shopping-add-mode-btn--active' : ''}`}
@@ -1326,6 +1355,7 @@ function ShoppingListView({
           {addMode === 'ingredient' ? (
             <div className="mp-shopping-add-ingredient">
               <IngredientSearch
+                ref={ingredientSearchRef}
                 ingredients={ingredients}
                 selectedIngredient={selectedIngredient}
                 onSelect={(ing) => {
@@ -1358,6 +1388,7 @@ function ShoppingListView({
             </div>
           ) : (
             <input
+              ref={descriptionRef}
               className="mp-shopping-add-desc"
               value={addDescription}
               onChange={e => setAddDescription(e.target.value)}
