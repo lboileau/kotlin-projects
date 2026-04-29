@@ -12,6 +12,7 @@ import {
   type MealsByTypeResponse,
 } from '../api/client';
 import { Button } from './ui/Button';
+import { InfoPopover } from './ui/InfoPopover';
 import { IngredientSearch } from './ui/IngredientSearch';
 import { buildMealPlanSummary } from '../lib/mealPlanSummary';
 import { Modal } from './ui/Modal';
@@ -1477,6 +1478,12 @@ export function ShoppingListView({
                         {displayName}
                         {isManual && <span className="mp-shopping-manual-badge">manual</span>}
                       </span>
+                      {item.usedInRecipes.length > 0 && (
+                        <InfoPopover
+                          items={Array.from(new Set(item.usedInRecipes))}
+                          ariaLabel="Recipes using this item"
+                        />
+                      )}
                       <span className="mp-shopping-qty">
                         {item.entries.map((e, i) => (
                           <span key={e.unit ?? 'no-unit'}>

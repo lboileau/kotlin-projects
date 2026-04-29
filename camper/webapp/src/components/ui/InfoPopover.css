@@ -1,0 +1,95 @@
+/* ── InfoPopover ──────────────────────────────────────────────────────────── */
+
+.info-popover {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Trigger button size override: tighten padding for icon-only use at small size */
+.info-popover__trigger.btn--sm {
+  padding: 2px;
+  height: 18px; /* match .mp-shopping-check height so row height is unchanged */
+  color: var(--charcoal-light);
+  opacity: 0.6;
+  line-height: 1;
+}
+
+.info-popover__trigger.btn--sm:hover {
+  opacity: 1;
+}
+
+.info-popover__trigger.btn--md {
+  padding: 4px;
+  color: var(--charcoal-light);
+  opacity: 0.6;
+}
+
+.info-popover__trigger.btn--md:hover {
+  opacity: 1;
+}
+
+/* Popover panel: parchment card, positioned below-left of trigger */
+.info-popover__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  background: var(--parchment);
+  border: 1px solid var(--tan-deep);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-medium);
+  padding: 8px 10px;
+  min-width: 140px;
+  max-width: 220px;
+  white-space: nowrap;
+  /* Prevent overflow outside the modal on narrow columns */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Triangle pointer pointing up toward the trigger */
+.info-popover__pointer {
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--tan-deep);
+}
+
+.info-popover__pointer::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: -4px;
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--parchment);
+}
+
+/* Recipe name list */
+.info-popover__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.info-popover__item {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  color: var(--charcoal);
+  padding: 1px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
