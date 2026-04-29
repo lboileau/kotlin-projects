@@ -91,8 +91,9 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
         onClose();
       }
     } else {
+      // Full success — keep modal open, reset form, refocus first input (W3)
       setEmails(['']);
-      onClose();
+      setTimeout(() => inputRefs.current[0]?.focus(), 0);
     }
   };
 
@@ -145,6 +146,9 @@ export function AddMemberModal({ isOpen, onClose, onAdd }: Props) {
           <div className="modal-actions">
             <Button type="button" variant="secondary" onClick={onClose}>
               Cancel
+            </Button>
+            <Button type="button" variant="ghost" onClick={onClose}>
+              Done
             </Button>
             <Button type="submit" disabled={loading || !hasValidEmail}>
               {loading ? 'Summoning...' : emails.filter(e => e.trim()).length > 1 ? 'Send Invitations' : 'Send Invitation'}

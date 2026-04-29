@@ -484,7 +484,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
 
 // ── View 1: Overview ──────────────────────────
 
-interface OverviewProps {
+export interface OverviewProps {
   mealPlan: MealPlanDetailResponse | null;
   currentDay: MealPlanDayResponse | null;
   activeDay: number;
@@ -521,7 +521,7 @@ interface OverviewProps {
   onAddRecipeInline: (dayId: string, mealType: MealType, recipeId: string) => void;
 }
 
-function OverviewView({
+export function OverviewView({
   mealPlan, currentDay, activeDay, setActiveDay,
   onAddDay, onRemoveDay, onRemoveRecipe, onUpdateName, onUpdateServings,
   createName, setCreateName, createServings, setCreateServings,
@@ -532,11 +532,13 @@ function OverviewView({
   showSaveTemplate, setShowSaveTemplate, templateName, setTemplateName, savingTemplate, onSaveAsTemplate,
   recipes, onAddRecipeInline,
 }: OverviewProps) {
+  const toast = useToast();
   const [addingMealType, setAddingMealType] = useState<MealType | null>(null);
   const [inlineSearch, setInlineSearch] = useState('');
   const [editName, setEditName] = useState(mealPlan?.name ?? '');
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inlineSearchRef = useRef<HTMLInputElement>(null);
   // Sync editName when mealPlan name changes externally
   useEffect(() => { if (mealPlan) setEditName(mealPlan.name); }, [mealPlan?.name]);
   useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
@@ -815,8 +817,18 @@ function OverviewView({
               </div>
             )}
             {isAdding ? (
-              <div className="mp-inline-add">
+              <div
+                className="mp-inline-add"
+                onKeyDown={e => {
+                  if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setAddingMealType(null);
+                    setInlineSearch('');
+                  }
+                }}
+              >
                 <input
+                  ref={inlineSearchRef}
                   className="mp-inline-add-search"
                   value={inlineSearch}
                   onChange={e => setInlineSearch(e.target.value)}
@@ -831,8 +843,11 @@ function OverviewView({
                         className="mp-inline-add-option"
                         onClick={() => {
                           onAddRecipeInline(currentDay.id, key, r.id);
-                          setAddingMealType(null);
+                          // Keep addingMealType open so user can add more recipes (W3)
                           setInlineSearch('');
+                          const mealLabel = MEAL_TYPES.find(m => m.key === key)?.label ?? key;
+                          toast.success(`Added "${r.name}" to ${mealLabel}`);
+                          inlineSearchRef.current?.focus();
                         }}
                       >
                         {r.name}
