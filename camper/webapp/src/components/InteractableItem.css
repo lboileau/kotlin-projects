@@ -69,3 +69,49 @@
   margin-right: 4px;
   color: var(--ember);
 }
+
+/* ── Assignment progress badge (W16) ──────────────────────────────────── */
+
+.interactable-item__badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 26px;
+  height: 22px;
+  padding: 0 6px;
+  background: var(--parchment);
+  border: 1.5px solid var(--tan-deep);
+  border-radius: 11px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--charcoal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  transition: transform 200ms;
+}
+
+.interactable-item--hovered .interactable-item__badge {
+  transform: scale(1.08);
+}
+
+/* progress: default parchment chip — charcoal text */
+.interactable-item__badge--progress {
+  color: var(--charcoal);
+}
+
+/* complete: mint background, sage border */
+.interactable-item__badge--complete {
+  background: var(--mint);
+  border-color: var(--sage);
+}
+
+/* empty: translucent, dashed border, lower opacity */
+.interactable-item__badge--empty {
+  background: rgba(255, 255, 255, 0.6);
+  border-style: dashed;
+  color: var(--charcoal);
+  opacity: 0.6;
+}
