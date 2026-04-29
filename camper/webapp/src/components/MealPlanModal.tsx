@@ -814,7 +814,20 @@ export function OverviewView({
                 {dayRecipes.map(recipe => (
                   <div key={recipe.id} className="mp-recipe-row">
                     <span className="mp-recipe-name">{recipe.recipeName}</span>
-                    {/* TODO(W1): add in-app "View recipe" button → /recipes/${recipe.recipeId} once W1 routes ship */}
+                    <a
+                      className="mp-recipe-viewlink"
+                      href={`/recipes/${recipe.recipeId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`View ${recipe.recipeName} in the recipe chest`}
+                      title="View recipe details"
+                    >
+                      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M2 11V3a1 1 0 0 1 1-1h7l1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
+                        <line x1="4" y1="5" x2="9" y2="5" />
+                        <line x1="4" y1="7.5" x2="9" y2="7.5" />
+                      </svg>
+                    </a>
                     {recipe.recipeWebLink && (
                       <a
                         className="mp-recipe-extlink"

@@ -528,6 +528,19 @@
   color: var(--lavender);
 }
 
+.mp-recipe-viewlink {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 4px;
+  color: var(--charcoal);
+  opacity: 0.6;
+}
+
+.mp-recipe-viewlink:hover {
+  opacity: 1;
+  color: var(--lavender);
+}
+
 /* Add recipe button in meal header */
 .mp-meal-add-btn {
   display: flex;
