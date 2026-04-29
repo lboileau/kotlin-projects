@@ -36,9 +36,54 @@ interface MealPlanModalProps {
   planId: string;
 }
 
+// W6 — Map a URL hash string to a ViewTab, or null if unrecognised.
+// Only whitelists the three real top-level tabs; 'templates' is a sub-flow inside Overview.
+function parseHash(hash: string): ViewTab | null {
+  const stripped = hash.replace(/^#/, '');
+  if (stripped === 'overview' || stripped === 'recipes' || stripped === 'shopping') {
+    return stripped;
+  }
+  return null;
+}
+
 export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   const toast = useToast();
   const [activeView, setActiveView] = useState<ViewTab>('overview');
+
+  // W6 — Tab hash sync (three effects)
+
+  // Effect 1: Hash → state (initial read + live browser back/forward).
+  // When the modal opens, map the current URL hash to a ViewTab and set it.
+  // A hashchange listener keeps the active tab in sync during browser navigation.
+  useEffect(() => {
+    if (!isOpen) return;
+    const sync = () => {
+      const tab = parseHash(window.location.hash);
+      if (tab) setActiveView(tab);
+    };
+    sync();
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, [isOpen]);
+
+  // Effect 2: State → hash (pushState so browser back walks through tabs).
+  // Skip if the hash already matches to avoid an infinite loop on hashchange-driven updates.
+  useEffect(() => {
+    if (!isOpen) return;
+    const target = '#' + activeView;
+    if (window.location.hash !== target) {
+      window.history.pushState(null, '', target);
+    }
+  }, [isOpen, activeView]);
+
+  // Effect 3: Modal close → clear hash via replaceState (no new history entry).
+  useEffect(() => {
+    if (isOpen) return;
+    if (window.location.hash) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+  }, [isOpen]);
+
   const [mealPlan, setMealPlan] = useState<MealPlanDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState(0);
