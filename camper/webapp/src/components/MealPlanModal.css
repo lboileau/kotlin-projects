@@ -988,6 +988,87 @@
   background: linear-gradient(135deg, var(--ember), var(--flame)) !important;
 }
 
+/* W12 — Multi-day recipe add grid */
+.mp-add-grid {
+  display: grid;
+  grid-template-columns: auto repeat(4, minmax(56px, 1fr));
+  gap: 4px 6px;
+  margin-bottom: var(--space-md);
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.mp-add-grid-corner {
+  /* empty top-left cell at row=0, col=0 */
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  background: var(--parchment);
+}
+
+.mp-add-grid-col-header,
+.mp-add-grid-row-header {
+  font-size: 0.78rem;
+  color: var(--charcoal);
+  padding: 4px 6px;
+  font-weight: 600;
+}
+
+.mp-add-grid-col-header {
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--parchment);
+}
+
+.mp-add-grid-row-header {
+  text-align: right;
+  align-self: center;
+  white-space: nowrap;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--parchment);
+}
+
+.mp-add-grid-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--tan);
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.4);
+  transition: background-color 120ms, border-color 120ms;
+  min-height: 36px;
+}
+
+.mp-add-grid-cell:hover {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.mp-add-grid-cell--checked {
+  background: var(--mint);
+  border-color: var(--sage);
+}
+
+.mp-add-grid-cell input[type="checkbox"] {
+  /* visually hidden but retained for a11y/keyboard navigation */
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mp-add-grid-cell--checked::before {
+  content: '✓';
+  color: var(--charcoal);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
 .mp-book-placeholder {
   display: flex;
   flex-direction: column;
