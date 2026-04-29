@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { api, type Item, type PlanMember } from '../api/client';
 import { Modal } from './ui/Modal';
 import { GearPacksPanel } from './GearPacksPanel';
+import { useToast } from '../context/ToastContext';
 import './GearModal.css';
 
 export interface CategoryDef {
@@ -150,29 +151,32 @@ function ItemRow({ item, canEdit, categories, onTogglePacked, onDelete, onUpdate
   );
 }
 
-interface AddItemFormProps {
+export interface AddItemFormProps {
   categories: CategoryDef[];
   placeholder: string;
   onAdd: (name: string, category: string, quantity: number, gearPackId?: string | null) => Promise<void>;
   gearPacks?: { id: string; name: string }[];
 }
 
-function AddItemForm({ categories, placeholder, onAdd, gearPacks }: AddItemFormProps) {
+export function AddItemForm({ categories, placeholder, onAdd, gearPacks }: AddItemFormProps) {
   const [name, setName] = useState('');
   const [category, setCategory] = useState(categories[0]?.value ?? '');
   const [quantity, setQuantity] = useState(1);
   const [gearPackId, setGearPackId] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
+    const addedName = name.trim();
     setAdding(true);
     try {
-      await onAdd(name.trim(), category, quantity, gearPackId);
+      await onAdd(addedName, category, quantity, gearPackId);
       setName('');
-      setQuantity(1);
+      // quantity preserved at last value (W3)
+      toast.success(`Added "${addedName}"`, { durationMs: 1500 });
       inputRef.current?.focus();
     } finally {
       setAdding(false);
