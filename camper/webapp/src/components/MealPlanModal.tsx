@@ -483,6 +483,12 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   );
 }
 
+// ── Helpers ───────────────────────────────────
+
+function hostname(url: string): string {
+  try { return new URL(url).hostname; } catch { return 'recipe source'; }
+}
+
 // ── View 1: Overview ──────────────────────────
 
 export interface OverviewProps {
@@ -808,6 +814,22 @@ export function OverviewView({
                 {dayRecipes.map(recipe => (
                   <div key={recipe.id} className="mp-recipe-row">
                     <span className="mp-recipe-name">{recipe.recipeName}</span>
+                    {/* TODO(W1): add in-app "View recipe" button → /recipes/${recipe.recipeId} once W1 routes ship */}
+                    {recipe.recipeWebLink && (
+                      <a
+                        className="mp-recipe-extlink"
+                        href={recipe.recipeWebLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Open original recipe at ${hostname(recipe.recipeWebLink)}`}
+                      >
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M6 3H3a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-3" />
+                          <path d="M10 2h4v4" />
+                          <line x1="14" y1="2" x2="7" y2="9" />
+                        </svg>
+                      </a>
+                    )}
                     <button className="mp-recipe-remove" onClick={() => onRemoveRecipe(recipe.id)} title="Remove recipe">
                       <svg width="12" height="12" viewBox="0 0 12 12">
                         <path d="M3,3 L9,9 M9,3 L3,9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
