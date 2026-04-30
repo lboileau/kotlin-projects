@@ -11,9 +11,9 @@ import {
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
 import { Button } from '../components/ui/Button';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { useToast } from '../context/ToastContext';
 import './RecipesPage.css';
-import '../components/Modal.css';
 import { UNITS } from '../lib/constants';
 import { CATEGORIES, MEALS, THEMES } from '../lib/recipeConstants';
 import { RecipeForm } from '../components/RecipeForm';
@@ -1166,30 +1166,17 @@ function RecipeDetailView({
         </div>
       </div>
 
-      {/* Delete confirmation modal */}
-      {deletingRecipe && (
-        <div className="modal-overlay" onClick={() => setDeletingRecipe(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon-large">
-              <svg width="48" height="48" viewBox="0 0 48 48">
-                <path d="M10,16 L38,16" stroke="var(--rose-deep)" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M18,16 L18,10 Q18,8 20,8 L28,8 Q30,8 30,10 L30,16" stroke="var(--rose-deep)" strokeWidth="2" fill="none" />
-                <path d="M13,16 L15,40 Q15,42 17,42 L31,42 Q33,42 33,40 L35,16" stroke="var(--rose-deep)" strokeWidth="2" fill="none" />
-              </svg>
-            </div>
-            <h2 className="modal-title">Remove from Cookbook?</h2>
-            <p className="modal-flavor">"{deletingRecipe.name}" will be lost from the recipe chest.</p>
-            <div className="modal-actions">
-              <Button variant="secondary" onClick={() => setDeletingRecipe(null)}>
-                Keep It
-              </Button>
-              <Button variant="danger" onClick={handleDeleteConfirm}>
-                Remove
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete recipe confirmation */}
+      <ConfirmModal
+        isOpen={deletingRecipe !== null}
+        title="Remove from Cookbook?"
+        message={deletingRecipe ? `"${deletingRecipe.name}" will be lost from the recipe chest.` : ''}
+        confirmLabel="Remove"
+        cancelLabel="Keep It"
+        tone="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingRecipe(null)}
+      />
     </>
   );
 }
