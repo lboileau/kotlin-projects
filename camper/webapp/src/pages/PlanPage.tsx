@@ -18,6 +18,7 @@ import { ProfileSetupModal } from '../components/ProfileSetupModal';
 import { AppHeader } from '../components/AppHeader';
 import { Button } from '../components/ui/Button';
 import { MealPlanReconcileBanner } from '../components/MealPlanReconcileBanner';
+import { PendingInvitationsList } from '../components/PendingInvitationsList';
 import './PlanPage.css';
 
 type ModalType = 'equipment' | 'kitchen' | 'itinerary' | 'assignments' | 'logbook' | 'addMember' | 'managePlan' | null;
@@ -504,6 +505,21 @@ export function PlanPage() {
                 })}
               </div>
             </div>
+
+            {isOwner && planId && (
+              <PendingInvitationsList
+                members={members}
+                planId={planId}
+                onResend={async (email) => {
+                  await api.addMember(planId, email);
+                  await loadData();
+                }}
+                onRemove={async (memberId) => {
+                  await api.removeMember(planId, memberId);
+                  await loadData();
+                }}
+              />
+            )}
 
             <div className="modal-actions" style={{ marginTop: 'var(--space-lg)' }}>
               <Button onClick={() => setActiveModal(null)}>
