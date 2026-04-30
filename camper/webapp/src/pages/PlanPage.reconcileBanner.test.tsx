@@ -30,6 +30,9 @@ const mockApi = vi.hoisted(() => ({
   getMealPlanForTrip: vi.fn(),
   updateMealPlan:     vi.fn(),
   syncGear:           vi.fn(),
+  // W16: PlanPage now fetches assignments alongside other data in loadData.
+  getAssignments:     vi.fn(),
+  getAssignment:      vi.fn(),
 }));
 
 vi.mock('../api/client', () => ({
@@ -161,6 +164,8 @@ describe('PlanPage — MealPlanReconcileBanner integration (W17)', () => {
     vi.clearAllMocks();
     mockApi.syncGear.mockResolvedValue(undefined);
     mockApi.updateMealPlan.mockResolvedValue({});
+    // W16: loadData now fetches assignments; default to empty so banner tests aren't affected.
+    mockApi.getAssignments.mockResolvedValue([]);
   });
 
   // ── (1) Mismatch → banner renders ─────────────────────────────────────────

@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { api, type Plan, type PlanMember, type MealPlanDetailResponse } from '../api/client';
+import { api, type Plan, type PlanMember, type MealPlanDetailResponse, type AssignmentDetail } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { usePlanUpdates } from '../hooks/usePlanUpdates';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { Campfire } from '../components/Campfire';
 import { CamperAvatar } from '../components/CamperAvatar';
-import { InteractableItem } from '../components/InteractableItem';
+import { InteractableItem, type BadgeContent } from '../components/InteractableItem';
 import { AddMemberModal } from '../components/AddMemberModal';
 import { GearModal } from '../components/GearModal';
 import { MealPlanModal } from '../components/MealPlanModal';
@@ -29,6 +29,8 @@ export function PlanPage() {
   const [members, setMembers] = useState<PlanMember[]>([]);
   // Meal plan state — introduced by W17; reused by W16 for kitchen badge.
   const [mealPlan, setMealPlan] = useState<MealPlanDetailResponse | null>(null);
+  // Assignment details state — introduced by W16 for badge computation on PlanPage icons.
+  const [assignmentDetails, setAssignmentDetails] = useState<AssignmentDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
@@ -42,14 +44,21 @@ export function PlanPage() {
   const loadData = useCallback(async () => {
     if (!planId) return;
     try {
-      const [plans, memberData, mealPlanData] = await Promise.all([
+      const [plans, memberData, mealPlanData, assignmentsList] = await Promise.all([
         api.getPlans(),
         api.getPlanMembers(planId),
         api.getMealPlanForTrip(planId),
+        api.getAssignments(planId),
       ]);
       setPlan(plans.find(p => p.id === planId) || null);
       setMembers(memberData);
       setMealPlan(mealPlanData);
+      // Second parallel fetch: get each assignment's detail (with .members populated).
+      // Mirrors AssignmentsModal.tsx:371-373 — list then parallel detail fetch.
+      const details = await Promise.all(
+        assignmentsList.map(a => api.getAssignment(planId, a.id))
+      );
+      setAssignmentDetails(details);
     } catch {
       // handle error silently for now
     } finally {
@@ -80,6 +89,7 @@ export function PlanPage() {
     }
     if (resource === 'assignments') {
       setAssignmentsRefreshKey(k => k + 1);
+      loadData();  // Also refresh PlanPage badge data (W16)
     }
     if (resource === 'itinerary') {
       setItineraryRefreshKey(k => k + 1);
@@ -156,9 +166,63 @@ export function PlanPage() {
   };
 
   const memberCount = members.length;
-  // Count only registered members (username truthy) for reconcile banner.
-  // Pending invites haven't joined yet — counting them would inflate desired servings.
+  // Count only registered members (username truthy) for reconcile banner (W17)
+  // and assignment badge totals (W16). Pending invites haven't joined yet.
   const memberCountForServings = members.filter(m => m.username).length;
+
+  // ── W16 badge computation ────────────────────────────────────────────────────
+  // Reuse the registered-member count for badge totals (same filter as W17).
+  const memberCountForBadges = memberCountForServings;
+
+  // Compute how many UNIQUE registered members appear in assignments of a given type.
+  const computeAssignmentBadge = (type: 'tent' | 'canoe'): BadgeContent => {
+    const filtered = assignmentDetails.filter(a => a.type === type);
+    const assignedUserIds = new Set<string>();
+    for (const a of filtered) {
+      for (const m of a.members) assignedUserIds.add(m.userId);
+    }
+    const assigned = assignedUserIds.size;
+    const total = memberCountForBadges;
+    if (total === 0) return { label: '—', tone: 'empty' };
+    if (assigned === 0) return { label: `0/${total}`, tone: 'empty' };
+    if (assigned === total) return { label: '✓', tone: 'complete' };
+    return { label: `${assigned}/${total}`, tone: 'progress' };
+  };
+
+  // Combined tent+canoe badge: shows the UNION of unique members across all assignment
+  // types, because both tent and canoe share one icon ("Tents & Canoe Pairings").
+  // Tooltip breaks down each type separately.
+  const tentTypeBadge = computeAssignmentBadge('tent');
+  const canoeTypeBadge = computeAssignmentBadge('canoe');
+  const combinedAssignedIds = new Set<string>();
+  for (const a of assignmentDetails) {
+    for (const m of a.members) {
+      combinedAssignedIds.add(m.userId);
+    }
+  }
+  const combinedAssigned = combinedAssignedIds.size;
+  const combinedTotal = memberCountForBadges;
+  const tentCanoeBadge: BadgeContent =
+    combinedTotal === 0
+      ? { label: '—', tone: 'empty' }
+      : combinedAssigned === 0
+        ? { label: `0/${combinedTotal}`, tone: 'empty' }
+        : combinedAssigned === combinedTotal
+          ? { label: '✓', tone: 'complete' }
+          : { label: `${combinedAssigned}/${combinedTotal}`, tone: 'progress' };
+  const tentCanoeTooltip = `Tents: ${tentTypeBadge.label} · Canoes: ${canoeTypeBadge.label}`;
+
+  // Kitchen badge: reuses mealPlan state introduced by W17.
+  // No meal-plan STOMP topic exists today — updates only on PlanPage mount + member changes.
+  const kitchenBadge: BadgeContent =
+    mealPlan == null
+      ? { label: '—', tone: 'empty' }
+      : { label: `${mealPlan.days.length}d`, tone: 'progress' };
+  const kitchenTooltip =
+    mealPlan == null
+      ? 'No meal plan yet'
+      : `Meal plan: ${mealPlan.days.length} day${mealPlan.days.length !== 1 ? 's' : ''}`;
+  // ─────────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="plan-page">
@@ -231,7 +295,14 @@ export function PlanPage() {
         ) : (
           <>
             {/* Background items — on the ground below the 50% treeline */}
-            <InteractableItem id="tent" label="Tents & Canoe Pairings" x={10} y={58} onClick={() => setActiveModal('assignments')}>
+            <InteractableItem
+              id="tent"
+              label="Tents & Canoe Pairings"
+              x={10} y={58}
+              onClick={() => setActiveModal('assignments')}
+              badge={tentCanoeBadge}
+              badgeTooltip={tentCanoeTooltip}
+            >
               <TentSVG />
             </InteractableItem>
 
@@ -239,7 +310,14 @@ export function PlanPage() {
               <EquipmentPileSVG />
             </InteractableItem>
 
-            <InteractableItem id="kitchen" label="Camp Kitchen & Meals" x={88} y={78} onClick={() => setActiveModal('kitchen')}>
+            <InteractableItem
+              id="kitchen"
+              label="Camp Kitchen & Meals"
+              x={88} y={78}
+              onClick={() => setActiveModal('kitchen')}
+              badge={kitchenBadge}
+              badgeTooltip={kitchenTooltip}
+            >
               <KitchenSVG />
             </InteractableItem>
 
