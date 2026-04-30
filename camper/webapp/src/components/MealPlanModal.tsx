@@ -124,6 +124,10 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
   const [templatePreview, setTemplatePreview] = useState<MealPlanDetailResponse | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
 
+  // W9 — blur-save feedback for the meal plan name
+  const [nameSaveStatus, setNameSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const savedFlashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const loadMealPlan = useCallback(async () => {
     try {
       const data = await api.getMealPlanForTrip(planId);
@@ -191,6 +195,11 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
     }
   }, [activeView, mealPlan, loadShoppingList]);
 
+  // W9 — clear the save-flash timer on unmount
+  useEffect(() => () => {
+    if (savedFlashTimerRef.current) clearTimeout(savedFlashTimerRef.current);
+  }, []);
+
   const handleCreate = async () => {
     if (!createName.trim()) return;
     setCreating(true);
@@ -215,10 +224,19 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
     if (!mealPlan) return;
     const trimmed = name.trim();
     if (!trimmed || trimmed === mealPlan.name) return;
+    setNameSaveStatus('saving');
     try {
       await api.updateMealPlan(mealPlan.id, { name: trimmed });
       await loadMealPlan();
-    } catch { /* */ }
+      setNameSaveStatus('saved');
+      if (savedFlashTimerRef.current) clearTimeout(savedFlashTimerRef.current);
+      savedFlashTimerRef.current = setTimeout(() => setNameSaveStatus('idle'), 1500);
+    } catch (err) {
+      setNameSaveStatus('error');
+      toast.error(err instanceof Error ? err.message : 'Failed to save meal plan name');
+      if (savedFlashTimerRef.current) clearTimeout(savedFlashTimerRef.current);
+      savedFlashTimerRef.current = setTimeout(() => setNameSaveStatus('idle'), 3000);
+    }
   };
 
   const handleUpdateServings = async (delta: number) => {
@@ -481,6 +499,7 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
               onRemoveDay={handleRemoveDay}
               onRemoveRecipe={handleRemoveRecipe}
               onUpdateName={handleUpdateName}
+              nameSaveStatus={nameSaveStatus}
               onUpdateServings={handleUpdateServings}
               createName={createName}
               setCreateName={setCreateName}
@@ -570,6 +589,7 @@ export interface OverviewProps {
   onRemoveDay: (day: MealPlanDayResponse) => void;
   onRemoveRecipe: (id: string) => void;
   onUpdateName: (name: string) => void;
+  nameSaveStatus: 'idle' | 'saving' | 'saved' | 'error';
   onUpdateServings: (delta: number) => void;
   createName: string;
   setCreateName: (v: string) => void;
@@ -600,7 +620,7 @@ export interface OverviewProps {
 
 export function OverviewView({
   mealPlan, currentDay, activeDay, setActiveDay,
-  onAddDay, onRemoveDay, onRemoveRecipe, onUpdateName, onUpdateServings,
+  onAddDay, onRemoveDay, onRemoveRecipe, onUpdateName, nameSaveStatus, onUpdateServings,
   createName, setCreateName, createServings, setCreateServings,
   creating, onCreate, error,
   templates, showLoadTemplate, setShowLoadTemplate, loadingTemplate, onLoadTemplate,
@@ -619,6 +639,12 @@ export function OverviewView({
   // Sync editName when mealPlan name changes externally
   useEffect(() => { if (mealPlan) setEditName(mealPlan.name); }, [mealPlan?.name]);
   useEffect(() => () => { if (copyTimerRef.current) clearTimeout(copyTimerRef.current); }, []);
+  // W9 — revert editName to the persisted value on save failure
+  useEffect(() => {
+    if (nameSaveStatus === 'error' && mealPlan) {
+      setEditName(mealPlan.name);
+    }
+  }, [nameSaveStatus, mealPlan?.name]);
   if (!mealPlan) {
     return (
       <div className="mp-empty-state">
@@ -719,13 +745,30 @@ export function OverviewView({
     <div className="mp-overview">
       {/* Plan header: name + servings, then template links */}
       <div className="mp-plan-header">
-        <input
-          className="mp-plan-name-input"
-          value={editName}
-          onChange={e => setEditName(e.target.value)}
-          onBlur={() => onUpdateName(editName)}
-          onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
-        />
+        <div className="mp-plan-name-row">
+          <input
+            className="mp-plan-name-input"
+            value={editName}
+            onChange={e => setEditName(e.target.value)}
+            onBlur={() => onUpdateName(editName)}
+            onKeyDown={e => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+          />
+          {nameSaveStatus === 'saving' && (
+            <span className="mp-name-save-flash mp-name-save-flash--saving" aria-live="polite">
+              Saving…
+            </span>
+          )}
+          {nameSaveStatus === 'saved' && (
+            <span className="mp-name-save-flash mp-name-save-flash--saved" aria-live="polite">
+              ✓ Saved
+            </span>
+          )}
+          {nameSaveStatus === 'error' && (
+            <span className="mp-name-save-flash mp-name-save-flash--error" aria-live="polite" role="alert">
+              Couldn't save — try again
+            </span>
+          )}
+        </div>
         <div className="mp-plan-servings-row">
           <div className="mp-servings-stepper mp-servings-stepper--inline">
             <button className="mp-stepper-btn" onClick={() => onUpdateServings(-1)}>-</button>

@@ -273,6 +273,28 @@
   outline: none;
 }
 
+/* W9 — blur-save feedback row + flash chip */
+.mp-plan-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mp-name-save-flash {
+  font-size: 0.85rem;
+  font-style: italic;
+  animation: mp-flash-in 200ms ease;
+}
+
+.mp-name-save-flash--saving { color: var(--charcoal-light); }
+.mp-name-save-flash--saved  { color: var(--sage-deep); font-weight: 600; }
+.mp-name-save-flash--error  { color: var(--rose-deep); font-weight: 600; }
+
+@keyframes mp-flash-in {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
 .mp-plan-servings-row {
   display: flex;
   align-items: center;

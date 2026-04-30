@@ -70,6 +70,7 @@ function makeProps(overrides?: Partial<OverviewProps>): OverviewProps {
     onRemoveDay: vi.fn(),
     onRemoveRecipe: vi.fn(),
     onUpdateName: vi.fn(),
+    nameSaveStatus: 'idle' as const,
     onUpdateServings: vi.fn(),
     createName: '',
     setCreateName: vi.fn(),
