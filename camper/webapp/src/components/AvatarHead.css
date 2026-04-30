@@ -4,7 +4,5 @@
  */
 .avatar-head--pending {
   border-radius: 50%;
-  outline: 1.5px dashed var(--tan-deep);
-  outline-offset: 2px;
   opacity: 0.7;
 }

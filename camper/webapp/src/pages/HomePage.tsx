@@ -82,7 +82,11 @@ export function HomePage() {
     setCreating(true);
     try {
       const plan = await api.createPlan(newName.trim());
-      setPlans(prev => [...prev, plan]);
+      // The BE may not auto-populate plan_members for the creator, so
+      // isMember can come back false even though the owner IS in their
+      // own trip.  Override to true so the card shows the navigate arrow
+      // immediately rather than a misleading "Join" button.
+      setPlans(prev => [...prev, { ...plan, isMember: true }]);
       setNewName('');
       setShowCreate(false);
     } catch (err) {
