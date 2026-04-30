@@ -463,11 +463,12 @@ export function ActivityLadderPage() {
         </main>
       </div>
 
-      {/* Restart confirmation — W29 will finalize copy */}
+      {/* Restart confirmation */}
       <ConfirmModal
         isOpen={showRestartConfirm}
-        title="Restart ladder?"
-        message="All votes will be reset and a new tournament will begin."
+        title="Restart Ladder?"
+        flavor="Votes and brackets will be reset."
+        message="A fresh tournament will begin from the current activity list. This cannot be undone."
         confirmLabel="Restart"
         tone="danger"
         onConfirm={async () => {
