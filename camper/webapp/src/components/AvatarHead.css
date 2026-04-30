@@ -1,0 +1,10 @@
+/* Pending state for compact avatar head.
+ * Applied when invitationStatus is truthy and not "registered" — mirrors the
+ * CamperAvatar pending treatment but scaled for the compact (28px default) size.
+ */
+.avatar-head--pending {
+  border-radius: 50%;
+  outline: 1.5px dashed var(--tan-deep);
+  outline-offset: 2px;
+  opacity: 0.7;
+}
