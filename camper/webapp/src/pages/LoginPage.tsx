@@ -6,6 +6,7 @@ import { ParallaxBackground } from '../components/ParallaxBackground';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { FormField } from '../components/ui/FormField';
+import { Tabs, Tab } from '../components/ui/Tabs';
 import './LoginPage.css';
 
 export function LoginPage() {
@@ -70,20 +71,15 @@ export function LoginPage() {
 
         {/* Form card */}
         <div className="login-card">
-          <div className="login-card-header">
-            <button
-              className={`login-tab ${mode === 'login' ? 'login-tab--active' : ''}`}
-              onClick={() => { setMode('login'); setError(''); }}
-            >
-              Sign In
-            </button>
-            <button
-              className={`login-tab ${mode === 'register' ? 'login-tab--active' : ''}`}
-              onClick={() => { setMode('register'); setError(''); }}
-            >
-              Register
-            </button>
-          </div>
+          <Tabs
+            value={mode}
+            onChange={(v) => { setMode(v as 'login' | 'register'); setError(''); }}
+            ariaLabel="Login mode"
+            className="login-card-header"
+          >
+            <Tab value="login" label="Sign In" />
+            <Tab value="register" label="Register" />
+          </Tabs>
 
           <form onSubmit={handleSubmit} className="login-form">
             <FormField label="Email">

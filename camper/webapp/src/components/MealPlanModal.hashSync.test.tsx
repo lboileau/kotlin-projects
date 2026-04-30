@@ -70,10 +70,10 @@ describe('MealPlanModal — tab hash sync (W6)', () => {
 
     // Effect 1 (hash → state) reads #shopping on open and calls setActiveView('shopping').
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Shopping List' })).toHaveClass('mp-tab--active');
+      expect(screen.getByRole('tab', { name: 'Shopping List' })).toHaveAttribute('aria-selected', 'true');
     });
-    expect(screen.getByRole('button', { name: 'Overview' })).not.toHaveClass('mp-tab--active');
-    expect(screen.getByRole('button', { name: 'Recipe Book' })).not.toHaveClass('mp-tab--active');
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'false');
+    expect(screen.getByRole('tab', { name: 'Recipe Book' })).toHaveAttribute('aria-selected', 'false');
   });
 
   it('(2) clicking Recipe Book tab updates window.location.hash to #recipes', async () => {
@@ -86,7 +86,7 @@ describe('MealPlanModal — tab hash sync (W6)', () => {
     });
 
     // Act: click Recipe Book tab (which calls setActiveView('recipes')).
-    await user.click(screen.getByRole('button', { name: 'Recipe Book' }));
+    await user.click(screen.getByRole('tab', { name: 'Recipe Book' }));
 
     // Effect 2 fires again and pushes #recipes.
     await waitFor(() => {
@@ -99,9 +99,9 @@ describe('MealPlanModal — tab hash sync (W6)', () => {
     render(<MealPlanModal isOpen={true} onClose={vi.fn()} planId="plan1" />);
 
     // Navigate to Shopping List first so we can navigate back.
-    await user.click(screen.getByRole('button', { name: 'Shopping List' }));
+    await user.click(screen.getByRole('tab', { name: 'Shopping List' }));
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Shopping List' })).toHaveClass('mp-tab--active');
+      expect(screen.getByRole('tab', { name: 'Shopping List' })).toHaveAttribute('aria-selected', 'true');
     });
 
     // Simulate browser back: change the URL hash and fire the hashchange event.
@@ -117,9 +117,9 @@ describe('MealPlanModal — tab hash sync (W6)', () => {
 
     // Effect 1's hashchange listener calls setActiveView('overview').
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Overview' })).toHaveClass('mp-tab--active');
+      expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
     });
-    expect(screen.getByRole('button', { name: 'Shopping List' })).not.toHaveClass('mp-tab--active');
+    expect(screen.getByRole('tab', { name: 'Shopping List' })).toHaveAttribute('aria-selected', 'false');
   });
 
   it('(4) closing the modal clears the hash', async () => {

@@ -16,6 +16,7 @@ import { InfoPopover } from './ui/InfoPopover';
 import { IngredientSearch } from './ui/IngredientSearch';
 import { buildMealPlanSummary } from '../lib/mealPlanSummary';
 import { Modal } from './ui/Modal';
+import { Tabs, Tab } from './ui/Tabs';
 import { useToast } from '../context/ToastContext';
 import './MealPlanModal.css';
 import { UNITS } from '../lib/constants';
@@ -451,21 +452,15 @@ export function MealPlanModal({ isOpen, onClose, planId }: MealPlanModalProps) {
             <h2 className="mp-title">Camp Kitchen</h2>
           </div>
 
-          <div className="mp-tabs">
-            {([
-              { key: 'overview' as ViewTab, label: 'Overview' },
-              { key: 'recipes' as ViewTab, label: 'Recipe Book' },
-              { key: 'shopping' as ViewTab, label: 'Shopping List' },
-            ]).map(tab => (
-              <button
-                key={tab.key}
-                className={`mp-tab ${activeView === tab.key ? 'mp-tab--active' : ''}`}
-                onClick={() => setActiveView(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <Tabs
+            value={activeView}
+            onChange={(v) => setActiveView(v as ViewTab)}
+            ariaLabel="Meal plan section"
+          >
+            <Tab value="overview" label="Overview" />
+            <Tab value="recipes" label="Recipe Book" />
+            <Tab value="shopping" label="Shopping List" />
+          </Tabs>
 
         </div>
 

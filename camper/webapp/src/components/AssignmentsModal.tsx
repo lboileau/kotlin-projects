@@ -5,6 +5,7 @@ import { AvatarHair } from './AvatarHair';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
 import { ConfirmModal } from './ui/ConfirmModal';
+import { Tabs, Tab } from './ui/Tabs';
 import './AssignmentsModal.css';
 
 interface AssignmentsModalProps {
@@ -575,22 +576,15 @@ export function AssignmentsModal({ isOpen, onClose, planId, planOwnerId, current
         </div>
 
         {/* Tab bar */}
-        <div className="assign-tabs">
-          <button
-            className={`assign-tab ${activeTab === 'tent' ? 'assign-tab--active' : ''}`}
-            onClick={() => setActiveTab('tent')}
-          >
-            <span className="assign-tab-icon">{'\u25B3'}</span>
-            Tents
-          </button>
-          <button
-            className={`assign-tab ${activeTab === 'canoe' ? 'assign-tab--active' : ''}`}
-            onClick={() => setActiveTab('canoe')}
-          >
-            <span className="assign-tab-icon">{'\u25E0'}</span>
-            Canoes
-          </button>
-        </div>
+        <Tabs
+          value={activeTab}
+          onChange={(v) => setActiveTab(v as 'tent' | 'canoe')}
+          ariaLabel="Assignment kind"
+          className="assign-tabs"
+        >
+          <Tab value="tent" label="Tents" icon={'\u25B3'} />
+          <Tab value="canoe" label="Canoes" icon={'\u25E0'} />
+        </Tabs>
 
         {/* Body */}
         <div className="assign-modal-body">
