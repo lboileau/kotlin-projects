@@ -82,19 +82,7 @@
   padding: var(--space-xs) 0;
 }
 
-/* ── Success / Error Messages ────────────── */
-
-.gear-packs-success {
-  font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--sage-dark);
-  background: rgba(143, 176, 138, 0.12);
-  border: 1px solid rgba(143, 176, 138, 0.25);
-  border-radius: var(--radius-sm);
-  padding: var(--space-xs) var(--space-sm);
-  margin-bottom: var(--space-sm);
-}
+/* ── Error Message ───────────────────────── */
 
 .gear-packs-error {
   font-family: var(--font-body);
