@@ -1,0 +1,58 @@
+.pending-invitations {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+}
+
+.pending-invitations__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.pending-invitation-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 8px 12px;
+  background: rgba(255, 248, 231, 0.4);
+  border: 1px solid var(--tan);
+  border-radius: 6px;
+}
+
+.pending-invitation-row__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.pending-invitation-row__email {
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--charcoal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pending-invitation-row__meta {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--charcoal-light);
+}
+
+.pending-invitation-row__passive {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--charcoal-light);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.pending-invitation-row__actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
