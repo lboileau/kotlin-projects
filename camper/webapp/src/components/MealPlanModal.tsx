@@ -1185,6 +1185,12 @@ export function RecipeBookView({
               {selectedRecipe.theme && <span className="mp-book-item-badge mp-filter-pill--theme">{selectedRecipe.theme}</span>}
             </div>
 
+            {mealPlan && (
+              <p className="mp-recipe-scaling-line">
+                Base: {selectedRecipe.baseServings} {selectedRecipe.baseServings === 1 ? 'serving' : 'servings'} · Scaled to {mealPlan.servings}
+              </p>
+            )}
+
             {selectedRecipe.ingredients.length > 0 && (
               <div className="mp-book-ingredients">
                 <h4 className="mp-book-ingredients-title">Ingredients</h4>
@@ -1568,6 +1574,11 @@ export function ShoppingListView({
 
       {hasItems && (
         <>
+          {/* Servings context line — W18 */}
+          <p className="mp-shopping-context-line">
+            Shopping list for {shoppingList.servings} {shoppingList.servings === 1 ? 'serving' : 'servings'} · {shoppingList.fullyPurchasedCount} of {shoppingList.totalItems} purchased
+          </p>
+
           {/* Progress */}
           <div className="mp-shopping-progress">
             <div className="mp-shopping-progress-text">

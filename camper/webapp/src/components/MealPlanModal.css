@@ -865,6 +865,13 @@
   color: var(--charcoal-light);
 }
 
+/* Scaling context line — W18 */
+.mp-recipe-scaling-line {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal-light);
+}
+
 .mp-book-ingredients {
   flex: 1;
   overflow-y: auto;
@@ -1074,6 +1081,14 @@
   color: var(--charcoal-light);
   padding: var(--space-xl);
   text-align: center;
+}
+
+/* Servings context line — W18 */
+.mp-shopping-context-line {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--charcoal-light);
+  margin-bottom: var(--space-sm);
 }
 
 /* Progress */
