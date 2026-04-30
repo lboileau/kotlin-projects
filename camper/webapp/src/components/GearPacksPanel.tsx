@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, type GearPackSummary, type GearPackDetail, type GearPackItemSearchResult } from '../api/client';
 import { ConfirmModal } from './ui/ConfirmModal';
+import { useToast } from '../context/ToastContext';
 import './GearPacksPanel.css';
 
 const ITEM_CATEGORIES = [
@@ -72,7 +73,6 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
   const [groupSize, setGroupSize] = useState(memberCount || 1);
   const [applying, setApplying] = useState(false);
   const [applyError, setApplyError] = useState<string | null>(null);
-  const [applySuccess, setApplySuccess] = useState<string | null>(null);
 
   // Create form state
   const [createFormOpen, setCreateFormOpen] = useState(false);
@@ -103,6 +103,8 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
   const [searchResults, setSearchResults] = useState<GearPackItemSearchResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const toast = useToast();
 
   const loadPacks = useCallback(async () => {
     setLoading(true);
@@ -150,14 +152,25 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
   const handleApply = async (packId: string) => {
     setApplying(true);
     setApplyError(null);
-    setApplySuccess(null);
     try {
       const result = await api.applyGearPack(packId, { planId, groupSize });
-      setApplySuccess(`Added ${result.appliedCount} items to your gear list!`);
+      const packName = packs.find(p => p.id === packId)?.name ?? 'pack';
+      toast.success(`Added ${result.appliedCount} items from ${packName}`, {
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            // Sequential deletes — keep server load low; small N (≤30 items per pack)
+            for (const item of result.items) {
+              try { await api.deleteItem(item.id); } catch {/* ignore individual failures */}
+            }
+            onItemsChanged();
+            toast.info(`Undid ${result.items.length} items from ${packName}`);
+          },
+        },
+      });
       setPreviewPackId(null);
       setPackDetail(null);
       onItemsChanged();
-      setTimeout(() => setApplySuccess(null), 3000);
     } catch (e) {
       setApplyError(e instanceof Error ? e.message : 'Failed to apply gear pack');
     } finally {
@@ -409,9 +422,6 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
             <p className="gear-packs-empty">No gear packs available.</p>
           ) : (
             <>
-              {applySuccess && (
-                <div className="gear-packs-success">{applySuccess}</div>
-              )}
               {applyError && (
                 <div className="gear-packs-error">{applyError}</div>
               )}
