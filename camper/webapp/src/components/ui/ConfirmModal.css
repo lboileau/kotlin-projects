@@ -1,0 +1,22 @@
+/* ── ConfirmModal ────────────────────────────────────────────────────────────
+ *
+ * Built on top of <Modal size="sm">. All parchment aesthetics (background,
+ * border, shadow, .modal-title, .modal-flavor, .modal-actions) come from
+ * Modal.css. This file only adds the icon container and message body styles.
+ *
+ * No new theme tokens — uses CSS custom properties from theme.css.
+ * ────────────────────────────────────────────────────────────────────────── */
+
+.confirm-modal__icon {
+  text-align: center;
+  margin-bottom: var(--space-md);
+}
+
+.confirm-modal__message {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--charcoal-light);
+  line-height: 1.5;
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}

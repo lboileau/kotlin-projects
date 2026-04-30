@@ -6,6 +6,7 @@ import { useLadderUpdates } from '../hooks/useLadderUpdates';
 import { AppHeader } from '../components/AppHeader';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { Button } from '../components/ui/Button';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 import { LadderPeoplePanel } from '../components/activityladder/LadderPeoplePanel';
 import { LadderMatchupView } from '../components/activityladder/LadderMatchupView';
 import { LadderOutcomeBanner } from '../components/activityladder/LadderOutcomeBanner';
@@ -45,9 +46,11 @@ export function ActivityLadderPage() {
 
   // Action states
   const [startLoading, setStartLoading] = useState(false);
-  const [restartLoading, setRestartLoading] = useState(false);
   const [voteLoading, setVoteLoading] = useState(false);
   const [actionError, setActionError] = useState('');
+
+  // Restart confirm modal
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   const currentUserId = user?.id ?? '';
 
@@ -237,8 +240,6 @@ export function ActivityLadderPage() {
 
   const handleRestart = async () => {
     if (!ladderId) return;
-    if (!confirm('Restart the ladder? This will reset all votes and participants.')) return;
-    setRestartLoading(true);
     setActionError('');
     try {
       await api.ladders.restart(ladderId);
@@ -258,8 +259,6 @@ export function ActivityLadderPage() {
       }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : 'Failed to restart ladder.');
-    } finally {
-      setRestartLoading(false);
     }
   };
 
@@ -396,8 +395,7 @@ export function ActivityLadderPage() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={handleRestart}
-                    loading={restartLoading}
+                    onClick={() => setShowRestartConfirm(true)}
                     className="ladder-page-restart-btn"
                   >
                     Restart Ladder
@@ -444,8 +442,7 @@ export function ActivityLadderPage() {
                   <Button
                     variant="secondary"
                     size="sm"
-                    onClick={handleRestart}
-                    loading={restartLoading}
+                    onClick={() => setShowRestartConfirm(true)}
                     className="ladder-page-restart-btn"
                   >
                     Restart Ladder
@@ -465,6 +462,20 @@ export function ActivityLadderPage() {
           </aside>
         </main>
       </div>
+
+      {/* Restart confirmation — W29 will finalize copy */}
+      <ConfirmModal
+        isOpen={showRestartConfirm}
+        title="Restart ladder?"
+        message="All votes will be reset and a new tournament will begin."
+        confirmLabel="Restart"
+        tone="danger"
+        onConfirm={async () => {
+          await handleRestart();
+          setShowRestartConfirm(false);
+        }}
+        onCancel={() => setShowRestartConfirm(false)}
+      />
     </div>
   );
 }

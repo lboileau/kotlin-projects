@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api, type GearPackSummary, type GearPackDetail, type GearPackItemSearchResult } from '../api/client';
+import { ConfirmModal } from './ui/ConfirmModal';
 import './GearPacksPanel.css';
 
 const ITEM_CATEGORIES = [
@@ -91,7 +92,6 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
 
   // Delete confirm state
   const [deleteConfirmPackId, setDeleteConfirmPackId] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   // Add item state
   const [addItemName, setAddItemName] = useState('');
@@ -255,7 +255,6 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
   // ── Delete ───────────────────────────────
 
   const handleDeleteConfirm = async (packId: string) => {
-    setDeleting(true);
     try {
       await api.deleteGearPack(packId);
       setDeleteConfirmPackId(null);
@@ -271,8 +270,6 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
       onItemsChanged();
     } catch {
       // fail silently
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -420,7 +417,6 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
               )}
               {packs.map(pack => {
                 const isEditing = editingPackId === pack.id;
-                const isDeleteConfirm = deleteConfirmPackId === pack.id;
                 const isOwned = pack.createdBy === currentUserId;
 
                 if (isEditing) {
@@ -574,34 +570,6 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
                   );
                 }
 
-                if (isDeleteConfirm) {
-                  return (
-                    <div key={pack.id} className="gear-pack-card gear-pack-card--confirm">
-                      <div className="gear-pack-card-info">
-                        <PackIcon packName={pack.name} />
-                        <span className="gear-pack-card-name">{pack.name}</span>
-                      </div>
-                      <p className="gear-pack-delete-message">
-                        This will ungroup all items from plans that use this pack. Are you sure?
-                      </p>
-                      <div className="gear-pack-form-actions">
-                        <button
-                          className="gear-pack-delete-confirm-btn"
-                          onClick={() => handleDeleteConfirm(pack.id)}
-                          disabled={deleting}
-                        >
-                          {deleting ? '...' : 'Delete'}
-                        </button>
-                        <button
-                          className="gear-pack-cancel-btn"
-                          onClick={() => setDeleteConfirmPackId(null)}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  );
-                }
 
                 return (
                   <div key={pack.id} className="gear-pack-card">
@@ -699,6 +667,17 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
           )}
         </div>
       )}
+
+      {/* Delete gear pack confirmation */}
+      <ConfirmModal
+        isOpen={deleteConfirmPackId !== null}
+        title="Delete Pack?"
+        message="This will ungroup all items from plans that use this pack."
+        confirmLabel="Delete"
+        tone="danger"
+        onConfirm={() => handleDeleteConfirm(deleteConfirmPackId!)}
+        onCancel={() => setDeleteConfirmPackId(null)}
+      />
     </div>
   );
 }

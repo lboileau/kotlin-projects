@@ -4,9 +4,8 @@ import { api, type Plan } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { ParallaxBackground } from '../components/ParallaxBackground';
 import { AppHeader } from '../components/AppHeader';
-import { Button } from '../components/ui/Button';
+import { ConfirmModal } from '../components/ui/ConfirmModal';
 import './HomePage.css';
-import '../components/Modal.css';
 
 export function HomePage() {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -279,57 +278,29 @@ export function HomePage() {
         </div>
       </div>
 
-      {/* Delete confirmation modal */}
-      {deletingPlan && (
-        <div className="modal-overlay" onClick={() => setDeletingPlan(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon-large">
-              <svg width="48" height="48" viewBox="0 0 48 48">
-                <path d="M10,16 L38,16" stroke="var(--rose-deep)" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M18,16 L18,10 Q18,8 20,8 L28,8 Q30,8 30,10 L30,16" stroke="var(--rose-deep)" strokeWidth="2" fill="none" />
-                <path d="M13,16 L15,40 Q15,42 17,42 L31,42 Q33,42 33,40 L35,16" stroke="var(--rose-deep)" strokeWidth="2" fill="none" />
-                <line x1="20" y1="22" x2="20" y2="36" stroke="var(--rose-deep)" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="24" y1="22" x2="24" y2="36" stroke="var(--rose-deep)" strokeWidth="1.5" strokeLinecap="round" />
-                <line x1="28" y1="22" x2="28" y2="36" stroke="var(--rose-deep)" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </div>
-            <h2 className="modal-title">Abandon Expedition?</h2>
-            <p className="modal-flavor">"{deletingPlan.name}" will be lost to the wilderness forever.</p>
-            <div className="modal-actions">
-              <Button variant="secondary" onClick={() => setDeletingPlan(null)}>
-                Keep Camp
-              </Button>
-              <Button variant="danger" onClick={handleDeleteConfirm}>
-                Break Camp
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Leave confirmation modal */}
-      {leavingPlan && (
-        <div className="modal-overlay" onClick={() => setLeavingPlan(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-icon-large">
-              <svg width="48" height="48" viewBox="0 0 48 48">
-                <path d="M16,8 L10,8 Q6,8 6,12 L6,36 Q6,40 10,40 L16,40" stroke="var(--charcoal-light)" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <path d="M20,24 L40,24" stroke="var(--charcoal-light)" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M34,18 L40,24 L34,30" stroke="var(--charcoal-light)" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-            <h2 className="modal-title">Leave Expedition?</h2>
-            <p className="modal-flavor">You'll pack up your gear and leave "{leavingPlan.name}" behind.</p>
-            <div className="modal-actions">
-              <Button variant="secondary" onClick={() => setLeavingPlan(null)}>
-                Stay at Camp
-              </Button>
-              <Button variant="danger" onClick={handleLeaveConfirm}>
-                Leave Camp
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete expedition confirmation */}
+      <ConfirmModal
+        isOpen={deletingPlan !== null}
+        title="Abandon Expedition?"
+        message={deletingPlan ? `"${deletingPlan.name}" will be lost to the wilderness forever.` : ''}
+        confirmLabel="Break Camp"
+        cancelLabel="Keep Camp"
+        tone="danger"
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeletingPlan(null)}
+      />
+
+      {/* Leave expedition confirmation */}
+      <ConfirmModal
+        isOpen={leavingPlan !== null}
+        title="Leave Expedition?"
+        message={leavingPlan ? `You'll pack up your gear and leave "${leavingPlan.name}" behind.` : ''}
+        confirmLabel="Leave Camp"
+        cancelLabel="Stay at Camp"
+        tone="danger"
+        onConfirm={handleLeaveConfirm}
+        onCancel={() => setLeavingPlan(null)}
+      />
     </div>
   );
 }
