@@ -1,0 +1,41 @@
+.meal-plan-reconcile-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(232, 179, 99, 0.18);
+  border: 1px solid var(--ember);
+  border-radius: 8px;
+  margin: 68px auto 12px;
+  max-width: 720px;
+  font-size: 0.95rem;
+  color: var(--parchment);
+  /* Relative stacking so it appears above the parallax background and the
+     fixed celestial toggle (z-index: 45), but below the app header (z-index: 50) */
+  position: relative;
+  z-index: 48;
+}
+
+.meal-plan-reconcile-banner__icon {
+  font-size: 1.2rem;
+  color: var(--ember);
+  flex-shrink: 0;
+}
+
+.meal-plan-reconcile-banner__text {
+  flex: 1;
+}
+
+.meal-plan-reconcile-banner__update {
+  flex-shrink: 0;
+}
+
+.meal-plan-reconcile-banner__dismiss {
+  color: var(--parchment);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.meal-plan-reconcile-banner__dismiss:hover {
+  opacity: 1;
+}
