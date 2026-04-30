@@ -99,8 +99,25 @@
   cursor: default;
 }
 
-.camper-avatar--pending .avatar-figure {
-  opacity: 0.6;
+.camper-avatar--pending:not(.camper-avatar--failed) {
+  outline: 2px dashed var(--tan-deep);
+  outline-offset: 4px;
+  opacity: 0.7;
+}
+
+.camper-avatar__envelope-overlay {
+  position: absolute;
+  top: -4px;
+  right: -6px;
+  background: var(--parchment);
+  border: 1px solid var(--tan-deep);
+  border-radius: 6px;
+  padding: 1px 4px;
+  font-size: 0.6rem;
+  line-height: 1;
+  color: var(--tan-deep);
+  pointer-events: none;
+  z-index: 10;
 }
 
 .avatar-name--pending {

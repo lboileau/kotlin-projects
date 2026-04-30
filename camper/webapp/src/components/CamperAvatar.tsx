@@ -97,7 +97,13 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
   return (
     <div
       className={`camper-avatar ${isPending ? 'camper-avatar--pending' : ''} ${isFailed ? 'camper-avatar--failed' : ''}`}
-      title={isFailed && email ? `Failed to invite ${email}` : undefined}
+      title={
+        isFailed && email
+          ? `Failed to invite ${email}`
+          : isPending && email
+          ? `Invited: ${email}`
+          : undefined
+      }
       style={{
         transform: `translate(calc(${x}px - 50%), calc(${y}px - 50%))`,
         animationDelay: `${index * 0.1}s`,
@@ -212,6 +218,9 @@ export function CamperAvatar({ name, email, invitationStatus, role, index, total
               <line x1="26" y1="7" x2="6" y2="25" stroke="#e83a2a" strokeWidth="4" strokeLinecap="square" />
             </svg>
           </button>
+        )}
+        {isPending && !isFailed && (
+          <span className="camper-avatar__envelope-overlay" aria-hidden="true">✉</span>
         )}
       </div>
       {displayName && <span className="avatar-name">{displayName}</span>}

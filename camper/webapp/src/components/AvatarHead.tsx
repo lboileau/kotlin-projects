@@ -1,15 +1,23 @@
 import type { AvatarResponse } from '../api/client';
 import { SKIN_COLORS, HAIR_COLORS } from '../lib/avatarConstants';
 import { AvatarHair } from './AvatarHair';
+import './AvatarHead.css';
 
 /**
  * Renders a circular avatar head with hair and facial features.
  * Uses the exact same SVG structure as MiniAvatar in AssignmentsModal.
+ *
+ * Props:
+ *   invitationStatus — when truthy and not "registered", applies .avatar-head--pending
+ *   styling (dashed outline + opacity) to indicate an invited-but-not-yet-registered member.
  */
-export function AvatarHead({ avatar, size = 28 }: { avatar?: AvatarResponse | null; size?: number }) {
+export function AvatarHead({ avatar, size = 28, invitationStatus }: { avatar?: AvatarResponse | null; size?: number; invitationStatus?: string | null }) {
+  const isPending = !!invitationStatus && invitationStatus !== 'registered';
+  const pendingClass = isPending ? 'avatar-head--pending' : undefined;
+
   if (!avatar) {
     return (
-      <svg width={size} height={size} viewBox="0 0 28 28">
+      <svg width={size} height={size} viewBox="0 0 28 28" className={pendingClass}>
         <defs><clipPath id="avatar-head-clip"><circle cx="14" cy="14" r="13" /></clipPath></defs>
         <circle cx="14" cy="14" r="13" fill="var(--sage)" stroke="var(--sage-deep)" strokeWidth="1.5" />
         <g clipPath="url(#avatar-head-clip)">
@@ -24,7 +32,7 @@ export function AvatarHead({ avatar, size = 28 }: { avatar?: AvatarResponse | nu
   const hair = HAIR_COLORS[avatar.hairColor] || '#4A3020';
 
   return (
-    <svg width={size} height={size} viewBox="0 0 28 28">
+    <svg width={size} height={size} viewBox="0 0 28 28" className={pendingClass}>
       {/* Face — same as MiniAvatar: cx=14, cy=16, r=11 */}
       <circle cx="14" cy="16" r="11" fill={skin} />
       {/* Hair — same transform as MiniAvatar */}
