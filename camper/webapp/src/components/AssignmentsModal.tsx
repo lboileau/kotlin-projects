@@ -4,6 +4,7 @@ import { SKIN_COLORS, HAIR_COLORS, FALLBACK_COLORS } from '../lib/avatarConstant
 import { AvatarHair } from './AvatarHair';
 import { Button } from './ui/Button';
 import { Modal } from './ui/Modal';
+import { ConfirmModal } from './ui/ConfirmModal';
 import './AssignmentsModal.css';
 
 interface AssignmentsModalProps {
@@ -105,8 +106,8 @@ interface AssignmentCardProps {
   onJoin: (assignmentId: string) => void;
   onLeave: (assignmentId: string) => void;
   onAddMember: (assignmentId: string, userId: string) => void;
-  onRemoveMember: (assignmentId: string, userId: string) => void;
-  onDelete: (assignmentId: string) => void;
+  onRemoveMember: (assignmentId: string, userId: string) => void | Promise<void>;
+  onDelete: (assignmentId: string) => void | Promise<void>;
   onUpdate: (assignmentId: string, name: string, maxOccupancy: number) => void;
 }
 
@@ -128,6 +129,8 @@ function AssignmentCard({
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState<EditFormData>({ name: assignment.name, maxOccupancy: assignment.maxOccupancy });
   const [addError, setAddError] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [removeMemberUserId, setRemoveMemberUserId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isAssignmentOwner = assignment.ownerId === currentUserId;
@@ -187,7 +190,12 @@ function AssignmentCard({
     onToggleAddMember(null);
   };
 
+  const removeMemberName = removeMemberUserId
+    ? getMemberName(removeMemberUserId, planMembers)
+    : '';
+
   return (
+    <>
     <div className="assign-card">
       {/* Card header */}
       <div className="assign-card-header">
@@ -210,7 +218,7 @@ function AssignmentCard({
                 <path d="M10,2 L12,4 L5,11 L3,11 L3,9 Z" fill="none" stroke="currentColor" strokeWidth="1.2" />
               </svg>
             </button>
-            <button className="assign-action-btn assign-action-btn--danger" title="Delete" onClick={() => onDelete(assignment.id)}>
+            <button className="assign-action-btn assign-action-btn--danger" title="Delete" aria-label="Delete this group" onClick={() => setDeleteConfirmOpen(true)}>
               <svg width="14" height="14" viewBox="0 0 14 14">
                 <path d="M3,4 L11,4 L10,12 L4,12 Z" fill="none" stroke="currentColor" strokeWidth="1.2" />
                 <line x1="2" y1="4" x2="12" y2="4" stroke="currentColor" strokeWidth="1.2" />
@@ -281,7 +289,8 @@ function AssignmentCard({
                 <button
                   className="assign-member-remove"
                   title={`Remove ${name}`}
-                  onClick={() => onRemoveMember(assignment.id, member.userId)}
+                  aria-label={`Remove ${name} from group`}
+                  onClick={() => setRemoveMemberUserId(member.userId)}
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12">
                     <path d="M3,3 L9,9 M9,3 L3,9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -313,7 +322,7 @@ function AssignmentCard({
             className="assign-add-member-btn"
             onClick={() => { onToggleAddMember(showAddMember ? null : assignment.id); setAddError(''); }}
           >
-            {showAddMember ? 'Cancel' : 'Add Member'}
+            {showAddMember ? 'Cancel' : 'Invite'}
           </button>
         )}
       </div>
@@ -350,6 +359,26 @@ function AssignmentCard({
         </div>
       )}
     </div>
+    <ConfirmModal
+      isOpen={deleteConfirmOpen}
+      title="Break this camp?"
+      message="All adventurers in this group will lose their assignment."
+      confirmLabel="Break Camp"
+      onConfirm={() => onDelete(assignment.id)}
+      onCancel={() => setDeleteConfirmOpen(false)}
+    />
+    <ConfirmModal
+      isOpen={removeMemberUserId !== null}
+      title="Remove from group?"
+      message={`${removeMemberName} will be removed from this assignment.`}
+      confirmLabel="Remove"
+      onConfirm={async () => {
+        await onRemoveMember(assignment.id, removeMemberUserId!);
+        setRemoveMemberUserId(null);
+      }}
+      onCancel={() => setRemoveMemberUserId(null)}
+    />
+    </>
   );
 }
 

@@ -581,7 +581,7 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
                       </div>
                       <div className="gear-pack-card-actions">
                         {isOwned && (
-                          <>
+                          <div className="gear-pack-card-manage-actions">
                             <button
                               className="gear-pack-edit-btn"
                               onClick={() => handleEditStart(pack)}
@@ -591,10 +591,16 @@ export function GearPacksPanel({ planId, memberCount, canEdit, onItemsChanged, c
                             <button
                               className="gear-pack-delete-btn"
                               onClick={() => setDeleteConfirmPackId(pack.id)}
+                              aria-label={`Delete ${pack.name}`}
                             >
+                              <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true">
+                                <path d="M2,3 L10,3 L9,11 L3,11 Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+                                <line x1="1" y1="3" x2="11" y2="3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                                <line x1="4" y1="1.5" x2="8" y2="1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                              </svg>
                               Delete
                             </button>
-                          </>
+                          </div>
                         )}
                         <button
                           className="gear-pack-preview-btn"

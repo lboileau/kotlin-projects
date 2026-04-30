@@ -401,6 +401,20 @@
   margin: 0;
 }
 
+/* ── Manage Actions (hover-reveal) ──────── */
+
+.gear-pack-card-manage-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.gear-pack-card:hover .gear-pack-card-manage-actions {
+  opacity: 1;
+}
+
 /* ── Edit / Delete Buttons on Cards ─────── */
 
 .gear-pack-edit-btn,
@@ -427,6 +441,9 @@
 }
 
 .gear-pack-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: rgba(232, 93, 58, 0.06);
   border: 1px solid rgba(232, 93, 58, 0.2);
   color: var(--flame);
