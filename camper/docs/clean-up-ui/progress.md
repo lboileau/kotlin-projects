@@ -1,5 +1,74 @@
 # clean-up-ui — Progress Log
 
+## Phase 3 — high-value workflow improvements — SHIPPED 2026-04-29
+
+All four Phase 3 PRs stacked on Phases 1+2.
+
+### PRs
+
+| Workstream | PR | Title |
+|---|---|---|
+| Phase 2 progress + Phase 3 plan | [#299](https://github.com/lboileau/kotlin-projects/pull/299) | `docs(clean-up-ui): Phase 2 progress + Phase 3 plan` |
+| W12 | [#300](https://github.com/lboileau/kotlin-projects/pull/300) | `feat(clean-up-ui): W12 — multi-day recipe add grid` |
+| W13 | [#301](https://github.com/lboileau/kotlin-projects/pull/301) | `feat(clean-up-ui): W13 — quick-create recipe in MealPlanModal` |
+| W17 | [#302](https://github.com/lboileau/kotlin-projects/pull/302) | `feat(clean-up-ui): W17 — member→servings reconcile banner` |
+| W16 | [#303](https://github.com/lboileau/kotlin-projects/pull/303) | `feat(clean-up-ui): W16 — assignment progress badges on PlanPage icons` |
+
+### Workstream status
+
+| WS | Status | Code review | Test review | Tests |
+|---|---|---|---|---|
+| W12 | ✅ shipped | APPROVED (after sticky CSS fix) | APPROVED (after fixes 2 + 3: production onClick test, real-handler integration test) | 8 added (7 unit + 1 integration) |
+| W13 | ✅ shipped | APPROVED first-pass | APPROVED first-pass | 14 added (6 RecipeForm + 6 quickCreate + 2 regression) |
+| W17 | ✅ shipped | APPROVED first-pass | APPROVED first-pass | 16 added (9 banner + 7 PlanPage integration) |
+| W16 | ✅ shipped | APPROVED first-pass | APPROVED first-pass | 17 added (7 InteractableItem + 10 PlanPage badges) |
+
+**Total tests: 119 passing across 21 files** (up from Phase 2's 64/13).
+
+### Deviations from plan
+
+1. **W12 wrapper-duplicate-handler bug caught by test-reviewer.** Original W12 tests used a wrapper that re-implemented production `handleAddRecipeToMeal` — assertions verified the wrapper, not production code. Fixed by adding a full-`MealPlanModal` integration test that exercises the real production handler. **Lesson saved into all subsequent prompts**: web-dev must add at least one full-component integration test if they use a wrapper for isolation. Subsequent Phase 3 PRs (W13, W17, W16) all followed the lesson on first pass.
+
+2. **W12 sticky CSS missed first-pass.** Plan specified `position: sticky` on column headers + row labels for the recipe-add grid; web-dev missed it. Fixed in amend.
+
+3. **W13 RecipeForm extracted into shared component.** Plan-gate decision was full extraction (NOT a simplified inline form). 320-line `RecipeCreateView` body moved to `src/components/RecipeForm.tsx`; both `RecipesPage` and `MealPlanModal` consume it via an `onSuccess(newRecipe)` callback. Constants (CATEGORIES, MEALS, THEMES, DraftIngredient) extracted to `src/lib/recipeConstants.ts`.
+
+4. **W13 RecipeForm CSS strategy (interim).** Form-specific CSS classes stayed in `RecipesPage.css`; `RecipeForm.tsx` imports it directly. Acceptable for this PR; flagged as follow-up cleanup.
+
+5. **W16 union-of-userIds vs worst-of badge logic.** phase-3-plan.md's `combineTentAndCanoeBadge` reference code was internally inconsistent — the code said worst-of but the test spec implied union. Web-dev resolved by implementing union-of-unique-member-IDs (semantically: "members with ≥1 assignment of any type"). Per-type breakdown preserved in tooltip ("Tents: 3/5 · Canoes: 0/5"). Better UX.
+
+6. **W16 N+1 fetch on PlanPage mount.** `getAssignments` returns `Assignment[]` (no member counts), so the implementation does `getAssignments` followed by `Promise.all(getAssignment(id))` for the details. Acceptable for typical N≤6 assignments.
+
+7. **W17 banner self-contained sessionStorage.** Plan suggested PlanPage would own the dismissed state; orchestrator/web-dev consolidated it inside the banner component using a lazy `useState(() => sessionStorage.getItem(key) === '1')` initializer. Cleaner — PlanPage just passes `mealPlan`, `memberCount`, `planId`, `onUpdated`.
+
+8. **W17 introduced `getMealPlanForTrip` fetch on PlanPage** that W16 reused for the kitchen badge. Both phases share `mealPlan` state; W16 doesn't add a parallel fetch.
+
+9. **W17 reconcileBanner.test.tsx** required updating in W16 to mock `getAssignments`/`getAssignment` (since W16's `loadData` now calls them). Cascade handled cleanly.
+
+### New patterns established
+
+- **Production-handler integration tests** alongside RecipeBookView/wrapper tests (W12 lesson — "wrapper for UI isolation, full-component integration for handler verification").
+- **Sub-component exports for testability** continue: `RecipeBookView`, `RecipeBookProps`, `OverviewView`, `OverviewProps`, `AddItemForm`, `ShoppingListView`. New: `BadgeContent` exported from `InteractableItem`.
+- **`vi.hoisted()` + `vi.mock()` for `usePlanUpdates`** — no-op mock pattern for any PlanPage test (W17, W16 both use it).
+- **`[data-item="<x>"] .interactable-item__badge` selector pattern** for unambiguous badge queries (W16).
+- **Lazy sessionStorage `useState` initializer** for component-owned per-resource preferences (W17 dismissal flag).
+- **Two-tier parallel fetch pattern** when list endpoint doesn't return detail data (W16: `getAssignments` → `Promise.all(getAssignment)`).
+
+### Carry-overs to later phases
+
+- **`INGREDIENT_CATEGORIES` (`lib/constants.ts`) is duplicate of `CATEGORIES` (`lib/recipeConstants.ts`)** — follow-up cleanup PR. Re-export from one source.
+- **Form-specific CSS classes** in `RecipesPage.css` should move into `RecipeForm.css` (W13 deferred).
+- **Kitchen badge edge case:** `mealPlan != null && mealPlan.days.length === 0` renders "0d" with progress tone — minor polish opportunity (Phase 4+).
+- **Phase 4 a11y nit** still relevant (toast `role`/`aria-live` interplay from Phase 1).
+- **`MealPlanModal.tsx` is now ≈1700 lines** — split is increasingly attractive but not yet blocking work.
+- **Test fixture file** (`src/test/fixtures.ts`) for shared `Plan`, `PlanMember`, `MealPlanDetailResponse`, `AssignmentDetail` factories — reduce duplication.
+
+### Pause
+
+**Awaiting user "go" before starting Phase 4 (W7 confirm modal → W29 restart ladder copy → W23 delete + invite consistency → W24 tabs primitive → W18 servings context → W19 pending member visuals → W20 pending invitations rollup → W15 gear pack apply summary + Undo → W9 blur-save feedback). 9 workstreams — the largest phase.**
+
+---
+
 ## Phase 2 — routing & structure — SHIPPED 2026-04-29
 
 All three Phase 2 PRs stacked on Phase 1.
