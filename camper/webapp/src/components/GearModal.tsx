@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { api, type Item, type PlanMember } from '../api/client';
 import { Modal } from './ui/Modal';
+import { ConfirmModal } from './ui/ConfirmModal';
 import { GearPacksPanel } from './GearPacksPanel';
 import { useToast } from '../context/ToastContext';
 import './GearModal.css';
@@ -49,15 +50,16 @@ interface ItemRowProps {
   canEdit: boolean;
   categories: CategoryDef[];
   onTogglePacked: (item: Item) => void;
-  onDelete: (item: Item) => void;
+  onDelete: (item: Item) => void | Promise<void>;
   onUpdate: (item: Item, name: string, quantity: number, category: string) => void;
 }
 
-function ItemRow({ item, canEdit, categories, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
+export function ItemRow({ item, canEdit, categories, onTogglePacked, onDelete, onUpdate }: ItemRowProps) {
   const [editing, setEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
   const [editQty, setEditQty] = useState(item.quantity);
   const [editCategory, setEditCategory] = useState(item.category);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -115,39 +117,49 @@ function ItemRow({ item, canEdit, categories, onTogglePacked, onDelete, onUpdate
   }
 
   return (
-    <div className={`gear-item ${item.packed ? 'gear-item--packed' : ''}`}>
-      <button
-        className={`gear-check ${item.packed ? 'gear-check--checked' : ''}`}
-        onClick={() => canEdit && onTogglePacked(item)}
-        disabled={!canEdit}
-        aria-label={item.packed ? 'Unpack item' : 'Pack item'}
-      >
-        {item.packed && (
-          <svg width="12" height="12" viewBox="0 0 12 12">
-            <path d="M2,6 L5,9 L10,3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+    <>
+      <div className={`gear-item ${item.packed ? 'gear-item--packed' : ''}`}>
+        <button
+          className={`gear-check ${item.packed ? 'gear-check--checked' : ''}`}
+          onClick={() => canEdit && onTogglePacked(item)}
+          disabled={!canEdit}
+          aria-label={item.packed ? 'Unpack item' : 'Pack item'}
+        >
+          {item.packed && (
+            <svg width="12" height="12" viewBox="0 0 12 12">
+              <path d="M2,6 L5,9 L10,3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+        <span className="gear-item-category-icon" title={getCategoryLabel(item.category, categories)}>
+          {getCategoryIcon(item.category, categories)}
+        </span>
+        <span className="gear-item-name">{item.name}</span>
+        {item.quantity > 1 && <span className="gear-item-qty">×{item.quantity}</span>}
+        {canEdit && (
+          <div className="gear-item-actions">
+            <button className="gear-item-edit" onClick={() => setEditing(true)} title="Edit">
+              <svg width="14" height="14" viewBox="0 0 14 14">
+                <path d="M10,2 L12,4 L5,11 L2,12 L3,9 Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <button className="gear-item-delete" onClick={() => setDeleteConfirmOpen(true)} title="Remove" aria-label={`Remove ${item.name}`}>
+              <svg width="14" height="14" viewBox="0 0 14 14">
+                <path d="M3,3 L11,11 M11,3 L3,11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
         )}
-      </button>
-      <span className="gear-item-category-icon" title={getCategoryLabel(item.category, categories)}>
-        {getCategoryIcon(item.category, categories)}
-      </span>
-      <span className="gear-item-name">{item.name}</span>
-      {item.quantity > 1 && <span className="gear-item-qty">×{item.quantity}</span>}
-      {canEdit && (
-        <div className="gear-item-actions">
-          <button className="gear-item-edit" onClick={() => setEditing(true)} title="Edit">
-            <svg width="14" height="14" viewBox="0 0 14 14">
-              <path d="M10,2 L12,4 L5,11 L2,12 L3,9 Z" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <button className="gear-item-delete" onClick={() => onDelete(item)} title="Remove">
-            <svg width="14" height="14" viewBox="0 0 14 14">
-              <path d="M3,3 L11,11 M11,3 L3,11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-      )}
-    </div>
+      </div>
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        title="Remove this item?"
+        message={`"${item.name}" will be removed from the list.`}
+        confirmLabel="Remove"
+        onConfirm={() => onDelete(item)}
+        onCancel={() => setDeleteConfirmOpen(false)}
+      />
+    </>
   );
 }
 
