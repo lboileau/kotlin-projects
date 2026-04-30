@@ -100,8 +100,6 @@
 }
 
 .camper-avatar--pending:not(.camper-avatar--failed) {
-  outline: 2px dashed var(--tan-deep);
-  outline-offset: 4px;
   opacity: 0.7;
 }
 
