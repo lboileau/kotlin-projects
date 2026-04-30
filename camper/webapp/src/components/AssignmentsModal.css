@@ -53,47 +53,15 @@
 /* ── Tabs ──────────────────────────────── */
 
 .assign-tabs {
-  display: flex;
-  gap: 4px;
   padding: var(--space-sm) var(--space-xl) var(--space-sm);
   position: relative;
   z-index: 1;
 }
 
-.assign-tab {
+/* Full-width tab buttons with equal sizing */
+.assign-tabs .ui-tab {
   flex: 1;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  gap: var(--space-xs);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-  border: 1px solid rgba(168, 139, 91, 0.2);
-  border-bottom: none;
-  background: rgba(255, 255, 255, 0.2);
-  color: var(--charcoal-light);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.assign-tab:hover {
-  background: rgba(255, 255, 255, 0.4);
-  color: var(--charcoal);
-}
-
-.assign-tab--active {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(168, 139, 91, 0.3);
-  color: var(--charcoal);
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.assign-tab-icon {
-  font-size: 1rem;
-  line-height: 1;
 }
 
 /* ── Scrollable Body ────────────────────── */

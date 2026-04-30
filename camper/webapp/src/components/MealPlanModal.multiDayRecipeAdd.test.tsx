@@ -440,11 +440,11 @@ describe('MealPlanModal — handleAddRecipeToMeal (integration, W12)', () => {
 
     // Wait for tab strip (always visible) and loading to finish (recipe list appears)
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: 'Recipe Book' })).toBeInTheDocument();
+      expect(screen.getByRole('tab', { name: 'Recipe Book' })).toBeInTheDocument();
     });
 
     // Switch to Recipe Book tab
-    await user.click(screen.getByRole('button', { name: 'Recipe Book' }));
+    await user.click(screen.getByRole('tab', { name: 'Recipe Book' }));
 
     // Wait for Pasta Bolognese to appear in the recipe list
     await waitFor(() => {

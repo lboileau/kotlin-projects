@@ -1,0 +1,59 @@
+/* ──────────────────────────────────────────────────────────
+   ui/Tabs — WAI-ARIA tablist with roving tabindex
+   ────────────────────────────────────────────────────────── */
+
+.ui-tabs {
+  display: flex;
+  gap: 2px;
+}
+
+.ui-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--charcoal-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+  position: relative;
+  white-space: nowrap;
+}
+
+.ui-tab:hover:not(:disabled) {
+  color: var(--charcoal);
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: var(--radius-sm);
+}
+
+.ui-tab--active {
+  color: var(--charcoal);
+}
+
+.ui-tab--active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: var(--sage-deep);
+  border-radius: 2px;
+}
+
+.ui-tab-icon {
+  display: inline-flex;
+  align-items: center;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.ui-tab:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
