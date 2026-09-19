@@ -13,6 +13,7 @@ import com.acme.services.camperservice.features.mealplan.actions.GetMealPlanByPl
 import com.acme.services.camperservice.features.mealplan.actions.GetMealPlanDetailAction
 import com.acme.services.camperservice.features.mealplan.actions.GetShoppingListAction
 import com.acme.services.camperservice.features.mealplan.actions.GetTemplatesAction
+import com.acme.services.camperservice.features.mealplan.actions.ListMealPlansByCreatorAction
 import com.acme.services.camperservice.features.mealplan.actions.RemoveDayAction
 import com.acme.services.camperservice.features.mealplan.actions.RemoveManualItemAction
 import com.acme.services.camperservice.features.mealplan.actions.RemoveRecipeFromMealAction
@@ -31,6 +32,7 @@ class MealPlanService(
     private val getMealPlanDetail = GetMealPlanDetailAction(mealPlanClient, recipeClient, ingredientClient)
     private val getMealPlanByPlanId = GetMealPlanByPlanIdAction(mealPlanClient, recipeClient, ingredientClient)
     private val getTemplatesAction = GetTemplatesAction(mealPlanClient)
+    private val listMealPlansByCreator = ListMealPlansByCreatorAction(mealPlanClient)
     private val updateMealPlan = UpdateMealPlanAction(mealPlanClient)
     private val deleteMealPlan = DeleteMealPlanAction(mealPlanClient)
     private val copyToTrip = CopyToTripAction(mealPlanClient, recipeClient, ingredientClient)
@@ -49,6 +51,7 @@ class MealPlanService(
     fun getDetail(param: GetMealPlanDetailParam) = getMealPlanDetail.execute(param)
     fun getByPlanId(param: GetMealPlanByPlanIdParam) = getMealPlanByPlanId.execute(param)
     fun getTemplates(param: GetTemplatesParam) = getTemplatesAction.execute(param)
+    fun listMealPlansByCreator(param: ListMealPlansByCreatorParam) = listMealPlansByCreator.execute(param)
     fun update(param: UpdateMealPlanParam) = updateMealPlan.execute(param)
     fun delete(param: DeleteMealPlanParam) = deleteMealPlan.execute(param)
     fun copyToTrip(param: CopyToTripParam) = copyToTrip.execute(param)

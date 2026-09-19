@@ -36,6 +36,7 @@ class ShoppingListCalculatorTest {
             unit: String,
             recipeName: String,
             baseServings: Int,
+            recipeId: UUID = UUID.randomUUID(),
         ) = RecipeIngredientWithMeta(
             recipeIngredientId = UUID.randomUUID(),
             ingredientId = ingredientId,
@@ -43,6 +44,7 @@ class ShoppingListCalculatorTest {
             category = "produce",
             quantity = BigDecimal(quantity),
             unit = unit,
+            recipeId = recipeId,
             recipeName = recipeName,
             baseServings = baseServings,
         )
@@ -52,9 +54,11 @@ class ShoppingListCalculatorTest {
             quantity: String,
             unit: String,
             recipeName: String,
+            recipeId: UUID = UUID.randomUUID(),
         ) = ScaledIngredient(
             ingredientId = ingredientId,
             recipeIngredientId = UUID.randomUUID(),
+            recipeId = recipeId,
             recipeName = recipeName,
             quantity = BigDecimal(quantity),
             unit = unit,

@@ -78,6 +78,10 @@ class FakeMealPlanClient : MealPlanClient {
         return success(mealPlans.values.filter { it.isTemplate }.sortedBy { it.name })
     }
 
+    override fun getByCreatedBy(param: GetByCreatedByParam): Result<List<MealPlan>, AppError> {
+        return success(mealPlans.values.filter { it.createdBy == param.createdBy }.sortedByDescending { it.updatedAt })
+    }
+
     override fun update(param: UpdateMealPlanParam): Result<MealPlan, AppError> {
         val validation = validateUpdate.execute(param)
         if (validation is Result.Failure) return validation
@@ -177,6 +181,14 @@ class FakeMealPlanClient : MealPlanClient {
         if (!recipes.containsKey(param.id)) return failure(NotFoundError("MealPlanRecipe", param.id.toString()))
         recipes.remove(param.id)
         return success(Unit)
+    }
+
+    override fun getMealPlanIdForRecipe(param: GetMealPlanIdForRecipeParam): Result<UUID, AppError> {
+        val recipe = recipes[param.mealPlanRecipeId]
+            ?: return failure(NotFoundError("MealPlanRecipe", param.mealPlanRecipeId.toString()))
+        val day = days[recipe.mealPlanDayId]
+            ?: return failure(NotFoundError("MealPlanRecipe", param.mealPlanRecipeId.toString()))
+        return success(day.mealPlanId)
     }
 
     // --- Shopping List Purchases ---

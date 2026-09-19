@@ -22,6 +22,9 @@ data class GetByIdParam(val id: UUID)
 /** Parameter for retrieving a meal plan by its associated plan (trip) ID. */
 data class GetByPlanIdParam(val planId: UUID)
 
+/** Parameter for retrieving all meal plans created by a given user. */
+data class GetByCreatedByParam(val createdBy: UUID)
+
 /** Parameter for updating an existing meal plan. Null fields are left unchanged. */
 data class UpdateMealPlanParam(
     val id: UUID,
@@ -64,6 +67,9 @@ data class GetRecipesByMealPlanIdParam(val mealPlanId: UUID)
 
 /** Parameter for removing a recipe from a meal. */
 data class RemoveRecipeParam(val id: UUID)
+
+/** Parameter for resolving the owning meal plan ID for a meal plan recipe entry. */
+data class GetMealPlanIdForRecipeParam(val mealPlanRecipeId: UUID)
 
 // --- Shopping list purchase params ---
 

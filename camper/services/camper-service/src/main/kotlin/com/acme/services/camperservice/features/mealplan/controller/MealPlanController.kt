@@ -5,6 +5,7 @@ import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.mealplan.dto.*
 import com.acme.services.camperservice.features.mealplan.params.*
 import com.acme.services.camperservice.features.mealplan.service.MealPlanService
+import com.acme.services.camperservice.websocket.MealPlanEventPublisher
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,7 +14,8 @@ import java.util.UUID
 @RestController
 @RequestMapping("/api/meal-plans")
 class MealPlanController(
-    private val mealPlanService: MealPlanService
+    private val mealPlanService: MealPlanService,
+    private val eventPublisher: MealPlanEventPublisher,
 ) {
     private val logger = LoggerFactory.getLogger(MealPlanController::class.java)
 
@@ -64,6 +66,17 @@ class MealPlanController(
         }
     }
 
+    /** GET /api/meal-plans?createdBy={createdBy} — List meal plans created by a user */
+    @GetMapping(params = ["createdBy"])
+    fun listByCreatedBy(
+        @RequestParam createdBy: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("GET /api/meal-plans?createdBy={}", createdBy)
+        val param = ListMealPlansByCreatorParam(createdBy = createdBy)
+        return mealPlanService.listMealPlansByCreator(param).toResponseEntity { it }
+    }
+
     /** GET /api/meal-plans/templates — List template meal plans */
     @GetMapping("/templates")
     fun getTemplates(
@@ -89,7 +102,9 @@ class MealPlanController(
             servings = request.servings,
             scalingMode = request.scalingMode,
         )
-        return mealPlanService.update(param).toResponseEntity { it }
+        val result = mealPlanService.update(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(id, "meal-plan", "updated")
+        return result.toResponseEntity { it }
     }
 
     /** DELETE /api/meal-plans/{id} — Delete meal plan */
@@ -100,7 +115,9 @@ class MealPlanController(
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/meal-plans/{}", id)
         val param = DeleteMealPlanParam(mealPlanId = id, userId = userId)
-        return mealPlanService.delete(param).toResponseEntity(successStatus = 204) { }
+        val result = mealPlanService.delete(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(id, "meal-plan", "deleted")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 
     /** POST /api/meal-plans/{id}/copy-to-trip — Copy template to a trip */
@@ -149,7 +166,9 @@ class MealPlanController(
             userId = userId,
             dayNumber = request.dayNumber,
         )
-        return mealPlanService.addDay(param).toResponseEntity(successStatus = 201) { it }
+        val result = mealPlanService.addDay(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(id, "meal-plan", "updated")
+        return result.toResponseEntity(successStatus = 201) { it }
     }
 
     /** DELETE /api/meal-plans/{mealPlanId}/days/{dayId} — Remove a day */
@@ -161,7 +180,9 @@ class MealPlanController(
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/meal-plans/{}/days/{}", mealPlanId, dayId)
         val param = RemoveDayParam(mealPlanId = mealPlanId, dayId = dayId, userId = userId)
-        return mealPlanService.removeDay(param).toResponseEntity(successStatus = 204) { }
+        val result = mealPlanService.removeDay(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(mealPlanId, "meal-plan", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 
     /** POST /api/meal-plans/{mealPlanId}/days/{dayId}/recipes — Add recipe to a meal on a day */
@@ -180,7 +201,9 @@ class MealPlanController(
             mealType = request.mealType,
             recipeId = request.recipeId,
         )
-        return mealPlanService.addRecipeToMeal(param).toResponseEntity(successStatus = 201) { it }
+        val result = mealPlanService.addRecipeToMeal(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(mealPlanId, "meal-plan", "updated")
+        return result.toResponseEntity(successStatus = 201) { it }
     }
 
     /** GET /api/meal-plans/{id}/shopping-list — Get computed shopping list */
@@ -210,7 +233,9 @@ class MealPlanController(
             unit = request.unit,
             quantityPurchased = request.quantityPurchased,
         )
-        return mealPlanService.updatePurchase(param).toResponseEntity { it }
+        val result = mealPlanService.updatePurchase(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(id, "shopping-list", "updated")
+        return result.toResponseEntity { it }
     }
 
     /** POST /api/meal-plans/{id}/shopping-list/items — Add manual item */
@@ -229,7 +254,9 @@ class MealPlanController(
             quantity = request.quantity,
             unit = request.unit,
         )
-        return mealPlanService.addManualItem(param).toResponseEntity(successStatus = 201) { it }
+        val result = mealPlanService.addManualItem(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(id, "shopping-list", "updated")
+        return result.toResponseEntity(successStatus = 201) { it }
     }
 
     /** DELETE /api/meal-plans/{id}/shopping-list/items/{itemId} — Remove manual item */
@@ -245,7 +272,9 @@ class MealPlanController(
             userId = userId,
             itemId = itemId,
         )
-        return mealPlanService.removeManualItem(param).toResponseEntity(successStatus = 204) { }
+        val result = mealPlanService.removeManualItem(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(id, "shopping-list", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 
     /** DELETE /api/meal-plans/{id}/shopping-list — Reset all purchases */
@@ -256,14 +285,17 @@ class MealPlanController(
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/meal-plans/{}/shopping-list", id)
         val param = ResetPurchasesParam(mealPlanId = id, userId = userId)
-        return mealPlanService.resetPurchases(param).toResponseEntity(successStatus = 204) { }
+        val result = mealPlanService.resetPurchases(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(id, "shopping-list", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 }
 
 /** Separate controller for meal-plan-recipe deletion (different base path) */
 @RestController
 class MealPlanRecipeController(
-    private val mealPlanService: MealPlanService
+    private val mealPlanService: MealPlanService,
+    private val eventPublisher: MealPlanEventPublisher,
 ) {
     private val logger = LoggerFactory.getLogger(MealPlanRecipeController::class.java)
 
@@ -275,6 +307,8 @@ class MealPlanRecipeController(
     ): ResponseEntity<Any> {
         logger.info("DELETE /api/meal-plan-recipes/{}", mealPlanRecipeId)
         val param = RemoveRecipeFromMealParam(mealPlanRecipeId = mealPlanRecipeId, userId = userId)
-        return mealPlanService.removeRecipeFromMeal(param).toResponseEntity(successStatus = 204) { }
+        val result = mealPlanService.removeRecipeFromMeal(param)
+        if (result is Result.Success) eventPublisher.publishUpdate(result.value, "meal-plan", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
     }
 }

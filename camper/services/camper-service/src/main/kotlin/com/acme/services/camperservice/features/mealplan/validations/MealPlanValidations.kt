@@ -32,6 +32,10 @@ internal class ValidateGetTemplates {
     fun execute(param: GetTemplatesParam): Result<Unit, MealPlanError> = success(Unit)
 }
 
+internal class ValidateListMealPlansByCreator {
+    fun execute(param: ListMealPlansByCreatorParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
 internal class ValidateUpdateMealPlan {
     fun execute(param: UpdateMealPlanParam): Result<Unit, MealPlanError> {
         if (param.name != null && param.name.isBlank()) return Result.Failure(MealPlanError.Invalid("name", "must not be blank"))

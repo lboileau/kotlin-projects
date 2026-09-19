@@ -26,6 +26,10 @@ data class GetTemplatesParam(
     val userId: UUID
 )
 
+data class ListMealPlansByCreatorParam(
+    val createdBy: UUID
+)
+
 data class UpdateMealPlanParam(
     val mealPlanId: UUID,
     val userId: UUID,

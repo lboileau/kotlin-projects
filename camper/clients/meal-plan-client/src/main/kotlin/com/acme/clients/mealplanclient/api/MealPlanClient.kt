@@ -7,6 +7,7 @@ import com.acme.clients.mealplanclient.model.MealPlanDay
 import com.acme.clients.mealplanclient.model.MealPlanRecipe
 import com.acme.clients.mealplanclient.model.ShoppingListManualItem
 import com.acme.clients.mealplanclient.model.ShoppingListPurchase
+import java.util.UUID
 
 /**
  * Client interface for MealPlan, MealPlanDay, MealPlanRecipe, and ShoppingListPurchase
@@ -33,6 +34,9 @@ interface MealPlanClient {
 
     /** Retrieve all template meal plans. */
     fun getTemplates(): Result<List<MealPlan>, AppError>
+
+    /** Retrieve all meal plans created by a given user, newest updated first. */
+    fun getByCreatedBy(param: GetByCreatedByParam): Result<List<MealPlan>, AppError>
 
     /** Update an existing meal plan. Null fields are left unchanged. */
     fun update(param: UpdateMealPlanParam): Result<MealPlan, AppError>
@@ -64,6 +68,9 @@ interface MealPlanClient {
 
     /** Remove a recipe from a meal. */
     fun removeRecipe(param: RemoveRecipeParam): Result<Unit, AppError>
+
+    /** Resolve the owning meal plan ID for a meal plan recipe entry. Returns NotFoundError if not found. */
+    fun getMealPlanIdForRecipe(param: GetMealPlanIdForRecipeParam): Result<UUID, AppError>
 
     // --- Shopping List Purchases ---
 

@@ -88,8 +88,14 @@ data class ShoppingListItemResponse(
     val unit: String?,
     val status: String,
     val usedInRecipes: List<String>,
+    val usedInRecipeRefs: List<RecipeRefResponse>,
     val source: String,
     val manualItemId: UUID?,
+)
+
+data class RecipeRefResponse(
+    val id: UUID,
+    val name: String,
 )
 
 data class ManualItemResponse(

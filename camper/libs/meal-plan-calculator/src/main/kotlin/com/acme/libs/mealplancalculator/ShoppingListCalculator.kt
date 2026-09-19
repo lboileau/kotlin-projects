@@ -2,6 +2,7 @@ package com.acme.libs.mealplancalculator
 
 import com.acme.libs.mealplancalculator.model.IngredientInfo
 import com.acme.libs.mealplancalculator.model.RecipeIngredientWithMeta
+import com.acme.libs.mealplancalculator.model.RecipeRef
 import com.acme.libs.mealplancalculator.model.ScaledIngredient
 import com.acme.libs.mealplancalculator.model.ScalingMode
 import com.acme.libs.mealplancalculator.model.ShoppingListRow
@@ -52,6 +53,7 @@ object ShoppingListCalculator {
             ScaledIngredient(
                 ingredientId = ingredient.ingredientId,
                 recipeIngredientId = ingredient.recipeIngredientId,
+                recipeId = ingredient.recipeId,
                 recipeName = ingredient.recipeName,
                 quantity = scaledQuantity,
                 unit = ingredient.unit,
@@ -83,6 +85,10 @@ object ShoppingListCalculator {
 
             for (subgroup in subgroups) {
                 val recipeNames = subgroup.map { it.recipeName }.distinct().sorted()
+                val recipeRefs = subgroup
+                    .map { RecipeRef(id = it.recipeId, name = it.recipeName) }
+                    .distinctBy { it.id }
+                    .sortedWith(compareBy({ it.name }, { it.id }))
 
                 // Pick the first unit in the subgroup as the common unit
                 val commonUnit = subgroup.first().unit
@@ -104,6 +110,7 @@ object ShoppingListCalculator {
                         quantityRequired = bestQuantity,
                         unit = bestUnit,
                         usedInRecipes = recipeNames,
+                        usedInRecipeRefs = recipeRefs,
                     ),
                 )
             }

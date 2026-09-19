@@ -10,4 +10,5 @@ data class ShoppingListRow(
     val quantityRequired: BigDecimal,
     val unit: String,
     val usedInRecipes: List<String>,
+    val usedInRecipeRefs: List<RecipeRef>,
 )

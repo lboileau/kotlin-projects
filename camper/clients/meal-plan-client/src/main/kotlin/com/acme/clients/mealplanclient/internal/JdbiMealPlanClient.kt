@@ -10,6 +10,7 @@ import com.acme.clients.mealplanclient.model.MealPlanRecipe
 import com.acme.clients.mealplanclient.model.ShoppingListManualItem
 import com.acme.clients.mealplanclient.model.ShoppingListPurchase
 import org.jdbi.v3.core.Jdbi
+import java.util.UUID
 
 internal class JdbiMealPlanClient(jdbi: Jdbi) : MealPlanClient {
 
@@ -17,6 +18,7 @@ internal class JdbiMealPlanClient(jdbi: Jdbi) : MealPlanClient {
     private val getMealPlanById = GetMealPlanById(jdbi)
     private val getMealPlanByPlanId = GetMealPlanByPlanId(jdbi)
     private val getTemplates = GetTemplates(jdbi)
+    private val getByCreatedBy = GetByCreatedBy(jdbi)
     private val updateMealPlan = UpdateMealPlan(jdbi, getMealPlanById)
     private val deleteMealPlan = DeleteMealPlan(jdbi)
     private val addDay = AddDay(jdbi)
@@ -26,6 +28,7 @@ internal class JdbiMealPlanClient(jdbi: Jdbi) : MealPlanClient {
     private val getRecipesByDayId = GetRecipesByDayId(jdbi)
     private val getRecipesByMealPlanId = GetRecipesByMealPlanId(jdbi)
     private val removeRecipe = RemoveRecipe(jdbi)
+    private val getMealPlanIdForRecipe = GetMealPlanIdForRecipe(jdbi)
     private val getPurchases = GetPurchases(jdbi)
     private val upsertPurchase = UpsertPurchase(jdbi)
     private val deletePurchases = DeletePurchases(jdbi)
@@ -39,6 +42,7 @@ internal class JdbiMealPlanClient(jdbi: Jdbi) : MealPlanClient {
     override fun getById(param: GetByIdParam): Result<MealPlan, AppError> = getMealPlanById.execute(param)
     override fun getByPlanId(param: GetByPlanIdParam): Result<MealPlan?, AppError> = getMealPlanByPlanId.execute(param)
     override fun getTemplates(): Result<List<MealPlan>, AppError> = getTemplates.execute()
+    override fun getByCreatedBy(param: GetByCreatedByParam): Result<List<MealPlan>, AppError> = getByCreatedBy.execute(param)
     override fun update(param: UpdateMealPlanParam): Result<MealPlan, AppError> = updateMealPlan.execute(param)
     override fun delete(param: DeleteMealPlanParam): Result<Unit, AppError> = deleteMealPlan.execute(param)
     override fun addDay(param: AddDayParam): Result<MealPlanDay, AppError> = addDay.execute(param)
@@ -48,6 +52,7 @@ internal class JdbiMealPlanClient(jdbi: Jdbi) : MealPlanClient {
     override fun getRecipesByDayId(param: GetRecipesByDayIdParam): Result<List<MealPlanRecipe>, AppError> = getRecipesByDayId.execute(param)
     override fun getRecipesByMealPlanId(param: GetRecipesByMealPlanIdParam): Result<List<MealPlanRecipe>, AppError> = getRecipesByMealPlanId.execute(param)
     override fun removeRecipe(param: RemoveRecipeParam): Result<Unit, AppError> = removeRecipe.execute(param)
+    override fun getMealPlanIdForRecipe(param: GetMealPlanIdForRecipeParam): Result<UUID, AppError> = getMealPlanIdForRecipe.execute(param)
     override fun getPurchases(param: GetPurchasesParam): Result<List<ShoppingListPurchase>, AppError> = getPurchases.execute(param)
     override fun upsertPurchase(param: UpsertPurchaseParam): Result<ShoppingListPurchase, AppError> = upsertPurchase.execute(param)
     override fun deletePurchases(param: DeletePurchasesParam): Result<Unit, AppError> = deletePurchases.execute(param)

@@ -15,6 +15,7 @@ import com.acme.libs.mealplancalculator.model.IngredientInfo
 import com.acme.libs.mealplancalculator.UnitConverter
 import com.acme.libs.mealplancalculator.model.PurchaseStatus
 import com.acme.libs.mealplancalculator.model.RecipeIngredientWithMeta
+import com.acme.services.camperservice.features.mealplan.dto.RecipeRefResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListCategoryResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListItemResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListResponse
@@ -113,6 +114,7 @@ internal class GetShoppingListAction(
                         category = ingredientInfoMap[ingredientId]!!.category,
                         quantity = ri.quantity,
                         unit = ri.unit,
+                        recipeId = recipe.id,
                         recipeName = recipe.name,
                         baseServings = recipe.baseServings,
                     )
@@ -178,6 +180,7 @@ internal class GetShoppingListAction(
                 unit = row.unit,
                 status = status,
                 usedInRecipes = row.usedInRecipes,
+                usedInRecipeRefs = row.usedInRecipeRefs.map { RecipeRefResponse(id = it.id, name = it.name) },
                 source = "recipe",
                 manualItemId = null,
             )
@@ -223,6 +226,7 @@ internal class GetShoppingListAction(
                     unit = purchase.unit,
                     status = PurchaseStatus.NO_LONGER_NEEDED.name.lowercase(),
                     usedInRecipes = emptyList(),
+                    usedInRecipeRefs = emptyList(),
                     source = "recipe",
                     manualItemId = null,
                 )
@@ -306,6 +310,7 @@ internal class GetShoppingListAction(
                 unit = item.unit,
                 status = status,
                 usedInRecipes = emptyList(),
+                usedInRecipeRefs = emptyList(),
                 source = "manual",
                 manualItemId = item.id,
             ) to manualCategory
