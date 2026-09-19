@@ -1,0 +1,22 @@
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+.app-shell__scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 641px) {
+  .app-shell {
+    border-left: 1px solid var(--gray-5);
+    border-right: 1px solid var(--gray-5);
+  }
+}

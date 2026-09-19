@@ -4,7 +4,7 @@ import type {
   MealPlanDetailResponse,
   MealPlanDayResponse,
   MealPlanRecipeDetailResponse,
-} from '../api/client';
+} from '../api/types';
 
 function makeRecipe(
   id: string,

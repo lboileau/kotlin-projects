@@ -1,0 +1,32 @@
+/* Tiny global reset — component styling lives in co-located CSS modules. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--color-background, #ffffff);
+  color-scheme: light;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+button {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}

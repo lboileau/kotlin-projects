@@ -1,293 +1,46 @@
-# Camper Webapp
+# Meal Planner Webapp
 
-Interactive camping trip planner frontend. Aesthetic: **"Enchanted Expedition Journal"** — watercolor storybook meets cozy RPG. Parallax wilderness backgrounds, animated campfire campsite scene, SVG illustrated art, soft pastel palette.
+Mobile-first meal planning app: recipes, ingredients, meal plans, shopping lists. Written from scratch on the `meal-app-frontend` branch, replacing the old camping UI. Source of truth for product and design decisions: `../docs/meal-app-frontend/requirements.md` and `../docs/meal-app-frontend/plan.md`.
 
 ## Tech Stack
 
-- **Framework:** React 19 + TypeScript
-- **Build:** Vite 7
-- **Routing:** react-router-dom
-- **WebSocket:** @stomp/stompjs for STOMP-over-WebSocket live updates
-- **Styling:** Plain CSS (no framework) with CSS custom properties
-- **Fonts:** Cinzel Decorative (display), Fredericka the Great (headings), Lora (body) — via Google Fonts
+- **Framework:** React 19 + TypeScript, Vite 7
+- **Routing:** react-router-dom 7 (`createBrowserRouter`, nested routes)
+- **Server state:** TanStack Query 5
+- **UI:** Radix Themes 3 (light only, accent set in `src/theme.ts`), Radix `Dialog` primitive for bottom sheets, `@radix-ui/react-icons`
+- **Live sync:** `@stomp/stompjs` over `/ws`, topic `/topic/meal-plans/{mealPlanId}`
+- **Styling:** Radix props and tokens first; co-located CSS for custom parts. Custom CSS uses the generic `--accent-*` / `--gray-*` tokens, never a named colour scale or hard-coded colours.
 
-## Project Structure
+## Structure
 
 ```
-webapp/
-├── CLAUDE.md
-├── index.html              # Entry HTML with Google Fonts
-├── vite.config.ts          # Dev server (port 3000), API proxy to :8080
-├── src/
-│   ├── main.tsx            # React entry point
-│   ├── App.tsx             # Router + AuthProvider
-│   ├── api/
-│   │   └── client.ts       # API client (typed fetch wrapper)
-│   ├── hooks/
-│   │   ├── usePlanUpdates.ts # STOMP WebSocket hook for live plan updates
-│   │   └── useLadderUpdates.ts # STOMP WebSocket hook for live ladder updates + presence tracking
-│   ├── context/
-│   │   └── AuthContext.tsx  # Auth state (localStorage-persisted)
-│   ├── lib/
-│   │   ├── avatarConstants.ts          # Shared color maps (SKIN_COLORS, HAIR_COLORS, etc.)
-│   │   └── profileConstants.ts         # Shared option arrays (DIETARY_OPTIONS, EXPERIENCE_OPTIONS)
-│   ├── components/
-│   │   ├── ui/                         # Shared UI primitives
-│   │   │   ├── Button.tsx/css          # Shared button (variants: primary/secondary/danger/ghost/icon)
-│   │   │   ├── Input.tsx               # Shared text input (forwardRef, error prop)
-│   │   │   ├── Select.tsx              # Shared select dropdown (options array)
-│   │   │   ├── FormField.tsx           # Label + children wrapper
-│   │   │   ├── CheckboxGroup.tsx       # 2-column checkbox grid
-│   │   │   ├── Modal.tsx               # Shared modal shell (overlay, close, escape, sizes sm/md/lg/xl)
-│   │   │   └── ui.css                  # Consolidated input/select/checkbox/field styles
-│   │   ├── AvatarPreview.tsx           # Full-body seated avatar SVG preview
-│   │   ├── ProfileForm.tsx/css         # Shared profile editing form (used by modal + account page)
-│   │   ├── ParallaxBackground.tsx/css  # Layered parallax with mouse tracking
-│   │   ├── Campfire.tsx/css            # Animated CSS campfire (flames, embers, smoke, logs, stones)
-│   │   ├── CamperAvatar.tsx/css        # SVG illustrated person seated around fire
-│   │   ├── CampsiteItems.tsx           # SVG art: TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG
-│   │   ├── InteractableItem.tsx/css    # Hoverable/clickable campsite object with glow + tooltip
-│   │   ├── GearModal.tsx/css            # Equipment & gear management modal (checklist per owner)
-│   │   ├── GearPacksPanel.tsx/css      # Collapsible gear pack browser (preview, scale, apply)
-│   │   ├── MealPlanModal.tsx/css       # Meal plan modal — overview, recipe book, shopping list
-│   │   ├── AssignmentsModal.tsx/css    # Tent & canoe group assignments modal
-│   │   ├── ComingSoonModal.tsx         # Themed "not ready" modal with flavor text
-│   │   ├── AddMemberModal.tsx          # Form modal to invite member by email
-│   │   ├── Modal.css                   # Shared modal styles (parchment aesthetic)
-│   │   ├── activityladder/             # Activity ladder components
-│   │   │   ├── LadderPeoplePanel.tsx/css # People sidebar: voters + spectators, online/offline + voted indicators
-│   │   │   ├── MatchupDisplay.tsx/css   # Current matchup with two activity cards
-│   │   │   └── VoteProgress.tsx/css     # "N of M voted" progress bar
-│   │   └── ProtectedRoute.tsx          # Auth guard (redirect to /login)
-│   ├── pages/
-│   │   ├── LoginPage.tsx/css           # Login/register with night-sky parallax
-│   │   ├── HomePage.tsx/css            # Trip list with dusk parallax, flag trail markers
-│   │   ├── PlanPage.tsx/css            # THE CENTERPIECE — campsite scene
-│   │   ├── RecipesPage.tsx/css         # Recipe book — list, detail, create, import, review
-│   │   ├── LadderListPage.tsx/css      # Activity ladder list page at `/activities` — all ladders with status badges
-│   │   ├── NewLadderPage.tsx/css       # Create ladder form at `/activities/new` — title + add/remove activities inline
-│   │   └── LadderPage.tsx/css          # Live ladder detail page at `/activities/:ladderId` — matchup display, voting, presence
-│   └── styles/
-│       ├── theme.css                   # Design tokens (colors, typography, spacing, shadows)
-│       └── animations.css              # All @keyframes (fire, float, twinkle, fade, etc.)
+src/
+  main.tsx, router.tsx, theme.ts
+  api/         http.ts (request + ApiError), queryClient.ts, types.ts, one file per domain
+  auth/        AuthProvider, useAuth, RequireAuth, storage
+  components/  AppShell, TabBar, PageHeader, Sheet, SheetLink, useCloseSheet, Toast, Placeholder
+  lib/         historyIndex, safeNext, selectedPlan, toastStore, mealPlanSummary
+  pages/       sign-in, account, plans, shopping, recipes, ingredients
+  styles/      global.css (reset and body only)
 ```
 
-## Architecture
+## Conventions
 
-### Shared UI Components (`components/ui/`)
-All UI primitives are defined once and reused everywhere. Never create ad-hoc styled buttons, inputs, or modals.
-- **`Button`** — variants: `primary`, `secondary`, `danger`, `ghost`, `icon`. Sizes: `sm`, `md`, `lg`. Props: `loading`, `disabled`, `className`, standard HTML button attributes.
-- **`Input`** — styled text input with `forwardRef` and optional `error` prop. CSS class: `ui-input`.
-- **`Select`** — styled select with `options: {value, label}[]` and optional `placeholder`.
-- **`FormField`** — label + children wrapper. CSS classes: `form-field`, `form-field__label`.
-- **`CheckboxGroup`** — 2-column checkbox grid with `options`, `selected`, `onChange`.
-- **`Modal`** — shared modal shell with overlay, close button, escape-to-close. Sizes: `sm` (340px), `md` (420px, default), `lg` (600px), `xl` (860px). Props: `isOpen`, `onClose`, `title?`, `flavor?`, `size`, `closable` (default true), `className`.
-
-### Shared Constants (`lib/`)
-- `avatarConstants.ts` — `SKIN_COLORS`, `HAIR_COLORS`, `SHIRT_COLORS`, `PANTS_COLORS`, `FALLBACK_COLORS`
-- `profileConstants.ts` — `DIETARY_OPTIONS`, `EXPERIENCE_OPTIONS`
-
-### Shared Feature Components
-- **`AvatarPreview`** — full-body seated avatar SVG. Props: `avatar: AvatarResponse | null`, `size?: number`.
-- **`ProfileForm`** — shared profile editing form (trail name, experience, dietary, avatar preview + randomize, submit). Used by both `ProfileSetupModal` and `AccountPage`. Avatar randomize is preview-only (no persistence until save). Props: `user`, `onSave`, `submitLabel?`, `showEmail?`, `markProfileCompleted?`.
-- **`AppHeader`** — shared page header with logo, page title, user avatar, logout. Used by `PlanPage`, `AccountPage`, `HomePage`, `RecipesPage`.
-
-### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item` (includes `gearPackId`, `gearPackName`), `Assignment`, `AssignmentDetail`, `AssignmentMember`, `GearPackSummary`, `GearPackDetail`, `GearPackItem`, `ApplyGearPackResponse`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse` (id, recipeId, recipeName, recipeWebLink, baseServings, scaleFactor, isFullyPurchased, ingredients), `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
-- `request<T>()` helper auto-injects `X-User-Id` from localStorage
-- All methods return typed promises; throws on non-OK responses
-
-### Live Updates (`hooks/usePlanUpdates.ts`)
-- `usePlanUpdates(planId, onUpdate)` — connects to `/ws` via STOMP, subscribes to `/topic/plans/{planId}`
-- Calls `onUpdate({ resource, action })` when the server publishes a change notification
-- Reconnects automatically on disconnect (5s delay)
-- PlanPage routes updates by resource type: `plan`/`members` → refetch plan & members immediately; `assignments` → increment `assignmentsRefreshKey`; `itinerary` → increment `itineraryRefreshKey`
-- AssignmentsModal and ItineraryModal accept a `refreshKey` prop — when it increments while the modal is open, they refetch their data
-- Items are not live-updated (modals refetch on open)
-
-### Auth (`context/AuthContext.tsx`)
-- `AuthProvider` wraps app — stores user in state + localStorage
-- `useAuth()` hook: `{ user, login, logout, isAuthenticated }`
-- `ProtectedRoute` redirects unauthenticated users to `/login`
-
-### Pages
-- **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`. If sign-in fails because user has no username, auto-switches to Register tab with error message.
-- **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
-- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealPlanModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (edit plan name + toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others. Pending (invited but not registered) members show their email address. Campfire circle radius scales dynamically with member count to prevent avatar overlap.
-  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists scoped to the current plan, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists. **Gear Packs:** A collapsible `GearPacksPanel` at the top of shared gear lets owners/managers browse predefined gear templates, preview items with quantity scaling by group size, and apply packs to bulk-add items.
-  - **MealPlanModal** — Fixed-height (88vh) three-view modal opened from the kitchen campsite item. Three tab views:
-    - **Overview:** Editable meal plan name (blur-to-save), servings-per-recipe stepper, save-as-template / load-from-template links. Day tabs (add/remove days). Four meal type sections (Breakfast, Lunch, Dinner, Snacks) each with inline recipe search-and-add and remove buttons. Empty state shows a create form with name input, servings stepper, and optional template loader with preview.
-    - **Recipe Book:** Open-book layout (left page: search + filter pills + scrollable recipe list; spine; right page: selected recipe detail with ingredients). "Add to Meal Plan" button pinned at bottom with day + meal type popover (pre-selects active day). Left and right pages scroll independently.
-    - **Shopping List:** Progress bar (X of Y purchased). Items grouped by ingredient category. Each row: checkbox toggle, ingredient name, quantity display, status badge (done/more needed/needed/removed). Merges multi-unit entries per ingredient. Reset purchases with confirmation.
-    - **Templates:** Save current meal plan as template. Load from template with day-by-day preview (grouped by meal type with icons). Loading a template replaces all days/recipes but preserves the existing meal plan name.
-  - **AssignmentsModal** — Fixed-height modal with two tabs (Tents / Canoes). Cards show assignment name, owner, occupancy bar, and member list with mini SVG avatar heads. Features: "Add Tent" / "Add Canoe" buttons (creator auto-added if not already in a group of that type); join (auto-leaves current group of same type); leave (including owner self-leave); owner/plan-owner "Add Member" panel showing available plan members with greyed-out entries for those already in another group of the same type; inline edit name/max occupancy; delete. Pending adventurers are filtered from the add-member list.
-- **RecipesPage** — Standalone page at `/recipes` with dusk parallax background. Multi-view single-page flow: `list`, `detail`, `create`, `edit`, `import`.
-  - **List view:** Searchable recipe cards (filter by name). Shows published and own draft recipes. "New Recipe" and "Import Recipe" buttons. Each card shows name, status badge (draft/published), base servings, and description snippet. Click to view detail.
-  - **Create view:** Form with name, description, optional web link, base servings, and ingredient picker. Ingredient picker is a search-as-you-type dropdown over the global ingredients list; each selected ingredient gets a quantity + unit row. Submits to `POST /api/recipes`.
-  - **Import view:** Single URL input. Submits to `POST /api/recipes/import` which scrapes the page and creates a draft recipe via Claude API. Redirects to detail view of the created draft.
-  - **Detail view:** Shows full recipe info. For draft recipes, the creator sees a review panel for any `pending_review` ingredients. Each pending ingredient shows `originalText`, suggested match info, and three resolve actions: confirm match, select existing ingredient (search dropdown), or create new ingredient (name + category + unit form). After all ingredients are resolved and no duplicate flag, a "Publish" button appears. Duplicate recipes show a banner with "Not a duplicate" / "Use existing" resolve options.
-  - **Edit view:** Form to update name, description, base servings. Submits to `PUT /api/recipes/{id}`.
-  - Loads all ingredients on mount alongside recipe list (`GET /api/ingredients`) so the ingredient picker is immediately available.
-
-### Visual Design System
-- **Palette:** Defined in `theme.css` as CSS variables (`--lavender`, `--sage`, `--tan`, `--rose`, `--mint`, `--ember`, `--flame`, `--night-sky`, `--parchment`, etc.)
-- **Parallax:** Three variants (`night`, `dusk`, `campsite`) with mouse-tracked layer offsets via CSS custom properties
-- **Campfire:** Multi-layered CSS (outer/mid/inner/core flames) + ember particles + smoke + log/stone ring
-- **Campsite Items:** Pure SVG components for tent, equipment pile, kitchen, map table
-- **Avatars:** SVG-illustrated people with randomized pastel colors, positioned in a semicircle around campfire using trigonometry. Circle radius scales dynamically (15% per member beyond 4) to prevent overlap
-- **Modals:** Parchment-textured with category-specific flavor text
-
-## API Endpoints Used
-
-All calls go through Vite proxy (`/api` → `localhost:8080`).
-
-| Method | Endpoint | Auth | Used By |
-|--------|----------|------|---------|
-| POST | `/api/auth` | No | LoginPage (sign in) |
-| POST | `/api/users` | No | LoginPage (register) |
-| GET | `/api/plans` | X-User-Id | HomePage |
-| POST | `/api/plans` | X-User-Id | HomePage (create trip) |
-| GET | `/api/plans/:id/members` | X-User-Id | PlanPage |
-| PUT | `/api/plans/:id` | X-User-Id | PlanPage (update name/visibility) |
-| POST | `/api/plans/:id/members` | X-User-Id | PlanPage (invite), HomePage (join) |
-| DELETE | `/api/plans/:id/members/:memberId` | X-User-Id | PlanPage (leave/remove), HomePage (leave) |
-| GET | `/api/items?ownerType=&ownerId=&planId=` | X-User-Id | GearModal (list items; planId scopes personal items) |
-| POST | `/api/items` | X-User-Id | GearModal (create item) |
-| PUT | `/api/items/:id` | X-User-Id | GearModal (update item) |
-| DELETE | `/api/items/:id` | X-User-Id | GearModal (delete item) |
-| GET | `/api/gear-packs` | X-User-Id | GearPacksPanel (list packs) |
-| GET | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (preview pack items) |
-| POST | `/api/gear-packs` | X-User-Id | GearPacksPanel (create pack) |
-| PUT | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (edit pack) |
-| DELETE | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (delete pack) |
-| POST | `/api/gear-packs/:id/items` | X-User-Id | GearPacksPanel (add item to pack) |
-| PUT | `/api/gear-packs/:id/items/:itemId` | X-User-Id | GearPacksPanel (edit item) |
-| DELETE | `/api/gear-packs/:id/items/:itemId` | X-User-Id | GearPacksPanel (remove item) |
-| GET | `/api/gear-pack-items/search?q=` | X-User-Id | GearPacksPanel (search items) |
-| POST | `/api/gear-packs/:id/apply` | X-User-Id | GearPacksPanel (apply pack to plan) |
-| GET | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (list) |
-| GET | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (detail) |
-| POST | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (create) |
-| PUT | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (update) |
-| DELETE | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (delete) |
-| POST | `/api/plans/:id/assignments/:assignmentId/members` | X-User-Id | AssignmentsModal (add member) |
-| DELETE | `/api/plans/:id/assignments/:assignmentId/members/:userId` | X-User-Id | AssignmentsModal (remove member) |
-| PUT | `/api/plans/:id/assignments/:assignmentId/owner` | X-User-Id | AssignmentsModal (transfer ownership) |
-| GET | `/api/ingredients` | X-User-Id | RecipesPage (ingredient picker) |
-| GET | `/api/recipes` | X-User-Id | RecipesPage (list) |
-| POST | `/api/recipes` | X-User-Id | RecipesPage (create) |
-| POST | `/api/recipes/import` | X-User-Id | RecipesPage (import from URL) |
-| GET | `/api/recipes/:id` | X-User-Id | RecipesPage (detail) |
-| PUT | `/api/recipes/:id` | X-User-Id | RecipesPage (edit) |
-| DELETE | `/api/recipes/:id` | X-User-Id | RecipesPage (delete) |
-| PUT | `/api/recipes/:id/ingredients/:ingredientId` | X-User-Id | RecipesPage (resolve pending ingredient) |
-| PUT | `/api/recipes/:id/resolve-duplicate` | X-User-Id | RecipesPage (resolve duplicate flag) |
-| POST | `/api/recipes/:id/publish` | X-User-Id | RecipesPage (publish draft) |
-| GET | `/api/meal-plans?planId=` | X-User-Id | MealPlanModal (get meal plan for trip) |
-| GET | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (detail / template preview) |
-| POST | `/api/meal-plans` | X-User-Id | MealPlanModal (create) |
-| PUT | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (update name/servings) |
-| DELETE | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (delete) |
-| POST | `/api/meal-plans/:id/days` | X-User-Id | MealPlanModal (add day) |
-| DELETE | `/api/meal-plans/:id/days/:dayId` | X-User-Id | MealPlanModal (remove day) |
-| POST | `/api/meal-plans/:id/days/:dayId/recipes` | X-User-Id | MealPlanModal (add recipe to meal) |
-| DELETE | `/api/meal-plan-recipes/:id` | X-User-Id | MealPlanModal (remove recipe from meal) |
-| GET | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (shopping list) |
-| PATCH | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (update purchase) |
-| DELETE | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (reset purchases) |
-| GET | `/api/meal-plans/templates` | X-User-Id | MealPlanModal (list templates) |
-| POST | `/api/meal-plans/:id/save-as-template` | X-User-Id | MealPlanModal (save as template) |
-| POST | `/api/meal-plans/:id/copy-to-trip` | X-User-Id | MealPlanModal (load template) |
-| POST | `/api/ladders` | X-User-Id | NewLadderPage (create ladder) |
-| GET | `/api/ladders` | X-User-Id | LadderListPage (list ladders) |
-| GET | `/api/ladders/:id` | X-User-Id | LadderPage (ladder detail) |
-| POST | `/api/ladders/:id/activities` | X-User-Id | NewLadderPage / LadderPage (add activity; DRAFT only, creator only) |
-| DELETE | `/api/ladders/:id/activities/:activityId` | X-User-Id | NewLadderPage / LadderPage (remove activity; DRAFT only, creator only) |
-| POST | `/api/ladders/:id/start` | X-User-Id | LadderPage (start ladder; DRAFT only, creator only) |
-| POST | `/api/ladders/:id/vote` | X-User-Id | LadderPage (cast vote; ACTIVE only, eligible voter only) |
-| POST | `/api/ladders/:id/restart` | X-User-Id | LadderPage (restart ladder; creator only) |
-| GET | `/api/users/:userId/avatar` | X-User-Id | LadderPeoplePanel (fetch avatar for participant if needed) |
-
-## Activity Ladder Feature
-
-### Pages
-- **`LadderListPage` (`/activities`)** — Lists all ladders with status badges (DRAFT/ACTIVE/COMPLETED). Create new ladder CTA button.
-- **`NewLadderPage` (`/activities/new`)** — Create ladder form: title input, add/remove activities inline (name, imageUrl, distanceMinutes, costPerPerson fields). Submit creates ladder in DRAFT status.
-- **`LadderPage` (`/activities/:ladderId`)** — Live ladder detail:
-  - **DRAFT (creator):** Activity list with add/remove, "Start Ladder" button, people panel.
-  - **DRAFT (non-creator):** Activity list (read-only), people panel, waiting message.
-  - **ACTIVE (voter, not voted):** Current matchup display (two activity cards), vote buttons, progress bar (N of M voted), final-round/reset banners, people panel, creator's restart button.
-  - **ACTIVE (voter, voted):** Same matchup (voting locked), progress, people panel, creator's restart button.
-  - **ACTIVE (spectator):** Matchup, progress, "You are watching" message, people panel.
-  - **COMPLETED:** Winning activity highlighted, people panel, creator's restart button available.
-
-### Components
-- **`LadderPeoplePanel`** — Sidebar showing:
-  - **DRAFT:** Single section "In the room" with all connected users (from `useLadderUpdates`).
-  - **ACTIVE/COMPLETED:** Two sections: Voters (from `ladder_participants`, with online/offline + voted indicators), Watching (currently connected spectators, no persistence).
-  - Reuses `AvatarHead` (compact variant) for avatars, not full `CamperAvatar`.
-  - Updates live via presence-changed and vote events.
-  
-- **`MatchupDisplay`** — Shows two current-match activities as side-by-side cards:
-  - Activity name, image, distanceMinutes, costPerPerson (purely informational).
-  - Vote buttons (A/B) if voter has not voted; buttons disabled if already voted.
-  
-- **`VoteProgress`** — Displays "N of M voted" with progress bar. Updates as votes arrive.
-
-### Live Updates Hook
-- **`useLadderUpdates(ladderId, onUpdate)`** — Connects to `/ws` via STOMP, subscribes to `/topic/ladders/{ladderId}` with `X-User-Id` in STOMP `connectHeaders` (required for server to associate session with user).
-  - Receives: `presence-changed`, `started`, `round-resolved`, `round-started`, `completed`, `restarted`.
-  - Frontend subscribes and refetches ladder detail + participants on most events.
-  - Vote progress updates incrementally on each vote event (no full refetch needed).
-
-### API Namespace (`api.ladders`)
-- `createLadder(title, activities)` — POST /api/ladders
-- `getLadderList()` — GET /api/ladders
-- `getLadderDetail(id)` — GET /api/ladders/{id}
-- `addActivity(ladderId, name, imageUrl, distanceMinutes, costPerPerson)` — POST /api/ladders/{id}/activities
-- `removeActivity(ladderId, activityId)` — DELETE /api/ladders/{id}/activities/{activityId}
-- `startLadder(ladderId)` — POST /api/ladders/{id}/start
-- `castVote(ladderId, votedForActivityId)` — POST /api/ladders/{id}/vote
-- `restartLadder(ladderId)` — POST /api/ladders/{id}/restart
-
-### Key Implementation Notes
-- **Avatar resolution:** `LadderParticipantResponse` carries `avatarSeed?`. Frontend fetches full avatar on-demand via `api.getAvatar(userId)` if seed is present (causes N HTTP round-trips for N participants). Consider caching fetched avatars in component state.
-- **First render bug fix:** `useEffect` for avatar fetching must run AFTER the participant list is populated; don't pre-seed with `avatar: null` in initial state.
-- **Validation fix:** Create form must check `name.trim()`, `imageUrl.trim()`, and numeric fields for negative values.
+- **Every screen state has a URL.** Sheets are child routes rendered through the parent page's `<Outlet/>`. Never open a sheet or dialog from local state.
+- **Sheets** use `components/Sheet` and close through `useCloseSheet(parentPath)`, which goes back when there is in-app history and replaces to the parent otherwise. Content portalled outside the app tree must be wrapped in a nested `<Theme>` or the Radix tokens do not apply.
+- **API calls** go through `api/http.ts`. Callers only ever see `ApiError { status, code, message }` (network failure is `status 0`, code `NETWORK`). Branch on status or code, never on message text.
+- **Errors** surface through the global mutation error toast. Optimistic mutations that show their own message set `meta: { suppressErrorToast: true }`.
+- **Optimistic updates** for predictable actions (check-off, quick add, add or remove recipe from a plan, rename, servings): edit the cache, roll back on error, invalidate on settle. Creating or importing recipes, creating ingredients and publishing wait for the server.
+- **Identity** is the `X-User-Id` header, read from auth storage on each request. All localStorage access is wrapped in try/catch.
+- **Mobile first:** design for 360 to 430px, no horizontal scroll, 44px touch targets, safe-area insets. Desktop centres a max-width column.
+- **Types:** `verbatimModuleSyntax` is on, so type-only imports use `import type`.
+- **Tests:** none are being written for this rewrite. The existing `lib/mealPlanSummary.test.ts` must keep passing.
 
 ## Running
 
 ```bash
-# Dev (requires API running on :8080)
-npm run dev        # → http://localhost:3000
-
-# Build (canonical type-check gate)
-npm run build      # → dist/
-```
-
-## Testing
-
-```bash
-# Run tests once (for CI)
+npm run dev     # http://localhost:3000, proxies /api and /ws to localhost:8080
+npm run build   # authoritative type-check gate (tsc -b + vite build)
+npm run lint
 npm run test
-
-# Run tests in watch mode (for development)
-npm run test:watch
 ```
-
-Test files use Vitest and are co-located with source code using `.test.ts` / `.test.tsx` suffix. The test runner is configured with `environment: 'node'` (appropriate for pure functions; component tests would use `jsdom`).
-
-**Important:** `npm run build` is the authoritative type-check gate, not `npx tsc --noEmit`. The build runs `tsc -b` which enforces `verbatimModuleSyntax`, whereas `--noEmit` does not. Always use `npm run build` for final verification.
-
-## Conventions
-
-- **No UI framework** — all styling is custom CSS with CSS variables
-- **Shared UI components** — all buttons, inputs, selects, modals, and form fields use shared primitives from `components/ui/`. Never create ad-hoc styled versions.
-- **Shared constants** — color maps and option arrays live in `lib/`. Never duplicate in component files.
-- **SVG art** — all illustrations are inline SVG, no external image files
-- **Animations** — CSS-only (keyframes in animations.css), no JS animation libraries
-- **Component pattern:** Each visual component has co-located `.tsx` + `.css` files
-- **Modals** use `<Modal>` from `components/ui/Modal` for overlay, close button, escape-to-close. `Modal.css` provides base parchment styling. Custom modal CSS should only add layout (flex, height, overflow), not re-declare background/border/shadow.
-- **Pages** use `<AppHeader>` for the header — never create custom headers
-- **Avatar randomize** is preview-only — the `randomizeAvatar` endpoint returns a preview without persisting. The seed is saved when the profile form is submitted via `updateUser`.
-- **Parallax** uses CSS `calc()` with `--mouse-x`/`--mouse-y` custom properties set via JS mousemove listener
