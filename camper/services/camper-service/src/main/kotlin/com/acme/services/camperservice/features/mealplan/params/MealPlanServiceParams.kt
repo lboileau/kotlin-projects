@@ -43,6 +43,12 @@ data class DeleteMealPlanParam(
     val userId: UUID
 )
 
+data class DuplicateMealPlanParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val name: String?
+)
+
 data class CopyToTripParam(
     val mealPlanId: UUID,
     val userId: UUID,
@@ -79,6 +85,18 @@ data class AddRecipeToMealParam(
 data class RemoveRecipeFromMealParam(
     val mealPlanRecipeId: UUID,
     val userId: UUID
+)
+
+data class AddRecipeToPlanParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val recipeId: UUID
+)
+
+data class RemoveRecipeFromPlanParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val recipeId: UUID
 )
 
 data class GetShoppingListParam(

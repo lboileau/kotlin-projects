@@ -259,6 +259,7 @@ internal class GetShoppingListAction(
         return Result.Success(
             ShoppingListResponse(
                 mealPlanId = mealPlan.id,
+                mealPlanName = mealPlan.name,
                 servings = mealPlan.servings,
                 scalingMode = mealPlan.scalingMode,
                 totalItems = allItems.size,

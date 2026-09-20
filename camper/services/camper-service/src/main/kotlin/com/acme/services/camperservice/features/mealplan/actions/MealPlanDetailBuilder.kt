@@ -86,7 +86,8 @@ internal object MealPlanDetailBuilder {
         )
     }
 
-    private fun buildRecipeDetail(
+    /** Also used by [com.acme.services.camperservice.features.mealplan.actions.AddRecipeToPlanAction] to build an accurate detail for an already-present recipe. */
+    internal fun buildRecipeDetail(
         mpr: MealPlanRecipe,
         mealPlan: MealPlan,
         scalingMode: ScalingMode,
@@ -150,7 +151,7 @@ internal object MealPlanDetailBuilder {
         )
     }
 
-    private fun computeScaleFactor(servings: Int, baseServings: Int, scalingMode: ScalingMode): BigDecimal {
+    internal fun computeScaleFactor(servings: Int, baseServings: Int, scalingMode: ScalingMode): BigDecimal {
         val ratio = BigDecimal(servings).divide(BigDecimal(baseServings), 10, RoundingMode.HALF_UP)
         return when (scalingMode) {
             ScalingMode.FRACTIONAL -> ratio

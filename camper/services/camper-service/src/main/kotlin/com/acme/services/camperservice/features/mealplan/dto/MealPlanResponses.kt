@@ -14,7 +14,8 @@ data class MealPlanResponse(
     val sourceTemplateId: UUID?,
     val createdBy: UUID,
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    val recipeCount: Int,
 )
 
 data class MealPlanDetailResponse(
@@ -67,6 +68,7 @@ data class MealPlanIngredientResponse(
 
 data class ShoppingListResponse(
     val mealPlanId: UUID,
+    val mealPlanName: String,
     val servings: Int,
     val scalingMode: String,
     val totalItems: Int,

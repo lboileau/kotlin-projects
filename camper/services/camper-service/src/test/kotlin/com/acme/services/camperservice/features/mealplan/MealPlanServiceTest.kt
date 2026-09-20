@@ -61,6 +61,7 @@ class MealPlanServiceTest {
             createdBy = userId,
             createdAt = Instant.now(),
             updatedAt = Instant.now(),
+            recipeCount = 0,
         )
         fakeMealPlanClient.seed(mealPlan)
         return mealPlan

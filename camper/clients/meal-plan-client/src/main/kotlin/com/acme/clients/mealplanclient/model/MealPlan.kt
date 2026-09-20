@@ -14,4 +14,6 @@ data class MealPlan(
     val createdBy: UUID,
     val createdAt: Instant,
     val updatedAt: Instant,
+    /** Number of distinct recipes across all days of this plan. */
+    val recipeCount: Int,
 )

@@ -30,6 +30,7 @@ class FakeMealPlanClient : MealPlanClient {
     private val recipes = ConcurrentHashMap<UUID, MealPlanRecipe>()
     private val purchases = ConcurrentHashMap<UUID, ShoppingListPurchase>()
     private val manualItems = ConcurrentHashMap<UUID, ShoppingListManualItem>()
+    private val addRecipeToPlanLock = Any()
 
     private val validateCreate = ValidateCreateMealPlan()
     private val validateUpdate = ValidateUpdateMealPlan()
@@ -60,6 +61,7 @@ class FakeMealPlanClient : MealPlanClient {
             createdBy = param.createdBy,
             createdAt = Instant.now(),
             updatedAt = Instant.now(),
+            recipeCount = 0,
         )
         mealPlans[entity.id] = entity
         return success(entity)
@@ -67,19 +69,24 @@ class FakeMealPlanClient : MealPlanClient {
 
     override fun getById(param: GetByIdParam): Result<MealPlan, AppError> {
         val entity = mealPlans[param.id]
-        return if (entity != null) success(entity) else failure(NotFoundError("MealPlan", param.id.toString()))
+        return if (entity != null) success(withRecipeCount(entity)) else failure(NotFoundError("MealPlan", param.id.toString()))
     }
 
     override fun getByPlanId(param: GetByPlanIdParam): Result<MealPlan?, AppError> {
-        return success(mealPlans.values.find { it.planId == param.planId })
+        return success(mealPlans.values.find { it.planId == param.planId }?.let { withRecipeCount(it) })
     }
 
     override fun getTemplates(): Result<List<MealPlan>, AppError> {
-        return success(mealPlans.values.filter { it.isTemplate }.sortedBy { it.name })
+        return success(mealPlans.values.filter { it.isTemplate }.sortedBy { it.name }.map { withRecipeCount(it) })
     }
 
     override fun getByCreatedBy(param: GetByCreatedByParam): Result<List<MealPlan>, AppError> {
-        return success(mealPlans.values.filter { it.createdBy == param.createdBy }.sortedByDescending { it.updatedAt })
+        return success(
+            mealPlans.values
+                .filter { it.createdBy == param.createdBy }
+                .sortedByDescending { it.updatedAt }
+                .map { withRecipeCount(it) }
+        )
     }
 
     override fun update(param: UpdateMealPlanParam): Result<MealPlan, AppError> {
@@ -94,7 +101,63 @@ class FakeMealPlanClient : MealPlanClient {
             updatedAt = Instant.now(),
         )
         mealPlans[param.id] = updated
-        return success(updated)
+        return success(withRecipeCount(updated))
+    }
+
+    override fun duplicate(param: DuplicateMealPlanParam): Result<MealPlan, AppError> {
+        val source = mealPlans[param.sourceMealPlanId]
+            ?: return failure(NotFoundError("MealPlan", param.sourceMealPlanId.toString()))
+
+        val newMealPlanId = UUID.randomUUID()
+        val now = Instant.now()
+
+        val sourceDays = days.values.filter { it.mealPlanId == source.id }
+        val dayIdMap = mutableMapOf<UUID, UUID>()
+        val newDays = sourceDays.map { day ->
+            val newDay = MealPlanDay(
+                id = UUID.randomUUID(),
+                mealPlanId = newMealPlanId,
+                dayNumber = day.dayNumber,
+                createdAt = now,
+                updatedAt = now,
+            )
+            dayIdMap[day.id] = newDay.id
+            newDay
+        }
+
+        val newRecipes = recipes.values
+            .filter { it.mealPlanDayId in dayIdMap.keys }
+            .map { mpr ->
+                MealPlanRecipe(
+                    id = UUID.randomUUID(),
+                    mealPlanDayId = dayIdMap.getValue(mpr.mealPlanDayId),
+                    mealType = mpr.mealType,
+                    recipeId = mpr.recipeId,
+                    createdAt = now,
+                    updatedAt = now,
+                )
+            }
+
+        val newMealPlan = MealPlan(
+            id = newMealPlanId,
+            planId = null,
+            name = param.name,
+            servings = source.servings,
+            scalingMode = source.scalingMode,
+            isTemplate = false,
+            sourceTemplateId = null,
+            createdBy = param.createdBy,
+            createdAt = now,
+            updatedAt = now,
+            recipeCount = 0,
+        )
+
+        // Commit all-or-nothing: everything above is computed before any map is mutated.
+        mealPlans[newMealPlan.id] = newMealPlan
+        newDays.forEach { days[it.id] = it }
+        newRecipes.forEach { recipes[it.id] = it }
+
+        return success(withRecipeCount(newMealPlan))
     }
 
     override fun delete(param: DeleteMealPlanParam): Result<Unit, AppError> {
@@ -189,6 +252,49 @@ class FakeMealPlanClient : MealPlanClient {
         val day = days[recipe.mealPlanDayId]
             ?: return failure(NotFoundError("MealPlanRecipe", param.mealPlanRecipeId.toString()))
         return success(day.mealPlanId)
+    }
+
+    override fun removeRecipeFromPlan(param: RemoveRecipeFromPlanParam): Result<Int, AppError> {
+        val dayIds = days.values.filter { it.mealPlanId == param.mealPlanId }.map { it.id }.toSet()
+        val toRemove = recipes.values.filter { it.mealPlanDayId in dayIds && it.recipeId == param.recipeId }.map { it.id }
+        toRemove.forEach { recipes.remove(it) }
+        return success(toRemove.size)
+    }
+
+    override fun addRecipeToPlanIfAbsent(param: AddRecipeToPlanIfAbsentParam): Result<Pair<MealPlanRecipe, Boolean>, AppError> {
+        // Mirrors the client's FOR UPDATE lock on the meal plan row: a single lock object serialises
+        // the whole check-and-insert so concurrent calls for the same plan cannot double-insert.
+        synchronized(addRecipeToPlanLock) {
+            if (!mealPlans.containsKey(param.mealPlanId)) {
+                return failure(NotFoundError("MealPlan", param.mealPlanId.toString()))
+            }
+
+            val dayIds = days.values.filter { it.mealPlanId == param.mealPlanId }.map { it.id }.toSet()
+            val existing = recipes.values.find { it.mealPlanDayId in dayIds && it.recipeId == param.recipeId }
+            if (existing != null) {
+                return success(existing to false)
+            }
+
+            val lowestDay = days.values.filter { it.mealPlanId == param.mealPlanId }.minByOrNull { it.dayNumber }
+                ?: MealPlanDay(
+                    id = UUID.randomUUID(),
+                    mealPlanId = param.mealPlanId,
+                    dayNumber = 1,
+                    createdAt = Instant.now(),
+                    updatedAt = Instant.now(),
+                ).also { days[it.id] = it }
+
+            val entity = MealPlanRecipe(
+                id = UUID.randomUUID(),
+                mealPlanDayId = lowestDay.id,
+                mealType = "dinner",
+                recipeId = param.recipeId,
+                createdAt = Instant.now(),
+                updatedAt = Instant.now(),
+            )
+            recipes[entity.id] = entity
+            return success(entity to true)
+        }
     }
 
     // --- Shopping List Purchases ---
@@ -294,6 +400,15 @@ class FakeMealPlanClient : MealPlanClient {
         }
         return success(Unit)
     }
+
+    // --- recipeCount is derived, never stored — recompute on every read, mirroring the SQL subselect ---
+
+    private fun computeRecipeCount(mealPlanId: UUID): Int {
+        val dayIds = days.values.filter { it.mealPlanId == mealPlanId }.map { it.id }.toSet()
+        return recipes.values.filter { it.mealPlanDayId in dayIds }.map { it.recipeId }.distinct().size
+    }
+
+    private fun withRecipeCount(mealPlan: MealPlan): MealPlan = mealPlan.copy(recipeCount = computeRecipeCount(mealPlan.id))
 
     // --- Test helpers ---
 

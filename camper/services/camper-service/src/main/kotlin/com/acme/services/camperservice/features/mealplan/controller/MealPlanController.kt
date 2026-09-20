@@ -120,6 +120,51 @@ class MealPlanController(
         return result.toResponseEntity(successStatus = 204) { }
     }
 
+    /** POST /api/meal-plans/{mealPlanId}/duplicate — Duplicate a meal plan (flat copy; no sync event) */
+    @PostMapping("/{mealPlanId}/duplicate")
+    fun duplicate(
+        @PathVariable mealPlanId: UUID,
+        @RequestHeader("X-User-Id") userId: UUID,
+        @RequestBody request: DuplicateMealPlanRequest
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/meal-plans/{}/duplicate", mealPlanId)
+        val param = DuplicateMealPlanParam(mealPlanId = mealPlanId, userId = userId, name = request.name)
+        return mealPlanService.duplicate(param).toResponseEntity(successStatus = 201) { it }
+    }
+
+    /** POST /api/meal-plans/{mealPlanId}/recipes — Plan-level add recipe (flat plans): lowest-numbered day, mealType dinner, idempotent */
+    @PostMapping("/{mealPlanId}/recipes")
+    fun addRecipeToPlan(
+        @PathVariable mealPlanId: UUID,
+        @RequestHeader("X-User-Id") userId: UUID,
+        @RequestBody request: AddRecipeToPlanRequest
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/meal-plans/{}/recipes", mealPlanId)
+        val param = AddRecipeToPlanParam(mealPlanId = mealPlanId, userId = userId, recipeId = request.recipeId)
+        return when (val result = mealPlanService.addRecipeToPlan(param)) {
+            is Result.Success -> {
+                val (detail, created) = result.value
+                if (created) eventPublisher.publishUpdate(mealPlanId, "meal-plan", "updated")
+                ResponseEntity.status(if (created) 201 else 200).body(detail)
+            }
+            is Result.Failure -> result.error.toResponseEntity()
+        }
+    }
+
+    /** DELETE /api/meal-plans/{mealPlanId}/recipes/{recipeId} — Plan-level remove recipe (flat plans): removes every occurrence, idempotent */
+    @DeleteMapping("/{mealPlanId}/recipes/{recipeId}")
+    fun removeRecipeFromPlan(
+        @PathVariable mealPlanId: UUID,
+        @PathVariable recipeId: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("DELETE /api/meal-plans/{}/recipes/{}", mealPlanId, recipeId)
+        val param = RemoveRecipeFromPlanParam(mealPlanId = mealPlanId, userId = userId, recipeId = recipeId)
+        val result = mealPlanService.removeRecipeFromPlan(param)
+        if (result is Result.Success && result.value > 0) eventPublisher.publishUpdate(mealPlanId, "meal-plan", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
+    }
+
     /** POST /api/meal-plans/{id}/copy-to-trip — Copy template to a trip */
     @PostMapping("/{id}/copy-to-trip")
     fun copyToTrip(

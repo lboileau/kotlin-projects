@@ -54,6 +54,7 @@ internal class CreateMealPlan(private val jdbi: Jdbi) {
                     createdBy = param.createdBy,
                     createdAt = now,
                     updatedAt = now,
+                    recipeCount = 0,
                 )
             }
             success(entity)

@@ -36,6 +36,13 @@ data class UpdateMealPlanParam(
 /** Parameter for deleting a meal plan by its unique identifier. */
 data class DeleteMealPlanParam(val id: UUID)
 
+/** Parameter for duplicating a meal plan (name, servings, scaling mode, days, and recipes). Purchases and manual items are not copied. */
+data class DuplicateMealPlanParam(
+    val sourceMealPlanId: UUID,
+    val name: String,
+    val createdBy: UUID,
+)
+
 // --- Day params ---
 
 /** Parameter for adding a day to a meal plan. */
@@ -70,6 +77,22 @@ data class RemoveRecipeParam(val id: UUID)
 
 /** Parameter for resolving the owning meal plan ID for a meal plan recipe entry. */
 data class GetMealPlanIdForRecipeParam(val mealPlanRecipeId: UUID)
+
+/** Parameter for removing every occurrence of a recipe from a meal plan (all days, all meal types) in one call. */
+data class RemoveRecipeFromPlanParam(
+    val mealPlanId: UUID,
+    val recipeId: UUID,
+)
+
+/**
+ * Parameter for atomically finding-or-creating a meal_plan_recipes row for (mealPlanId, recipeId).
+ * The whole check-and-insert (including finding/creating the lowest-numbered day) runs under a
+ * lock on the meal plan row, so concurrent calls for the same plan cannot double-insert the recipe.
+ */
+data class AddRecipeToPlanIfAbsentParam(
+    val mealPlanId: UUID,
+    val recipeId: UUID,
+)
 
 // --- Shopping list purchase params ---
 

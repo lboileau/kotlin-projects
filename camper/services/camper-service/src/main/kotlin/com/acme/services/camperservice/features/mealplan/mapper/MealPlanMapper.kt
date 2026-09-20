@@ -22,6 +22,7 @@ object MealPlanMapper {
         createdBy = mealPlan.createdBy,
         createdAt = mealPlan.createdAt,
         updatedAt = mealPlan.updatedAt,
+        recipeCount = mealPlan.recipeCount,
     )
 
     fun toMealPlanDayResponse(

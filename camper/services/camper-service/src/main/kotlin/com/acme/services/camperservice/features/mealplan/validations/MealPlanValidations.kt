@@ -52,6 +52,14 @@ internal class ValidateDeleteMealPlan {
     fun execute(param: DeleteMealPlanParam): Result<Unit, MealPlanError> = success(Unit)
 }
 
+internal class ValidateDuplicateMealPlan {
+    fun execute(param: DuplicateMealPlanParam): Result<Unit, MealPlanError> {
+        if (param.name != null && param.name.isBlank()) return Result.Failure(MealPlanError.Invalid("name", "must not be blank"))
+        if (param.name != null && param.name.length > 255) return Result.Failure(MealPlanError.Invalid("name", "must not exceed 255 characters"))
+        return success(Unit)
+    }
+}
+
 internal class ValidateCopyToTrip {
     fun execute(param: CopyToTripParam): Result<Unit, MealPlanError> {
         if (param.servings != null && param.servings <= 0) {
@@ -91,6 +99,14 @@ internal class ValidateAddRecipeToMeal {
 
 internal class ValidateRemoveRecipeFromMeal {
     fun execute(param: RemoveRecipeFromMealParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateAddRecipeToPlan {
+    fun execute(param: AddRecipeToPlanParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateRemoveRecipeFromPlan {
+    fun execute(param: RemoveRecipeFromPlanParam): Result<Unit, MealPlanError> = success(Unit)
 }
 
 internal class ValidateGetShoppingList {

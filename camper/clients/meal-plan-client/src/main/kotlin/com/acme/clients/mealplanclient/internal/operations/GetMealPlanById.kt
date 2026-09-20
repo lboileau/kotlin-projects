@@ -24,7 +24,8 @@ internal class GetMealPlanById(private val jdbi: Jdbi) {
         val entity = jdbi.withHandle<MealPlan?, Exception> { handle ->
             handle.createQuery(
                 """
-                SELECT id, plan_id, name, servings, scaling_mode, is_template, source_template_id, created_by, created_at, updated_at
+                SELECT id, plan_id, name, servings, scaling_mode, is_template, source_template_id, created_by, created_at, updated_at,
+                    (SELECT COUNT(DISTINCT mpr.recipe_id) FROM meal_plan_recipes mpr JOIN meal_plan_days d ON d.id = mpr.meal_plan_day_id WHERE d.meal_plan_id = meal_plans.id) AS recipe_count
                 FROM meal_plans WHERE id = :id
                 """.trimIndent()
             )

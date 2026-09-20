@@ -26,6 +26,14 @@ data class AddRecipeRequest(
     val recipeId: UUID
 )
 
+data class AddRecipeToPlanRequest(
+    val recipeId: UUID
+)
+
+data class DuplicateMealPlanRequest(
+    val name: String? = null
+)
+
 data class CopyToTripRequest(
     val planId: UUID,
     val servings: Int?

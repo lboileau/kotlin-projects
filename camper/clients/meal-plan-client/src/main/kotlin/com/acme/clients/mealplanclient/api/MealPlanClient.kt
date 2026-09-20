@@ -44,6 +44,13 @@ interface MealPlanClient {
     /** Delete a meal plan by its unique identifier. Cascades to days, recipes, and purchases. */
     fun delete(param: DeleteMealPlanParam): Result<Unit, AppError>
 
+    /**
+     * Duplicate a meal plan: copies name, servings, scaling mode, days (preserving day numbers),
+     * and meal_plan_recipes (preserving meal types). Does not copy purchases or manual items.
+     * The copy is never a template and is not bound to a trip. All-or-nothing (single transaction).
+     */
+    fun duplicate(param: DuplicateMealPlanParam): Result<MealPlan, AppError>
+
     // --- Days ---
 
     /** Add a numbered day to a meal plan. */
@@ -71,6 +78,16 @@ interface MealPlanClient {
 
     /** Resolve the owning meal plan ID for a meal plan recipe entry. Returns NotFoundError if not found. */
     fun getMealPlanIdForRecipe(param: GetMealPlanIdForRecipeParam): Result<UUID, AppError>
+
+    /** Remove every occurrence of a recipe from a meal plan (all days, all meal types) in one statement. Returns the number of rows removed (0 if none). */
+    fun removeRecipeFromPlan(param: RemoveRecipeFromPlanParam): Result<Int, AppError>
+
+    /**
+     * Atomically finds-or-creates a meal_plan_recipes row for (mealPlanId, recipeId), locking the
+     * meal plan row for the duration of the check-and-insert. Returns NotFoundError if the meal
+     * plan doesn't exist. Returns the row plus whether it was newly created (false = already present).
+     */
+    fun addRecipeToPlanIfAbsent(param: AddRecipeToPlanIfAbsentParam): Result<Pair<MealPlanRecipe, Boolean>, AppError>
 
     // --- Shopping List Purchases ---
 
