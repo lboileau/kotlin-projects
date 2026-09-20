@@ -14,3 +14,57 @@
   padding: 48px 24px;
   text-align: center;
 }
+
+.shopping-redirect__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+.shopping-redirect__hint {
+  margin: 0 0 2px;
+}
+
+/* Same card look as a plan on the Plans page. */
+.shopping-redirect__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 64px;
+  padding: 14px 16px;
+  border: none;
+  border-radius: var(--radius-4);
+  background: var(--accent-2);
+  color: var(--gray-12);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.shopping-redirect__row:hover {
+  background: var(--accent-3);
+}
+
+.shopping-redirect__row:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.shopping-redirect__row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.shopping-redirect__row-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
