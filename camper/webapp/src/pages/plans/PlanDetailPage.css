@@ -1,0 +1,115 @@
+.plan-detail-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.plan-detail-page__edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: var(--gray-12);
+  cursor: pointer;
+}
+
+.plan-detail-page__edit:hover {
+  background: var(--accent-3);
+}
+
+.plan-detail-page__edit:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.plan-detail-page__body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.plan-detail-page__servings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: var(--radius-4);
+  background: var(--accent-2);
+}
+
+.plan-detail-page__shopping-button {
+  width: 100%;
+}
+
+.plan-detail-page__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.plan-detail-page__recipes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-detail-page__recipe-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 10px 12px;
+  border-radius: var(--radius-4);
+  background: var(--accent-2);
+}
+
+.plan-detail-page__recipe-link {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  padding: 4px 0;
+}
+
+.plan-detail-page__recipe-name {
+  font-weight: 600;
+  color: var(--gray-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.plan-detail-page__recipe-link:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+  border-radius: var(--radius-2);
+}
+
+.plan-detail-page__empty-recipes {
+  padding: 24px 12px;
+  text-align: center;
+}
+
+.plan-detail-page__not-found {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.plan-detail-page__skeleton {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

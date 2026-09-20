@@ -1,65 +1,12 @@
-// Shared cross-domain response types. Meal-plan shapes live here for now
-// because `lib/mealPlanSummary.ts` needs them; they should move into
-// `api/mealPlans.ts` once that domain is built out (plan build order,
-// step 3/4) alongside the functions that fetch them.
-
-export interface MealPlanResponse {
-  id: string;
-  planId: string | null;
-  name: string;
-  servings: number;
-  scalingMode: string;
-  isTemplate: boolean;
-  sourceTemplateId: string | null;
-  createdBy: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface MealPlanDetailResponse {
-  id: string;
-  planId: string | null;
-  name: string;
-  servings: number;
-  scalingMode: string;
-  isTemplate: boolean;
-  sourceTemplateId: string | null;
-  createdBy: string;
-  days: MealPlanDayResponse[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface MealPlanDayResponse {
-  id: string;
-  dayNumber: number;
-  meals: MealsByTypeResponse;
-}
-
-export interface MealsByTypeResponse {
-  breakfast: MealPlanRecipeDetailResponse[];
-  lunch: MealPlanRecipeDetailResponse[];
-  dinner: MealPlanRecipeDetailResponse[];
-  snack: MealPlanRecipeDetailResponse[];
-}
-
-export interface MealPlanRecipeDetailResponse {
-  id: string;
-  recipeId: string;
-  recipeName: string;
-  recipeWebLink: string | null;
-  baseServings: number;
-  scaleFactor: number;
-  isFullyPurchased: boolean;
-  ingredients: MealPlanIngredientResponse[];
-}
-
-export interface MealPlanIngredientResponse {
-  recipeIngredientId: string;
-  ingredientId: string;
-  ingredientName: string;
-  category: string;
-  quantity: number;
-  scaledQuantity: number;
-  unit: string;
-}
+// Meal-plan response types now live in `api/mealPlans.ts`, alongside the
+// fetch functions that produce them. Re-exported here so
+// `lib/mealPlanSummary.ts` (and its test) don't need to change their
+// import path.
+export type {
+  MealPlanResponse,
+  MealPlanDetailResponse,
+  MealPlanDayResponse,
+  MealsByTypeResponse,
+  MealPlanRecipeDetailResponse,
+  MealPlanIngredientResponse,
+} from './mealPlans';

@@ -1,11 +1,299 @@
-import { Outlet } from 'react-router-dom';
-import { PlaceholderPage } from '../../components/Placeholder';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
+import { AlertDialog, Button, DropdownMenu, Progress, Skeleton, Text, TextField } from '@radix-ui/themes';
+import { ChevronDownIcon, DotsVerticalIcon, PersonIcon, PlusIcon } from '@radix-ui/react-icons';
+import { SheetLink } from '../../components/SheetLink';
+import { ApiError } from '../../api/http';
+import { usePlan } from '../../queries/plans';
+import {
+  useAddManualShoppingItem,
+  useRemoveManualShoppingItem,
+  useResetPurchases,
+  useShoppingList,
+  useToggleShoppingRow,
+} from '../../queries/shopping';
+import { buildShoppingRows, sortTier, type ShoppingRow } from '../../lib/shoppingRows';
+import { clearSelectedPlanId, getSelectedPlanId, setSelectedPlanId } from '../../lib/selectedPlan';
+import { useMealPlanSync } from '../../sync/useMealPlanSync';
+import { toast } from '../../lib/toastStore';
+import { ShoppingRowItem } from './ShoppingRowItem';
+import './ShoppingPage.css';
+
+function categoryLabel(category: string): string {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+function isTempRow(row: ShoppingRow): boolean {
+  return row.manualItemId?.startsWith('temp-') ?? false;
+}
 
 export function ShoppingPage() {
+  const { planId } = useParams<{ planId: string }>();
+  const navigate = useNavigate();
+  useMealPlanSync(planId);
+
+  const { data: plan } = usePlan(planId);
+  const { data: list, isLoading, isError, error } = useShoppingList(planId);
+
+  const toggleRow = useToggleShoppingRow(planId ?? '');
+  const addManualItem = useAddManualShoppingItem(planId ?? '');
+  const removeManualItem = useRemoveManualShoppingItem(planId ?? '');
+  const resetPurchases = useResetPurchases(planId ?? '');
+
+  const notFound = isError && error instanceof ApiError && error.status === 404;
+
+  useEffect(() => {
+    if (planId) setSelectedPlanId(planId);
+  }, [planId]);
+
+  useEffect(() => {
+    if (notFound && planId && getSelectedPlanId() === planId) clearSelectedPlanId();
+  }, [notFound, planId]);
+
+  const [quickAddText, setQuickAddText] = useState('');
+  const quickAddRef = useRef<HTMLInputElement>(null);
+  const [confirmingReset, setConfirmingReset] = useState(false);
+
+  // Keeps a just-toggled row from jumping to the bottom of its category
+  // instantly — it stays pinned at its pre-toggle tier for a bit, so the
+  // row that slides up to replace it doesn't absorb a second tap meant
+  // for something else. Re-tapping the same row while it's still pinned
+  // resets the timer but keeps the original pinned tier (not the tier it
+  // would have right now, which is mid-flight and not what's on screen).
+  const [pinnedTiers, setPinnedTiers] = useState<Map<string, number>>(new Map());
+  const settleTimersRef = useRef<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    const timers = settleTimersRef.current;
+    return () => {
+      for (const timer of timers.values()) window.clearTimeout(timer);
+      timers.clear();
+    };
+  }, []);
+
+  function pinRowBriefly(row: ShoppingRow) {
+    setPinnedTiers((current) => {
+      if (current.has(row.key)) return current;
+      const next = new Map(current);
+      next.set(row.key, sortTier(row));
+      return next;
+    });
+
+    const existingTimer = settleTimersRef.current.get(row.key);
+    if (existingTimer !== undefined) window.clearTimeout(existingTimer);
+
+    const timer = window.setTimeout(() => {
+      settleTimersRef.current.delete(row.key);
+      setPinnedTiers((current) => {
+        if (!current.has(row.key)) return current;
+        const next = new Map(current);
+        next.delete(row.key);
+        return next;
+      });
+    }, 600);
+    settleTimersRef.current.set(row.key, timer);
+  }
+
+  function handleToggle(row: ShoppingRow, checked: boolean) {
+    pinRowBriefly(row);
+    toggleRow.mutate({ row, checked });
+  }
+
+  function handleClearNoLongerNeeded(row: ShoppingRow) {
+    // No pin here: a cleared no_longer_needed row drops out of the list
+    // entirely (0 required / 0 purchased is filtered out), so there's no
+    // "wrong tier" to freeze against.
+    toggleRow.mutate({ row, checked: false });
+  }
+
+  function handleQuickAdd(event: FormEvent) {
+    event.preventDefault();
+    const text = quickAddText.trim();
+    if (!text) return;
+
+    setQuickAddText('');
+    addManualItem.mutate(text, {
+      // Only restore the failed text if the user hasn't already started
+      // typing the next item.
+      onError: () => setQuickAddText((current) => current || text),
+    });
+    quickAddRef.current?.focus();
+  }
+
+  function handleRemoveManual(manualItemId: string) {
+    removeManualItem.mutate(manualItemId);
+  }
+
+  function handleResetConfirmed() {
+    resetPurchases.mutate(undefined, {
+      onSuccess: () => toast.info('Purchases reset'),
+    });
+  }
+
+  if (notFound) {
+    return (
+      <div className="shopping-page">
+        <div className="shopping-page__not-found">
+          <Text size="4" weight="medium">
+            Plan not found
+          </Text>
+          <Text color="gray" size="2">
+            It may have been deleted, or the link is wrong.
+          </Text>
+          <Button asChild size="3" variant="solid">
+            <Link to="/plans">Back to Plans</Link>
+          </Button>
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  if (isLoading || !list) {
+    return (
+      <div className="shopping-page">
+        <div className="shopping-page__skeleton">
+          <Skeleton height="32px" />
+          <Skeleton height="56px" />
+          <Skeleton height="56px" />
+          <Skeleton height="56px" />
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  const groups = buildShoppingRows(list, pinnedTiers);
+  const isEmpty = groups.length === 0;
+  const progress = list.totalItems > 0 ? (list.fullyPurchasedCount / list.totalItems) * 100 : 0;
+
   return (
-    <>
-      <PlaceholderPage title="Shopping" />
+    <div className="shopping-page">
+      <header className="shopping-page__header">
+        <div className="shopping-page__header-top">
+          <SheetLink to="switch" className="shopping-page__plan-name">
+            <Text as="span" size="4" weight="bold" className="shopping-page__plan-name-text">
+              {plan?.name ?? 'Shopping'}
+            </Text>
+            <ChevronDownIcon />
+          </SheetLink>
+
+          <div className="shopping-page__header-actions">
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger>
+                <button type="button" className="shopping-page__icon-button" aria-label="More actions">
+                  <DotsVerticalIcon />
+                </button>
+              </DropdownMenu.Trigger>
+              <DropdownMenu.Content>
+                <DropdownMenu.Item onSelect={() => navigate(`/plans/${planId}`)}>View plan</DropdownMenu.Item>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Item
+                  color="red"
+                  onSelect={(event) => {
+                    event.preventDefault();
+                    setConfirmingReset(true);
+                  }}
+                >
+                  Reset all purchases
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
+            <Link to="/account" className="shopping-page__icon-button" aria-label="Account">
+              <PersonIcon />
+            </Link>
+          </div>
+        </div>
+
+        <div className="shopping-page__progress-row">
+          <Text size="1" color="gray">
+            {list.fullyPurchasedCount} of {list.totalItems}
+          </Text>
+          <Progress value={progress} size="1" className="shopping-page__progress-bar" />
+        </div>
+      </header>
+
+      {isEmpty ? (
+        <div className="shopping-page__empty">
+          <Text size="4" weight="medium">
+            Nothing to shop for yet
+          </Text>
+          <Text color="gray" size="2">
+            Add recipes to this plan to build a shopping list, or add items below.
+          </Text>
+          <Button asChild size="3" variant="solid">
+            <Link to={`/plans/${planId}/add`}>
+              <PlusIcon /> Add recipes
+            </Link>
+          </Button>
+        </div>
+      ) : (
+        <div className="shopping-page__body">
+          {groups.map((group) => (
+            <div key={group.category}>
+              <div className="shopping-page__category-header">
+                <Text size="2" weight="medium" className="shopping-page__category-title">
+                  {categoryLabel(group.category)}
+                </Text>
+                <Text size="1" color="gray">
+                  {group.rows.length}
+                </Text>
+              </div>
+              <div className="shopping-page__rows">
+                {group.rows.map((row) => (
+                  <ShoppingRowItem
+                    key={row.key}
+                    row={row}
+                    disabled={isTempRow(row)}
+                    onToggle={(checked) => handleToggle(row, checked)}
+                    onRemoveManual={row.source === 'manual' ? () => handleRemoveManual(row.manualItemId!) : undefined}
+                    onClearNoLongerNeeded={() => handleClearNoLongerNeeded(row)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <form onSubmit={handleQuickAdd} className="shopping-page__quick-add">
+        <TextField.Root
+          ref={quickAddRef}
+          value={quickAddText}
+          onChange={(event) => setQuickAddText(event.target.value)}
+          placeholder="Add an item…"
+          enterKeyHint="done"
+          autoCapitalize="sentences"
+          size="3"
+          className="shopping-page__quick-add-input"
+        />
+        <Button type="submit" size="3" variant="solid" disabled={!quickAddText.trim()} aria-label="Add item">
+          <PlusIcon />
+        </Button>
+      </form>
+
+      <AlertDialog.Root open={confirmingReset} onOpenChange={setConfirmingReset}>
+        <AlertDialog.Content maxWidth="400px">
+          <AlertDialog.Title>Reset all purchases?</AlertDialog.Title>
+          <AlertDialog.Description size="2">
+            This clears every checked-off item on this list. It can&apos;t be undone.
+          </AlertDialog.Description>
+          <div className="shopping-page__alert-actions">
+            <AlertDialog.Cancel>
+              <Button variant="soft" size="3">
+                Cancel
+              </Button>
+            </AlertDialog.Cancel>
+            <AlertDialog.Action>
+              <Button variant="solid" color="red" size="3" onClick={handleResetConfirmed} loading={resetPurchases.isPending}>
+                Reset
+              </Button>
+            </AlertDialog.Action>
+          </div>
+        </AlertDialog.Content>
+      </AlertDialog.Root>
+
       <Outlet />
-    </>
+    </div>
   );
 }
