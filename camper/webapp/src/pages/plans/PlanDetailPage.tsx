@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useParams } from 'react-router-dom';
-import { Badge, Button, IconButton, Separator, Skeleton, Text } from '@radix-ui/themes';
-import { Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+import { Badge, Button, IconButton, Separator, Text, TextField } from '@radix-ui/themes';
+import { ListBulletIcon, Pencil2Icon, PlusIcon, Share1Icon, TrashIcon } from '@radix-ui/react-icons';
+import { BottomBar } from '../../components/BottomBar';
+import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { Stepper } from '../../components/Stepper';
@@ -12,6 +14,7 @@ import { flattenMealPlan, type FlatPlanRecipe } from '../../lib/flatPlan';
 import { clearSelectedPlanId, getSelectedPlanId, setSelectedPlanId } from '../../lib/selectedPlan';
 import { toast } from '../../lib/toastStore';
 import { useMealPlanSync } from '../../sync/useMealPlanSync';
+import { useSharePlan } from './useSharePlan';
 import './PlanDetailPage.css';
 
 export function PlanDetailPage() {
@@ -19,6 +22,7 @@ export function PlanDetailPage() {
   useMealPlanSync(planId);
   const { data: plan, isLoading, isError, error, refetch } = usePlan(planId);
   const updatePlan = useUpdatePlan(planId ?? '');
+  const sharePlan = useSharePlan(planId, plan?.name);
   const addRecipe = useAddRecipeToPlan(planId);
   const removeRecipe = useRemoveRecipeFromPlan(planId);
 
@@ -171,11 +175,7 @@ export function PlanDetailPage() {
     return (
       <div className="plan-detail-page">
         <PageHeader title="Plan" backTo="/plans" />
-        <div className="plan-detail-page__skeleton" aria-busy="true" aria-label="Loading plan">
-          <Skeleton height="40px" aria-hidden="true" />
-          <Skeleton height="60px" aria-hidden="true" />
-          <Skeleton height="60px" aria-hidden="true" />
-        </div>
+        <PageLoader area="plans" label="Loading plan" />
         <Outlet />
       </div>
     );
@@ -189,11 +189,37 @@ export function PlanDetailPage() {
         title={plan.name}
         backTo="/plans"
         actions={
-          <SheetLink to="edit" className="plan-detail-page__edit" aria-label="Edit plan">
-            <Pencil2Icon />
-          </SheetLink>
+          <>
+            <button
+              type="button"
+              className="header-icon-button"
+              aria-label="Share plan"
+              disabled={sharePlan.isSharing}
+              onClick={() => void sharePlan.share()}
+            >
+              <Share1Icon />
+            </button>
+            <SheetLink to="edit" className="header-icon-button" aria-label="Edit plan">
+              <Pencil2Icon />
+            </SheetLink>
+          </>
         }
       />
+
+      {sharePlan.fallbackUrl && (
+        <div className="plan-detail-page__share-fallback">
+          <Text size="2" color="gray">
+            Copy this link to share the plan:
+          </Text>
+          <TextField.Root
+            value={sharePlan.fallbackUrl}
+            readOnly
+            size="3"
+            aria-label="Share link"
+            onFocus={(event) => event.currentTarget.select()}
+          />
+        </div>
+      )}
 
       <div className="plan-detail-page__body">
         <div className="plan-detail-page__servings-row">
@@ -251,6 +277,13 @@ export function PlanDetailPage() {
         </div>
       </div>
 
+      <BottomBar>
+        <Button asChild size="3" variant="solid" className="plan-detail-page__shopping-button">
+          <Link to={`/plans/${planId}/shopping`}>
+            <ListBulletIcon /> Shopping list
+          </Link>
+        </Button>
+      </BottomBar>
 
       <Outlet />
     </div>

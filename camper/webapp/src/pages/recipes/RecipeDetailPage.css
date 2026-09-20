@@ -16,20 +16,6 @@
   padding: 16px;
 }
 
-.recipe-detail-page__skeleton-line {
-  display: block;
-  height: 16px;
-  width: 60%;
-  border-radius: var(--radius-2);
-}
-
-.recipe-detail-page__skeleton-block {
-  display: block;
-  height: 160px;
-  width: 100%;
-  border-radius: var(--radius-4);
-}
-
 .recipe-detail-page__icon-button {
   min-width: 44px;
   min-height: 44px;

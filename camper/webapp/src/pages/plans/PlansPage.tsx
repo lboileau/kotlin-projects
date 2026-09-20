@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
-import { Badge, Button, Heading, Skeleton, Text } from '@radix-ui/themes';
+import { Badge, Button, Heading, Text } from '@radix-ui/themes';
 import { ChevronRightIcon, PlusIcon } from '@radix-ui/react-icons';
+import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
@@ -27,13 +28,7 @@ export function PlansPage() {
     <div className="plans-page">
       <PageHeader title="Plans" />
       <div className="plans-page__body">
-        {isLoading && (
-          <div aria-busy="true" aria-label="Loading plans">
-            <Skeleton className="plans-page__skeleton-row" aria-hidden="true" />
-            <Skeleton className="plans-page__skeleton-row" aria-hidden="true" />
-            <Skeleton className="plans-page__skeleton-row" aria-hidden="true" />
-          </div>
-        )}
+        {isLoading && <PageLoader area="plans" label="Loading plans" />}
 
         {!isLoading && isError && !hasData && (
           <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />

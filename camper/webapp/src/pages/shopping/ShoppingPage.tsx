@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
-import { AlertDialog, Button, DropdownMenu, Heading, Progress, Skeleton, Text, TextField } from '@radix-ui/themes';
+import { AlertDialog, Button, DropdownMenu, Heading, Progress, Text, TextField } from '@radix-ui/themes';
 import { ChevronDownIcon, DotsVerticalIcon, PersonIcon, PlusIcon } from '@radix-ui/react-icons';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
@@ -20,6 +20,8 @@ import { clearSelectedPlanId, getSelectedPlanId, setSelectedPlanId } from '../..
 import { useMealPlanSync } from '../../sync/useMealPlanSync';
 import { toast } from '../../lib/toastStore';
 import { ShoppingRowItem } from './ShoppingRowItem';
+import { PageLoader } from '../../components/PageLoader';
+import '../../components/PageHeader.css';
 import './ShoppingPage.css';
 
 function categoryLabel(category: string): string {
@@ -118,12 +120,7 @@ export function ShoppingPage() {
         <Heading as="h1" className="sr-only">
           Shopping
         </Heading>
-        <div className="shopping-page__skeleton" aria-busy="true" aria-label="Loading shopping list">
-          <Skeleton height="32px" aria-hidden="true" />
-          <Skeleton height="56px" aria-hidden="true" />
-          <Skeleton height="56px" aria-hidden="true" />
-          <Skeleton height="56px" aria-hidden="true" />
-        </div>
+        <PageLoader area="shopping" label="Loading shopping list" />
         <Outlet />
       </div>
     );
@@ -205,7 +202,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
           <div className="shopping-page__header-actions">
             <DropdownMenu.Root>
               <DropdownMenu.Trigger>
-                <button type="button" className="shopping-page__icon-button" aria-label="More actions">
+                <button type="button" className="header-icon-button" aria-label="More actions">
                   <DotsVerticalIcon />
                 </button>
               </DropdownMenu.Trigger>
@@ -223,7 +220,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
                 </DropdownMenu.Item>
               </DropdownMenu.Content>
             </DropdownMenu.Root>
-            <Link to="/account" className="shopping-page__icon-button" aria-label="Account">
+            <Link to="/account" className="header-icon-button" aria-label="Account">
               <PersonIcon />
             </Link>
           </div>

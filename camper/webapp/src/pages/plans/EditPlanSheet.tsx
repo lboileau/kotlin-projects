@@ -15,14 +15,13 @@ import {
   usePlan,
   usePlanMembers,
   useRemoveMember,
-  useShareLink,
   useUpdatePlan,
 } from '../../queries/plans';
 import type { MealPlanResponse } from '../../api/mealPlans';
 import { ApiError } from '../../api/http';
 import { useAuth } from '../../auth/useAuth';
 import { buildMealPlanSummary } from '../../lib/mealPlanSummary';
-import { buildShareUrl, sharePlanLink } from '../../lib/shareLink';
+import { useSharePlan } from './useSharePlan';
 import { clearSelectedPlanId, getSelectedPlanId } from '../../lib/selectedPlan';
 import { toast } from '../../lib/toastStore';
 import './EditPlanSheet.css';
@@ -34,8 +33,8 @@ export function EditPlanSheet() {
   const { user } = useAuth();
 
   const { data: plan, isError, error, refetch } = usePlan(planId);
+  const sharePlan = useSharePlan(planId, plan?.name);
   const members = usePlanMembers(planId);
-  const shareLink = useShareLink(planId);
   const updatePlan = useUpdatePlan(planId ?? '');
   const deletePlan = useDeletePlan();
   const duplicatePlan = useDuplicatePlan();
@@ -50,7 +49,6 @@ export function EditPlanSheet() {
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [confirmingLeave, setConfirmingLeave] = useState(false);
   const [confirmingRemoveUserId, setConfirmingRemoveUserId] = useState<string | null>(null);
-  const [shareFallbackUrl, setShareFallbackUrl] = useState<string | null>(null);
 
   const dirty = name.trim().length > 0 && name.trim() !== plan?.name;
   // Derived from the plan's own `role` field (never from comparing ids
@@ -110,22 +108,6 @@ export function EditPlanSheet() {
         sheet.close({ to: '/plans', replace: true });
       },
     });
-  }
-
-  async function handleShare() {
-    if (!planId || !plan) return;
-    setShareFallbackUrl(null);
-    const result = await shareLink.refetch();
-    if (!result.data) {
-      // 409: the plan belongs to a camping trip, which cannot be link-shared.
-      // The server's message says so; anything else gets the generic copy.
-      const shareError = result.error;
-      const conflict = shareError instanceof ApiError && shareError.status === 409;
-      toast.error(conflict ? shareError.message : "Couldn't get the share link.");
-      return;
-    }
-    const outcome = await sharePlanLink({ url: buildShareUrl(result.data.token), planName: plan.name });
-    if (outcome.fallbackUrl) setShareFallbackUrl(outcome.fallbackUrl);
   }
 
   function handleRemoveMember(userId: string) {
@@ -233,12 +215,12 @@ export function EditPlanSheet() {
             <Text as="span" size="2" weight="medium">
               Sharing
             </Text>
-            <Button variant="soft" size="3" onClick={() => void handleShare()} loading={shareLink.isFetching}>
+            <Button variant="soft" size="3" onClick={() => void sharePlan.share()} loading={sharePlan.isSharing}>
               <Link2Icon /> Share plan
             </Button>
-            {shareFallbackUrl && (
+            {sharePlan.fallbackUrl && (
               <TextField.Root
-                value={shareFallbackUrl}
+                value={sharePlan.fallbackUrl}
                 readOnly
                 size="2"
                 aria-label="Share link"

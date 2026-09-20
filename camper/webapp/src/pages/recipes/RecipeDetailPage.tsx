@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { AlertDialog, Badge, Button, Callout, Heading, IconButton, Skeleton, Text } from '@radix-ui/themes';
+import { AlertDialog, Badge, Button, Callout, Heading, IconButton, Text } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, ExternalLinkIcon, Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
@@ -52,11 +53,7 @@ export function RecipeDetailPage() {
     return (
       <div className="recipe-detail-page">
         <PageHeader title="Recipe" backTo="/recipes" />
-        <div className="recipe-detail-page__body">
-          <Skeleton className="recipe-detail-page__skeleton-line" />
-          <Skeleton className="recipe-detail-page__skeleton-line" />
-          <Skeleton className="recipe-detail-page__skeleton-block" />
-        </div>
+        <PageLoader area="recipes" label="Loading recipe" />
         <Outlet />
       </div>
     );

@@ -68,11 +68,6 @@
   row-gap: 4px;
 }
 
-.plans-page__skeleton-row {
-  height: 60px;
-  border-radius: var(--radius-4);
-}
-
 .plans-page__empty {
   flex: 1;
   display: flex;

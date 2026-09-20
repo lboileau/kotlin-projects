@@ -1,6 +1,7 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { Badge, Button, Skeleton, Text } from '@radix-ui/themes';
+import { Badge, Button, Text } from '@radix-ui/themes';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
+import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { usePlans } from '../../queries/plans';
@@ -36,12 +37,7 @@ function ChoosePlan() {
     <div className="shopping-redirect">
       <PageHeader title="Shopping" />
 
-      {isLoading && (
-        <div className="shopping-redirect__list" aria-busy="true" aria-label="Loading plans">
-          <Skeleton height="64px" aria-hidden="true" />
-          <Skeleton height="64px" aria-hidden="true" />
-        </div>
-      )}
+      {isLoading && <PageLoader area="shopping" label="Loading plans" />}
 
       {isError && !plans && <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />}
 

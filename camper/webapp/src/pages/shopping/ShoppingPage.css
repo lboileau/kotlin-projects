@@ -60,31 +60,8 @@
 .shopping-page__header-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   flex-shrink: 0;
-}
-
-.shopping-page__icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
-  color: var(--gray-12);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.shopping-page__icon-button:hover {
-  background: var(--accent-3);
-}
-
-.shopping-page__icon-button:focus-visible {
-  outline: 2px solid var(--accent-9);
-  outline-offset: 2px;
 }
 
 .shopping-page__progress-row {
@@ -139,13 +116,6 @@
   gap: 12px;
   padding: 48px 24px;
   text-align: center;
-}
-
-.shopping-page__skeleton {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .shopping-page__quick-add {

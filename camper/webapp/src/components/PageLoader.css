@@ -1,0 +1,56 @@
+.page-loader {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 32px 16px;
+  color: var(--accent-9);
+}
+
+.page-loader__icon path,
+.page-loader__icon rect {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: page-loader-draw 2.4s ease-in-out infinite;
+}
+
+/* The small inner marks follow the outline, in a lighter tone. */
+.page-loader__icon .page-loader__detail {
+  stroke: var(--accent-8);
+  animation-delay: 0.35s;
+}
+
+@keyframes page-loader-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0.35;
+  }
+  45%,
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-loader__icon path,
+  .page-loader__icon rect {
+    stroke-dashoffset: 0;
+    animation: page-loader-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes page-loader-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}

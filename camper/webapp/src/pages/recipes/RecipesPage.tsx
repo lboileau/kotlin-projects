@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Badge, Button, IconButton, Skeleton, Switch, Text, TextField } from '@radix-ui/themes';
+import { Badge, Button, IconButton, Switch, Text, TextField } from '@radix-ui/themes';
 import {
   Cross2Icon,
   DownloadIcon,
@@ -8,6 +8,7 @@ import {
   MagnifyingGlassIcon,
   PlusIcon,
 } from '@radix-ui/react-icons';
+import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
 import { QueryErrorState } from '../../components/QueryErrorState';
@@ -145,13 +146,7 @@ export function RecipesPage() {
       </div>
 
       <div className="recipes-page__list">
-        {isLoading && (
-          <div className="recipes-page__skeletons">
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} className="recipes-page__skeleton-row" />
-            ))}
-          </div>
-        )}
+        {isLoading && <PageLoader area="recipes" label="Loading recipes" />}
 
         {isError && !hasData && <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />}
 

@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Skeleton, Text, TextField } from '@radix-ui/themes';
+import { Button, Text, TextField } from '@radix-ui/themes';
 import { MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
+import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
 import { SheetLink } from '../../components/SheetLink';
@@ -87,13 +88,7 @@ export function IngredientsPage() {
       </div>
 
       <div className="ingredients-page__list">
-        {isLoading && (
-          <div className="ingredients-page__skeletons">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="ingredients-page__skeleton-row" />
-            ))}
-          </div>
-        )}
+        {isLoading && <PageLoader area="recipes" label="Loading ingredients" />}
 
         {isError && !hasData && <QueryErrorState message="Couldn't load ingredients." onRetry={() => void refetch()} />}
 
