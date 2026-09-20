@@ -18,9 +18,15 @@ src/
   main.tsx, router.tsx, theme.ts
   api/         http.ts (request + ApiError), queryClient.ts, types.ts, one file per domain
   auth/        AuthProvider, useAuth, RequireAuth, storage
-  components/  AppShell, TabBar, PageHeader, Sheet, SheetLink, useSheet, Toast, Placeholder
-  lib/         historyIndex, safeNext, selectedPlan, toastStore, mealPlanSummary
-  pages/       sign-in, account, plans, shopping, recipes, ingredients
+  queries/     TanStack Query hooks and keys: plans, shopping, recipes, ingredients
+  sync/        SyncProvider (one STOMP client), useMealPlanSync
+  components/  AppShell, TabBar, PageHeader, Sheet, SheetLink, useSheet, Toast, Stepper,
+               IngredientPicker, QueryErrorState, RouteFallback, RecipesIngredientsToggle
+  lib/         pure helpers: flatPlan, shoppingRows, parseQuantity, formatQuantity,
+               ingredientConstants, normalizeUrl, asyncPool, historyIndex, safeNext, selectedPlan,
+               toastStore, usePageTitle, mealPlanSummary
+  pages/       sign-in, account, plans, shopping, recipes, ingredients (each area has an
+               index.ts barrel that is one lazy chunk)
   styles/      global.css (reset and body only)
 ```
 
@@ -35,6 +41,34 @@ src/
 - **Mobile first:** design for 360 to 430px, no horizontal scroll, 44px touch targets, safe-area insets. Desktop centres a max-width column.
 - **Types:** `verbatimModuleSyntax` is on, so type-only imports use `import type`.
 - **Tests:** none are being written for this rewrite. The existing `lib/mealPlanSummary.test.ts` must keep passing.
+
+## Non-obvious decisions
+
+Things a reasonable refactor would undo by accident. Each is deliberate; read the why before changing it.
+
+- **Shopping check-off is serialized and coalesced per row** (`queries/shopping.ts`, `rowChains` / `rowLatestChecked`). Two PATCHes for one row can reach the server out of order (check then uncheck quickly). Each row's sends are chained, and a superseded tap sends nothing, so only the latest desired state goes out. The optimistic write in `onMutate` keeps the UI instant; the chain is only about network ordering.
+- **`isMutating(...) === 1`, not `=== 0`, gates the settle-time invalidation** (`invalidateIfLast` in `queries/shopping.ts`, and the check in `sync/useMealPlanSync.ts`). When a mutation's `onSettled` runs, TanStack Query still counts that mutation as in flight, so "I am the last one" is `1`.
+- **Rollbacks are targeted and applied to the current cache, never a whole-list snapshot** (`queries/shopping.ts`, `queries/plans.ts`). Restoring a pre-mutation snapshot would also wipe a different concurrent mutation that already succeeded.
+- **Adding a recipe to a plan shares one "resolve day 1" promise per plan** (`dayResolutionInFlight` in `queries/plans.ts`), so separate hook instances never race to create day 1; a 409 falls back to refetching and using the existing day. (Superseded once the plan-level add endpoint is adopted.)
+- **Optimistic rows with `temp-` ids are not actionable** until the real id lands (`PlanDetailPage.tsx` `isPendingOnly`, `ShoppingRowItem` `isTempRow`).
+- **Plan servings: 400ms debounce, flushed on unmount, override cleared only when nothing newer is queued** (`PlanDetailPage.tsx`). Displayed value is `override ?? server value`, with no effect-based sync.
+- **Shopping "settle pin": 600ms, and a re-tap resets the timer but not the pinned tier** (`ShoppingPage.tsx` `pinRowBriefly`). A just-toggled row stays where it is so the row sliding into its place cannot absorb the next tap.
+- **Live sync** (`sync/SyncProvider.tsx`, `sync/useMealPlanSync.ts`): one STOMP client, mounted in `AppShell` while signed in. Topic subscriptions are reference counted. On reconnect every subscribed topic gets a synthetic `null` message so handlers refetch. A message arriving while a mutation for that plan is in flight is deferred (300ms recheck), so the user's own echo never flickers their optimistic rows.
+- **Sheets close by history index, not `location.key`** (`lib/historyIndex.ts`, `components/useSheet.ts`). Any navigation, including `replace`, mints a fresh key, so a sign-in redirect chain looks like in-app navigation. `window.history.state.idx` survives `replace` and reloads.
+- **`useSheet(parentPath, options?)` is the only way to close a sheet.** `close()` goes back or replaces to the parent; `close({ to, replace })` closes then lands elsewhere; `canClose` / `onBlockedClose` refuse closing during async work (`ImportRecipeSheet`). The options are read through a ref synced in a no-deps effect because refs cannot be written during render.
+- **`Dialog.Portal` content is wrapped in a nested `<Theme hasBackground={false}>`** (`components/Sheet.tsx`). The portal renders into `document.body`, outside the root theme's DOM subtree, so tokens would not apply otherwise. Radix Themes' own `AlertDialog` and `DropdownMenu` handle this themselves.
+- **Radix CSS is imported modularly** (`main.tsx`): base tokens plus only the colour scales in use (violet, purple, iris, mauve, red, green, amber). A new `color="…"` anywhere needs a matching `tokens/colors/<name>.css` import or it silently renders wrong.
+- **Code splitting is per area, not per route.** Each `pages/{area}/index.ts` barrel is one lazy chunk, so opening a sheet never waits on the network. `routePrefetch.ts` idle-prefetches the other tab areas once from `AppShell`.
+- **Route-change focus relies on effect ordering** (`AppShell.tsx`): it focuses `<main>` only when nothing has claimed focus, and a sheet's autofocused input always claims it first because a descendant's mount focus precedes an ancestor's effect.
+- **Two toast live regions are always mounted** (`components/Toast.tsx`), polite for info and assertive for errors, because some screen readers only announce changes to a region that already existed.
+- **Quantities go through `lib/parseQuantity.ts`** ("1.5", "1,5", "1/2", "1 1/2", "1½"). Never `parseFloat`: it reads "1/2" as 1. Quantity fields use `inputmode="text"` because the iOS decimal pad has no slash.
+- **Scraper suggestions are normalised** (`normalizeCategory` / `normalizeUnit` in `lib/ingredientConstants.ts`) before any ingredient create; the database rejects values outside its fixed lists.
+- **`createOrFindIngredient` force-fetches the ingredient list and matches names case-insensitively before creating** (`queries/ingredients.ts`). The database's unique constraint is case-sensitive, so "butter" beside "Butter" raises no 409.
+- **`IngredientPicker` reads `value` / `initialQuery` only on mount.** Remount it with a changing `key` to reset it. Options select on `pointerdown` with `preventDefault` so the input's blur cannot swallow the tap. Enter inside the picker never submits the surrounding form.
+
+## Not yet verified in a browser
+
+Everything so far was checked by build, lint and code review only. Worth a manual pass: import blocked-close and back-button-during-import; animated close on create, duplicate and delete plan; STOMP reconnect; reduced-motion sheet close; the timing constants (400ms, 600ms, 180ms, 300ms); dynamic (non-literal) Radix colours against the modular CSS imports.
 
 ## Running
 
