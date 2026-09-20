@@ -69,7 +69,14 @@ export const router = createBrowserRouter([
               { path: 'add-to-plan', element: <AddToPlanSheet /> },
             ],
           },
-          { path: 'recipes/:recipeId/edit', element: <EditRecipePage /> },
+          {
+            path: 'recipes/:recipeId/edit',
+            element: <EditRecipePage />,
+            children: [
+              { path: 'lines/new', element: <AddLineSheet /> },
+              { path: 'lines/:lineId', element: <EditLineSheet /> },
+            ],
+          },
           {
             path: 'ingredients',
             element: <IngredientsPage />,

@@ -1,0 +1,30 @@
+.line-sheet__scraped {
+  margin-bottom: 12px;
+}
+
+.line-sheet__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.line-sheet__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.line-sheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.line-sheet__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.line-sheet__actions > * {
+  flex: 1;
+}

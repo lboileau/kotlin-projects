@@ -1,0 +1,11 @@
+.import-recipe-sheet__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.import-recipe-sheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
