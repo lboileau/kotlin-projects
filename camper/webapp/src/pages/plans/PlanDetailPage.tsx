@@ -89,7 +89,7 @@ export function PlanDetailPage() {
   function handleRemove(recipe: FlatPlanRecipe) {
     if (!planId) return;
     removeRecipe.mutate(
-      { planId, recipeId: recipe.recipeId, mealPlanRecipeIds: recipe.mealPlanRecipeIds },
+      { planId, recipeId: recipe.recipeId },
       {
         onSuccess: () => {
           toast.info(`Removed ${recipe.recipeName}`, {
@@ -208,7 +208,7 @@ export function PlanDetailPage() {
                 <div key={recipe.recipeId} className="plan-detail-page__recipe-row">
                   <Link to={`/recipes/${recipe.recipeId}`} className="plan-detail-page__recipe-link">
                     <span className="plan-detail-page__recipe-name">{recipe.recipeName}</span>
-                    <Badge variant="soft" size="1">
+                    <Badge variant="soft" size="1" className="plan-detail-page__recipe-badge">
                       serves {recipe.baseServings}
                     </Badge>
                   </Link>

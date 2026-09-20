@@ -9,17 +9,22 @@ import react from '@vitejs/plugin-react'
 // here keeps production chunk names readable for debugging.
 const ROUTE_AREAS = ['plans', 'shopping', 'recipes', 'ingredients', 'sign-in', 'account']
 
+// Overridable so the dev server can point at a different local backend
+// (e.g. a branch running on another port) without editing this file:
+// `VITE_API_TARGET=http://localhost:8081 npm run dev`.
+const API_TARGET = process.env.VITE_API_TARGET ?? 'http://localhost:8080'
+
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8080',
+        target: API_TARGET,
         changeOrigin: true,
       },
       '/ws': {
-        target: 'http://localhost:8080',
+        target: API_TARGET,
         ws: true,
       },
     },

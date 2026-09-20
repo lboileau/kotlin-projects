@@ -1,4 +1,4 @@
-import { request } from './http';
+import { request, requestWithStatus, type ResponseWithStatus } from './http';
 
 export interface MealPlanResponse {
   id: string;
@@ -9,6 +9,8 @@ export interface MealPlanResponse {
   isTemplate: boolean;
   sourceTemplateId: string | null;
   createdBy: string;
+  /** Distinct recipes in the plan, across every day/meal slot. */
+  recipeCount: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -94,21 +96,30 @@ export function deleteMealPlan(mealPlanId: string): Promise<void> {
   return request(`/api/meal-plans/${mealPlanId}`, { method: 'DELETE' });
 }
 
-/** POST /api/meal-plans/{id}/days */
-export function addMealPlanDay(mealPlanId: string, dayNumber: number): Promise<MealPlanDayResponse> {
-  return request(`/api/meal-plans/${mealPlanId}/days`, { method: 'POST', body: { dayNumber } });
-}
-
-/** POST /api/meal-plans/{id}/days/{dayId}/recipes */
-export function addRecipeToMeal(
+/**
+ * POST /api/meal-plans/{id}/recipes — server picks the plan's
+ * lowest-numbered day (creating day 1 first if the plan has none), meal
+ * type `dinner`, concurrency-safe. Status carries meaning here: `201`
+ * with a new entry, or `200` with the EXISTING entry when the recipe is
+ * already anywhere in the plan — callers use the status, not the body
+ * shape, to tell those apart (`requestWithStatus`, not `request`).
+ */
+export function addRecipeToPlan(
   mealPlanId: string,
-  dayId: string,
-  input: { mealType: MealType; recipeId: string },
-): Promise<MealPlanRecipeDetailResponse> {
-  return request(`/api/meal-plans/${mealPlanId}/days/${dayId}/recipes`, { method: 'POST', body: input });
+  recipeId: string,
+): Promise<ResponseWithStatus<MealPlanRecipeDetailResponse>> {
+  return requestWithStatus(`/api/meal-plans/${mealPlanId}/recipes`, { method: 'POST', body: { recipeId } });
 }
 
-/** DELETE /api/meal-plan-recipes/{mealPlanRecipeId} — note: not nested under /meal-plans. */
-export function removeRecipeFromMeal(mealPlanRecipeId: string): Promise<void> {
-  return request(`/api/meal-plan-recipes/${mealPlanRecipeId}`, { method: 'DELETE' });
+/** DELETE /api/meal-plans/{id}/recipes/{recipeId} — removes every occurrence of the recipe; idempotent. */
+export function removeRecipeFromPlan(mealPlanId: string, recipeId: string): Promise<void> {
+  return request(`/api/meal-plans/${mealPlanId}/recipes/${recipeId}`, { method: 'DELETE' });
+}
+
+/** POST /api/meal-plans/{id}/duplicate — atomic server-side copy (days + recipes; not purchases/manual items). Omit `name` for the server's default ("<source> copy"). */
+export function duplicateMealPlan(mealPlanId: string, name?: string): Promise<MealPlanResponse> {
+  return request(`/api/meal-plans/${mealPlanId}/duplicate`, {
+    method: 'POST',
+    body: name !== undefined ? { name } : {},
+  });
 }

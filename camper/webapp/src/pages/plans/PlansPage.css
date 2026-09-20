@@ -5,7 +5,13 @@
 }
 
 .plans-page__body {
-  padding: 12px 16px calc(96px + env(safe-area-inset-bottom));
+  /* flex: 1, not just padding, reserves room for the fab region below:
+     it grows to fill the column's height (from .plans-page's
+     min-height: 100%) so the fab region's own natural flow position
+     lands at the bottom of the screen even with only one or two plans,
+     not fixed clearance guessed as a pixel count. */
+  flex: 1;
+  padding: 12px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -68,14 +74,23 @@
   text-align: center;
 }
 
+/*
+ * Sticky, not fixed: `position: fixed` is relative to the viewport, which
+ * doesn't know about the app's centred max-width column (AppShell.css) —
+ * at desktop width that centred a box matching the column but computed
+ * independently of it, so any mismatch between the two put the button
+ * outside the column's actual right edge. A normal in-flow element,
+ * scoped to this column by ordinary layout, can't drift from it. Sticky
+ * (rather than static) keeps it visible while scrolling a long list; for
+ * a short one, `.plans-page__body`'s `flex: 1` above already puts it at
+ * the bottom of the screen without any scrolling needed.
+ */
 .plans-page__fab-region {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: calc(72px + env(safe-area-inset-bottom));
-  width: min(calc(100% - 32px), 640px);
+  position: sticky;
+  bottom: 16px;
   display: flex;
   justify-content: flex-end;
+  padding: 0 16px;
   pointer-events: none;
   z-index: 30;
 }

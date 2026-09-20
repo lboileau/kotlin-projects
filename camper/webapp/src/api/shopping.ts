@@ -29,6 +29,7 @@ export interface ShoppingListCategoryResponse {
 
 export interface ShoppingListResponse {
   mealPlanId: string;
+  mealPlanName: string;
   servings: number;
   scalingMode: string;
   totalItems: number;

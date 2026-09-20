@@ -8,6 +8,11 @@ import { usePlans } from '../../queries/plans';
 import { formatRelativeTime } from '../../lib/relativeTime';
 import './PlansPage.css';
 
+function recipeCountLabel(recipeCount: number): string {
+  if (recipeCount === 0) return 'No recipes yet';
+  return `${recipeCount} ${recipeCount === 1 ? 'recipe' : 'recipes'}`;
+}
+
 export function PlansPage() {
   const { data: plans, isLoading, isError, refetch } = usePlans();
   const hasPlans = !!plans && plans.length > 0;
@@ -59,6 +64,9 @@ export function PlansPage() {
                   <Badge variant="soft">
                     {plan.servings} {plan.servings === 1 ? 'serving' : 'servings'}
                   </Badge>
+                  <Text size="1" color="gray">
+                    {recipeCountLabel(plan.recipeCount)}
+                  </Text>
                   <Text size="1" color="gray">
                     Updated {formatRelativeTime(plan.updatedAt)}
                   </Text>

@@ -1,4 +1,4 @@
-import type { MealPlanDayResponse, MealPlanDetailResponse, MealPlanRecipeDetailResponse } from '../api/mealPlans';
+import type { MealPlanDetailResponse, MealPlanRecipeDetailResponse } from '../api/mealPlans';
 
 export const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const;
 
@@ -49,12 +49,6 @@ export function flattenMealPlan(detail: MealPlanDetailResponse): FlatPlanRecipe[
 /** The set of recipe ids already in the plan, for "already added" checks. */
 export function recipeIdsInPlan(detail: MealPlanDetailResponse): Set<string> {
   return new Set(flattenMealPlan(detail).map((recipe) => recipe.recipeId));
-}
-
-/** The lowest-numbered day, or null if the plan has none yet (needs one created). */
-export function getLowestDay(detail: MealPlanDetailResponse): MealPlanDayResponse | null {
-  if (detail.days.length === 0) return null;
-  return detail.days.reduce((lowest, day) => (day.dayNumber < lowest.dayNumber ? day : lowest));
 }
 
 /** The first occurrence of a recipe already in the plan, or null. Used to no-op a duplicate add. */

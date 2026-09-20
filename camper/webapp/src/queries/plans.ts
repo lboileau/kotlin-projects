@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  addMealPlanDay,
-  addRecipeToMeal,
+  addRecipeToPlan,
   createMealPlan,
   deleteMealPlan,
+  duplicateMealPlan,
   getMealPlanDetail,
   listMyMealPlans,
-  removeRecipeFromMeal,
+  removeRecipeFromPlan,
   updateMealPlan,
   type MealPlanDayResponse,
   type MealPlanDetailResponse,
@@ -15,8 +15,9 @@ import {
   type MealType,
 } from '../api/mealPlans';
 import { ApiError } from '../api/http';
+import type { ShoppingListResponse } from '../api/shopping';
 import { useAuth } from '../auth/useAuth';
-import { findRecipeInPlan, getLowestDay, MEAL_TYPES, type FlatPlanRecipe } from '../lib/flatPlan';
+import { findRecipeInPlan, MEAL_TYPES } from '../lib/flatPlan';
 
 export const plansKey = ['plans', 'mine'] as const;
 export const planKey = (planId: string) => ['plan', planId] as const;
@@ -51,15 +52,11 @@ export function usePlan(planId: string | undefined) {
   });
 }
 
-/** Create a plan, then its day 1 — not optimistic, the caller shows a loading button. */
+/** Create a plan — not optimistic, the caller shows a loading button. Day 1 is created lazily, server-side, on the first recipe add. */
 export function useCreatePlan() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { name: string; servings: number }) => {
-      const plan = await createMealPlan(input);
-      await addMealPlanDay(plan.id, 1);
-      return plan;
-    },
+    mutationFn: (input: { name: string; servings: number }) => createMealPlan(input),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: plansKey });
     },
@@ -94,14 +91,25 @@ export function useUpdatePlan(planId: string) {
         if (input.servings !== undefined) previousFields.servings = previousDetail.servings;
       }
 
+      // The shopping list's header shows the plan name from its own
+      // response (`mealPlanName`), not from the plan detail — captured
+      // separately (from the shopping cache itself, not `previousDetail`)
+      // so its rollback is targeted to exactly what this mutation wrote.
+      const previousMealPlanName = queryClient.getQueryData<ShoppingListResponse>(shoppingKey(planId))?.mealPlanName;
+
       queryClient.setQueryData<MealPlanDetailResponse>(planKey(planId), (current) =>
         current ? { ...current, ...input } : current,
       );
       queryClient.setQueryData<MealPlanResponse[]>(plansKey, (current) =>
         current ? current.map((plan) => (plan.id === planId ? { ...plan, ...input } : plan)) : current,
       );
+      if (input.name !== undefined) {
+        queryClient.setQueryData<ShoppingListResponse>(shoppingKey(planId), (current) =>
+          current ? { ...current, mealPlanName: input.name! } : current,
+        );
+      }
 
-      return { input, previousFields };
+      return { input, previousFields, previousMealPlanName };
     },
     onError: (_error, input, context) => {
       if (!context) return;
@@ -130,6 +138,12 @@ export function useUpdatePlan(planId: string) {
           return { ...plan, ...patch };
         });
       });
+      if (input.name !== undefined && context.previousMealPlanName !== undefined) {
+        queryClient.setQueryData<ShoppingListResponse>(shoppingKey(planId), (current) => {
+          if (!current || current.mealPlanName !== input.name) return current;
+          return { ...current, mealPlanName: context.previousMealPlanName! };
+        });
+      }
     },
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: planKey(planId) });
@@ -159,41 +173,6 @@ function emptyDay(dayNumber: number): MealPlanDayResponse {
   return { id: `temp-day-${dayNumber}`, dayNumber, meals: { breakfast: [], lunch: [], dinner: [], snack: [] } };
 }
 
-// Module-level (not per-hook-instance) so every useAddRecipeToPlan caller
-// for the same plan — the picker sheet, PlanDetailPage's Undo, a recipe's
-// "Add to plan" sheet — shares one in-flight "create day 1" request
-// instead of racing to create it themselves. Cleared once it settles.
-const dayResolutionInFlight = new Map<string, Promise<MealPlanDayResponse>>();
-
-async function createDayOne(planId: string): Promise<MealPlanDayResponse> {
-  try {
-    return await addMealPlanDay(planId, 1);
-  } catch (error) {
-    // Lost the race — someone else's day 1 already exists. Use it.
-    if (error instanceof ApiError && error.status === 409) {
-      const fresh = await getMealPlanDetail(planId);
-      const freshDay = getLowestDay(fresh);
-      if (freshDay) return freshDay;
-    }
-    throw error;
-  }
-}
-
-/** Resolves the plan's lowest day, serializing concurrent "no days yet" callers onto one request. */
-async function resolveLowestDay(planId: string, detail: MealPlanDetailResponse): Promise<MealPlanDayResponse> {
-  const existingDay = getLowestDay(detail);
-  if (existingDay) return existingDay;
-
-  let promise = dayResolutionInFlight.get(planId);
-  if (!promise) {
-    promise = createDayOne(planId).finally(() => {
-      dayResolutionInFlight.delete(planId);
-    });
-    dayResolutionInFlight.set(planId, promise);
-  }
-  return promise;
-}
-
 export interface AddRecipeToPlanInput {
   planId: string;
   recipeId: string;
@@ -210,8 +189,11 @@ export interface AddRecipeToPlanResult {
 }
 
 /**
- * Adds a recipe to the plan's lowest-numbered day (creating day 1 first
- * if the plan has none), meal type `dinner`. Used both by the plan's own
+ * Adds a recipe to the plan — a single plan-level POST. The server picks
+ * the lowest-numbered day (creating day 1 first if the plan has none),
+ * meal type `dinner`, and is concurrency-safe; its status carries whether
+ * anything was actually added (`201`) or the recipe was already anywhere
+ * in the plan (`200`, the existing entry). Used both by the plan's own
  * recipe picker and by a recipe's "Add to plan" sheet — the latter often
  * doesn't have the recipe's name/servings on hand, so those are optional
  * and the optimistic insert is skipped when they're missing (the mutation
@@ -228,26 +210,15 @@ export function useAddRecipeToPlan(boundPlanId?: string) {
   return useMutation({
     mutationKey: boundPlanId ? planKey(boundPlanId) : undefined,
     mutationFn: async ({ planId, recipeId }: AddRecipeToPlanInput): Promise<AddRecipeToPlanResult> => {
-      let detail = queryClient.getQueryData<MealPlanDetailResponse>(planKey(planId));
-      if (!detail) {
-        detail = await getMealPlanDetail(planId);
-      }
-
-      // A recipe already in the plan (e.g. added from another sheet
-      // whose "Added" badge is cache-only and can be stale) is a no-op,
-      // not a second server row.
-      const existing = findRecipeInPlan(detail, recipeId);
-      if (existing) {
-        return { entry: existing, alreadyInPlan: true };
-      }
-
-      const day = await resolveLowestDay(planId, detail);
-      const entry = await addRecipeToMeal(planId, day.id, { mealType: 'dinner', recipeId });
-      return { entry, alreadyInPlan: false };
+      const { data: entry, status } = await addRecipeToPlan(planId, recipeId);
+      return { entry, alreadyInPlan: status === 200 };
     },
     onMutate: async ({ planId, recipeId, recipeName, recipeWebLink, baseServings }) => {
       await queryClient.cancelQueries({ queryKey: planKey(planId) });
       const previous = queryClient.getQueryData<MealPlanDetailResponse>(planKey(planId));
+      // Best-effort, cache-only guess (can be stale) — used only to skip
+      // showing a duplicate optimistic row/count while the server's own
+      // 200-vs-201 (the actual source of truth) is still in flight.
       const alreadyInPlan = previous ? findRecipeInPlan(previous, recipeId) !== null : false;
 
       let tempId: string | null = null;
@@ -275,7 +246,21 @@ export function useAddRecipeToPlan(boundPlanId?: string) {
         });
       }
 
-      return { tempId };
+      // recipeCount is "distinct recipes", so it only needs bumping when
+      // we don't already believe the recipe is in the plan — independent
+      // of whether recipeName/baseServings were given (AddToPlanSheet
+      // doesn't have them, but still affects this count).
+      let recipeCountBumped = false;
+      if (!alreadyInPlan) {
+        recipeCountBumped = true;
+        queryClient.setQueryData<MealPlanResponse[]>(plansKey, (current) =>
+          current
+            ? current.map((plan) => (plan.id === planId ? { ...plan, recipeCount: plan.recipeCount + 1 } : plan))
+            : current,
+        );
+      }
+
+      return { tempId, recipeCountBumped };
     },
     onError: (_error, { planId }, context) => {
       // Targeted: remove only this call's own temp entry (by its
@@ -283,26 +268,39 @@ export function useAddRecipeToPlan(boundPlanId?: string) {
       // rollback here would also wipe out any other add that succeeded
       // in the meantime (e.g. rapid taps in the recipe picker).
       const tempId = context?.tempId;
-      if (!tempId) return;
-      queryClient.setQueryData<MealPlanDetailResponse>(planKey(planId), (current) => {
-        if (!current) return current;
-        return {
-          ...current,
-          days: current.days.map((day) => ({
-            ...day,
-            meals: {
-              breakfast: day.meals.breakfast.filter((entry) => entry.id !== tempId),
-              lunch: day.meals.lunch.filter((entry) => entry.id !== tempId),
-              dinner: day.meals.dinner.filter((entry) => entry.id !== tempId),
-              snack: day.meals.snack.filter((entry) => entry.id !== tempId),
-            },
-          })),
-        };
-      });
+      if (tempId) {
+        queryClient.setQueryData<MealPlanDetailResponse>(planKey(planId), (current) => {
+          if (!current) return current;
+          return {
+            ...current,
+            days: current.days.map((day) => ({
+              ...day,
+              meals: {
+                breakfast: day.meals.breakfast.filter((entry) => entry.id !== tempId),
+                lunch: day.meals.lunch.filter((entry) => entry.id !== tempId),
+                dinner: day.meals.dinner.filter((entry) => entry.id !== tempId),
+                snack: day.meals.snack.filter((entry) => entry.id !== tempId),
+              },
+            })),
+          };
+        });
+      }
+      if (context?.recipeCountBumped) {
+        queryClient.setQueryData<MealPlanResponse[]>(plansKey, (current) =>
+          current
+            ? current.map((plan) =>
+                plan.id === planId ? { ...plan, recipeCount: Math.max(0, plan.recipeCount - 1) } : plan,
+              )
+            : current,
+        );
+      }
     },
     onSettled: (_data, _error, { planId }) => {
       void queryClient.invalidateQueries({ queryKey: planKey(planId) });
       void queryClient.invalidateQueries({ queryKey: shoppingKey(planId) });
+      // Reconciles recipeCount for real in case the onMutate guess above
+      // (from possibly-stale cached detail) didn't match the server's.
+      void queryClient.invalidateQueries({ queryKey: plansKey });
     },
   });
 }
@@ -310,7 +308,6 @@ export function useAddRecipeToPlan(boundPlanId?: string) {
 export interface RemoveRecipeFromPlanInput {
   planId: string;
   recipeId: string;
-  mealPlanRecipeIds: string[];
 }
 
 interface RemovedPlanEntry {
@@ -320,25 +317,25 @@ interface RemovedPlanEntry {
 }
 
 /**
- * Removes every occurrence of the recipe from the plan. Optimistic — the
+ * Removes every occurrence of the recipe from the plan — a single
+ * plan-level DELETE by recipeId, idempotent server-side. Optimistic — the
  * caller shows an Undo toast. `boundPlanId` is optional, same rationale
  * as `useAddRecipeToPlan` — only ever called with a known target plan in
  * this app so far, but keeping it optional matches that hook's shape.
+ *
+ * The remove button stays disabled while a row is optimistic-only
+ * (`PlanDetailPage.tsx` `isPendingOnly`, unchanged by this) — not because
+ * the DELETE needs a real id anymore (it targets `recipeId`, which is
+ * known immediately), but because a DELETE racing ahead of the still-in-
+ * flight POST could land first and be a no-op (recipe not in the plan
+ * yet), only for the POST to then add it back — leaving the recipe
+ * stuck in the plan despite the user's remove tap.
  */
 export function useRemoveRecipeFromPlan(boundPlanId?: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: boundPlanId ? planKey(boundPlanId) : undefined,
-    mutationFn: async ({ mealPlanRecipeIds }: RemoveRecipeFromPlanInput) => {
-      // allSettled, not all: for a legacy recipe with several occurrences,
-      // one failing shouldn't stop the others from actually being
-      // deleted server-side. Throwing (once) after still triggers the
-      // rollback + toast; onSettled's invalidation then refetches the
-      // real state, which reconciles any rows that did succeed.
-      const results = await Promise.allSettled(mealPlanRecipeIds.map((id) => removeRecipeFromMeal(id)));
-      const failure = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
-      if (failure) throw failure.reason;
-    },
+    mutationFn: ({ planId, recipeId }: RemoveRecipeFromPlanInput) => removeRecipeFromPlan(planId, recipeId),
     onMutate: async ({ planId, recipeId }) => {
       await queryClient.cancelQueries({ queryKey: planKey(planId) });
       const previous = queryClient.getQueryData<MealPlanDetailResponse>(planKey(planId));
@@ -374,63 +371,56 @@ export function useRemoveRecipeFromPlan(boundPlanId?: string) {
         });
       }
 
+      // recipeCount is "distinct recipes" — removing every occurrence of
+      // one recipeId is always exactly one fewer, regardless of how many
+      // occurrences existed. This is only reachable from a row the user
+      // can already see rendered (PlanDetailPage's flattened list, which
+      // requires `plan` to be loaded), so the plan is always in cache.
+      queryClient.setQueryData<MealPlanResponse[]>(plansKey, (current) =>
+        current
+          ? current.map((plan) => (plan.id === planId ? { ...plan, recipeCount: Math.max(0, plan.recipeCount - 1) } : plan))
+          : current,
+      );
+
       return { removedEntries };
     },
     onError: (_error, { planId }, context) => {
       const removedEntries = context?.removedEntries;
-      if (!removedEntries?.length) return;
-      queryClient.setQueryData<MealPlanDetailResponse>(planKey(planId), (current) => {
-        if (!current) return current;
-        let days = current.days;
-        for (const { dayId, mealType, entry } of removedEntries) {
-          days = days.map((day) => {
-            if (day.id !== dayId) return day;
-            if (day.meals[mealType].some((existing) => existing.id === entry.id)) return day; // already back
-            return { ...day, meals: { ...day.meals, [mealType]: [...day.meals[mealType], entry] } };
-          });
-        }
-        return { ...current, days };
-      });
+      if (removedEntries?.length) {
+        queryClient.setQueryData<MealPlanDetailResponse>(planKey(planId), (current) => {
+          if (!current) return current;
+          let days = current.days;
+          for (const { dayId, mealType, entry } of removedEntries) {
+            days = days.map((day) => {
+              if (day.id !== dayId) return day;
+              if (day.meals[mealType].some((existing) => existing.id === entry.id)) return day; // already back
+              return { ...day, meals: { ...day.meals, [mealType]: [...day.meals[mealType], entry] } };
+            });
+          }
+          return { ...current, days };
+        });
+      }
+      queryClient.setQueryData<MealPlanResponse[]>(plansKey, (current) =>
+        current ? current.map((plan) => (plan.id === planId ? { ...plan, recipeCount: plan.recipeCount + 1 } : plan)) : current,
+      );
     },
     onSettled: (_data, _error, { planId }) => {
       void queryClient.invalidateQueries({ queryKey: planKey(planId) });
       void queryClient.invalidateQueries({ queryKey: shoppingKey(planId) });
+      // Reconciles recipeCount for real in case the optimistic write above
+      // raced with something else.
+      void queryClient.invalidateQueries({ queryKey: plansKey });
     },
   });
 }
 
-export interface DuplicatePlanResult {
-  newPlanId: string;
-  failedRecipeNames: string[];
+/** Server-confirmed: atomic server-side copy (days + recipes; not purchases/manual items). Omit `name` for the server's default ("<source> copy"). */
+export function useDuplicatePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ planId, name }: { planId: string; name?: string }) => duplicateMealPlan(planId, name),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: plansKey });
+    },
+  });
 }
-
-/**
- * Plain async helper rather than a mutation hook: duplicating needs
- * per-recipe progress text while it runs, which doesn't fit useMutation's
- * single pending/success/error shape. The caller (the edit sheet) drives
- * its own loading/progress state and invalidates `plansKey` itself.
- */
-export async function duplicatePlan(
-  plan: MealPlanResponse,
-  recipes: FlatPlanRecipe[],
-  onProgress?: (done: number, total: number) => void,
-): Promise<DuplicatePlanResult> {
-  const newPlan = await createMealPlan({ name: `${plan.name} copy`, servings: plan.servings });
-  const day = await addMealPlanDay(newPlan.id, 1);
-
-  const failedRecipeNames: string[] = [];
-  for (let i = 0; i < recipes.length; i++) {
-    try {
-      await addRecipeToMeal(newPlan.id, day.id, { mealType: 'dinner', recipeId: recipes[i].recipeId });
-    } catch {
-      failedRecipeNames.push(recipes[i].recipeName);
-    }
-    onProgress?.(i + 1, recipes.length);
-  }
-
-  return { newPlanId: newPlan.id, failedRecipeNames };
-}
-
-// Re-exported so consumers of the plans domain don't also need to reach
-// into `lib/flatPlan` directly for this one type.
-export type { FlatPlanRecipe };

@@ -85,6 +85,16 @@
   white-space: nowrap;
 }
 
+/* `.plan-detail-page__recipe-link` is a column flex, so its children
+   default to `align-items: stretch` — needed for the name span above to
+   take the full row width (its ellipsis truncation depends on that), but
+   it also stretches the badge into a full-width bar. Opt the badge out
+   individually rather than changing the parent's `align-items`, which
+   would break the name's truncation. */
+.plan-detail-page__recipe-badge {
+  align-self: flex-start;
+}
+
 .plan-detail-page__recipe-link:focus-visible {
   outline: 2px solid var(--accent-9);
   outline-offset: 2px;

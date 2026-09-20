@@ -1,14 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
 import { Button, Separator, Spinner, Text, TextField } from '@radix-ui/themes';
 import { CopyIcon, Share2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { QueryErrorState } from '../../components/QueryErrorState';
-import { ApiError } from '../../api/http';
-import { duplicatePlan, plansKey, usePlan, useDeletePlan, useUpdatePlan } from '../../queries/plans';
-import { flattenMealPlan } from '../../lib/flatPlan';
+import { usePlan, useDeletePlan, useDuplicatePlan, useUpdatePlan } from '../../queries/plans';
 import { buildMealPlanSummary } from '../../lib/mealPlanSummary';
 import { clearSelectedPlanId, getSelectedPlanId } from '../../lib/selectedPlan';
 import { toast } from '../../lib/toastStore';
@@ -17,11 +14,11 @@ import './EditPlanSheet.css';
 export function EditPlanSheet() {
   const { planId } = useParams<{ planId: string }>();
   const sheet = useSheet(`/plans/${planId}`);
-  const queryClient = useQueryClient();
 
   const { data: plan, isError, refetch } = usePlan(planId);
   const updatePlan = useUpdatePlan(planId ?? '');
   const deletePlan = useDeletePlan();
+  const duplicatePlan = useDuplicatePlan();
 
   // No effect needed to seed this from `plan`: until the field is
   // touched this session, the displayed value just falls through to the
@@ -29,8 +26,6 @@ export function EditPlanSheet() {
   const [nameOverride, setNameOverride] = useState<string | null>(null);
   const name = nameOverride ?? plan?.name ?? '';
 
-  const [duplicating, setDuplicating] = useState(false);
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const dirty = name.trim().length > 0 && name.trim() !== plan?.name;
@@ -41,27 +36,14 @@ export function EditPlanSheet() {
     updatePlan.mutate({ name: name.trim() });
   }
 
-  async function handleDuplicate() {
-    if (!plan) return;
-    setDuplicating(true);
-    const recipes = flattenMealPlan(plan);
-    setProgress({ done: 0, total: recipes.length });
-    try {
-      const { newPlanId, failedRecipeNames } = await duplicatePlan(plan, recipes, (done, total) =>
-        setProgress({ done, total }),
-      );
-      void queryClient.invalidateQueries({ queryKey: plansKey });
-      if (failedRecipeNames.length > 0) {
-        toast.error(`Copied the plan, but couldn't add: ${failedRecipeNames.join(', ')}`);
-      }
-      sheet.close({ to: `/plans/${newPlanId}` });
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : 'Could not duplicate the plan.';
-      toast.error(message);
-    } finally {
-      setDuplicating(false);
-      setProgress(null);
-    }
+  function handleDuplicate() {
+    if (!planId) return;
+    // On error the global mutation error toast already surfaces it — stay
+    // on the sheet so the user can retry.
+    duplicatePlan.mutate(
+      { planId },
+      { onSuccess: (newPlan) => sheet.close({ to: `/plans/${newPlan.id}` }) },
+    );
   }
 
   async function handleCopySummary() {
@@ -134,14 +116,15 @@ export function EditPlanSheet() {
           <Separator size="4" />
 
           <div className="edit-plan-sheet__section">
-            <Button variant="soft" size="3" onClick={handleDuplicate} loading={duplicating} disabled={duplicating}>
+            <Button
+              variant="soft"
+              size="3"
+              onClick={handleDuplicate}
+              loading={duplicatePlan.isPending}
+              disabled={duplicatePlan.isPending}
+            >
               <CopyIcon /> Duplicate
             </Button>
-            {progress && (
-              <Text size="1" color="gray">
-                Adding {progress.done} of {progress.total}…
-              </Text>
-            )}
           </div>
 
           <div className="edit-plan-sheet__section">

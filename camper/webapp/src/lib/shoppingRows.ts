@@ -7,6 +7,7 @@ import type {
   ShoppingListResponse,
   ShoppingRecipeRef,
 } from '../api/shopping';
+import { formatQuantity } from './formatQuantity';
 
 // Store-walk order; anything not listed sorts last, alphabetically among itself.
 const CATEGORY_ORDER = [
@@ -114,15 +115,18 @@ export function mergeShoppingItems(items: ShoppingListItemResponse[]): ShoppingR
   return [...grouped.values()];
 }
 
-function fmt(quantity: number): string {
-  return parseFloat(quantity.toFixed(2)).toString();
-}
-
-/** "2 cups + 1 tbsp" style quantity text across all of a row's entries. */
+/**
+ * "2 cups + 1 tbsp" style quantity text across all of a row's entries.
+ * Goes through `lib/formatQuantity` (recipe-fraction glyphs, e.g. "1½")
+ * so a quantity reads the same on the shopping list as it does on the
+ * recipe page — these are server-scaled and can land on an awkward
+ * decimal (0.3333, 2.6667) that a plain `toFixed(2)` would show as
+ * "0.33"/"2.67" instead of "⅓"/"2⅔".
+ */
 export function formatQuantityText(row: ShoppingRow): string {
   return row.entries
     .filter((entry) => entry.quantityRequired > 0)
-    .map((entry) => `${fmt(entry.quantityRequired)}${entry.unit ? ` ${entry.unit}` : ''}`)
+    .map((entry) => `${formatQuantity(entry.quantityRequired)}${entry.unit ? ` ${entry.unit}` : ''}`)
     .join(' + ');
 }
 

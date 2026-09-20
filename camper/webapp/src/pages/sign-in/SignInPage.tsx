@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Callout, Card, Heading, Text, TextField } from '@radix-ui/themes';
 import { useAuth } from '../../auth/useAuth';
@@ -25,6 +25,21 @@ export function SignInPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const nextPath = safeNext(searchParams.get('next'));
+
+  const usernameRef = useRef<HTMLInputElement>(null);
+  // Captured once, from the very first render: true only when the page
+  // loaded directly in register mode (`?mode=register`), in which case
+  // the name field is already there and email should keep the initial
+  // focus. `false` means the field can only become visible later, by
+  // `setNeedsRegistration(true)` after a failed sign-in — that's the
+  // transition the effect below reacts to.
+  const startedInRegisterMode = useRef(needsRegistration);
+
+  useEffect(() => {
+    if (needsRegistration && !startedInRegisterMode.current) {
+      usernameRef.current?.focus();
+    }
+  }, [needsRegistration]);
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -107,6 +122,7 @@ export function SignInPage() {
                 Your name
               </Text>
               <TextField.Root
+                ref={usernameRef}
                 type="text"
                 autoComplete="name"
                 placeholder="Jamie Rivers"

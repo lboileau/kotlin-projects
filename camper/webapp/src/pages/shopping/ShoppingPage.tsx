@@ -5,10 +5,8 @@ import { ChevronDownIcon, DotsVerticalIcon, PersonIcon, PlusIcon } from '@radix-
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { ApiError } from '../../api/http';
-import type { MealPlanDetailResponse } from '../../api/mealPlans';
 import type { ShoppingListResponse } from '../../api/shopping';
 import { usePageTitle } from '../../lib/usePageTitle';
-import { usePlan } from '../../queries/plans';
 import {
   useAddManualShoppingItem,
   useRemoveManualShoppingItem,
@@ -35,9 +33,14 @@ export function ShoppingPage() {
   const { planId } = useParams<{ planId: string }>();
   useMealPlanSync(planId);
 
-  const { data: plan } = usePlan(planId);
+  // The plan name comes from the shopping list response itself
+  // (`mealPlanName`) rather than a separate `usePlan()` fetch — the plan
+  // detail endpoint is one of the slower ones (N+1 on the server, see
+  // plan.md's risks), and nothing else on this page needs it: `notFound`
+  // is derived from this same query's own error, and the empty-state /
+  // dropdown links below are plain routes that don't need plan data.
   const { data: list, isLoading, isError, error, refetch } = useShoppingList(planId);
-  usePageTitle(plan?.name ? `Shopping — ${plan.name}` : 'Shopping');
+  usePageTitle(list?.mealPlanName ? `Shopping — ${list.mealPlanName}` : 'Shopping');
 
   const notFound = isError && error instanceof ApiError && error.status === 404;
 
@@ -109,16 +112,15 @@ export function ShoppingPage() {
   // by row key, and ingredients are shared across plans, so a pin left
   // over from plan A could mis-sort a same-ingredient row in plan B for
   // up to 600ms. Remounting resets all of it cleanly.
-  return <ShoppingListBody key={planId} planId={planId!} plan={plan} list={list} />;
+  return <ShoppingListBody key={planId} planId={planId!} list={list} />;
 }
 
 interface ShoppingListBodyProps {
   planId: string;
-  plan: MealPlanDetailResponse | undefined;
   list: ShoppingListResponse;
 }
 
-function ShoppingListBody({ planId, plan, list }: ShoppingListBodyProps) {
+function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
   const navigate = useNavigate();
 
   const toggleRow = useToggleShoppingRow(planId);
@@ -216,7 +218,7 @@ function ShoppingListBody({ planId, plan, list }: ShoppingListBodyProps) {
         <div className="shopping-page__header-top">
           <SheetLink to="switch" className="shopping-page__plan-name">
             <Heading as="h1" size="4" weight="bold" className="shopping-page__plan-name-text">
-              {plan?.name ?? 'Shopping'}
+              {list.mealPlanName}
             </Heading>
             <ChevronDownIcon />
           </SheetLink>
