@@ -28,32 +28,6 @@
   gap: 6px;
 }
 
-.new-ingredient-sheet__added {
-  margin-top: 20px;
-  padding-top: 12px;
-  border-top: 1px solid var(--gray-4);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.new-ingredient-sheet__added-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.new-ingredient-sheet__added-list li {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--accent-11);
-  font-size: 0.875rem;
-}
-
 .new-ingredient-sheet__done {
   margin-top: 16px;
   align-self: stretch;

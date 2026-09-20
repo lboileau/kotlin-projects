@@ -1,7 +1,14 @@
 import { useMemo } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Badge, Button, IconButton, Skeleton, Switch, Text, TextField } from '@radix-ui/themes';
-import { Cross2Icon, DownloadIcon, Link2Icon, MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
+import { Badge, Button, DropdownMenu, IconButton, Skeleton, Switch, Text, TextField } from '@radix-ui/themes';
+import {
+  Cross2Icon,
+  DownloadIcon,
+  InfoCircledIcon,
+  Link2Icon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+} from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
 import { QueryErrorState } from '../../components/QueryErrorState';
@@ -182,7 +189,16 @@ export function RecipesPage() {
 
         {!isLoading &&
           (hasData || !isError) &&
-          filtered.map((recipe) => <RecipeRow key={recipe.id} recipe={recipe} onOpen={() => navigate(`/recipes/${recipe.id}`)} />)}
+          filtered.map((recipe) => (
+            <RecipeRow
+              key={recipe.id}
+              recipe={recipe}
+              isOwner={recipe.createdBy === user?.id}
+              onOpen={() => navigate(`/recipes/${recipe.id}`)}
+              onAddToPlan={() => navigate(`/recipes/${recipe.id}/add-to-plan`)}
+              onEdit={() => navigate(`/recipes/${recipe.id}/edit`)}
+            />
+          ))}
       </div>
 
       <Outlet />
@@ -190,39 +206,73 @@ export function RecipesPage() {
   );
 }
 
-function RecipeRow({ recipe, onOpen }: { recipe: RecipeResponse; onOpen: () => void }) {
+function RecipeRow({
+  recipe,
+  isOwner,
+  onOpen,
+  onAddToPlan,
+  onEdit,
+}: {
+  recipe: RecipeResponse;
+  isOwner: boolean;
+  onOpen: () => void;
+  onAddToPlan: () => void;
+  onEdit: () => void;
+}) {
   return (
-    <button type="button" className="recipes-page__row" onClick={onOpen}>
-      <div className="recipes-page__row-main">
-        <Text as="span" size="3" weight="medium" className="recipes-page__row-name">
-          {recipe.name}
-        </Text>
-        {recipe.status === 'draft' && (
-          <Badge color="amber" variant="soft">
-            Draft
-          </Badge>
-        )}
-        {recipe.webLink && (
-          <span className="recipes-page__row-imported" role="img" aria-label="Imported from a link" title="Imported from a link">
-            <Link2Icon />
-          </span>
-        )}
-      </div>
-      <div className="recipes-page__row-meta">
-        <Text as="span" size="2" color="gray">
-          Serves {recipe.baseServings}
-        </Text>
-        {recipe.meal && (
-          <Badge variant="soft" color="gray">
-            {capitalize(recipe.meal)}
-          </Badge>
-        )}
-        {recipe.theme && (
-          <Badge variant="soft" color="gray">
-            {capitalize(recipe.theme)}
-          </Badge>
-        )}
-      </div>
-    </button>
+    <div className="recipes-page__row">
+      <button type="button" className="recipes-page__row-open" onClick={onOpen}>
+        <div className="recipes-page__row-main">
+          <Text as="span" size="3" weight="medium" className="recipes-page__row-name">
+            {recipe.name}
+          </Text>
+          {recipe.status === 'draft' && (
+            <Badge color="amber" variant="soft">
+              Draft
+            </Badge>
+          )}
+          {recipe.webLink && (
+            <span className="recipes-page__row-imported" role="img" aria-label="Imported from a link" title="Imported from a link">
+              <Link2Icon />
+            </span>
+          )}
+        </div>
+        <div className="recipes-page__row-meta">
+          <Text as="span" size="2" color="gray">
+            Serves {recipe.baseServings}
+          </Text>
+          {recipe.meal && (
+            <Badge variant="soft" color="gray">
+              {capitalize(recipe.meal)}
+            </Badge>
+          )}
+          {recipe.theme && (
+            <Badge variant="soft" color="gray">
+              {capitalize(recipe.theme)}
+            </Badge>
+          )}
+        </div>
+      </button>
+
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <IconButton
+            type="button"
+            variant="ghost"
+            color="gray"
+            size="3"
+            aria-label={`More about ${recipe.name}`}
+            className="recipes-page__row-info"
+          >
+            <InfoCircledIcon />
+          </IconButton>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <DropdownMenu.Item onSelect={onOpen}>View recipe</DropdownMenu.Item>
+          <DropdownMenu.Item onSelect={onAddToPlan}>Add to plan</DropdownMenu.Item>
+          {isOwner && <DropdownMenu.Item onSelect={onEdit}>Edit recipe</DropdownMenu.Item>}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </div>
   );
 }

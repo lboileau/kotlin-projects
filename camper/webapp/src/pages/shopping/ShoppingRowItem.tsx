@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Checkbox, IconButton, Text } from '@radix-ui/themes';
-import { Cross2Icon } from '@radix-ui/react-icons';
+import { Cross2Icon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { formatQuantityText, type ShoppingRow } from '../../lib/shoppingRows';
 import './ShoppingRowItem.css';
 
@@ -46,6 +47,9 @@ export function ShoppingRowItem({ row, onToggle, onRemoveManual, onClearNoLonger
   const quantityText = formatQuantityText(row);
   const checked = row.overallStatus === 'done';
   const noLongerNeeded = row.overallStatus === 'no_longer_needed';
+  // The recipes an item belongs to stay hidden until the info icon is tapped.
+  const [showRecipes, setShowRecipes] = useState(false);
+  const hasRecipes = row.recipeRefs.length > 0;
 
   if (noLongerNeeded) {
     return (
@@ -75,6 +79,20 @@ export function ShoppingRowItem({ row, onToggle, onRemoveManual, onClearNoLonger
             {quantityText && <span className="shopping-row__quantity">{quantityText}</span>}
           </span>
         </label>
+        {hasRecipes && (
+          <IconButton
+            type="button"
+            variant="ghost"
+            color="gray"
+            size="3"
+            className="shopping-row__info"
+            aria-label={`${showRecipes ? 'Hide' : 'Show'} recipes for ${name}`}
+            aria-expanded={showRecipes}
+            onClick={() => setShowRecipes((current) => !current)}
+          >
+            <InfoCircledIcon />
+          </IconButton>
+        )}
         {onRemoveManual && (
           <IconButton
             type="button"
@@ -89,7 +107,7 @@ export function ShoppingRowItem({ row, onToggle, onRemoveManual, onClearNoLonger
           </IconButton>
         )}
       </div>
-      {row.recipeRefs.length > 0 && <RecipeRefsCaption row={row} />}
+      {hasRecipes && showRecipes && <RecipeRefsCaption row={row} />}
     </div>
   );
 }

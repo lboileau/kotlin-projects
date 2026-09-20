@@ -1,7 +1,8 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Theme } from '@radix-ui/themes';
 import { Cross1Icon } from '@radix-ui/react-icons';
+import { SheetPortalContext } from './useSheetContainer';
 import './Sheet.css';
 
 interface SheetProps {
@@ -23,6 +24,12 @@ interface SheetProps {
  * path with nothing sheet-specific for a page to wire up.
  */
 export function Sheet({ title, open, onClose, fullHeight = false, children }: SheetProps) {
+  // State, not a plain ref: descendants read this through context, which
+  // only re-renders on a state change — a ref's `.current` mutating
+  // silently wouldn't notify `useSheetContainer()` callers that it's now
+  // available.
+  const [contentNode, setContentNode] = useState<HTMLDivElement | null>(null);
+
   return (
     <Dialog.Root
       open={open}
@@ -46,6 +53,7 @@ export function Sheet({ title, open, onClose, fullHeight = false, children }: Sh
         <Theme hasBackground={false}>
           <Dialog.Overlay className="sheet-overlay" />
           <Dialog.Content
+            ref={setContentNode}
             className={`sheet-content${fullHeight ? ' sheet-content--full' : ''}`}
           >
             <div className="sheet-content__handle" aria-hidden="true" />
@@ -58,7 +66,9 @@ export function Sheet({ title, open, onClose, fullHeight = false, children }: Sh
               </Dialog.Close>
             </div>
             <Dialog.Description className="sr-only">{title}</Dialog.Description>
-            <div className="sheet-content__body">{children}</div>
+            <div className="sheet-content__body">
+              <SheetPortalContext.Provider value={contentNode}>{children}</SheetPortalContext.Provider>
+            </div>
           </Dialog.Content>
         </Theme>
       </Dialog.Portal>

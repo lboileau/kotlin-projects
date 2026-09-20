@@ -126,7 +126,7 @@ export function IngredientsPage() {
           groups.map((group) => (
             <section key={group.category} className="ingredients-page__group">
               <Text as="p" size="1" weight="bold" color="gray" className="ingredients-page__group-header">
-                {capitalize(group.category)} &middot; {group.items.length}
+                {capitalize(group.category)}
               </Text>
               <ul className="ingredients-page__rows">
                 {group.items.map((ingredient) => (

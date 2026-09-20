@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { Button, Callout, Select, Separator, Spinner, Text, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
+import { SheetSelectContent } from '../../components/SheetSelectContent';
 import { useSheet, type UseSheetResult } from '../../components/useSheet';
 import { useDeleteIngredient, useIngredients, useUpdateIngredient } from '../../queries/ingredients';
 import { ApiError } from '../../api/http';
@@ -101,26 +102,26 @@ function EditIngredientForm({
             Category
             <Select.Root value={category} onValueChange={setCategory} size="3">
               <Select.Trigger />
-              <Select.Content>
+              <SheetSelectContent>
                 {CATEGORIES.map((c) => (
                   <Select.Item key={c} value={c}>
                     {capitalize(c)}
                   </Select.Item>
                 ))}
-              </Select.Content>
+              </SheetSelectContent>
             </Select.Root>
           </Text>
           <Text as="label" size="2" weight="medium" className="edit-ingredient-sheet__field">
             Unit
             <Select.Root value={unit} onValueChange={setUnit} size="3">
               <Select.Trigger />
-              <Select.Content>
+              <SheetSelectContent>
                 {UNITS.map((u) => (
                   <Select.Item key={u} value={u}>
                     {u}
                   </Select.Item>
                 ))}
-              </Select.Content>
+              </SheetSelectContent>
             </Select.Root>
           </Text>
         </div>

@@ -27,16 +27,22 @@
 .shopping-page__plan-name {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  gap: 8px;
   min-height: 44px;
   min-width: 0;
   flex: 1;
-  padding: 0 4px;
+  padding: 10px 16px;
   border: none;
-  background: transparent;
+  border-radius: var(--radius-4);
+  background: var(--accent-2);
   color: var(--gray-12);
+  text-decoration: none;
   cursor: pointer;
-  min-width: 0;
+}
+
+.shopping-page__plan-name:hover {
+  background: var(--accent-3);
 }
 
 .shopping-page__plan-name-text {
@@ -49,7 +55,6 @@
 .shopping-page__plan-name:focus-visible {
   outline: 2px solid var(--accent-9);
   outline-offset: 2px;
-  border-radius: var(--radius-2);
 }
 
 .shopping-page__header-actions {
@@ -101,9 +106,6 @@
 }
 
 .shopping-page__category-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
   padding: 4px 4px 6px;
 }
 
@@ -147,15 +149,9 @@
 }
 
 .shopping-page__quick-add {
-  position: sticky;
-  bottom: 0;
-  z-index: 5;
   display: flex;
   gap: 8px;
   align-items: center;
-  background: var(--color-background);
-  border-top: 1px solid var(--gray-5);
-  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
 }
 
 .shopping-page__quick-add-input {

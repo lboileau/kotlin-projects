@@ -3,6 +3,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Button, Callout, Select, Spinner, Text, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
+import { SheetSelectContent } from '../../components/SheetSelectContent';
 import { useSheet, type UseSheetResult } from '../../components/useSheet';
 import { IngredientPicker } from '../../components/IngredientPicker';
 import { useRecipe, useRemoveRecipeIngredient, useResolveRecipeIngredient } from '../../queries/recipes';
@@ -133,13 +134,13 @@ function EditLineForm({
             Unit
             <Select.Root value={unit} onValueChange={setUnit} size="3">
               <Select.Trigger />
-              <Select.Content>
+              <SheetSelectContent>
                 {UNITS.map((u) => (
                   <Select.Item key={u} value={u}>
                     {u}
                   </Select.Item>
                 ))}
-              </Select.Content>
+              </SheetSelectContent>
             </Select.Root>
           </Text>
         </div>

@@ -4,6 +4,7 @@ import { AlertDialog, Button, DropdownMenu, Heading, Progress, Skeleton, Text, T
 import { ChevronDownIcon, DotsVerticalIcon, PersonIcon, PlusIcon } from '@radix-ui/react-icons';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
+import { BottomBar } from '../../components/BottomBar';
 import { ApiError } from '../../api/http';
 import type { ShoppingListResponse } from '../../api/shopping';
 import { usePageTitle } from '../../lib/usePageTitle';
@@ -14,7 +15,7 @@ import {
   useShoppingList,
   useToggleShoppingRow,
 } from '../../queries/shopping';
-import { buildShoppingRows, sortTier, type ShoppingRow } from '../../lib/shoppingRows';
+import { buildShoppingRows, type ShoppingRow } from '../../lib/shoppingRows';
 import { clearSelectedPlanId, getSelectedPlanId, setSelectedPlanId } from '../../lib/selectedPlan';
 import { useMealPlanSync } from '../../sync/useMealPlanSync';
 import { toast } from '../../lib/toastStore';
@@ -106,12 +107,9 @@ export function ShoppingPage() {
   // Keyed on planId: this route doesn't remount when SwitchPlanSheet
   // navigates from one plan's shopping list to another's (same route,
   // just a new :planId param), so every bit of local state below —
-  // the quick-add draft, the settle-pin tiers/timers, the reset-confirm
-  // dialog, and each mutation's own isPending — would otherwise carry
-  // over from the previous plan. The pin tiers in particular are keyed
-  // by row key, and ingredients are shared across plans, so a pin left
-  // over from plan A could mis-sort a same-ingredient row in plan B for
-  // up to 600ms. Remounting resets all of it cleanly.
+  // the quick-add draft, the reset-confirm dialog, and each mutation's
+  // own isPending — would otherwise carry over from the previous plan.
+  // Remounting resets all of it cleanly.
   return <ShoppingListBody key={planId} planId={planId!} list={list} />;
 }
 
@@ -132,55 +130,11 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
   const quickAddRef = useRef<HTMLInputElement>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
 
-  // Keeps a just-toggled row from jumping to the bottom of its category
-  // instantly — it stays pinned at its pre-toggle tier for a bit, so the
-  // row that slides up to replace it doesn't absorb a second tap meant
-  // for something else. Re-tapping the same row while it's still pinned
-  // resets the timer but keeps the original pinned tier (not the tier it
-  // would have right now, which is mid-flight and not what's on screen).
-  const [pinnedTiers, setPinnedTiers] = useState<Map<string, number>>(new Map());
-  const settleTimersRef = useRef<Map<string, number>>(new Map());
-
-  useEffect(() => {
-    const timers = settleTimersRef.current;
-    return () => {
-      for (const timer of timers.values()) window.clearTimeout(timer);
-      timers.clear();
-    };
-  }, []);
-
-  function pinRowBriefly(row: ShoppingRow) {
-    setPinnedTiers((current) => {
-      if (current.has(row.key)) return current;
-      const next = new Map(current);
-      next.set(row.key, sortTier(row));
-      return next;
-    });
-
-    const existingTimer = settleTimersRef.current.get(row.key);
-    if (existingTimer !== undefined) window.clearTimeout(existingTimer);
-
-    const timer = window.setTimeout(() => {
-      settleTimersRef.current.delete(row.key);
-      setPinnedTiers((current) => {
-        if (!current.has(row.key)) return current;
-        const next = new Map(current);
-        next.delete(row.key);
-        return next;
-      });
-    }, 600);
-    settleTimersRef.current.set(row.key, timer);
-  }
-
   function handleToggle(row: ShoppingRow, checked: boolean) {
-    pinRowBriefly(row);
     toggleRow.mutate({ row, checked });
   }
 
   function handleClearNoLongerNeeded(row: ShoppingRow) {
-    // No pin here: a cleared no_longer_needed row drops out of the list
-    // entirely (0 required / 0 purchased is filtered out), so there's no
-    // "wrong tier" to freeze against.
     toggleRow.mutate({ row, checked: false });
   }
 
@@ -208,7 +162,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
     });
   }
 
-  const groups = buildShoppingRows(list, pinnedTiers);
+  const groups = buildShoppingRows(list);
   const isEmpty = groups.length === 0;
   const progress = list.totalItems > 0 ? (list.fullyPurchasedCount / list.totalItems) * 100 : 0;
 
@@ -280,9 +234,6 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
                 <Text size="2" weight="medium" className="shopping-page__category-title">
                   {categoryLabel(group.category)}
                 </Text>
-                <Text size="1" color="gray">
-                  {group.rows.length}
-                </Text>
               </div>
               <div className="shopping-page__rows">
                 {group.rows.map((row) => (
@@ -301,21 +252,23 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
         </div>
       )}
 
-      <form onSubmit={handleQuickAdd} className="shopping-page__quick-add">
-        <TextField.Root
-          ref={quickAddRef}
-          value={quickAddText}
-          onChange={(event) => setQuickAddText(event.target.value)}
-          placeholder="Add an item…"
-          enterKeyHint="done"
-          autoCapitalize="sentences"
-          size="3"
-          className="shopping-page__quick-add-input"
-        />
-        <Button type="submit" size="3" variant="solid" disabled={!quickAddText.trim()} aria-label="Add item">
-          <PlusIcon />
-        </Button>
-      </form>
+      <BottomBar>
+        <form onSubmit={handleQuickAdd} className="shopping-page__quick-add">
+          <TextField.Root
+            ref={quickAddRef}
+            value={quickAddText}
+            onChange={(event) => setQuickAddText(event.target.value)}
+            placeholder="Add an item…"
+            enterKeyHint="done"
+            autoCapitalize="sentences"
+            size="3"
+            className="shopping-page__quick-add-input"
+          />
+          <Button type="submit" size="3" variant="solid" disabled={!quickAddText.trim()} aria-label="Add item">
+            <PlusIcon />
+          </Button>
+        </form>
+      </BottomBar>
 
       <AlertDialog.Root open={confirmingReset} onOpenChange={setConfirmingReset}>
         <AlertDialog.Content maxWidth="400px">

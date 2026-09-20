@@ -134,36 +134,17 @@ function rowDisplayName(row: ShoppingRow): string {
   return row.ingredientName ?? row.description ?? '';
 }
 
-/** 0 = active, 1 = checked off, 2 = no longer needed — lower sorts first within a category. */
-export function sortTier(row: ShoppingRow): number {
-  if (row.overallStatus === 'no_longer_needed') return 2;
-  if (row.overallStatus === 'done') return 1;
-  return 0;
-}
-
 /**
- * Categories in store-walk order, each with its rows merged and sorted
- * (unchecked first, checked and no-longer-needed sunk to the bottom).
- *
- * `pinnedTiers` lets a caller freeze a just-toggled row at its previous
- * tier for a bit — so the row it slides past doesn't shift up under a
- * second tap meant for it — without this function needing to know
- * anything about timers; it just uses whatever tier it's given instead
- * of the row's real one, for rows present in the map.
+ * Categories in store-walk order, each with its rows merged and sorted by
+ * name only — a row's position never changes when it's checked off (or
+ * marked no longer needed), by design: nothing should jump around the
+ * list mid-shop just because you tapped it.
  */
-export function buildShoppingRows(
-  list: ShoppingListResponse,
-  pinnedTiers?: ReadonlyMap<string, number>,
-): ShoppingCategoryGroup[] {
-  const tierOf = (row: ShoppingRow) => pinnedTiers?.get(row.key) ?? sortTier(row);
-
+export function buildShoppingRows(list: ShoppingListResponse): ShoppingCategoryGroup[] {
   return list.categories
     .map((category) => ({
       category: category.category,
-      rows: mergeShoppingItems(category.items).sort((a, b) => {
-        const tierDiff = tierOf(a) - tierOf(b);
-        return tierDiff !== 0 ? tierDiff : rowDisplayName(a).localeCompare(rowDisplayName(b));
-      }),
+      rows: mergeShoppingItems(category.items).sort((a, b) => rowDisplayName(a).localeCompare(rowDisplayName(b))),
     }))
     .filter((group) => group.rows.length > 0)
     .sort((a, b) => categoryRank(a.category) - categoryRank(b.category));

@@ -1,12 +1,13 @@
 import { useId, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Badge, Button, Callout, Select, Text, TextField } from '@radix-ui/themes';
-import { CheckIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
+import { SheetSelectContent } from '../../components/SheetSelectContent';
 import { useSheet } from '../../components/useSheet';
 import { findIngredientByName, useCreateIngredient, useIngredients } from '../../queries/ingredients';
 import { ApiError } from '../../api/http';
 import { CATEGORIES, DEFAULT_CATEGORY, DEFAULT_UNIT, UNITS, capitalize } from '../../lib/ingredientConstants';
-import type { IngredientResponse } from '../../api/ingredients';
+import { toast } from '../../lib/toastStore';
 import './NewIngredientSheet.css';
 
 export function NewIngredientSheet() {
@@ -21,7 +22,6 @@ export function NewIngredientSheet() {
   const [category, setCategory] = useState<string>(DEFAULT_CATEGORY);
   const [unit, setUnit] = useState<string>(DEFAULT_UNIT);
   const [error, setError] = useState<string | null>(null);
-  const [added, setAdded] = useState<IngredientResponse[]>([]);
   const errorId = useId();
 
   const trimmed = name.trim();
@@ -47,7 +47,7 @@ export function NewIngredientSheet() {
     setError(null);
     try {
       const created = await createIngredient.mutateAsync({ name: trimmed, category, defaultUnit: unit });
-      setAdded((prev) => [created, ...prev]);
+      toast.info(`Added "${created.name}"`);
       setName('');
       nameRef.current?.focus();
     } catch (err) {
@@ -97,26 +97,26 @@ export function NewIngredientSheet() {
             Category
             <Select.Root value={category} onValueChange={setCategory} size="3">
               <Select.Trigger />
-              <Select.Content>
+              <SheetSelectContent>
                 {CATEGORIES.map((c) => (
                   <Select.Item key={c} value={c}>
                     {capitalize(c)}
                   </Select.Item>
                 ))}
-              </Select.Content>
+              </SheetSelectContent>
             </Select.Root>
           </Text>
           <Text as="label" size="2" weight="medium" className="new-ingredient-sheet__field">
             Unit
             <Select.Root value={unit} onValueChange={setUnit} size="3">
               <Select.Trigger />
-              <Select.Content>
+              <SheetSelectContent>
                 {UNITS.map((u) => (
                   <Select.Item key={u} value={u}>
                     {u}
                   </Select.Item>
                 ))}
-              </Select.Content>
+              </SheetSelectContent>
             </Select.Root>
           </Text>
         </div>
@@ -134,21 +134,6 @@ export function NewIngredientSheet() {
           Add
         </Button>
       </form>
-
-      {added.length > 0 && (
-        <div className="new-ingredient-sheet__added">
-          <Text as="p" size="1" color="gray">
-            Added this session
-          </Text>
-          <ul className="new-ingredient-sheet__added-list">
-            {added.map((ingredient) => (
-              <li key={ingredient.id}>
-                <CheckIcon /> {ingredient.name}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       <Button variant="soft" size="3" className="new-ingredient-sheet__done" onClick={() => sheet.close()}>
         Done

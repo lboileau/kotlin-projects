@@ -40,6 +40,52 @@ a {
   touch-action: manipulation;
 }
 
+/*
+ * Any Radix popup portalled to document.body — a popper-based one
+ * (Select, DropdownMenu, and anything else built on @radix-ui/react-popper,
+ * all sharing the `data-radix-popper-content-wrapper` attribute regardless
+ * of which component it is) or an AlertDialog/Dialog (`.rt-BaseDialogOverlay`
+ * / `.rt-BaseDialogContent`, shared by both since Radix Themes builds them
+ * on the same internal base) — needs a z-index above a Sheet's (101).
+ * Without this, it renders BEHIND an open sheet: the root <Theme> traps
+ * ordinary z-index comparisons in its own z-index: 0 stacking context
+ * (see Toast.tsx's comment), so anything portalled OUTSIDE it is compared
+ * against other body-level portals on raw z-index value alone, and a
+ * Sheet's explicit 101 beats a popup's implicit 0.
+ *
+ * Select/DropdownMenu content rendered inside a sheet should still prefer
+ * portalling INTO that sheet (`useSheetContainer`, `SheetSelectContent`) —
+ * that also fixes the sheet's scroll lock treating it as outside the
+ * dialog, which this rule alone does not. This rule is the fallback for
+ * everything else in the popper/dialog family: an AlertDialog (no
+ * container-portalling mechanism of its own) opened from inside a sheet,
+ * or a popper-based popup somewhere that isn't wired to a sheet container.
+ *
+ * The `!important` on the popper wrapper is load-bearing, not habit:
+ * @radix-ui/react-popper's Content reads its OWN computed z-index
+ * (`.rt-SelectContent` etc. — `auto` by default, nothing in this app sets
+ * one) and mirrors that value onto the WRAPPER as an inline style, every
+ * render. A plain rule here loses to that inline style regardless of its
+ * value — this is the one place in the app fighting a library-managed
+ * inline style rather than another stylesheet rule, which is the
+ * legitimate case for `!important`. AlertDialog/Dialog have no such
+ * mechanism, so their rule doesn't need it.
+ *
+ * Full layering order, lowest to highest: page content < docked bars
+ * (BottomBar, z-index: 5) < sheet overlay (100) / sheet content (101) <
+ * this rule's popups and alert dialogs (200) < toasts (1000, ToastRegion —
+ * always topmost, since an error or an Undo action must survive anything
+ * else being open).
+ */
+[data-radix-popper-content-wrapper] {
+  z-index: 200 !important;
+}
+
+.rt-BaseDialogOverlay,
+.rt-BaseDialogContent {
+  z-index: 200;
+}
+
 /* Shared accessible-name-only utility — visually hidden, still read by screen readers. */
 .sr-only {
   position: absolute;

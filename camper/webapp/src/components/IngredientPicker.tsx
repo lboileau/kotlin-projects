@@ -6,6 +6,7 @@ import type { IngredientResponse } from '../api/ingredients';
 import { createOrFindIngredient, useIngredients } from '../queries/ingredients';
 import { CATEGORIES, UNITS, capitalize, normalizeCategory, normalizeUnit } from '../lib/ingredientConstants';
 import { toast } from '../lib/toastStore';
+import { SheetSelectContent } from './SheetSelectContent';
 import './IngredientPicker.css';
 
 const MAX_RESULTS = 30;
@@ -297,26 +298,26 @@ export function IngredientPicker({
               Category
               <Select.Root value={createCategory} onValueChange={setCreateCategory} size="3">
                 <Select.Trigger />
-                <Select.Content>
+                <SheetSelectContent>
                   {CATEGORIES.map((category) => (
                     <Select.Item key={category} value={category}>
                       {capitalize(category)}
                     </Select.Item>
                   ))}
-                </Select.Content>
+                </SheetSelectContent>
               </Select.Root>
             </Text>
             <Text as="label" size="2" weight="medium" className="ingredient-picker__create-field">
               Unit
               <Select.Root value={createUnit} onValueChange={setCreateUnit} size="3">
                 <Select.Trigger />
-                <Select.Content>
+                <SheetSelectContent>
                   {UNITS.map((unit) => (
                     <Select.Item key={unit} value={unit}>
                       {unit}
                     </Select.Item>
                   ))}
-                </Select.Content>
+                </SheetSelectContent>
               </Select.Root>
             </Text>
           </div>

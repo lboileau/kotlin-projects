@@ -4,6 +4,7 @@ import { ExclamationTriangleIcon, ExternalLinkIcon, Pencil2Icon, PlusIcon, Trash
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
+import { BottomBar } from '../../components/BottomBar';
 import { useAuth } from '../../auth/useAuth';
 import { useDeleteRecipe, usePublishRecipe, useRecipe } from '../../queries/recipes';
 import { capitalize } from '../../lib/ingredientConstants';
@@ -216,36 +217,36 @@ export function RecipeDetailPage() {
             <PlusIcon /> Add ingredient
           </SheetLink>
         )}
-
-        <div className="recipe-detail-page__actions">
-          <Button
-            size="3"
-            variant={isDraft && isOwner ? 'soft' : 'solid'}
-            className="recipe-detail-page__add-to-plan"
-            asChild
-          >
-            <SheetLink to={`/recipes/${recipe.id}/add-to-plan`}>Add to plan</SheetLink>
-          </Button>
-
-          {isDraft && isOwner && (
-            <div className="recipe-detail-page__publish">
-              <Button
-                size="3"
-                disabled={publishBlockers.length > 0}
-                loading={publishRecipe.isPending}
-                onClick={handlePublish}
-              >
-                Publish
-              </Button>
-              {publishBlockedReason && (
-                <Text as="p" size="1" color="gray">
-                  {publishBlockedReason}
-                </Text>
-              )}
-            </div>
-          )}
-        </div>
       </div>
+
+      <BottomBar>
+        <Button
+          size="3"
+          variant={isDraft && isOwner ? 'soft' : 'solid'}
+          className="recipe-detail-page__add-to-plan"
+          asChild
+        >
+          <SheetLink to={`/recipes/${recipe.id}/add-to-plan`}>Add to plan</SheetLink>
+        </Button>
+
+        {isDraft && isOwner && (
+          <div className="recipe-detail-page__publish">
+            <Button
+              size="3"
+              disabled={publishBlockers.length > 0}
+              loading={publishRecipe.isPending}
+              onClick={handlePublish}
+            >
+              Publish
+            </Button>
+            {publishBlockedReason && (
+              <Text as="p" size="1" color="gray">
+                {publishBlockedReason}
+              </Text>
+            )}
+          </div>
+        )}
+      </BottomBar>
 
       <Outlet />
     </div>

@@ -27,6 +27,11 @@
 }
 
 .plan-detail-page__body {
+  /* Grows to fill the column's height (from .plan-detail-page's
+     min-height: 100%) so the BottomBar below lands at the bottom of the
+     screen even for a plan with few or no recipes yet, not just once
+     there's enough content to scroll. */
+  flex: 1;
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -50,6 +55,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .plan-detail-page__recipes {

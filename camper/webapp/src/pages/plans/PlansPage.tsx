@@ -4,6 +4,7 @@ import { ChevronRightIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
+import { BottomBar } from '../../components/BottomBar';
 import { usePlans } from '../../queries/plans';
 import { formatRelativeTime } from '../../lib/relativeTime';
 import './PlansPage.css';
@@ -78,13 +79,13 @@ export function PlansPage() {
       </div>
 
       {hasPlans && (
-        <div className="plans-page__fab-region">
-          <Button asChild size="4" variant="solid" radius="full" className="plans-page__fab">
-            <SheetLink to="new" aria-label="New plan">
+        <BottomBar>
+          <Button asChild size="3" variant="solid" className="plans-page__new-plan">
+            <SheetLink to="new">
               <PlusIcon /> New plan
             </SheetLink>
           </Button>
-        </div>
+        </BottomBar>
       )}
 
       <Outlet />

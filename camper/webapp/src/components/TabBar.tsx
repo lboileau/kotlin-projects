@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { BookmarkIcon, CalendarIcon, ListBulletIcon } from '@radix-ui/react-icons';
+import { getSelectedPlanId } from '../lib/selectedPlan';
 import './TabBar.css';
 
 const SHOPPING_UNDER_PLAN = /^\/plans\/[^/]+\/shopping/;
@@ -33,6 +34,17 @@ const TABS = [
 export function TabBar() {
   const location = useLocation();
 
+  // The Plans tab returns to the plan being worked on, so switching between
+  // Plans and Shopping stays on the same plan. Tapping it again while already
+  // on that plan goes up to the list of plans.
+  const selectedPlanId = getSelectedPlanId();
+  const selectedPlanPath = selectedPlanId ? `/plans/${selectedPlanId}` : null;
+  const onSelectedPlan =
+    selectedPlanPath !== null &&
+    location.pathname.startsWith(selectedPlanPath) &&
+    !SHOPPING_UNDER_PLAN.test(location.pathname);
+  const plansTarget = selectedPlanPath !== null && !onSelectedPlan ? selectedPlanPath : '/plans';
+
   return (
     <nav className="tab-bar" aria-label="Primary">
       {TABS.map(({ to, label, Icon, isActive }) => {
@@ -40,7 +52,7 @@ export function TabBar() {
         return (
           <NavLink
             key={to}
-            to={to}
+            to={to === '/plans' ? plansTarget : to}
             className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}`}
             aria-current={active ? 'page' : undefined}
           >

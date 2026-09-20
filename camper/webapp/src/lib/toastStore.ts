@@ -38,7 +38,16 @@ export function dismissToast(id: number): void {
 
 function pushToast(tone: ToastEntry['tone'], message: string, action?: ToastAction): void {
   const id = nextId++;
-  toasts = [...toasts, { id, tone, message, action }];
+  // A newer toast replaces any other of the same tone still showing,
+  // rather than stacking on top of it — a rapid flow (e.g. adding several
+  // ingredients back to back) can otherwise fire one info toast every
+  // second or two, piling several up before any of them expire. Info and
+  // error stay independent, matching the two separate live regions. The
+  // replaced toast's own dismiss timeout still fires later, harmlessly —
+  // `dismissToast` filtering an id that's already gone is a no-op.
+  // A toast that carries an action (Undo, Open) is never evicted: removing
+  // two recipes in a row must not take away the first one's Undo.
+  toasts = [...toasts.filter((entry) => entry.tone !== tone || entry.action), { id, tone, message, action }];
   emit();
   window.setTimeout(() => dismissToast(id), tone === 'error' ? 6000 : 4000);
 }

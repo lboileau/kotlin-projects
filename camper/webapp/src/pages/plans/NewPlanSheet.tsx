@@ -6,19 +6,28 @@ import { Stepper } from '../../components/Stepper';
 import { useCreatePlan } from '../../queries/plans';
 import './NewPlanSheet.css';
 
+/** "Sep 20" — today's date, used as the default plan name when the field is left blank. */
+function todaysDateLabel(): string {
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date());
+}
+
 export function NewPlanSheet() {
   const sheet = useSheet('/plans');
   const createPlan = useCreatePlan();
 
   const [name, setName] = useState('');
   const [servings, setServings] = useState(2);
+  const defaultName = todaysDateLabel();
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    if (createPlan.isPending || !name.trim()) return;
+    if (createPlan.isPending) return;
 
+    // Shown as a placeholder, not a pre-filled value, so typing a name
+    // never has to clear/replace anything — but an untouched, empty
+    // field still creates successfully, using that same date as the name.
     createPlan.mutate(
-      { name: name.trim(), servings },
+      { name: name.trim() || defaultName, servings },
       {
         onSuccess: (plan) => sheet.close({ to: `/plans/${plan.id}`, replace: true }),
         // On error the global mutation error toast already surfaces it —
@@ -37,10 +46,9 @@ export function NewPlanSheet() {
           <TextField.Root
             value={name}
             onChange={(event) => setName(event.target.value)}
-            placeholder="Weeknight dinners"
+            placeholder={defaultName}
             size="3"
             autoFocus
-            required
           />
         </label>
 
@@ -56,7 +64,6 @@ export function NewPlanSheet() {
           size="3"
           variant="solid"
           loading={createPlan.isPending}
-          disabled={!name.trim()}
           className="new-plan-sheet__submit"
         >
           Create plan
