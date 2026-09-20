@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Badge, Skeleton, Text } from '@radix-ui/themes';
 import { CheckIcon } from '@radix-ui/react-icons';
@@ -6,6 +7,7 @@ import { useSheet } from '../../components/useSheet';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { usePlans } from '../../queries/plans';
 import { setSelectedPlanId } from '../../lib/selectedPlan';
+import { planShareMeta } from '../../lib/planShareMeta';
 import './SwitchPlanSheet.css';
 
 export function SwitchPlanSheet() {
@@ -17,6 +19,19 @@ export function SwitchPlanSheet() {
   // refetch error (window focus) falls through to the normal render
   // instead of blanking an already-loaded list.
   const hasData = !!plans;
+
+  // This sheet doesn't fetch the plan it's switching away from — it
+  // reuses the already-fetched `mine` list, which is the cheapest signal
+  // for "is that plan still accessible" (both deleted and lost-access
+  // drop it from this list once invalidated). If it's gone, the parent
+  // ShoppingPage's own 403/404 already shows the right state — this just
+  // makes sure the sheet on top of it doesn't linger.
+  useEffect(() => {
+    if (plans && planId && !plans.some((plan) => plan.id === planId)) {
+      sheet.close();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plans, planId]);
 
   function handleSelect(id: string) {
     setSelectedPlanId(id);
@@ -45,6 +60,7 @@ export function SwitchPlanSheet() {
         <div className="switch-plan-sheet__list">
           {plans.map((plan) => {
             const current = plan.id === planId;
+            const { shared } = planShareMeta(plan);
             return (
               <button
                 key={plan.id}
@@ -54,11 +70,18 @@ export function SwitchPlanSheet() {
                 onClick={() => handleSelect(plan.id)}
               >
                 <span className="switch-plan-sheet__row-name">{plan.name}</span>
-                {current && (
-                  <Badge variant="soft">
-                    <CheckIcon /> Current
-                  </Badge>
-                )}
+                <span className="switch-plan-sheet__row-badges">
+                  {shared && (
+                    <Badge variant="soft" color="gray" size="1">
+                      Shared
+                    </Badge>
+                  )}
+                  {current && (
+                    <Badge variant="soft">
+                      <CheckIcon /> Current
+                    </Badge>
+                  )}
+                </span>
               </button>
             );
           })}

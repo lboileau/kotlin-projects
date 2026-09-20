@@ -7,6 +7,7 @@ import {
   updatePurchase,
   type ShoppingListResponse,
 } from '../api/shopping';
+import { ApiError } from '../api/http';
 import { shoppingKey } from './plans';
 import {
   applyRowToggle,
@@ -27,6 +28,12 @@ export function useShoppingList(planId: string | undefined) {
     queryKey: shoppingKey(planId ?? ''),
     queryFn: () => getShoppingList(planId!),
     enabled: !!planId,
+    retry: (failureCount, error) => {
+      // A 404 means "not found", a 403 means "no access" — both show
+      // immediately, neither is worth retrying (mirrors usePlan).
+      if (error instanceof ApiError && (error.status === 404 || error.status === 403)) return false;
+      return failureCount < 1;
+    },
   });
 }
 

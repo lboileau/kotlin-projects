@@ -1,11 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  acceptInvite,
   addRecipeToPlan,
   createMealPlan,
   deleteMealPlan,
   duplicateMealPlan,
   getMealPlanDetail,
+  getMembers,
+  getShareToken,
   listMyMealPlans,
+  removeMember,
   removeRecipeFromPlan,
   updateMealPlan,
   type MealPlanDayResponse,
@@ -13,22 +17,26 @@ import {
   type MealPlanRecipeDetailResponse,
   type MealPlanResponse,
   type MealType,
+  type PlanMemberResponse,
 } from '../api/mealPlans';
 import { ApiError } from '../api/http';
 import type { ShoppingListResponse } from '../api/shopping';
 import { useAuth } from '../auth/useAuth';
 import { findRecipeInPlan, MEAL_TYPES } from '../lib/flatPlan';
+import { toast } from '../lib/toastStore';
 
 export const plansKey = ['plans', 'mine'] as const;
 export const planKey = (planId: string) => ['plan', planId] as const;
 export const shoppingKey = (planId: string) => ['shopping', planId] as const;
+export const shareKey = (planId: string) => ['plan', planId, 'share'] as const;
+export const membersKey = (planId: string) => ['plan', planId, 'members'] as const;
 
-/** My plans (home list), templates filtered out, newest-updated first. */
+/** My plans (home list): owned plus shared, templates filtered out, newest-updated first. */
 export function usePlans() {
   const { user } = useAuth();
   return useQuery({
     queryKey: plansKey,
-    queryFn: () => listMyMealPlans(user!.id),
+    queryFn: () => listMyMealPlans(),
     enabled: !!user,
     select: (plans) =>
       plans
@@ -45,8 +53,9 @@ export function usePlan(planId: string | undefined) {
     queryFn: () => getMealPlanDetail(planId!),
     enabled: !!planId,
     retry: (failureCount, error) => {
-      // A 404 means "not found" — show that immediately, don't retry it.
-      if (error instanceof ApiError && error.status === 404) return false;
+      // A 404 means "not found", a 403 means "no access" — both show
+      // immediately, neither is worth retrying.
+      if (error instanceof ApiError && (error.status === 404 || error.status === 403)) return false;
       return failureCount < 1;
     },
   });
@@ -420,6 +429,101 @@ export function useDuplicatePlan() {
   return useMutation({
     mutationFn: ({ planId, name }: { planId: string; name?: string }) => duplicateMealPlan(planId, name),
     onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: plansKey });
+    },
+  });
+}
+
+/**
+ * The plan's share link token. Deliberately NOT fetched just by mounting
+ * — `enabled: false`, with the caller triggering the actual fetch via
+ * `refetch()` when the Share section's button is tapped. This keeps the
+ * (first-call-creates-it) request from firing on every plan view.
+ */
+export function useShareLink(planId: string | undefined) {
+  return useQuery({
+    queryKey: shareKey(planId ?? ''),
+    queryFn: () => getShareToken(planId!),
+    enabled: false,
+  });
+}
+
+/** Accepting a share link — idempotent server-side. Invalidates the plans list so the newly joined (or already-owned) plan shows up. */
+export function useAcceptInvite() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (token: string) => acceptInvite(token),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: plansKey });
+    },
+  });
+}
+
+/** A plan's members (owner first, then members by join time). Shown as soon as the edit sheet opens — unlike the share link, not deferred behind a tap. */
+export function usePlanMembers(planId: string | undefined) {
+  return useQuery({
+    queryKey: membersKey(planId ?? ''),
+    queryFn: () => getMembers(planId!),
+    enabled: !!planId,
+  });
+}
+
+export interface RemoveMemberInput {
+  userId: string;
+  /** True for a self-removal ("leave") — only changes the generic-failure toast's wording. */
+  isSelf?: boolean;
+}
+
+/**
+ * Removes a member — used both for the owner removing someone else and
+ * for a member removing themselves ("leave"); callers tell those apart
+ * via `isSelf` (for this hook's own error copy) and their own onSuccess
+ * (e.g. leave navigates away and clears the selected plan id,
+ * remove-by-owner just closes its inline confirm). Optimistic only for
+ * the members list itself, per the sharing contract — memberCount on the
+ * plan/plans caches is left to settle-time invalidation rather than
+ * guessed at here. Rollback is targeted: only this call's own removed
+ * member is spliced back into the CURRENT cache, never a whole-list
+ * snapshot (which would also undo a different member's removal that
+ * already succeeded).
+ */
+export function useRemoveMember(planId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId }: RemoveMemberInput) => removeMember(planId, userId),
+    onMutate: async ({ userId }) => {
+      await queryClient.cancelQueries({ queryKey: membersKey(planId) });
+      const previous = queryClient.getQueryData<PlanMemberResponse[]>(membersKey(planId));
+      const removedMember = previous?.find((member) => member.userId === userId) ?? null;
+      queryClient.setQueryData<PlanMemberResponse[]>(membersKey(planId), (current) =>
+        current ? current.filter((member) => member.userId !== userId) : current,
+      );
+      return { removedMember };
+    },
+    onError: (error, { isSelf }, context) => {
+      const removedMember = context?.removedMember;
+      if (removedMember) {
+        queryClient.setQueryData<PlanMemberResponse[]>(membersKey(planId), (current) => {
+          if (!current) return current;
+          if (current.some((member) => member.userId === removedMember.userId)) return current; // already back
+          return [...current, removedMember].sort((a, b) => (a.joinedAt < b.joinedAt ? -1 : 1));
+        });
+      }
+      // A 400 means the target can't be removed (the owner, or a legacy
+      // trip's owner) — worth its own message rather than the server's.
+      // Otherwise leave and remove get their own wording.
+      const message =
+        error instanceof ApiError && error.status === 400
+          ? "This person can't be removed"
+          : isSelf
+            ? "Couldn't leave this plan."
+            : "Couldn't remove that person.";
+      toast.error(message);
+    },
+    meta: { suppressErrorToast: true },
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: membersKey(planId) });
+      void queryClient.invalidateQueries({ queryKey: planKey(planId) });
       void queryClient.invalidateQueries({ queryKey: plansKey });
     },
   });

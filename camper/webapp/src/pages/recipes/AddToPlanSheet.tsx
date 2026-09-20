@@ -10,6 +10,7 @@ import { planKey, useAddRecipeToPlan, usePlans } from '../../queries/plans';
 import type { MealPlanDetailResponse, MealPlanResponse } from '../../api/mealPlans';
 import { recipeIdsInPlan } from '../../lib/flatPlan';
 import { getSelectedPlanId } from '../../lib/selectedPlan';
+import { planShareMeta } from '../../lib/planShareMeta';
 import { toast } from '../../lib/toastStore';
 import './AddToPlanSheet.css';
 
@@ -99,6 +100,7 @@ export function AddToPlanSheet() {
         <div className="add-to-plan-sheet__list">
           {orderedPlans.map((plan) => {
             const added = isAlreadyAdded(plan.id);
+            const { shared } = planShareMeta(plan);
             return (
               <button
                 key={plan.id}
@@ -108,11 +110,18 @@ export function AddToPlanSheet() {
                 onClick={() => handleAdd(plan)}
               >
                 <span className="add-to-plan-sheet__row-name">{plan.name}</span>
-                {added && (
-                  <Badge color="green" variant="soft">
-                    <CheckIcon /> Added
-                  </Badge>
-                )}
+                <span className="add-to-plan-sheet__row-badges">
+                  {shared && (
+                    <Badge variant="soft" color="gray" size="1">
+                      Shared
+                    </Badge>
+                  )}
+                  {added && (
+                    <Badge color="green" variant="soft">
+                      <CheckIcon /> Added
+                    </Badge>
+                  )}
+                </span>
               </button>
             );
           })}

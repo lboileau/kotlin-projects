@@ -44,18 +44,28 @@
   flex: 1;
 }
 
+.plans-page__row-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .plans-page__row-name {
   font-weight: 600;
   color: var(--gray-12);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .plans-page__row-meta {
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-wrap: wrap;
+  row-gap: 4px;
 }
 
 .plans-page__skeleton-row {

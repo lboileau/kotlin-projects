@@ -44,14 +44,20 @@ export function ShoppingPage() {
   usePageTitle(list?.mealPlanName ? `Shopping — ${list.mealPlanName}` : 'Shopping');
 
   const notFound = isError && error instanceof ApiError && error.status === 404;
+  // Checked the same way as `notFound` — before the "is there stale data
+  // to keep showing" branch below — so a background refetch that comes
+  // back 403 (e.g. the `members` sync event after the owner removes this
+  // user while the page is open) wins over whatever list was cached, the
+  // same way a 404 does.
+  const forbidden = isError && error instanceof ApiError && error.status === 403;
 
   useEffect(() => {
     if (planId) setSelectedPlanId(planId);
   }, [planId]);
 
   useEffect(() => {
-    if (notFound && planId && getSelectedPlanId() === planId) clearSelectedPlanId();
-  }, [notFound, planId]);
+    if ((notFound || forbidden) && planId && getSelectedPlanId() === planId) clearSelectedPlanId();
+  }, [notFound, forbidden, planId]);
 
   if (notFound) {
     return (
@@ -62,6 +68,25 @@ export function ShoppingPage() {
           </Heading>
           <Text color="gray" size="2">
             It may have been deleted, or the link is wrong.
+          </Text>
+          <Button asChild size="3" variant="solid">
+            <Link to="/plans">Back to Plans</Link>
+          </Button>
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  if (forbidden) {
+    return (
+      <div className="shopping-page">
+        <div className="shopping-page__not-found">
+          <Heading as="h1" size="4" weight="medium">
+            You don&apos;t have access to this plan
+          </Heading>
+          <Text color="gray" size="2">
+            It may have been shared with a different account, or you were removed.
           </Text>
           <Button asChild size="3" variant="solid">
             <Link to="/plans">Back to Plans</Link>

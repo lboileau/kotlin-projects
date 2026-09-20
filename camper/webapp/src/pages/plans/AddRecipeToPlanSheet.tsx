@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Badge, Button, Skeleton, Text, TextField } from '@radix-ui/themes';
 import { CheckIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { QueryErrorState } from '../../components/QueryErrorState';
+import { ApiError } from '../../api/http';
 import { useAuth } from '../../auth/useAuth';
 import { useRecipes } from '../../queries/recipes';
 import type { RecipeResponse } from '../../api/recipes';
@@ -23,8 +24,21 @@ export function AddRecipeToPlanSheet() {
   // refetch error (window focus) falls through to the normal render
   // instead of blanking an already-loaded list.
   const hasData = !!recipes;
-  const { data: plan } = usePlan(planId);
+  const { data: plan, isError: isPlanError, error: planError } = usePlan(planId);
   const addRecipe = useAddRecipeToPlan(planId);
+
+  // Same derivation as PlanDetailPage/EditPlanSheet — a stale `plan`
+  // stays in cache, so without this the sheet would keep showing the
+  // recipe picker over a page that's already switched to its "not
+  // found"/"no access" state underneath (e.g. removed as a member via
+  // the `members` event while this sheet is open).
+  const planNotFound = isPlanError && planError instanceof ApiError && planError.status === 404;
+  const planForbidden = isPlanError && planError instanceof ApiError && planError.status === 403;
+
+  useEffect(() => {
+    if (planNotFound || planForbidden) sheet.close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planNotFound, planForbidden]);
 
   const [query, setQuery] = useState('');
 

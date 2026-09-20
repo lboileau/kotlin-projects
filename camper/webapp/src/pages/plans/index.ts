@@ -8,3 +8,4 @@ export { NewPlanSheet } from './NewPlanSheet';
 export { PlanDetailPage } from './PlanDetailPage';
 export { AddRecipeToPlanSheet } from './AddRecipeToPlanSheet';
 export { EditPlanSheet } from './EditPlanSheet';
+export { JoinPlanPage } from './JoinPlanPage';

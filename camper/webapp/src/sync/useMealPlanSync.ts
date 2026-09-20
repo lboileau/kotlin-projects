@@ -9,11 +9,18 @@ const RECHECK_INTERVAL_MS = 300;
  * Subscribes to `/topic/meal-plans/{planId}` while mounted — used by
  * PlanDetailPage and the shopping page, which share one topic
  * subscription via the provider's reference counting. On a message (or
- * a reconnect resync): `deleted` invalidates `['plans','mine']` and
- * `['plan', id]`; anything else invalidates `['plan', id]` and
- * `['shopping', id]`. If a mutation for this plan is still in flight,
- * the invalidation is deferred until it settles, so the user's own
- * optimistic rows never flicker from their own echo.
+ * a reconnect resync): `deleted` and `{ resource: 'members' }` (a join,
+ * a removal or a leave) both also invalidate `['plans','mine']` —
+ * deleted because a plan disappears from the list, members because it
+ * changes memberCount/role/ownerName there too — anything else only
+ * invalidates `['plan', id]` and `['shopping', id]`. `['plan', id]`
+ * covers the share/members subkeys as well (`shareKey`/`membersKey` are
+ * both prefixed by `planKey`), so a member being removed while this
+ * plan's edit sheet or shopping list is open picks up the change (or,
+ * for the removed member themselves, the 403 that follows). If a
+ * mutation for this plan is still in flight, the invalidation is
+ * deferred until it settles, so the user's own optimistic rows never
+ * flicker from their own echo.
  */
 export function useMealPlanSync(planId: string | undefined): void {
   const context = useContext(SyncContext);
@@ -31,8 +38,8 @@ export function useMealPlanSync(planId: string | undefined): void {
       );
     }
 
-    function invalidate(deleted: boolean) {
-      if (deleted) {
+    function invalidate(alsoInvalidatePlansList: boolean) {
+      if (alsoInvalidatePlansList) {
         // Also invalidate shoppingKey — otherwise an open shopping page
         // for a plan deleted elsewhere keeps showing its last-fetched
         // list instead of picking up the 404 that drives its not-found
@@ -47,10 +54,10 @@ export function useMealPlanSync(planId: string | undefined): void {
     }
 
     function handleMessage(message: SyncMessage) {
-      const deleted = message?.action === 'deleted';
+      const alsoInvalidatePlansList = message?.action === 'deleted' || message?.resource === 'members';
 
       if (!isMutating()) {
-        invalidate(deleted);
+        invalidate(alsoInvalidatePlansList);
         return;
       }
 
@@ -59,7 +66,7 @@ export function useMealPlanSync(planId: string | undefined): void {
         if (!isMutating()) {
           window.clearInterval(pendingInterval);
           pendingInterval = undefined;
-          invalidate(deleted);
+          invalidate(alsoInvalidatePlansList);
         }
       }, RECHECK_INTERVAL_MS);
     }

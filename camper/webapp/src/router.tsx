@@ -20,6 +20,7 @@ const NewPlanSheet = lazy(() => import('./pages/plans').then((m) => ({ default: 
 const PlanDetailPage = lazy(() => import('./pages/plans').then((m) => ({ default: m.PlanDetailPage })));
 const AddRecipeToPlanSheet = lazy(() => import('./pages/plans').then((m) => ({ default: m.AddRecipeToPlanSheet })));
 const EditPlanSheet = lazy(() => import('./pages/plans').then((m) => ({ default: m.EditPlanSheet })));
+const JoinPlanPage = lazy(() => import('./pages/plans').then((m) => ({ default: m.JoinPlanPage })));
 
 const ShoppingPage = lazy(() => import('./pages/shopping').then((m) => ({ default: m.ShoppingPage })));
 const SwitchPlanSheet = lazy(() => import('./pages/shopping').then((m) => ({ default: m.SwitchPlanSheet })));
@@ -87,6 +88,9 @@ export const router = createBrowserRouter([
             children: [{ path: 'switch', element: <SwitchPlanSheet /> }],
           },
           { path: 'shopping', element: <ShoppingRedirect /> },
+          // Inside the guarded shell so a signed-out visitor goes through
+          // /sign-in?next=/join/... and comes back here to accept.
+          { path: 'join/:token', element: <JoinPlanPage /> },
           {
             path: 'recipes',
             element: <RecipesPage />,

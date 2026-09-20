@@ -17,7 +17,14 @@
 }
 
 .sign-in-page__subtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin-bottom: 20px;
+}
+
+.sign-in-page__subtitle p {
+  margin: 0;
 }
 
 .sign-in-page__form {

@@ -41,3 +41,34 @@
 .edit-plan-sheet__confirm-delete-actions > * {
   flex: 1;
 }
+
+.edit-plan-sheet__members {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-plan-sheet__member-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 4px 0;
+}
+
+.edit-plan-sheet__member-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-2);
+}
+
+.edit-plan-sheet__member-confirm {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}

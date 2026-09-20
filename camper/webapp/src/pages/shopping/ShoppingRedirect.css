@@ -62,9 +62,17 @@
   flex: 1;
 }
 
+.shopping-redirect__row-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
 .shopping-redirect__row-name {
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }

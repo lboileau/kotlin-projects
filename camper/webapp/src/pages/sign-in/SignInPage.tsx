@@ -25,6 +25,7 @@ export function SignInPage() {
   const [submitting, setSubmitting] = useState(false);
 
   const nextPath = safeNext(searchParams.get('next'));
+  const isJoinRedirect = nextPath.startsWith('/join/');
 
   const usernameRef = useRef<HTMLInputElement>(null);
   // Captured once, from the very first render: true only when the page
@@ -95,9 +96,17 @@ export function SignInPage() {
         <Heading as="h1" size="6" align="center" className="sign-in-page__title">
           Meal Planner
         </Heading>
-        <Text as="p" align="center" color="gray" size="2" className="sign-in-page__subtitle">
-          {needsRegistration ? 'Tell us your name to finish signing up.' : 'Sign in with your email.'}
-        </Text>
+        <div className="sign-in-page__subtitle">
+          <Text as="p" align="center" color="gray" size="2">
+            {needsRegistration ? 'Tell us your name to finish signing up.' : 'Sign in with your email.'}
+          </Text>
+
+          {isJoinRedirect && (
+            <Text as="p" align="center" color="gray" size="2">
+              Sign in to open the plan that was shared with you.
+            </Text>
+          )}
+        </div>
 
         <form onSubmit={handleSubmit} className="sign-in-page__form">
           <label className="sign-in-page__field">

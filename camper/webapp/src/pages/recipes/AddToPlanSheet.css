@@ -29,6 +29,13 @@
   white-space: nowrap;
 }
 
+.add-to-plan-sheet__row-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .add-to-plan-sheet__row:hover:not(:disabled) {
   background: var(--accent-3);
 }

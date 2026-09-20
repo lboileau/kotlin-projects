@@ -7,6 +7,7 @@ import { QueryErrorState } from '../../components/QueryErrorState';
 import { BottomBar } from '../../components/BottomBar';
 import { usePlans } from '../../queries/plans';
 import { formatRelativeTime } from '../../lib/relativeTime';
+import { planShareMeta } from '../../lib/planShareMeta';
 import './PlansPage.css';
 
 function recipeCountLabel(recipeCount: number): string {
@@ -57,25 +58,35 @@ export function PlansPage() {
         {!isLoading &&
           (hasData || !isError) &&
           hasPlans &&
-          plans.map((plan) => (
-            <Link key={plan.id} to={`/plans/${plan.id}`} className="plans-page__row">
-              <div className="plans-page__row-main">
-                <div className="plans-page__row-name">{plan.name}</div>
-                <div className="plans-page__row-meta">
-                  <Badge variant="soft">
-                    {plan.servings} {plan.servings === 1 ? 'serving' : 'servings'}
-                  </Badge>
-                  <Text size="1" color="gray">
-                    {recipeCountLabel(plan.recipeCount)}
-                  </Text>
-                  <Text size="1" color="gray">
-                    Updated {formatRelativeTime(plan.updatedAt)}
-                  </Text>
+          plans.map((plan) => {
+            const { shared, metaText } = planShareMeta(plan);
+            return (
+              <Link key={plan.id} to={`/plans/${plan.id}`} className="plans-page__row">
+                <div className="plans-page__row-main">
+                  <div className="plans-page__row-name-line">
+                    <div className="plans-page__row-name">{plan.name}</div>
+                    {shared && (
+                      <Badge variant="soft" color="gray" size="1">
+                        Shared
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="plans-page__row-meta">
+                    <Badge variant="soft">
+                      {plan.servings} {plan.servings === 1 ? 'serving' : 'servings'}
+                    </Badge>
+                    <Text size="1" color="gray">
+                      {recipeCountLabel(plan.recipeCount)}
+                    </Text>
+                    <Text size="1" color="gray">
+                      {metaText ?? `Updated ${formatRelativeTime(plan.updatedAt)}`}
+                    </Text>
+                  </div>
                 </div>
-              </div>
-              <ChevronRightIcon color="var(--gray-9)" />
-            </Link>
-          ))}
+                <ChevronRightIcon color="var(--gray-9)" />
+              </Link>
+            );
+          })}
       </div>
 
       {hasPlans && (

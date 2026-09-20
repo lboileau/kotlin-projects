@@ -23,6 +23,11 @@ export function PlanDetailPage() {
   const removeRecipe = useRemoveRecipeFromPlan(planId);
 
   const notFound = isError && error instanceof ApiError && error.status === 404;
+  // Checked the same way as `notFound` — before the "is there stale data
+  // to keep showing" branch below — so a background refetch that comes
+  // back 403 (e.g. the owner removed this user while the page was open)
+  // wins over whatever was cached, the same way a 404 does.
+  const forbidden = isError && error instanceof ApiError && error.status === 403;
 
   // No effect needed to seed this from `plan`: until the stepper is
   // touched this session, the displayed value just falls through to the
@@ -40,10 +45,10 @@ export function PlanDetailPage() {
   }, [planId]);
 
   useEffect(() => {
-    if (notFound && planId && getSelectedPlanId() === planId) {
+    if ((notFound || forbidden) && planId && getSelectedPlanId() === planId) {
       clearSelectedPlanId();
     }
-  }, [notFound, planId]);
+  }, [notFound, forbidden, planId]);
 
   useEffect(() => {
     return () => {
@@ -119,6 +124,26 @@ export function PlanDetailPage() {
           </Text>
           <Text color="gray" size="2">
             It may have been deleted, or the link is wrong.
+          </Text>
+          <Button asChild size="3" variant="solid">
+            <Link to="/plans">Back to Plans</Link>
+          </Button>
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  if (forbidden) {
+    return (
+      <div className="plan-detail-page">
+        <PageHeader title="Plan" backTo="/plans" />
+        <div className="plan-detail-page__not-found">
+          <Text size="4" weight="medium">
+            You don&apos;t have access to this plan
+          </Text>
+          <Text color="gray" size="2">
+            It may have been shared with a different account, or you were removed.
           </Text>
           <Button asChild size="3" variant="solid">
             <Link to="/plans">Back to Plans</Link>

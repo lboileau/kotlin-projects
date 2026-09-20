@@ -1,10 +1,11 @@
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { Button, Skeleton, Text } from '@radix-ui/themes';
+import { Badge, Button, Skeleton, Text } from '@radix-ui/themes';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { usePlans } from '../../queries/plans';
 import { getSelectedPlanId, setSelectedPlanId } from '../../lib/selectedPlan';
+import { planShareMeta } from '../../lib/planShareMeta';
 import './ShoppingRedirect.css';
 
 /**
@@ -49,19 +50,29 @@ function ChoosePlan() {
           <Text color="gray" size="2" as="p" className="shopping-redirect__hint">
             Choose a plan to shop for.
           </Text>
-          {plans.map((plan) => (
-            <button key={plan.id} type="button" className="shopping-redirect__row" onClick={() => handleSelect(plan.id)}>
-              <span className="shopping-redirect__row-main">
-                <span className="shopping-redirect__row-name">{plan.name}</span>
-                <Text as="span" size="2" color="gray">
-                  {plan.recipeCount === 0
-                    ? 'No recipes yet'
-                    : `${plan.recipeCount} ${plan.recipeCount === 1 ? 'recipe' : 'recipes'}`}
-                </Text>
-              </span>
-              <ChevronRightIcon aria-hidden="true" />
-            </button>
-          ))}
+          {plans.map((plan) => {
+            const { shared, metaText } = planShareMeta(plan);
+            const recipeCountLabel =
+              plan.recipeCount === 0 ? 'No recipes yet' : `${plan.recipeCount} ${plan.recipeCount === 1 ? 'recipe' : 'recipes'}`;
+            return (
+              <button key={plan.id} type="button" className="shopping-redirect__row" onClick={() => handleSelect(plan.id)}>
+                <span className="shopping-redirect__row-main">
+                  <span className="shopping-redirect__row-name-line">
+                    <span className="shopping-redirect__row-name">{plan.name}</span>
+                    {shared && (
+                      <Badge variant="soft" color="gray" size="1">
+                        Shared
+                      </Badge>
+                    )}
+                  </span>
+                  <Text as="span" size="2" color="gray">
+                    {metaText ? `${recipeCountLabel} · ${metaText}` : recipeCountLabel}
+                  </Text>
+                </span>
+                <ChevronRightIcon aria-hidden="true" />
+              </button>
+            );
+          })}
         </div>
       )}
 

@@ -45,12 +45,15 @@ export function ImportRecipeSheet() {
   // check this before touching component state or navigating out from
   // under whatever the user is looking at by the time it resolves.
   const mountedRef = useRef(true);
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    // Set on every mount, not just via the ref's initial value: StrictMode
+    // mounts, unmounts and remounts in development, and a cleanup-only
+    // effect would leave this false for the whole life of the component.
+    mountedRef.current = true;
+    return () => {
       mountedRef.current = false;
-    },
-    [],
-  );
+    };
+  }, []);
 
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
