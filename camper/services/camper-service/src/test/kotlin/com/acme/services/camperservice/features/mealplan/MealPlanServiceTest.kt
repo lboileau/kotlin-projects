@@ -4,14 +4,18 @@ import com.acme.clients.common.Result
 import com.acme.clients.ingredientclient.fake.FakeIngredientClient
 import com.acme.clients.ingredientclient.model.Ingredient
 import com.acme.clients.mealplanclient.fake.FakeMealPlanClient
+import com.acme.clients.userclient.fake.FakeUserClient
 import com.acme.clients.mealplanclient.model.MealPlan
 import com.acme.clients.mealplanclient.model.MealPlanDay
 import com.acme.clients.mealplanclient.model.MealPlanRecipe
 import com.acme.clients.mealplanclient.model.ShoppingListManualItem
 import com.acme.clients.mealplanclient.model.ShoppingListPurchase
+import com.acme.clients.planclient.fake.FakePlanClient
+import com.acme.clients.planclient.model.Plan as ClientPlan
 import com.acme.clients.recipeclient.fake.FakeRecipeClient
 import com.acme.clients.recipeclient.model.Recipe
 import com.acme.clients.recipeclient.model.RecipeIngredient
+import com.acme.services.camperservice.common.auth.PlanRoleAuthorizer
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
 import com.acme.services.camperservice.features.mealplan.params.*
 import com.acme.services.camperservice.features.mealplan.service.MealPlanService
@@ -28,8 +32,11 @@ class MealPlanServiceTest {
     private val fakeMealPlanClient = FakeMealPlanClient()
     private val fakeRecipeClient = FakeRecipeClient()
     private val fakeIngredientClient = FakeIngredientClient()
+    private val fakeUserClient = FakeUserClient()
+    private val fakePlanClient = FakePlanClient()
+    private val planRoleAuthorizer = PlanRoleAuthorizer(fakePlanClient)
 
-    private val service = MealPlanService(fakeMealPlanClient, fakeRecipeClient, fakeIngredientClient)
+    private val service = MealPlanService(fakeMealPlanClient, fakeRecipeClient, fakeIngredientClient, fakeUserClient, planRoleAuthorizer)
 
     private val userId = UUID.randomUUID()
 
@@ -38,6 +45,20 @@ class MealPlanServiceTest {
         fakeMealPlanClient.reset()
         fakeRecipeClient.reset()
         fakeIngredientClient.reset()
+    }
+
+    /** Seeds a real trip plan owned by [ownerId] (default: [userId]), for CreateMealPlanAction/CopyToTripAction's target-trip authorization check. */
+    private fun seedTripPlan(planId: UUID, ownerId: UUID = userId): ClientPlan {
+        val plan = ClientPlan(
+            id = planId,
+            name = "Test Trip",
+            visibility = "private",
+            ownerId = ownerId,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now(),
+        )
+        fakePlanClient.seedPlan(plan)
+        return plan
     }
 
     // ─── Helpers ────────────────────────────────────────────────────────────
@@ -223,6 +244,7 @@ class MealPlanServiceTest {
         @Test
         fun `create trip-bound meal plan succeeds`() {
             val planId = UUID.randomUUID()
+            seedTripPlan(planId)
             val result = service.create(CreateMealPlanParam(
                 userId = userId,
                 name = "Trip Meals",
@@ -320,6 +342,7 @@ class MealPlanServiceTest {
         @Test
         fun `create trip-bound when plan already has meal plan returns PlanAlreadyHasMealPlan`() {
             val planId = UUID.randomUUID()
+            seedTripPlan(planId)
             seedMealPlan(planId = planId)
 
             val result = service.create(CreateMealPlanParam(
@@ -578,6 +601,7 @@ class MealPlanServiceTest {
             seedMealPlanRecipe(day1.id, "breakfast", recipe.id)
 
             val targetPlanId = UUID.randomUUID()
+            seedTripPlan(targetPlanId)
             val result = service.copyToTrip(CopyToTripParam(
                 mealPlanId = template.id,
                 userId = userId,
@@ -600,11 +624,13 @@ class MealPlanServiceTest {
         @Test
         fun `copy non-template returns NotATemplate`() {
             val tripPlan = seedMealPlan(isTemplate = false)
+            val targetPlanId = UUID.randomUUID()
+            seedTripPlan(targetPlanId)
 
             val result = service.copyToTrip(CopyToTripParam(
                 mealPlanId = tripPlan.id,
                 userId = userId,
-                planId = UUID.randomUUID(),
+                planId = targetPlanId,
                 servings = null,
             ))
 
@@ -616,6 +642,7 @@ class MealPlanServiceTest {
         fun `copy to plan that already has meal plan returns PlanAlreadyHasMealPlan`() {
             val template = seedMealPlan(isTemplate = true, planId = null)
             val existingPlanId = UUID.randomUUID()
+            seedTripPlan(existingPlanId)
             seedMealPlan(planId = existingPlanId)
 
             val result = service.copyToTrip(CopyToTripParam(
@@ -645,11 +672,13 @@ class MealPlanServiceTest {
         @Test
         fun `copy template uses source servings when servings param is null`() {
             val template = seedMealPlan(name = "Template", servings = 8, isTemplate = true, planId = null)
+            val targetPlanId = UUID.randomUUID()
+            seedTripPlan(targetPlanId)
 
             val result = service.copyToTrip(CopyToTripParam(
                 mealPlanId = template.id,
                 userId = userId,
-                planId = UUID.randomUUID(),
+                planId = targetPlanId,
                 servings = null,
             ))
 
@@ -663,11 +692,13 @@ class MealPlanServiceTest {
             val ingredient = seedIngredient("Butter", "dairy", "g")
             seedManualItem(template.id, ingredientId = ingredient.id, quantity = BigDecimal("200"), unit = "g")
             seedManualItem(template.id, description = "Paper plates")
+            val targetPlanId = UUID.randomUUID()
+            seedTripPlan(targetPlanId)
 
             val result = service.copyToTrip(CopyToTripParam(
                 mealPlanId = template.id,
                 userId = userId,
-                planId = UUID.randomUUID(),
+                planId = targetPlanId,
                 servings = null,
             ))
 

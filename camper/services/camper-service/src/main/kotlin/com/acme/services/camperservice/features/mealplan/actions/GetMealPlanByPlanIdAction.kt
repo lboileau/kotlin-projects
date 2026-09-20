@@ -5,18 +5,26 @@ import com.acme.clients.mealplanclient.api.MealPlanClient
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.libs.mealplancalculator.ShoppingListCalculator
+import com.acme.services.camperservice.features.mealplan.auth.MealPlanAuthorizer
 import com.acme.services.camperservice.features.mealplan.dto.MealPlanDetailResponse
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
 import com.acme.services.camperservice.features.mealplan.params.GetMealPlanByPlanIdParam
 import com.acme.services.camperservice.features.mealplan.validations.ValidateGetMealPlanByPlanId
 import com.acme.clients.mealplanclient.api.GetByPlanIdParam as ClientGetByPlanIdParam
 
+/**
+ * "Does this trip have a meal plan, and if so, give me the detail." If no meal plan is bound
+ * to the trip yet, there's nothing to protect and this returns null regardless of the caller's
+ * access to the trip itself — the trip page is where a meal plan gets created in the first place.
+ * If a meal plan DOES exist, the caller must be its owner or a member (private-plan rule).
+ */
 internal class GetMealPlanByPlanIdAction(
     private val mealPlanClient: MealPlanClient,
     private val recipeClient: RecipeClient,
     private val ingredientClient: IngredientClient,
 ) {
     private val validate = ValidateGetMealPlanByPlanId()
+    private val authorizer = MealPlanAuthorizer(mealPlanClient)
 
     fun execute(param: GetMealPlanByPlanIdParam): Result<MealPlanDetailResponse?, MealPlanError> {
         when (val validation = validate.execute(param)) {
@@ -29,6 +37,11 @@ internal class GetMealPlanByPlanIdAction(
             is Result.Failure -> return Result.Failure(MealPlanError.Invalid("mealPlan", result.error.message))
         }
 
-        return MealPlanDetailBuilder.buildDetail(mealPlan, mealPlanClient, recipeClient, ingredientClient)
+        when (val access = authorizer.authorize(mealPlan.id, param.userId)) {
+            is Result.Failure -> return access
+            is Result.Success -> {}
+        }
+
+        return MealPlanDetailBuilder.buildDetail(mealPlan, param.userId, mealPlanClient, recipeClient, ingredientClient)
     }
 }

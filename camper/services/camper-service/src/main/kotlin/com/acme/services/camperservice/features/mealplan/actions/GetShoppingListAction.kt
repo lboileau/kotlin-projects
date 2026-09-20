@@ -15,6 +15,7 @@ import com.acme.libs.mealplancalculator.model.IngredientInfo
 import com.acme.libs.mealplancalculator.UnitConverter
 import com.acme.libs.mealplancalculator.model.PurchaseStatus
 import com.acme.libs.mealplancalculator.model.RecipeIngredientWithMeta
+import com.acme.services.camperservice.features.mealplan.auth.MealPlanAuthorizer
 import com.acme.services.camperservice.features.mealplan.dto.RecipeRefResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListCategoryResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListItemResponse
@@ -34,10 +35,16 @@ internal class GetShoppingListAction(
     private val ingredientClient: IngredientClient,
 ) {
     private val validate = ValidateGetShoppingList()
+    private val authorizer = MealPlanAuthorizer(mealPlanClient)
 
     fun execute(param: GetShoppingListParam): Result<ShoppingListResponse, MealPlanError> {
         when (val validation = validate.execute(param)) {
             is Result.Failure -> return validation
+            is Result.Success -> {}
+        }
+
+        when (val access = authorizer.authorize(param.mealPlanId, param.userId)) {
+            is Result.Failure -> return access
             is Result.Success -> {}
         }
 

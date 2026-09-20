@@ -34,6 +34,7 @@ internal object MealPlanDetailBuilder {
 
     fun buildDetail(
         mealPlan: MealPlan,
+        userId: UUID,
         mealPlanClient: MealPlanClient,
         recipeClient: RecipeClient,
         ingredientClient: IngredientClient,
@@ -82,6 +83,9 @@ internal object MealPlanDetailBuilder {
                 days = dayResponses,
                 createdAt = mealPlan.createdAt,
                 updatedAt = mealPlan.updatedAt,
+                role = MealPlanMapper.roleFor(mealPlan, userId),
+                memberCount = mealPlan.memberCount,
+                ownerName = mealPlan.ownerName,
             )
         )
     }

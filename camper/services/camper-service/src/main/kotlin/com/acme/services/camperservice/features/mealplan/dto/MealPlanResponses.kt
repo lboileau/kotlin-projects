@@ -16,6 +16,12 @@ data class MealPlanResponse(
     val createdAt: Instant,
     val updatedAt: Instant,
     val recipeCount: Int,
+    /** The caller's role on this meal plan: "owner" or "member". */
+    val role: String,
+    /** Number of members, not counting the owner. */
+    val memberCount: Int,
+    /** The owner's username, falling back to email. */
+    val ownerName: String,
 )
 
 data class MealPlanDetailResponse(
@@ -29,7 +35,10 @@ data class MealPlanDetailResponse(
     val createdBy: UUID,
     val days: List<MealPlanDayResponse>,
     val createdAt: Instant,
-    val updatedAt: Instant
+    val updatedAt: Instant,
+    val role: String,
+    val memberCount: Int,
+    val ownerName: String,
 )
 
 data class MealPlanDayResponse(
@@ -120,4 +129,22 @@ data class ShoppingListPurchaseResponse(
     val quantityPurchased: BigDecimal,
     val createdAt: Instant,
     val updatedAt: Instant
+)
+
+data class ShareTokenResponse(
+    val token: String,
+)
+
+data class AcceptInviteResponse(
+    val mealPlanId: UUID,
+    val name: String,
+    val role: String,
+    val alreadyMember: Boolean,
+)
+
+data class MealPlanMemberResponse(
+    val userId: UUID,
+    val username: String,
+    val role: String,
+    val joinedAt: Instant,
 )

@@ -7,6 +7,7 @@ import com.acme.clients.common.failure
 import com.acme.clients.common.success
 import com.acme.clients.mealplanclient.api.GetByIdParam
 import com.acme.clients.mealplanclient.internal.adapters.MealPlanRowAdapter
+import com.acme.clients.mealplanclient.internal.adapters.MealPlanSelect
 import com.acme.clients.mealplanclient.internal.validations.ValidateGetMealPlanById
 import com.acme.clients.mealplanclient.model.MealPlan
 import org.jdbi.v3.core.Jdbi
@@ -22,13 +23,7 @@ internal class GetMealPlanById(private val jdbi: Jdbi) {
 
         logger.debug("Finding meal plan by id={}", param.id)
         val entity = jdbi.withHandle<MealPlan?, Exception> { handle ->
-            handle.createQuery(
-                """
-                SELECT id, plan_id, name, servings, scaling_mode, is_template, source_template_id, created_by, created_at, updated_at,
-                    (SELECT COUNT(DISTINCT mpr.recipe_id) FROM meal_plan_recipes mpr JOIN meal_plan_days d ON d.id = mpr.meal_plan_day_id WHERE d.meal_plan_id = meal_plans.id) AS recipe_count
-                FROM meal_plans WHERE id = :id
-                """.trimIndent()
-            )
+            handle.createQuery("SELECT ${MealPlanSelect.COLUMNS} FROM meal_plans WHERE id = :id")
                 .bind("id", param.id)
                 .map { rs, _ -> MealPlanRowAdapter.fromResultSet(rs) }
                 .findOne()

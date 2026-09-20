@@ -7,6 +7,7 @@ import com.acme.clients.common.failure
 import com.acme.clients.common.success
 import com.acme.clients.mealplanclient.api.DuplicateMealPlanParam
 import com.acme.clients.mealplanclient.internal.adapters.MealPlanRowAdapter
+import com.acme.clients.mealplanclient.internal.adapters.MealPlanSelect
 import com.acme.clients.mealplanclient.model.MealPlan
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
@@ -29,13 +30,7 @@ internal class DuplicateMealPlan(private val jdbi: Jdbi) {
 
     companion object {
         private fun duplicate(handle: Handle, param: DuplicateMealPlanParam): MealPlan? {
-            val source = handle.createQuery(
-                """
-                SELECT id, plan_id, name, servings, scaling_mode, is_template, source_template_id, created_by, created_at, updated_at,
-                    (SELECT COUNT(DISTINCT mpr.recipe_id) FROM meal_plan_recipes mpr JOIN meal_plan_days d ON d.id = mpr.meal_plan_day_id WHERE d.meal_plan_id = meal_plans.id) AS recipe_count
-                FROM meal_plans WHERE id = :id
-                """.trimIndent()
-            )
+            val source = handle.createQuery("SELECT ${MealPlanSelect.COLUMNS} FROM meal_plans WHERE id = :id")
                 .bind("id", param.sourceMealPlanId)
                 .map { rs, _ -> MealPlanRowAdapter.fromResultSet(rs) }
                 .findOne()
@@ -115,6 +110,12 @@ internal class DuplicateMealPlan(private val jdbi: Jdbi) {
                 }
             }
 
+            val ownerName = handle.createQuery("SELECT COALESCE(username, email) FROM users WHERE id = :id")
+                .bind("id", param.createdBy)
+                .mapTo(String::class.java)
+                .findOne()
+                .orElse("")
+
             return MealPlan(
                 id = newId,
                 planId = null,
@@ -127,6 +128,8 @@ internal class DuplicateMealPlan(private val jdbi: Jdbi) {
                 createdAt = now,
                 updatedAt = now,
                 recipeCount = source.recipeCount,
+                memberCount = 0,
+                ownerName = ownerName,
             )
         }
     }

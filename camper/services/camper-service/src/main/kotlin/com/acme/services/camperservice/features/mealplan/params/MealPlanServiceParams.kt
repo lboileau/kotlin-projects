@@ -27,7 +27,33 @@ data class GetTemplatesParam(
 )
 
 data class ListMealPlansByCreatorParam(
-    val createdBy: UUID
+    val createdBy: UUID,
+    val userId: UUID
+)
+
+data class GetMineParam(
+    val userId: UUID
+)
+
+data class GetShareTokenParam(
+    val mealPlanId: UUID,
+    val userId: UUID
+)
+
+data class AcceptInviteParam(
+    val token: String,
+    val userId: UUID
+)
+
+data class GetMealPlanMembersParam(
+    val mealPlanId: UUID,
+    val userId: UUID
+)
+
+data class RemoveMealPlanMemberParam(
+    val mealPlanId: UUID,
+    val targetUserId: UUID,
+    val userId: UUID
 )
 
 data class UpdateMealPlanParam(

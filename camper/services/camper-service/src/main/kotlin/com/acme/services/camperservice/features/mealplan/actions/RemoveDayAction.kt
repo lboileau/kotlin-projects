@@ -3,6 +3,7 @@ package com.acme.services.camperservice.features.mealplan.actions
 import com.acme.clients.common.Result
 import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.mealplanclient.api.MealPlanClient
+import com.acme.services.camperservice.features.mealplan.auth.MealPlanAuthorizer
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
 import com.acme.services.camperservice.features.mealplan.params.RemoveDayParam
 import com.acme.services.camperservice.features.mealplan.validations.ValidateRemoveDay
@@ -12,6 +13,7 @@ internal class RemoveDayAction(
     private val mealPlanClient: MealPlanClient,
 ) {
     private val validate = ValidateRemoveDay()
+    private val authorizer = MealPlanAuthorizer(mealPlanClient)
 
     fun execute(param: RemoveDayParam): Result<Unit, MealPlanError> {
         when (val validation = validate.execute(param)) {
@@ -19,7 +21,12 @@ internal class RemoveDayAction(
             is Result.Success -> {}
         }
 
-        return when (val result = mealPlanClient.removeDay(ClientRemoveDayParam(param.dayId))) {
+        when (val access = authorizer.authorize(param.mealPlanId, param.userId)) {
+            is Result.Failure -> return access
+            is Result.Success -> {}
+        }
+
+        return when (val result = mealPlanClient.removeDay(ClientRemoveDayParam(mealPlanId = param.mealPlanId, id = param.dayId))) {
             is Result.Success -> Result.Success(Unit)
             is Result.Failure -> when (result.error) {
                 is NotFoundError -> Result.Failure(MealPlanError.DayNotFound(param.dayId))

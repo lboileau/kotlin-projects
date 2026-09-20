@@ -66,15 +66,25 @@ class MealPlanController(
         }
     }
 
-    /** GET /api/meal-plans?createdBy={createdBy} — List meal plans created by a user */
+    /** GET /api/meal-plans?createdBy={createdBy} — List meal plans created by a user (403 unless createdBy is the caller) */
     @GetMapping(params = ["createdBy"])
     fun listByCreatedBy(
         @RequestParam createdBy: UUID,
         @RequestHeader("X-User-Id") userId: UUID
     ): ResponseEntity<Any> {
         logger.info("GET /api/meal-plans?createdBy={}", createdBy)
-        val param = ListMealPlansByCreatorParam(createdBy = createdBy)
+        val param = ListMealPlansByCreatorParam(createdBy = createdBy, userId = userId)
         return mealPlanService.listMealPlansByCreator(param).toResponseEntity { it }
+    }
+
+    /** GET /api/meal-plans/mine — Meal plans the caller owns plus meal plans shared with them */
+    @GetMapping("/mine")
+    fun getMine(
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("GET /api/meal-plans/mine")
+        val param = GetMineParam(userId = userId)
+        return mealPlanService.getMine(param).toResponseEntity { it }
     }
 
     /** GET /api/meal-plans/templates — List template meal plans */
@@ -334,6 +344,42 @@ class MealPlanController(
         if (result is Result.Success) eventPublisher.publishUpdate(id, "shopping-list", "updated")
         return result.toResponseEntity(successStatus = 204) { }
     }
+
+    /** GET /api/meal-plans/{id}/share — Get (lazily creating) the meal plan's share token */
+    @GetMapping("/{id}/share")
+    fun getShareToken(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("GET /api/meal-plans/{}/share", id)
+        val param = GetShareTokenParam(mealPlanId = id, userId = userId)
+        return mealPlanService.getShareToken(param).toResponseEntity { it }
+    }
+
+    /** GET /api/meal-plans/{id}/members — Owner or member: list members, owner first */
+    @GetMapping("/{id}/members")
+    fun getMembers(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("GET /api/meal-plans/{}/members", id)
+        val param = GetMealPlanMembersParam(mealPlanId = id, userId = userId)
+        return mealPlanService.getMembers(param).toResponseEntity { it }
+    }
+
+    /** DELETE /api/meal-plans/{id}/members/{userId} — Owner removes anyone, a member removes themselves (leave) */
+    @DeleteMapping("/{id}/members/{userId}")
+    fun removeMember(
+        @PathVariable id: UUID,
+        @PathVariable userId: UUID,
+        @RequestHeader("X-User-Id") requestingUserId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("DELETE /api/meal-plans/{}/members/{}", id, userId)
+        val param = RemoveMealPlanMemberParam(mealPlanId = id, targetUserId = userId, userId = requestingUserId)
+        val result = mealPlanService.removeMember(param)
+        if (result is Result.Success && result.value) eventPublisher.publishUpdate(id, "members", "updated")
+        return result.toResponseEntity(successStatus = 204) { }
+    }
 }
 
 /** Separate controller for meal-plan-recipe deletion (different base path) */
@@ -355,5 +401,29 @@ class MealPlanRecipeController(
         val result = mealPlanService.removeRecipeFromMeal(param)
         if (result is Result.Success) eventPublisher.publishUpdate(result.value, "meal-plan", "updated")
         return result.toResponseEntity(successStatus = 204) { }
+    }
+}
+
+/** Separate controller for accepting a meal plan share link (different base path) */
+@RestController
+class MealPlanInviteController(
+    private val mealPlanService: MealPlanService,
+    private val eventPublisher: MealPlanEventPublisher,
+) {
+    private val logger = LoggerFactory.getLogger(MealPlanInviteController::class.java)
+
+    /** POST /api/meal-plan-invites/{token}/accept — Join a meal plan via its share link, idempotent */
+    @PostMapping("/api/meal-plan-invites/{token}/accept")
+    fun accept(
+        @PathVariable token: String,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/meal-plan-invites/{}/accept", token)
+        val param = AcceptInviteParam(token = token, userId = userId)
+        val result = mealPlanService.acceptInvite(param)
+        if (result is Result.Success && !result.value.alreadyMember) {
+            eventPublisher.publishUpdate(result.value.mealPlanId, "members", "updated")
+        }
+        return result.toResponseEntity { it }
     }
 }

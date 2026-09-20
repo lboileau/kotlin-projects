@@ -43,6 +43,11 @@ internal class CreateMealPlan(private val jdbi: Jdbi) {
                     .bind("createdAt", now)
                     .bind("updatedAt", now)
                     .execute()
+                val ownerName = handle.createQuery("SELECT COALESCE(username, email) FROM users WHERE id = :id")
+                    .bind("id", param.createdBy)
+                    .mapTo(String::class.java)
+                    .findOne()
+                    .orElse("")
                 MealPlan(
                     id = id,
                     planId = param.planId,
@@ -55,6 +60,8 @@ internal class CreateMealPlan(private val jdbi: Jdbi) {
                     createdAt = now,
                     updatedAt = now,
                     recipeCount = 0,
+                    memberCount = 0,
+                    ownerName = ownerName,
                 )
             }
             success(entity)

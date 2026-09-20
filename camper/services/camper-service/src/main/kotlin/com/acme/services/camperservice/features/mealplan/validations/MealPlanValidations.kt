@@ -172,3 +172,26 @@ internal class ValidateRemoveManualItem {
 internal class ValidateResetPurchases {
     fun execute(param: ResetPurchasesParam): Result<Unit, MealPlanError> = success(Unit)
 }
+
+internal class ValidateGetMine {
+    fun execute(param: GetMineParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateGetShareToken {
+    fun execute(param: GetShareTokenParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateAcceptInvite {
+    fun execute(param: AcceptInviteParam): Result<Unit, MealPlanError> {
+        if (param.token.isBlank()) return Result.Failure(MealPlanError.Invalid("token", "must not be blank"))
+        return success(Unit)
+    }
+}
+
+internal class ValidateGetMealPlanMembers {
+    fun execute(param: GetMealPlanMembersParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateRemoveMealPlanMember {
+    fun execute(param: RemoveMealPlanMemberParam): Result<Unit, MealPlanError> = success(Unit)
+}

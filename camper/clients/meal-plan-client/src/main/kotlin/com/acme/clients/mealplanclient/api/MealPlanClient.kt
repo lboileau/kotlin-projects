@@ -3,7 +3,11 @@ package com.acme.clients.mealplanclient.api
 import com.acme.clients.common.Result
 import com.acme.clients.common.error.AppError
 import com.acme.clients.mealplanclient.model.MealPlan
+import com.acme.clients.mealplanclient.model.MealPlanAccess
+import com.acme.clients.mealplanclient.model.BackingPlanResolution
 import com.acme.clients.mealplanclient.model.MealPlanDay
+import com.acme.clients.mealplanclient.model.MealPlanMember
+import com.acme.clients.mealplanclient.model.MealPlanMemberRemoval
 import com.acme.clients.mealplanclient.model.MealPlanRecipe
 import com.acme.clients.mealplanclient.model.ShoppingListManualItem
 import com.acme.clients.mealplanclient.model.ShoppingListPurchase
@@ -38,6 +42,15 @@ interface MealPlanClient {
     /** Retrieve all meal plans created by a given user, newest updated first. */
     fun getByCreatedBy(param: GetByCreatedByParam): Result<List<MealPlan>, AppError>
 
+    /** Retrieve meal plans a user owns plus meal plans shared with them, newest updated first. */
+    fun getMine(param: GetMineParam): Result<List<MealPlan>, AppError>
+
+    /**
+     * Resolve who owns a meal plan and whether a given user is a member, in one statement.
+     * Returns NotFoundError if the meal plan doesn't exist.
+     */
+    fun getAccess(param: GetAccessParam): Result<MealPlanAccess, AppError>
+
     /** Update an existing meal plan. Null fields are left unchanged. */
     fun update(param: UpdateMealPlanParam): Result<MealPlan, AppError>
 
@@ -59,12 +72,12 @@ interface MealPlanClient {
     /** Retrieve all days for a meal plan, ordered by day number. */
     fun getDays(param: GetDaysParam): Result<List<MealPlanDay>, AppError>
 
-    /** Remove a day from a meal plan. Cascades to recipes on that day. */
+    /** Remove a day from a meal plan. Cascades to recipes on that day. Scoped to mealPlanId — NotFoundError if the day belongs to a different meal plan. */
     fun removeDay(param: RemoveDayParam): Result<Unit, AppError>
 
     // --- Recipes ---
 
-    /** Add a recipe to a specific meal on a specific day. */
+    /** Add a recipe to a specific meal on a specific day. Scoped to mealPlanId — NotFoundError if the day belongs to a different meal plan. */
     fun addRecipe(param: AddRecipeParam): Result<MealPlanRecipe, AppError>
 
     /** Retrieve all recipes for a specific day, ordered by meal type. */
@@ -108,12 +121,48 @@ interface MealPlanClient {
     /** Retrieve all manual items for a meal plan. */
     fun getManualItems(param: GetManualItemsParam): Result<List<ShoppingListManualItem>, AppError>
 
-    /** Remove a manual item by its unique identifier. Returns NotFoundError if not found. */
+    /** Remove a manual item by its unique identifier. Scoped to mealPlanId — NotFoundError if not found, or if it belongs to a different meal plan. */
     fun removeManualItem(param: RemoveManualItemParam): Result<Unit, AppError>
 
-    /** Update the purchased quantity of a manual item. Returns NotFoundError if not found. */
+    /** Update the purchased quantity of a manual item. Scoped to mealPlanId — NotFoundError if not found, or if it belongs to a different meal plan. */
     fun updateManualItemPurchase(param: UpdateManualItemPurchaseParam): Result<ShoppingListManualItem, AppError>
 
     /** Reset quantity_purchased to 0 for all manual items in a meal plan. */
     fun resetManualItemPurchases(param: ResetManualItemPurchasesParam): Result<Unit, AppError>
+
+    // --- Sharing & Members ---
+
+    /**
+     * Lazily creates the meal plan's backing trip plan on first call and returns its id — used as
+     * the meal plan's share token, since there's no separate token column. Race-safe: two
+     * concurrent first calls return the same, single persisted plan id. If the meal plan is
+     * already bound to a real trip (not one created by this flow), that plan id is still
+     * returned, but [BackingPlanResolution.isRealTrip] is true — the caller must not treat it as a
+     * usable share token in that case. Returns NotFoundError if the meal plan doesn't exist.
+     */
+    fun getOrCreateBackingPlan(param: GetShareTokenParam): Result<BackingPlanResolution, AppError>
+
+    /**
+     * Resolves a share token (a backing plan id) to its meal plan, but only when that plan was
+     * created by the share flow (see `BackingPlanMarker`) — never for a meal plan merely bound to
+     * a real trip. Returns null for both an unknown token and a real trip's id, indistinguishably.
+     */
+    fun getShareBackingMealPlan(param: GetByPlanIdParam): Result<MealPlan?, AppError>
+
+    /**
+     * Idempotent insert into the backing plan's plan_members (role 'member'). If the user is
+     * already the backing plan's owner_id, they already have implicit access, so no row is
+     * inserted. Returns whether a new row was actually created.
+     */
+    fun addMember(param: AddMealPlanMemberParam): Result<Boolean, AppError>
+
+    /**
+     * Retrieve everyone with access to a meal plan other than its own owner: the backing plan's
+     * owner_id first (if different from the meal plan's owner), then its plan_members by join
+     * time. De-duplicated by user id.
+     */
+    fun getMembers(param: GetMealPlanMembersParam): Result<List<MealPlanMember>, AppError>
+
+    /** Remove a member from the backing plan's plan_members. See [MealPlanMemberRemoval] for the possible outcomes. */
+    fun removeMember(param: RemoveMealPlanMemberParam): Result<MealPlanMemberRemoval, AppError>
 }

@@ -7,6 +7,7 @@ import com.acme.clients.mealplanclient.api.AddRecipeToPlanIfAbsentParam
 import com.acme.clients.mealplanclient.api.GetPurchasesParam
 import com.acme.clients.mealplanclient.api.MealPlanClient
 import com.acme.clients.recipeclient.api.RecipeClient
+import com.acme.services.camperservice.features.mealplan.auth.MealPlanAuthorizer
 import com.acme.services.camperservice.features.mealplan.dto.MealPlanRecipeDetailResponse
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
 import com.acme.services.camperservice.features.mealplan.params.AddRecipeToPlanParam
@@ -30,11 +31,19 @@ internal class AddRecipeToPlanAction(
     private val ingredientClient: IngredientClient,
 ) {
     private val validate = ValidateAddRecipeToPlan()
+    private val authorizer = MealPlanAuthorizer(mealPlanClient)
 
     /** Returns the recipe detail plus whether a new row was created (false = already present, idempotent). */
     fun execute(param: AddRecipeToPlanParam): Result<Pair<MealPlanRecipeDetailResponse, Boolean>, MealPlanError> {
         when (val validation = validate.execute(param)) {
             is Result.Failure -> return validation
+            is Result.Success -> {}
+        }
+
+        // Access must be checked here, before addRecipeToPlanIfAbsent — that operation takes a row
+        // lock inside a transaction and must not be restructured to also do the access check.
+        when (val access = authorizer.authorize(param.mealPlanId, param.userId)) {
+            is Result.Failure -> return access
             is Result.Success -> {}
         }
 

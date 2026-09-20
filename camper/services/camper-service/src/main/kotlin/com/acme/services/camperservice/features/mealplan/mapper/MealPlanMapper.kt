@@ -8,10 +8,14 @@ import com.acme.services.camperservice.features.mealplan.dto.MealPlanResponse
 import com.acme.services.camperservice.features.mealplan.dto.MealsByTypeResponse
 import com.acme.services.camperservice.features.mealplan.dto.MealPlanRecipeDetailResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListPurchaseResponse
+import java.util.UUID
 
 object MealPlanMapper {
 
-    fun toMealPlanResponse(mealPlan: MealPlan): MealPlanResponse = MealPlanResponse(
+    /** "owner" if the caller created the plan, else "member" (assumes access was already authorized). */
+    fun roleFor(mealPlan: MealPlan, userId: UUID): String = if (mealPlan.createdBy == userId) "owner" else "member"
+
+    fun toMealPlanResponse(mealPlan: MealPlan, userId: UUID): MealPlanResponse = MealPlanResponse(
         id = mealPlan.id,
         planId = mealPlan.planId,
         name = mealPlan.name,
@@ -23,6 +27,9 @@ object MealPlanMapper {
         createdAt = mealPlan.createdAt,
         updatedAt = mealPlan.updatedAt,
         recipeCount = mealPlan.recipeCount,
+        role = roleFor(mealPlan, userId),
+        memberCount = mealPlan.memberCount,
+        ownerName = mealPlan.ownerName,
     )
 
     fun toMealPlanDayResponse(
