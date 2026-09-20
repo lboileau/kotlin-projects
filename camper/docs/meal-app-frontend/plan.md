@@ -161,3 +161,26 @@ Agents: kotlin-dev for step 1, web-dev for steps 2 to 8, code-reviewer after eac
 - **Slow plan and shopping endpoints** (N+1 on the server): cached data renders instantly and refetches in the background; skeletons on first load.
 - **Accept all partial failure**: each line reports its own result; failures stay in Needs review with the error.
 - **Flattening old multi-day plans**: removing a recipe removes all its occurrences; nothing else about those plans is changed.
+
+## 10. Outcome
+
+### What was built
+
+A from-scratch mobile-first meal-planning webapp (React 19 + React Router 7 + TanStack Query 5 + Radix Themes 3) replacing the entire camping UI. Screens: sign-in, plans home, plan detail, recipe picker sheet, recipe library, recipe detail and edit, import, ingredient management, shopping list with live sync. Backend retains all camping features (plans, items, itinerary, assignments, gear packs, log book, activity ladders, avatars, invitations) unchanged in code; they simply have no UI in this branch.
+
+### Deviations from plan
+
+1. **Backend plan-level recipe endpoints** added: `POST /api/meal-plans/{id}/recipes` (add, idempotent 201/200), `DELETE /api/meal-plans/{id}/recipes/{recipeId}` (remove, idempotent), `POST /api/meal-plans/{id}/duplicate` (flat copy). The frontend no longer resolves days or drives duplicate logic; the server is the source of truth for concurrency and idempotence.
+2. **`ListRecipesAction` now correctly filters** — fetches published recipes + caller's own drafts via `recipeClient.getAll(createdBy=userId)`, not via different backend logic. The API list endpoint has no ownership enforcement.
+3. **UpdateRecipeAction blank-clears-field semantics** — blank `description`, `meal`, or `theme` clears the field (NULLs it); absent means unchanged. Controller was updated to pass blank values through.
+4. **Shopping item refs** — `usedInRecipeRefs: [{id, name}]` added to `ShoppingListItemResponse` alongside `usedInRecipes` (names only). Frontend recipe links now target recipe detail pages by id.
+5. **MealPlanEventPublisher** — publishes to `/topic/meal-plans/{mealPlanId}` for all mutations (including manual items and resets), not just day-level changes.
+6. **`useSheet` architecture** — sheets close via history or navigation, never local state modals. Child routes enable every sheet state to have a URL, so shared links and browser back button work correctly.
+7. **No tests written** — per requirements. Existing `lib/mealPlanSummary.test.ts` continues to pass.
+
+### What is still open
+
+- **Partly verified in a browser (2026-09-19, desktop Chrome at a narrow width).** Worked by hand: sign-in redirect with `next`, registration, create plan, create recipe with inline ingredient create and back-to-back line entry ("1 1/2" saved as 1½), add to plan, shopping redirect, rapid quick add, check-off, two-tab live sync, browser Back closing a sheet, plan deleted elsewhere switching both open tabs to not found, no console errors. Still unverified: recipe import (needs `ANTHROPIC_API_KEY`), the draft review and Accept all flow, blocked close and Back during an import, duplicate and delete plan from the edit sheet, STOMP reconnect, reduced motion, a real phone (iOS keyboard, zoom-on-focus, safe areas).
+- **Ingredient name uniqueness** — the database constraint is case-sensitive, so "butter" and "Butter" are distinct. Frontend mitigates by force-fetching and matching case-insensitively before create, but a `lower(name)` unique index would lock the schema and requires a production data check first.
+- **Accent colour** — violet is the current choice. Still open to user's eye: purple vs. iris vs. another scale. First build screen (sign-in + Plans home) is where to approve.
+- **Timing constants** — 400ms debounce (plan servings), 600ms settle pin (shopping row stay-in-place after toggle), 180ms sheet close animation, 300ms sync message recheck delay. First guesses; may need tuning in real use.

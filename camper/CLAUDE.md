@@ -1,6 +1,6 @@
 # camper
 
-A web app for interactive camping trip planning. Invite people on a trip and let everyone view details and contribute to planning (dates, meal plans, equipment, etc.). Early development — features added incrementally.
+A mobile-first meal-planning web app (recipes, ingredients, meal plans, shopping lists). Backend also retains camping features (plans/trips, items, itinerary, assignments, gear packs, log book, activity ladders) without frontend UI. Early development — features added incrementally.
 
 ## Project Structure
 
@@ -63,7 +63,7 @@ Rule of thumb: "Does it do I/O? → `clients/`. Pure logic/types? → `libs/`."
 - **Error handling:** `Result<T, E>` sealed class. Never throw for expected failures.
 - **Client pattern:** Interface + internal facade + operations + param objects. Factory reads env vars. Fake in testFixtures.
 - **Service pattern:** Actions (validate → convert → call client) composed into a Service facade. Validations are 1:1 with actions.
-- **Live updates:** STOMP-over-WebSocket via `PlanEventPublisher`. Controllers publish `{ resource, action }` messages to `/topic/plans/{planId}` after successful mutations. Frontend subscribes per-plan and refetches on notification (deferred while modals are open).
+- **Live updates:** STOMP-over-WebSocket. Controllers publish `{ resource, action }` messages to `/topic/plans/{planId}` (camping features) or `/topic/meal-plans/{mealPlanId}` (meal planning) after successful mutations. Frontend subscribes per-plan and refetches on notification (deferred while modals are open). See `webapp/CLAUDE.md` for frontend patterns.
 - **Computed read-time data:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles unit conversion and aggregation (pure logic, no I/O). Only purchase records are stored.
 - **Computed avatars:** Avatar properties are deterministically generated at read time from a stored seed string using the `avatar-generator` lib (SHA-256 → enum indices). No avatar images are stored.
 - **Testing:** Unit tests with FakeClient, acceptance tests with Testcontainers + @SpringBootTest.
@@ -92,6 +92,12 @@ PGPASSWORD=postgres psql -h localhost -p 5433 -U postgres -d camper_db -f databa
 
 # Run the service with invite emails (requires Resend API key)
 RESEND_API_KEY=re_xxx EMAIL_FROM="onboarding@resend.dev" APP_BASE_URL="http://localhost:3000" ./gradlew :services:camper-service:bootRun
+
+# Start the webapp (in another terminal)
+cd webapp && npm run dev
+
+# If the backend is on a different port, point the dev proxy there
+VITE_API_TARGET=http://localhost:8081 npm run dev
 
 # Run all tests
 ./gradlew test
