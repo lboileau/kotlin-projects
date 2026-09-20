@@ -11,6 +11,10 @@ import './PlansPage.css';
 export function PlansPage() {
   const { data: plans, isLoading, isError, refetch } = usePlans();
   const hasPlans = !!plans && plans.length > 0;
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!plans;
 
   return (
     <div className="plans-page">
@@ -24,11 +28,11 @@ export function PlansPage() {
           </div>
         )}
 
-        {!isLoading && isError && (
+        {!isLoading && isError && !hasData && (
           <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />
         )}
 
-        {!isLoading && !isError && !hasPlans && (
+        {!isLoading && (hasData || !isError) && !hasPlans && (
           <div className="plans-page__empty">
             <Heading as="h2" size="4">
               No plans yet
@@ -45,7 +49,7 @@ export function PlansPage() {
         )}
 
         {!isLoading &&
-          !isError &&
+          (hasData || !isError) &&
           hasPlans &&
           plans.map((plan) => (
             <Link key={plan.id} to={`/plans/${plan.id}`} className="plans-page__row">

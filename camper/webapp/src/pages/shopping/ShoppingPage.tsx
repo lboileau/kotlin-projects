@@ -5,6 +5,8 @@ import { ChevronDownIcon, DotsVerticalIcon, PersonIcon, PlusIcon } from '@radix-
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { ApiError } from '../../api/http';
+import type { MealPlanDetailResponse } from '../../api/mealPlans';
+import type { ShoppingListResponse } from '../../api/shopping';
 import { usePageTitle } from '../../lib/usePageTitle';
 import { usePlan } from '../../queries/plans';
 import {
@@ -31,17 +33,11 @@ function isTempRow(row: ShoppingRow): boolean {
 
 export function ShoppingPage() {
   const { planId } = useParams<{ planId: string }>();
-  const navigate = useNavigate();
   useMealPlanSync(planId);
 
   const { data: plan } = usePlan(planId);
   const { data: list, isLoading, isError, error, refetch } = useShoppingList(planId);
   usePageTitle(plan?.name ? `Shopping — ${plan.name}` : 'Shopping');
-
-  const toggleRow = useToggleShoppingRow(planId ?? '');
-  const addManualItem = useAddManualShoppingItem(planId ?? '');
-  const removeManualItem = useRemoveManualShoppingItem(planId ?? '');
-  const resetPurchases = useResetPurchases(planId ?? '');
 
   const notFound = isError && error instanceof ApiError && error.status === 404;
 
@@ -52,6 +48,83 @@ export function ShoppingPage() {
   useEffect(() => {
     if (notFound && planId && getSelectedPlanId() === planId) clearSelectedPlanId();
   }, [notFound, planId]);
+
+  if (notFound) {
+    return (
+      <div className="shopping-page">
+        <div className="shopping-page__not-found">
+          <Heading as="h1" size="4" weight="medium">
+            Plan not found
+          </Heading>
+          <Text color="gray" size="2">
+            It may have been deleted, or the link is wrong.
+          </Text>
+          <Button asChild size="3" variant="solid">
+            <Link to="/plans">Back to Plans</Link>
+          </Button>
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  // Gated on the absence of data: this page is refetched by live sync, so
+  // a background refetch error (data already loaded) must not blank an
+  // already-rendered list — only a failure with nothing to show yet does.
+  if (isError && !list) {
+    return (
+      <div className="shopping-page">
+        <Heading as="h1" className="sr-only">
+          Shopping
+        </Heading>
+        <QueryErrorState message="Couldn't load the shopping list." onRetry={() => void refetch()} />
+        <Outlet />
+      </div>
+    );
+  }
+
+  if (isLoading || !list) {
+    return (
+      <div className="shopping-page">
+        <Heading as="h1" className="sr-only">
+          Shopping
+        </Heading>
+        <div className="shopping-page__skeleton" aria-busy="true" aria-label="Loading shopping list">
+          <Skeleton height="32px" aria-hidden="true" />
+          <Skeleton height="56px" aria-hidden="true" />
+          <Skeleton height="56px" aria-hidden="true" />
+          <Skeleton height="56px" aria-hidden="true" />
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  // Keyed on planId: this route doesn't remount when SwitchPlanSheet
+  // navigates from one plan's shopping list to another's (same route,
+  // just a new :planId param), so every bit of local state below —
+  // the quick-add draft, the settle-pin tiers/timers, the reset-confirm
+  // dialog, and each mutation's own isPending — would otherwise carry
+  // over from the previous plan. The pin tiers in particular are keyed
+  // by row key, and ingredients are shared across plans, so a pin left
+  // over from plan A could mis-sort a same-ingredient row in plan B for
+  // up to 600ms. Remounting resets all of it cleanly.
+  return <ShoppingListBody key={planId} planId={planId!} plan={plan} list={list} />;
+}
+
+interface ShoppingListBodyProps {
+  planId: string;
+  plan: MealPlanDetailResponse | undefined;
+  list: ShoppingListResponse;
+}
+
+function ShoppingListBody({ planId, plan, list }: ShoppingListBodyProps) {
+  const navigate = useNavigate();
+
+  const toggleRow = useToggleShoppingRow(planId);
+  const addManualItem = useAddManualShoppingItem(planId);
+  const removeManualItem = useRemoveManualShoppingItem(planId);
+  const resetPurchases = useResetPurchases(planId);
 
   const [quickAddText, setQuickAddText] = useState('');
   const quickAddRef = useRef<HTMLInputElement>(null);
@@ -131,54 +204,6 @@ export function ShoppingPage() {
     resetPurchases.mutate(undefined, {
       onSuccess: () => toast.info('Purchases reset'),
     });
-  }
-
-  if (notFound) {
-    return (
-      <div className="shopping-page">
-        <div className="shopping-page__not-found">
-          <Heading as="h1" size="4" weight="medium">
-            Plan not found
-          </Heading>
-          <Text color="gray" size="2">
-            It may have been deleted, or the link is wrong.
-          </Text>
-          <Button asChild size="3" variant="solid">
-            <Link to="/plans">Back to Plans</Link>
-          </Button>
-        </div>
-        <Outlet />
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="shopping-page">
-        <Heading as="h1" className="sr-only">
-          Shopping
-        </Heading>
-        <QueryErrorState message="Couldn't load the shopping list." onRetry={() => void refetch()} />
-        <Outlet />
-      </div>
-    );
-  }
-
-  if (isLoading || !list) {
-    return (
-      <div className="shopping-page">
-        <Heading as="h1" className="sr-only">
-          Shopping
-        </Heading>
-        <div className="shopping-page__skeleton" aria-busy="true" aria-label="Loading shopping list">
-          <Skeleton height="32px" aria-hidden="true" />
-          <Skeleton height="56px" aria-hidden="true" />
-          <Skeleton height="56px" aria-hidden="true" />
-          <Skeleton height="56px" aria-hidden="true" />
-        </div>
-        <Outlet />
-      </div>
-    );
   }
 
   const groups = buildShoppingRows(list, pinnedTiers);

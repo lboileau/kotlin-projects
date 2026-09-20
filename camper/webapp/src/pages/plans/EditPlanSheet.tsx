@@ -87,7 +87,7 @@ export function EditPlanSheet() {
 
   return (
     <Sheet {...sheet.sheetProps} title="Edit plan">
-      {isError ? (
+      {isError && !plan ? (
         <QueryErrorState message="Couldn't load this plan." onRetry={() => void refetch()} />
       ) : !plan ? (
         <div className="edit-plan-sheet__loading" aria-busy="true" aria-label="Loading plan">

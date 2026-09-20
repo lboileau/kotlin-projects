@@ -5,6 +5,17 @@
 
 const SHOPPING_UNDER_PLAN = /^\/plans\/[^/]+\/shopping/;
 
+// `navigator.connection` (Network Information API) isn't in the standard
+// DOM lib types, so it's typed narrowly here rather than widened to `any`.
+interface NavigatorConnection {
+  saveData?: boolean;
+}
+
+function saveDataEnabled(): boolean {
+  const connection = (navigator as Navigator & { connection?: NavigatorConnection }).connection;
+  return connection?.saveData === true;
+}
+
 const TAB_AREA_LOADERS: Record<string, () => Promise<unknown>> = {
   plans: () => import('./pages/plans'),
   shopping: () => import('./pages/shopping'),
@@ -28,6 +39,10 @@ function scheduleIdle(run: () => void): void {
 
 /** Call once, right after the shell mounts — not on every navigation. */
 export function prefetchOtherTabs(currentPathname: string): void {
+  // Respect the user's explicit "use less data" preference: warming tabs
+  // they haven't asked for isn't worth the bytes when they've said so.
+  if (saveDataEnabled()) return;
+
   const current = currentTabArea(currentPathname);
 
   for (const [area, load] of Object.entries(TAB_AREA_LOADERS)) {

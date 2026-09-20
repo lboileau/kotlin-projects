@@ -43,26 +43,43 @@ export function EditRecipePage() {
     );
   }
 
-  if (isError || !recipe) {
-    const notFound = error instanceof ApiError && error.status === 404;
+  // A 404 wins even over stale data (checked before the data-presence gate
+  // below): the recipe was deleted while its stale detail was still
+  // cached. See RecipeDetailPage for the same split.
+  const notFound = isError && error instanceof ApiError && error.status === 404;
+  if (notFound) {
     return (
       <div className="recipe-form-page">
         <PageHeader title="Edit recipe" backTo="/recipes" />
         <div className="recipe-form-page__body">
-          {notFound ? (
-            <Callout.Root color="red" variant="surface" role="alert">
-              <Callout.Icon>
-                <ExclamationTriangleIcon />
-              </Callout.Icon>
-              <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
-            </Callout.Root>
-          ) : (
-            <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
-          )}
+          <Callout.Root color="red" variant="surface" role="alert">
+            <Callout.Icon>
+              <ExclamationTriangleIcon />
+            </Callout.Icon>
+            <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
+          </Callout.Root>
         </div>
         <Outlet />
       </div>
     );
+  }
+
+  // Gated on the absence of data: a background refetch error (window
+  // focus) must not blank an in-progress edit of an already-loaded recipe.
+  if (isError && !recipe) {
+    return (
+      <div className="recipe-form-page">
+        <PageHeader title="Edit recipe" backTo="/recipes" />
+        <div className="recipe-form-page__body">
+          <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    return null;
   }
 
   // Keyed on the recipe id so the form's local state (below) is seeded

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
 import { RouteFallback } from './components/RouteFallback';
+import { RouteError } from './components/RouteError';
 import { RequireAuth } from './auth/RequireAuth';
 
 // Route-level code splitting, grouped by area (see pages/*/index.ts
@@ -53,9 +54,14 @@ export const router = createBrowserRouter([
         <SignInPage />
       </Suspense>
     ),
+    errorElement: <RouteError />,
   },
   {
     element: <RequireAuth />,
+    // Covers every guarded route below (AppShell and all its children):
+    // an error without its own errorElement bubbles up to the nearest
+    // ancestor that has one, so nothing further down needs to repeat this.
+    errorElement: <RouteError />,
     children: [
       {
         // AppShell wraps its <Outlet/> in the one Suspense boundary

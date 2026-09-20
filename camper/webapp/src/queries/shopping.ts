@@ -41,17 +41,28 @@ function invalidateIfLast(queryClient: ReturnType<typeof useQueryClient>, planId
   }
 }
 
-// Per-row (by row key) network serialization + coalescing. Two PATCHes
-// for the same row can otherwise reach the server out of order (tap
-// check then uncheck fast — "uncheck" can land first). `rowChains`
+// Per-row (by plan + row key) network serialization + coalescing. Two
+// PATCHes for the same row can otherwise reach the server out of order
+// (tap check then uncheck fast — "uncheck" can land first). `rowChains`
 // serializes: each row's next send waits for its previous one to
 // settle. `rowLatestChecked` coalesces: if a newer tap for that row
 // arrives before an earlier one's turn comes, the earlier one is
 // skipped entirely and only the latest desired state is ever sent — the
 // optimistic cache write (in onMutate, unaffected by any of this) is
 // what keeps the UI feeling instant regardless.
+//
+// Keyed by `${planId}:${row.key}`, not `row.key` alone: ingredients are a
+// global table, so the same ingredient can appear in two different
+// plans' shopping lists with the identical row key. Keying by row alone
+// let a toggle in one plan coalesce with a toggle of the same ingredient
+// in another plan (e.g. switching plans quickly via SwitchPlanSheet),
+// silently dropping one of the two sends.
 const rowChains = new Map<string, Promise<void>>();
 const rowLatestChecked = new Map<string, boolean>();
+
+function chainKey(planId: string, row: ShoppingRow): string {
+  return `${planId}:${row.key}`;
+}
 
 function sendRowState(planId: string, row: ShoppingRow, checked: boolean): Promise<void> {
   return Promise.all(
@@ -65,7 +76,7 @@ function sendRowState(planId: string, row: ShoppingRow, checked: boolean): Promi
 }
 
 function syncRowState(planId: string, row: ShoppingRow, checked: boolean): Promise<void> {
-  const rowKey = row.key;
+  const rowKey = chainKey(planId, row);
   rowLatestChecked.set(rowKey, checked);
 
   const previousLink = rowChains.get(rowKey) ?? Promise.resolve();

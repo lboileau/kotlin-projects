@@ -13,6 +13,10 @@ export function SwitchPlanSheet() {
   const sheet = useSheet(`/plans/${planId}/shopping`);
   const navigate = useNavigate();
   const { data: plans, isLoading, isError, refetch } = usePlans();
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!plans;
 
   function handleSelect(id: string) {
     setSelectedPlanId(id);
@@ -27,17 +31,17 @@ export function SwitchPlanSheet() {
         </div>
       )}
 
-      {!isLoading && isError && (
+      {!isLoading && isError && !hasData && (
         <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />
       )}
 
-      {!isLoading && !isError && (!plans || plans.length === 0) && (
+      {!isLoading && (hasData || !isError) && (!plans || plans.length === 0) && (
         <Text color="gray" size="2">
           You don&apos;t have any plans yet.
         </Text>
       )}
 
-      {!isLoading && !isError && plans && plans.length > 0 && (
+      {!isLoading && (hasData || !isError) && plans && plans.length > 0 && (
         <div className="switch-plan-sheet__list">
           {plans.map((plan) => {
             const current = plan.id === planId;

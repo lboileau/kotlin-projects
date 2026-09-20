@@ -61,28 +61,47 @@ export function RecipeDetailPage() {
     );
   }
 
-  if (isError || !recipe) {
-    // A 404 means the recipe genuinely doesn't exist — retrying won't help.
-    // Any other failure (network, 5xx) is worth a Retry.
-    const notFound = error instanceof ApiError && error.status === 404;
+  // A 404 means the recipe genuinely doesn't exist — retrying won't help.
+  // Checked before the data-presence gate below and without requiring
+  // `!recipe`, so a 404 on a background refetch (the recipe was deleted
+  // while its stale detail was still on screen) still wins over showing
+  // that stale data.
+  const notFound = isError && error instanceof ApiError && error.status === 404;
+  if (notFound) {
     return (
       <div className="recipe-detail-page">
         <PageHeader title="Recipe" backTo="/recipes" />
         <div className="recipe-detail-page__body">
-          {notFound ? (
-            <Callout.Root color="red" variant="surface" role="alert">
-              <Callout.Icon>
-                <ExclamationTriangleIcon />
-              </Callout.Icon>
-              <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
-            </Callout.Root>
-          ) : (
-            <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
-          )}
+          <Callout.Root color="red" variant="surface" role="alert">
+            <Callout.Icon>
+              <ExclamationTriangleIcon />
+            </Callout.Icon>
+            <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
+          </Callout.Root>
         </div>
         <Outlet />
       </div>
     );
+  }
+
+  // Any other failure (network, 5xx) is worth a Retry — but only when
+  // there's nothing already loaded to show. This page isn't on live sync,
+  // but every query still refetches on window focus, so a stale recipe
+  // must survive a background refetch error rather than being blanked.
+  if (isError && !recipe) {
+    return (
+      <div className="recipe-detail-page">
+        <PageHeader title="Recipe" backTo="/recipes" />
+        <div className="recipe-detail-page__body">
+          <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
+        </div>
+        <Outlet />
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    return null;
   }
 
   return (

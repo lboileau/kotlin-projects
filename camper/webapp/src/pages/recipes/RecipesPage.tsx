@@ -31,6 +31,10 @@ export function RecipesPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: recipes, isLoading, isError, refetch } = useRecipes();
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!recipes;
   const [searchParams, setSearchParams] = useSearchParams();
 
   const q = searchParams.get('q') ?? '';
@@ -143,9 +147,9 @@ export function RecipesPage() {
           </div>
         )}
 
-        {isError && <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />}
+        {isError && !hasData && <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />}
 
-        {!isLoading && !isError && filtered.length === 0 && (
+        {!isLoading && (hasData || !isError) && filtered.length === 0 && (
           <div className="recipes-page__empty">
             {recipes && recipes.length > 0 ? (
               <>
@@ -177,7 +181,7 @@ export function RecipesPage() {
         )}
 
         {!isLoading &&
-          !isError &&
+          (hasData || !isError) &&
           filtered.map((recipe) => <RecipeRow key={recipe.id} recipe={recipe} onOpen={() => navigate(`/recipes/${recipe.id}`)} />)}
       </div>
 

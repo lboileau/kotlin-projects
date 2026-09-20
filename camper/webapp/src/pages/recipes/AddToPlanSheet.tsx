@@ -19,6 +19,10 @@ export function AddToPlanSheet() {
   const queryClient = useQueryClient();
 
   const { data: plans, isLoading, isError, refetch } = usePlans();
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!plans;
   const addRecipe = useAddRecipeToPlan();
 
   // One shared mutation instance is used for every row (the target plan
@@ -77,17 +81,17 @@ export function AddToPlanSheet() {
         </div>
       )}
 
-      {!isLoading && isError && (
+      {!isLoading && isError && !hasData && (
         <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />
       )}
 
-      {!isLoading && !isError && orderedPlans.length === 0 && (
+      {!isLoading && (hasData || !isError) && orderedPlans.length === 0 && (
         <Text color="gray" size="2" className="add-to-plan-sheet__empty">
           You don&apos;t have any plans yet — create one from the Plans tab first.
         </Text>
       )}
 
-      {!isLoading && !isError && orderedPlans.length > 0 && (
+      {!isLoading && (hasData || !isError) && orderedPlans.length > 0 && (
         <div className="add-to-plan-sheet__list">
           {orderedPlans.map((plan) => {
             const added = isAlreadyAdded(plan.id);

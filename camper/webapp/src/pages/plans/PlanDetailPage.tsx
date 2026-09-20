@@ -129,7 +129,10 @@ export function PlanDetailPage() {
     );
   }
 
-  if (isError) {
+  // Gated on the absence of data: this page is refetched by live sync, so
+  // a background refetch error (data already loaded) must not blank an
+  // already-rendered plan — only a failure with nothing to show yet does.
+  if (isError && !plan) {
     return (
       <div className="plan-detail-page">
         <PageHeader title="Plan" backTo="/plans" />

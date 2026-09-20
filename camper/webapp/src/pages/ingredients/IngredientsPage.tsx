@@ -14,6 +14,10 @@ import './IngredientsPage.css';
 export function IngredientsPage() {
   const navigate = useNavigate();
   const { data: ingredients, isLoading, isError, refetch } = useIngredients();
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!ingredients;
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') ?? '';
 
@@ -91,9 +95,9 @@ export function IngredientsPage() {
           </div>
         )}
 
-        {isError && <QueryErrorState message="Couldn't load ingredients." onRetry={() => void refetch()} />}
+        {isError && !hasData && <QueryErrorState message="Couldn't load ingredients." onRetry={() => void refetch()} />}
 
-        {!isLoading && !isError && groups.length === 0 && (
+        {!isLoading && (hasData || !isError) && groups.length === 0 && (
           <div className="ingredients-page__empty">
             {ingredients && ingredients.length > 0 ? (
               <>
@@ -118,7 +122,7 @@ export function IngredientsPage() {
         )}
 
         {!isLoading &&
-          !isError &&
+          (hasData || !isError) &&
           groups.map((group) => (
             <section key={group.category} className="ingredients-page__group">
               <Text as="p" size="1" weight="bold" color="gray" className="ingredients-page__group-header">

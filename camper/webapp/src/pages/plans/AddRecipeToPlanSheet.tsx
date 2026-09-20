@@ -19,6 +19,10 @@ export function AddRecipeToPlanSheet() {
   const { user } = useAuth();
 
   const { data: recipes, isLoading, isError, refetch } = useRecipes();
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!recipes;
   const { data: plan } = usePlan(planId);
   const addRecipe = useAddRecipeToPlan(planId);
 
@@ -78,18 +82,18 @@ export function AddRecipeToPlanSheet() {
             </div>
           )}
 
-          {!isLoading && isError && (
+          {!isLoading && isError && !hasData && (
             <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />
           )}
 
-          {!isLoading && !isError && visibleRecipes.length === 0 && (
+          {!isLoading && (hasData || !isError) && visibleRecipes.length === 0 && (
             <Text color="gray" size="2" className="add-recipe-to-plan-sheet__empty">
               {query ? 'No recipes match.' : 'No recipes yet — create one from the Recipes tab.'}
             </Text>
           )}
 
           {!isLoading &&
-            !isError &&
+            (hasData || !isError) &&
             visibleRecipes.map((recipe) => {
               const added = alreadyAdded.has(recipe.id);
               return (
