@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Checkbox, IconButton } from '@radix-ui/themes';
 import { ChevronRightIcon, Cross2Icon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { formatQuantityText, type ShoppingRow } from '../../lib/shoppingRows';
 import './ShoppingRowItem.css';
 
-function RecipeRefsCaption({ row }: { row: ShoppingRow }) {
+function RecipeRefsCaption({ row, id }: { row: ShoppingRow; id: string }) {
   // Each recipe is its own pill-shaped link: clearly tappable on a phone,
   // and all of them are shown (they wrap) since the list is opt-in now.
   return (
-    <div className="shopping-row__recipes">
+    <div className="shopping-row__recipes" id={id}>
       {row.recipeRefs.map((ref) => (
         <Link key={ref.id} to={`/recipes/${ref.id}`} className="shopping-row__recipe-link">
           <span className="shopping-row__recipe-link-text">{ref.name}</span>
@@ -44,6 +44,7 @@ export function ShoppingRowItem({ row, onToggle, onRemoveManual, onClearNoLonger
   // The recipes an item belongs to stay hidden until the info icon is tapped.
   const [showRecipes, setShowRecipes] = useState(false);
   const hasRecipes = row.recipeRefs.length > 0;
+  const recipesId = useId();
 
   if (noLongerNeeded) {
     return (
@@ -82,6 +83,7 @@ export function ShoppingRowItem({ row, onToggle, onRemoveManual, onClearNoLonger
             className="shopping-row__info"
             aria-label={`${showRecipes ? 'Hide' : 'Show'} recipes for ${name}`}
             aria-expanded={showRecipes}
+            aria-controls={showRecipes ? recipesId : undefined}
             onClick={() => setShowRecipes((current) => !current)}
           >
             <InfoCircledIcon />
@@ -101,7 +103,7 @@ export function ShoppingRowItem({ row, onToggle, onRemoveManual, onClearNoLonger
           </IconButton>
         )}
       </div>
-      {hasRecipes && showRecipes && <RecipeRefsCaption row={row} />}
+      {hasRecipes && showRecipes && <RecipeRefsCaption row={row} id={recipesId} />}
     </div>
   );
 }

@@ -45,9 +45,14 @@ function pushToast(tone: ToastEntry['tone'], message: string, action?: ToastActi
   // error stay independent, matching the two separate live regions. The
   // replaced toast's own dismiss timeout still fires later, harmlessly —
   // `dismissToast` filtering an id that's already gone is a no-op.
-  // A toast that carries an action (Undo, Open) is never evicted: removing
-  // two recipes in a row must not take away the first one's Undo.
-  toasts = [...toasts.filter((entry) => entry.tone !== tone || entry.action), { id, tone, message, action }];
+  // A toast that carries an action (Undo, Open) is not replaced by a newer
+  // toast: removing two recipes in a row must not take away the first one's
+  // Undo. They are capped at two on screen, oldest dropped first, so removing
+  // five recipes quickly does not stack five.
+  const kept = toasts.filter((entry) => entry.tone !== tone || entry.action);
+  const keptActions = kept.filter((entry) => entry.action);
+  const overflow = new Set(keptActions.slice(0, Math.max(0, keptActions.length - (action ? 1 : 2))).map((entry) => entry.id));
+  toasts = [...kept.filter((entry) => !overflow.has(entry.id)), { id, tone, message, action }];
   emit();
   window.setTimeout(() => dismissToast(id), tone === 'error' ? 6000 : 4000);
 }

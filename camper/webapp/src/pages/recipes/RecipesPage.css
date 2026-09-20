@@ -130,9 +130,6 @@
 
 .recipes-page__row-open:focus-visible {
   background: var(--accent-3);
-}
-
-.recipes-page__row-open:focus-visible {
   outline: 2px solid var(--accent-9);
   outline-offset: -2px;
 }
