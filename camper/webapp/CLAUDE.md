@@ -73,6 +73,13 @@ Things a reasonable refactor would undo by accident. Each is deliberate; read th
 - **`createOrFindIngredient` force-fetches the ingredient list and matches names case-insensitively before creating** (`queries/ingredients.ts`). The database's unique constraint is case-sensitive, so "butter" beside "Butter" raises no 409.
 - **`IngredientPicker` reads `value` / `initialQuery` only on mount.** Remount it with a changing `key` to reset it. Options select on `pointerdown` with `preventDefault` so the input's blur cannot swallow the tap. Enter inside the picker never submits the surrounding form.
 
+## Viewport sizing on iOS
+
+- **The document never scrolls; no viewport units size the frame.** `html`, `body`, `#root`, Radix's root Theme wrapper and `.app-shell` are all `height: 100%`, with `overflow: hidden` on `html, body`. Only `.app-shell__scroll` and sheet bodies scroll. A scrollable document is what collapses and restores Safari's toolbars, and each toolbar change resizes the viewport, which pushed the tab bar below the visible screen. The full explanation is the comment at the top of `styles/global.css`.
+- **Never use `100vh`.** On iOS it is the tall viewport (toolbars hidden). Radix Themes sets `min-height: 100vh` on its root wrapper; `styles/global.css` overrides it. `dvh` is fine for sheet max-heights, not for the frame.
+- **`lib/viewportGuard.ts`** resets the document pan iOS can leave behind after the keyboard closes.
+- **`?debug=viewport`** on any URL shows a live on-device readout (inner and visual viewport, what `100vh` and `100dvh` resolve to, safe-area insets, shell height, and whether the tab bar is cut off and by how much). It stays on for the browser session; `?debug=off` turns it off. Not yet confirmed on a real iPhone.
+
 ## Browser verification status
 
 Checked by hand in desktop Chrome at a narrow width (2026-09-19): sign-in redirect with `next`, registration, create plan, create recipe with inline ingredient create and back-to-back line entry, add to plan, Shopping tab redirect, rapid quick add, check-off, two-tab live sync, browser Back closing a sheet, a plan deleted elsewhere switching open tabs to not found, no console errors.

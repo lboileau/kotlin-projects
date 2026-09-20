@@ -29,6 +29,11 @@ import { queryClient } from './api/queryClient';
 import { AuthProvider } from './auth/AuthProvider';
 import { ToastRegion } from './components/Toast';
 import { router } from './router';
+import { installViewportGuard } from './lib/viewportGuard';
+import { installViewportDebug } from './lib/viewportDebug';
+
+installViewportGuard();
+installViewportDebug();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

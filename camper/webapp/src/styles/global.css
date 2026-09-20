@@ -6,10 +6,34 @@
   box-sizing: border-box;
 }
 
+/*
+ * Viewport sizing — read before changing.
+ *
+ * The app is a fixed frame (header / scrolling page / tab bar), so the
+ * DOCUMENT must never scroll: only `.app-shell__scroll` and sheet bodies do.
+ * On iOS Safari a scrollable document is what collapses and restores the
+ * browser toolbars, and every toolbar change resizes the viewport — that is
+ * how the tab bar ended up below the visible screen. So:
+ *   - html, body, #root and Radix's root Theme wrapper are all `height: 100%`
+ *     with `overflow: hidden`. Percent heights resolve against the visible
+ *     layout viewport and need no viewport units at all.
+ *   - No `100vh` anywhere: on iOS it means the TALL viewport (toolbars
+ *     hidden), so anything sized with it overflows while toolbars show.
+ *     Radix Themes sets `min-height: 100vh` on its root wrapper; the rule
+ *     below overrides it.
+ *   - `lib/viewportGuard.ts` undoes the document pan iOS sometimes leaves
+ *     behind after the keyboard closes.
+ */
 html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.radix-themes:where([data-is-root-theme='true']) {
+  min-height: 100%;
   height: 100%;
 }
 
@@ -22,7 +46,7 @@ body {
 }
 
 #root {
-  min-height: 100dvh;
+  height: 100%;
 }
 
 button {

@@ -1,7 +1,8 @@
 .app-shell {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  /* Percent, not dvh: see the viewport note in styles/global.css. */
+  height: 100%;
   max-width: 640px;
   margin: 0 auto;
   background: var(--color-background);

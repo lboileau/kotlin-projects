@@ -1,5 +1,6 @@
 .require-auth__loading {
-  min-height: 100dvh;
+  height: 100%;
+  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
