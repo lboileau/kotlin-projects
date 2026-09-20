@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useParams } from 'react-router-dom';
 import { Badge, Button, IconButton, Separator, Skeleton, Text } from '@radix-ui/themes';
-import { ListBulletIcon, Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+import { Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { Stepper } from '../../components/Stepper';
 import { QueryErrorState } from '../../components/QueryErrorState';
-import { BottomBar } from '../../components/BottomBar';
 import { ApiError } from '../../api/http';
 import { usePlan, useAddRecipeToPlan, useRemoveRecipeFromPlan, useUpdatePlan } from '../../queries/plans';
 import { flattenMealPlan, type FlatPlanRecipe } from '../../lib/flatPlan';
@@ -227,13 +226,6 @@ export function PlanDetailPage() {
         </div>
       </div>
 
-      <BottomBar>
-        <Button asChild size="3" variant="solid" className="plan-detail-page__shopping-button">
-          <Link to={`/plans/${planId}/shopping`}>
-            <ListBulletIcon /> Shopping list
-          </Link>
-        </Button>
-      </BottomBar>
 
       <Outlet />
     </div>

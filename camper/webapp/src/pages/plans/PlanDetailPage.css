@@ -47,10 +47,6 @@
   background: var(--accent-2);
 }
 
-.plan-detail-page__shopping-button {
-  width: 100%;
-}
-
 .plan-detail-page__section-header {
   display: flex;
   align-items: center;
