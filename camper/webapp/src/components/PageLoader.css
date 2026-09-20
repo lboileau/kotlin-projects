@@ -8,8 +8,7 @@
   color: var(--accent-9);
 }
 
-.page-loader__icon path,
-.page-loader__icon rect {
+.page-loader__icon path {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: page-loader-draw 2.4s ease-in-out infinite;
@@ -38,8 +37,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-loader__icon path,
-  .page-loader__icon rect {
+  .page-loader__icon path {
     stroke-dashoffset: 0;
     animation: page-loader-pulse 2s ease-in-out infinite;
   }

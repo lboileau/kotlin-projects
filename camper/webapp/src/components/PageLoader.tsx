@@ -57,7 +57,7 @@ function RecipesIcon() {
 function PlansIcon() {
   return (
     <>
-      <rect pathLength={1} x="12" y="16" width="40" height="36" rx="6" />
+      <path pathLength={1} d="M18 16h28a6 6 0 0 1 6 6v24a6 6 0 0 1-6 6H18a6 6 0 0 1-6-6V22a6 6 0 0 1 6-6z" />
       <path pathLength={1} d="M12 26h40" />
       <path pathLength={1} d="M22 11v9" />
       <path pathLength={1} d="M42 11v9" />
