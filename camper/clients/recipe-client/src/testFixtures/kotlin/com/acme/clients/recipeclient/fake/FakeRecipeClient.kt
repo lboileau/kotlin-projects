@@ -73,7 +73,11 @@ class FakeRecipeClient : RecipeClient {
         val existing = recipes[param.id] ?: return failure(NotFoundError("Recipe", param.id.toString()))
         val updated = existing.copy(
             name = param.name ?: existing.name,
-            description = param.description ?: existing.description,
+            description = when {
+                param.clearDescription -> null
+                param.description != null -> param.description
+                else -> existing.description
+            },
             baseServings = param.baseServings ?: existing.baseServings,
             status = param.status ?: existing.status,
             duplicateOfId = when {
@@ -81,8 +85,16 @@ class FakeRecipeClient : RecipeClient {
                 param.duplicateOfId != null -> param.duplicateOfId
                 else -> existing.duplicateOfId
             },
-            meal = param.meal ?: existing.meal,
-            theme = param.theme ?: existing.theme,
+            meal = when {
+                param.clearMeal -> null
+                param.meal != null -> param.meal
+                else -> existing.meal
+            },
+            theme = when {
+                param.clearTheme -> null
+                param.theme != null -> param.theme
+                else -> existing.theme
+            },
             updatedAt = Instant.now()
         )
         recipes[param.id] = updated
