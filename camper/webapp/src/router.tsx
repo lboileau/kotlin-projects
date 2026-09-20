@@ -90,7 +90,11 @@ export const router = createBrowserRouter([
           {
             path: 'recipes',
             element: <RecipesPage />,
-            children: [{ path: 'import', element: <ImportRecipeSheet /> }],
+            children: [
+              { path: 'import', element: <ImportRecipeSheet /> },
+              // Add to plan straight from the library, without leaving the list.
+              { path: 'add-to-plan/:recipeId', element: <AddToPlanSheet /> },
+            ],
           },
           { path: 'recipes/new', element: <NewRecipePage /> },
           {

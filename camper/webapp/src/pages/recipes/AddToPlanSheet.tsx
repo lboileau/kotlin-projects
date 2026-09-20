@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge, Skeleton, Text } from '@radix-ui/themes';
 import { CheckIcon } from '@radix-ui/react-icons';
@@ -15,7 +15,11 @@ import './AddToPlanSheet.css';
 
 export function AddToPlanSheet() {
   const { recipeId } = useParams<{ recipeId: string }>();
-  const sheet = useSheet(`/recipes/${recipeId}`);
+  // Opened either from the recipe's own page or directly from the library
+  // (`/recipes/add-to-plan/:recipeId`), so the parent to fall back to differs.
+  const location = useLocation();
+  const fromLibrary = location.pathname.startsWith('/recipes/add-to-plan/');
+  const sheet = useSheet(fromLibrary ? `/recipes${location.search}` : `/recipes/${recipeId}`);
   const queryClient = useQueryClient();
 
   const { data: plans, isLoading, isError, refetch } = usePlans();

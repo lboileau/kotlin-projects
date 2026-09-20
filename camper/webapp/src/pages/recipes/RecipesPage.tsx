@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Badge, Button, DropdownMenu, IconButton, Skeleton, Switch, Text, TextField } from '@radix-ui/themes';
+import { Badge, Button, IconButton, Skeleton, Switch, Text, TextField } from '@radix-ui/themes';
 import {
   Cross2Icon,
   DownloadIcon,
-  InfoCircledIcon,
   Link2Icon,
   MagnifyingGlassIcon,
   PlusIcon,
@@ -193,10 +192,8 @@ export function RecipesPage() {
             <RecipeRow
               key={recipe.id}
               recipe={recipe}
-              isOwner={recipe.createdBy === user?.id}
               onOpen={() => navigate(`/recipes/${recipe.id}`)}
-              onAddToPlan={() => navigate(`/recipes/${recipe.id}/add-to-plan`)}
-              onEdit={() => navigate(`/recipes/${recipe.id}/edit`)}
+              onAddToPlan={() => navigate(`/recipes/add-to-plan/${recipe.id}${window.location.search}`)}
             />
           ))}
       </div>
@@ -208,16 +205,12 @@ export function RecipesPage() {
 
 function RecipeRow({
   recipe,
-  isOwner,
   onOpen,
   onAddToPlan,
-  onEdit,
 }: {
   recipe: RecipeResponse;
-  isOwner: boolean;
   onOpen: () => void;
   onAddToPlan: () => void;
-  onEdit: () => void;
 }) {
   return (
     <div className="recipes-page__row">
@@ -254,25 +247,16 @@ function RecipeRow({
         </div>
       </button>
 
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <IconButton
-            type="button"
-            variant="ghost"
-            color="gray"
-            size="3"
-            aria-label={`More about ${recipe.name}`}
-            className="recipes-page__row-info"
-          >
-            <InfoCircledIcon />
-          </IconButton>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content>
-          <DropdownMenu.Item onSelect={onOpen}>View recipe</DropdownMenu.Item>
-          <DropdownMenu.Item onSelect={onAddToPlan}>Add to plan</DropdownMenu.Item>
-          {isOwner && <DropdownMenu.Item onSelect={onEdit}>Edit recipe</DropdownMenu.Item>}
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+      <IconButton
+        type="button"
+        variant="soft"
+        size="3"
+        aria-label={`Add ${recipe.name} to a plan`}
+        className="recipes-page__row-info"
+        onClick={onAddToPlan}
+      >
+        <PlusIcon />
+      </IconButton>
     </div>
   );
 }

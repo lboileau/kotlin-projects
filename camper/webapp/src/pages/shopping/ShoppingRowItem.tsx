@@ -1,28 +1,22 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Checkbox, IconButton, Text } from '@radix-ui/themes';
-import { Cross2Icon, InfoCircledIcon } from '@radix-ui/react-icons';
+import { Button, Checkbox, IconButton } from '@radix-ui/themes';
+import { ChevronRightIcon, Cross2Icon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { formatQuantityText, type ShoppingRow } from '../../lib/shoppingRows';
 import './ShoppingRowItem.css';
 
-const MAX_VISIBLE_REFS = 3;
-
 function RecipeRefsCaption({ row }: { row: ShoppingRow }) {
-  const visible = row.recipeRefs.slice(0, MAX_VISIBLE_REFS);
-  const overflow = row.recipeRefs.length - visible.length;
-
+  // Each recipe is its own pill-shaped link: clearly tappable on a phone,
+  // and all of them are shown (they wrap) since the list is opt-in now.
   return (
-    <Text size="1" color="gray" as="p" className="shopping-row__recipes">
-      {visible.map((ref, index) => (
-        <span key={ref.id}>
-          {index > 0 && ' · '}
-          <Link to={`/recipes/${ref.id}`} className="shopping-row__recipe-link">
-            {ref.name}
-          </Link>
-        </span>
+    <div className="shopping-row__recipes">
+      {row.recipeRefs.map((ref) => (
+        <Link key={ref.id} to={`/recipes/${ref.id}`} className="shopping-row__recipe-link">
+          <span className="shopping-row__recipe-link-text">{ref.name}</span>
+          <ChevronRightIcon aria-hidden="true" />
+        </Link>
       ))}
-      {overflow > 0 && ` +${overflow} more`}
-    </Text>
+    </div>
   );
 }
 
