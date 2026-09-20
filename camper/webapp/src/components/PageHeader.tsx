@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon, PersonIcon } from '@radix-ui/react-icons';
+import { usePageTitle } from '../lib/usePageTitle';
 import './PageHeader.css';
 
 interface PageHeaderProps {
@@ -12,8 +13,10 @@ interface PageHeaderProps {
   showAccount?: boolean;
 }
 
+/** Also sets document.title to match — every page using this gets that for free. */
 export function PageHeader({ title, backTo, actions, showAccount = true }: PageHeaderProps) {
   const navigate = useNavigate();
+  usePageTitle(title);
 
   return (
     <header className="page-header">

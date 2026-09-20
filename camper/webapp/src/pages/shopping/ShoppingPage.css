@@ -29,6 +29,8 @@
   align-items: center;
   gap: 4px;
   min-height: 44px;
+  min-width: 0;
+  flex: 1;
   padding: 0 4px;
   border: none;
   background: transparent;
@@ -38,6 +40,7 @@
 }
 
 .shopping-page__plan-name-text {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

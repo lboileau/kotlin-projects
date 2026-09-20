@@ -1,4 +1,4 @@
-import { useId, useMemo, useState, type KeyboardEvent } from 'react';
+import { useId, useMemo, useRef, useState, type KeyboardEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button, Select, Text, TextField } from '@radix-ui/themes';
 import { ApiError } from '../api/http';
@@ -86,6 +86,7 @@ export function IngredientPicker({
 
   const inputId = useId();
   const listId = useId();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const trimmedQuery = query.trim();
   const results = useMemo(() => rankIngredients(ingredients ?? [], query), [ingredients, query]);
@@ -188,7 +189,7 @@ export function IngredientPicker({
   const activeId = listboxVisible ? optionId(activeIndex) : undefined;
 
   return (
-    <div className="ingredient-picker">
+    <div className="ingredient-picker" ref={containerRef}>
       {label && (
         <Text as="label" htmlFor={inputId} size="2" weight="medium" className="ingredient-picker__label">
           {label}
@@ -203,12 +204,24 @@ export function IngredientPicker({
         aria-activedescendant={activeId}
         aria-label={label ? undefined : placeholder}
         autoComplete="off"
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="search"
         placeholder={placeholder}
         value={query}
         size="3"
         autoFocus={autoFocus}
         disabled={creating}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setOpen(true);
+          // Inside a scrolling sheet body, the on-screen keyboard can push the
+          // results (and especially the Create row) out of view — nudge the
+          // picker back into view once the keyboard's animation has settled.
+          window.setTimeout(() => {
+            containerRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+          }, 300);
+        }}
         onChange={(event) => {
           setQuery(event.target.value);
           setOpen(true);
@@ -216,7 +229,7 @@ export function IngredientPicker({
         }}
         onKeyDown={handleKeyDown}
         onBlur={() => {
-          // Let a click on a row (onMouseDown, which fires first) register before we close.
+          // Let a tap on a row (onPointerDown, which fires first) register before we close.
           window.setTimeout(() => setOpen(false), 100);
         }}
       />
@@ -230,7 +243,10 @@ export function IngredientPicker({
               role="option"
               aria-selected={index === activeIndex}
               className={`ingredient-picker__row${index === activeIndex ? ' ingredient-picker__row--active' : ''}`}
-              onMouseDown={(event) => {
+              // onPointerDown (not onMouseDown/onClick) fires before the input's blur on both
+              // touch and mouse, and preventDefault here stops that blur from ever happening —
+              // without it, the input would close the list (via onBlur) before the tap registers.
+              onPointerDown={(event) => {
                 event.preventDefault();
                 selectIngredient(ingredient);
               }}
@@ -247,7 +263,7 @@ export function IngredientPicker({
               className={`ingredient-picker__row ingredient-picker__row--create${
                 activeIndex === results.length ? ' ingredient-picker__row--active' : ''
               }`}
-              onMouseDown={(event) => {
+              onPointerDown={(event) => {
                 event.preventDefault();
                 startCreate();
               }}
@@ -272,6 +288,8 @@ export function IngredientPicker({
               onChange={(event) => setCreateName(event.target.value)}
               autoFocus
               size="3"
+              autoCapitalize="words"
+              enterKeyHint="done"
             />
           </Text>
           <div className="ingredient-picker__create-row">
@@ -303,10 +321,11 @@ export function IngredientPicker({
             </Text>
           </div>
           <div className="ingredient-picker__create-actions">
-            <Button type="button" variant="soft" onClick={cancelCreate} disabled={createIngredient.isPending}>
+            <Button size="3" type="button" variant="soft" onClick={cancelCreate} disabled={createIngredient.isPending}>
               Cancel
             </Button>
             <Button
+              size="3"
               type="button"
               onClick={confirmCreate}
               loading={createIngredient.isPending}

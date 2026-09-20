@@ -1,15 +1,13 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button, Text, TextField } from '@radix-ui/themes';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
 import { Stepper } from '../../components/Stepper';
 import { useCreatePlan } from '../../queries/plans';
 import './NewPlanSheet.css';
 
 export function NewPlanSheet() {
-  const closeSheet = useCloseSheet('/plans');
-  const navigate = useNavigate();
+  const sheet = useSheet('/plans');
   const createPlan = useCreatePlan();
 
   const [name, setName] = useState('');
@@ -22,7 +20,7 @@ export function NewPlanSheet() {
     createPlan.mutate(
       { name: name.trim(), servings },
       {
-        onSuccess: (plan) => navigate(`/plans/${plan.id}`, { replace: true }),
+        onSuccess: (plan) => sheet.close({ to: `/plans/${plan.id}`, replace: true }),
         // On error the global mutation error toast already surfaces it —
         // stay on the sheet so the user can retry.
       },
@@ -30,7 +28,7 @@ export function NewPlanSheet() {
   }
 
   return (
-    <Sheet title="New plan" onClose={closeSheet}>
+    <Sheet {...sheet.sheetProps} title="New plan">
       <form onSubmit={handleSubmit} className="new-plan-sheet__form">
         <label className="new-plan-sheet__field">
           <Text as="span" size="2" weight="medium">

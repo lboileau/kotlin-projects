@@ -5,7 +5,7 @@ import { Link, type LinkProps } from 'react-router-dom';
  * A Link that opens a sheet (a child route rendered over its parent
  * page). Semantically distinct from a regular navigation Link so sheet
  * triggers are easy to find in usage; plain `<Link>` behavior underneath
- * is enough for `useCloseSheet`'s `location.key` heuristic to detect
+ * is enough for `useSheet`'s history-index heuristic to detect
  * in-app navigation.
  */
 export const SheetLink = forwardRef<HTMLAnchorElement, LinkProps>(function SheetLink(

@@ -36,8 +36,10 @@
 .ingredients-page__empty {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 12px;
   padding: 48px 24px;
   text-align: center;
 }
@@ -70,9 +72,17 @@
   border-bottom: 1px solid var(--gray-4);
   color: inherit;
   text-decoration: none;
+  touch-action: manipulation;
 }
 
 .ingredients-page__row:hover,
 .ingredients-page__row:focus-visible {
   background: var(--accent-2);
+}
+
+.ingredients-page__row-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

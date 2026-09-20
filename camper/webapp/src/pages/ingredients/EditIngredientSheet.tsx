@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button, Callout, Select, Separator, Spinner, Text, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet, type UseSheetResult } from '../../components/useSheet';
 import { useDeleteIngredient, useIngredients, useUpdateIngredient } from '../../queries/ingredients';
 import { ApiError } from '../../api/http';
 import { CATEGORIES, UNITS, capitalize } from '../../lib/ingredientConstants';
@@ -13,13 +13,13 @@ import './EditIngredientSheet.css';
 
 export function EditIngredientSheet() {
   const { ingredientId } = useParams<{ ingredientId: string }>();
-  const closeSheet = useCloseSheet('/ingredients');
+  const sheet = useSheet('/ingredients');
   const { data: ingredients, isLoading } = useIngredients();
   const ingredient = ingredients?.find((i) => i.id === ingredientId);
 
   if (isLoading) {
     return (
-      <Sheet title="Edit ingredient" onClose={closeSheet}>
+      <Sheet {...sheet.sheetProps} title="Edit ingredient">
         <Spinner />
       </Sheet>
     );
@@ -27,7 +27,7 @@ export function EditIngredientSheet() {
 
   if (!ingredient) {
     return (
-      <Sheet title="Edit ingredient" onClose={closeSheet}>
+      <Sheet {...sheet.sheetProps} title="Edit ingredient">
         <Text as="p" size="2" color="gray">
           This ingredient couldn&apos;t be found. It may have been deleted.
         </Text>
@@ -37,10 +37,16 @@ export function EditIngredientSheet() {
 
   // Keyed on the ingredient id so the form seeds fresh from `ingredient`
   // once via useState's lazy initializer, rather than syncing with an effect.
-  return <EditIngredientForm key={ingredient.id} ingredient={ingredient} closeSheet={closeSheet} />;
+  return <EditIngredientForm key={ingredient.id} ingredient={ingredient} sheet={sheet} />;
 }
 
-function EditIngredientForm({ ingredient, closeSheet }: { ingredient: IngredientResponse; closeSheet: () => void }) {
+function EditIngredientForm({
+  ingredient,
+  sheet,
+}: {
+  ingredient: IngredientResponse;
+  sheet: UseSheetResult;
+}) {
   const updateIngredient = useUpdateIngredient(ingredient.id);
   const deleteIngredient = useDeleteIngredient();
 
@@ -49,6 +55,7 @@ function EditIngredientForm({ ingredient, closeSheet }: { ingredient: Ingredient
   const [unit, setUnit] = useState(ingredient.defaultUnit);
   const [error, setError] = useState<string | null>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const errorId = useId();
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
@@ -69,15 +76,24 @@ function EditIngredientForm({ ingredient, closeSheet }: { ingredient: Ingredient
   async function handleDelete() {
     await deleteIngredient.mutateAsync(ingredient.id);
     toast.info('Ingredient deleted.');
-    closeSheet();
+    sheet.close();
   }
 
   return (
-    <Sheet title="Edit ingredient" onClose={closeSheet}>
+    <Sheet {...sheet.sheetProps} title="Edit ingredient">
       <form className="edit-ingredient-sheet__form" onSubmit={handleSave}>
         <Text as="label" size="2" weight="medium" className="edit-ingredient-sheet__field">
           Name
-          <TextField.Root size="3" value={name} onChange={(event) => setName(event.target.value)} autoFocus />
+          <TextField.Root
+            size="3"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            autoFocus
+            autoCapitalize="words"
+            enterKeyHint="done"
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? errorId : undefined}
+          />
         </Text>
 
         <div className="edit-ingredient-sheet__row">
@@ -110,7 +126,7 @@ function EditIngredientForm({ ingredient, closeSheet }: { ingredient: Ingredient
         </div>
 
         {error && (
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root id={errorId} color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>
@@ -131,7 +147,7 @@ function EditIngredientForm({ ingredient, closeSheet }: { ingredient: Ingredient
         </Button>
       ) : (
         <div className="edit-ingredient-sheet__confirm-delete">
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>
@@ -141,10 +157,10 @@ function EditIngredientForm({ ingredient, closeSheet }: { ingredient: Ingredient
             </Callout.Text>
           </Callout.Root>
           <div className="edit-ingredient-sheet__confirm-actions">
-            <Button variant="soft" onClick={() => setConfirmingDelete(false)} disabled={deleteIngredient.isPending}>
+            <Button size="3" variant="soft" onClick={() => setConfirmingDelete(false)} disabled={deleteIngredient.isPending}>
               Cancel
             </Button>
-            <Button color="red" onClick={handleDelete} loading={deleteIngredient.isPending}>
+            <Button size="3" color="red" onClick={handleDelete} loading={deleteIngredient.isPending}>
               Yes, delete
             </Button>
           </div>

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router-dom';
-import { AlertDialog, Button, DropdownMenu, Progress, Skeleton, Text, TextField } from '@radix-ui/themes';
+import { AlertDialog, Button, DropdownMenu, Heading, Progress, Skeleton, Text, TextField } from '@radix-ui/themes';
 import { ChevronDownIcon, DotsVerticalIcon, PersonIcon, PlusIcon } from '@radix-ui/react-icons';
 import { SheetLink } from '../../components/SheetLink';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { ApiError } from '../../api/http';
+import { usePageTitle } from '../../lib/usePageTitle';
 import { usePlan } from '../../queries/plans';
 import {
   useAddManualShoppingItem,
@@ -33,7 +35,8 @@ export function ShoppingPage() {
   useMealPlanSync(planId);
 
   const { data: plan } = usePlan(planId);
-  const { data: list, isLoading, isError, error } = useShoppingList(planId);
+  const { data: list, isLoading, isError, error, refetch } = useShoppingList(planId);
+  usePageTitle(plan?.name ? `Shopping — ${plan.name}` : 'Shopping');
 
   const toggleRow = useToggleShoppingRow(planId ?? '');
   const addManualItem = useAddManualShoppingItem(planId ?? '');
@@ -134,9 +137,9 @@ export function ShoppingPage() {
     return (
       <div className="shopping-page">
         <div className="shopping-page__not-found">
-          <Text size="4" weight="medium">
+          <Heading as="h1" size="4" weight="medium">
             Plan not found
-          </Text>
+          </Heading>
           <Text color="gray" size="2">
             It may have been deleted, or the link is wrong.
           </Text>
@@ -149,14 +152,29 @@ export function ShoppingPage() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="shopping-page">
+        <Heading as="h1" className="sr-only">
+          Shopping
+        </Heading>
+        <QueryErrorState message="Couldn't load the shopping list." onRetry={() => void refetch()} />
+        <Outlet />
+      </div>
+    );
+  }
+
   if (isLoading || !list) {
     return (
       <div className="shopping-page">
-        <div className="shopping-page__skeleton">
-          <Skeleton height="32px" />
-          <Skeleton height="56px" />
-          <Skeleton height="56px" />
-          <Skeleton height="56px" />
+        <Heading as="h1" className="sr-only">
+          Shopping
+        </Heading>
+        <div className="shopping-page__skeleton" aria-busy="true" aria-label="Loading shopping list">
+          <Skeleton height="32px" aria-hidden="true" />
+          <Skeleton height="56px" aria-hidden="true" />
+          <Skeleton height="56px" aria-hidden="true" />
+          <Skeleton height="56px" aria-hidden="true" />
         </div>
         <Outlet />
       </div>
@@ -172,9 +190,9 @@ export function ShoppingPage() {
       <header className="shopping-page__header">
         <div className="shopping-page__header-top">
           <SheetLink to="switch" className="shopping-page__plan-name">
-            <Text as="span" size="4" weight="bold" className="shopping-page__plan-name-text">
+            <Heading as="h1" size="4" weight="bold" className="shopping-page__plan-name-text">
               {plan?.name ?? 'Shopping'}
-            </Text>
+            </Heading>
             <ChevronDownIcon />
           </SheetLink>
 

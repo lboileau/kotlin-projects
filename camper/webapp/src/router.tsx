@@ -1,38 +1,65 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
+import { RouteFallback } from './components/RouteFallback';
 import { RequireAuth } from './auth/RequireAuth';
-import { SignInPage } from './pages/sign-in/SignInPage';
-import { AccountPage } from './pages/account/AccountPage';
-import { PlansPage } from './pages/plans/PlansPage';
-import { NewPlanSheet } from './pages/plans/NewPlanSheet';
-import { PlanDetailPage } from './pages/plans/PlanDetailPage';
-import { AddRecipeToPlanSheet } from './pages/plans/AddRecipeToPlanSheet';
-import { EditPlanSheet } from './pages/plans/EditPlanSheet';
-import { ShoppingPage } from './pages/shopping/ShoppingPage';
-import { SwitchPlanSheet } from './pages/shopping/SwitchPlanSheet';
-import { ShoppingRedirect } from './pages/shopping/ShoppingRedirect';
-import { RecipesPage } from './pages/recipes/RecipesPage';
-import { ImportRecipeSheet } from './pages/recipes/ImportRecipeSheet';
-import { NewRecipePage } from './pages/recipes/NewRecipePage';
-import { RecipeDetailPage } from './pages/recipes/RecipeDetailPage';
-import { EditRecipePage } from './pages/recipes/EditRecipePage';
-import { AddLineSheet } from './pages/recipes/AddLineSheet';
-import { EditLineSheet } from './pages/recipes/EditLineSheet';
-import { AddToPlanSheet } from './pages/recipes/AddToPlanSheet';
-import { IngredientsPage } from './pages/ingredients/IngredientsPage';
-import { NewIngredientSheet } from './pages/ingredients/NewIngredientSheet';
-import { EditIngredientSheet } from './pages/ingredients/EditIngredientSheet';
+
+// Route-level code splitting, grouped by area (see pages/*/index.ts
+// barrels): the shell, tab bar, auth, http, query client and sync stay
+// in the main chunk via ordinary static imports above and elsewhere;
+// everything below only downloads when its area is first visited. Every
+// route in an area shares one dynamic import() specifier, so they all
+// resolve from the same chunk — opening a sheet after its page has
+// already loaded needs no further network fetch.
+const SignInPage = lazy(() => import('./pages/sign-in/SignInPage').then((m) => ({ default: m.SignInPage })));
+const AccountPage = lazy(() => import('./pages/account/AccountPage').then((m) => ({ default: m.AccountPage })));
+
+const PlansPage = lazy(() => import('./pages/plans').then((m) => ({ default: m.PlansPage })));
+const NewPlanSheet = lazy(() => import('./pages/plans').then((m) => ({ default: m.NewPlanSheet })));
+const PlanDetailPage = lazy(() => import('./pages/plans').then((m) => ({ default: m.PlanDetailPage })));
+const AddRecipeToPlanSheet = lazy(() => import('./pages/plans').then((m) => ({ default: m.AddRecipeToPlanSheet })));
+const EditPlanSheet = lazy(() => import('./pages/plans').then((m) => ({ default: m.EditPlanSheet })));
+
+const ShoppingPage = lazy(() => import('./pages/shopping').then((m) => ({ default: m.ShoppingPage })));
+const SwitchPlanSheet = lazy(() => import('./pages/shopping').then((m) => ({ default: m.SwitchPlanSheet })));
+const ShoppingRedirect = lazy(() => import('./pages/shopping').then((m) => ({ default: m.ShoppingRedirect })));
+
+const RecipesPage = lazy(() => import('./pages/recipes').then((m) => ({ default: m.RecipesPage })));
+const ImportRecipeSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.ImportRecipeSheet })));
+const NewRecipePage = lazy(() => import('./pages/recipes').then((m) => ({ default: m.NewRecipePage })));
+const RecipeDetailPage = lazy(() => import('./pages/recipes').then((m) => ({ default: m.RecipeDetailPage })));
+const EditRecipePage = lazy(() => import('./pages/recipes').then((m) => ({ default: m.EditRecipePage })));
+const AddLineSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.AddLineSheet })));
+const EditLineSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.EditLineSheet })));
+const AddToPlanSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.AddToPlanSheet })));
+
+const IngredientsPage = lazy(() => import('./pages/ingredients').then((m) => ({ default: m.IngredientsPage })));
+const NewIngredientSheet = lazy(() =>
+  import('./pages/ingredients').then((m) => ({ default: m.NewIngredientSheet })),
+);
+const EditIngredientSheet = lazy(() =>
+  import('./pages/ingredients').then((m) => ({ default: m.EditIngredientSheet })),
+);
 
 // Full route table from the frontend plan (section 3). Pages not built
 // yet render a small placeholder (see components/Placeholder.tsx) so
 // navigation, the tab bar, and deep links can all be exercised now.
 // Sheets are child routes rendered via <Outlet/> over their parent page.
 export const router = createBrowserRouter([
-  { path: '/sign-in', element: <SignInPage /> },
+  {
+    path: '/sign-in',
+    element: (
+      <Suspense fallback={<RouteFallback />}>
+        <SignInPage />
+      </Suspense>
+    ),
+  },
   {
     element: <RequireAuth />,
     children: [
       {
+        // AppShell wraps its <Outlet/> in the one Suspense boundary
+        // every lazy route below renders through.
         element: <AppShell />,
         children: [
           {

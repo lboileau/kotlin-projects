@@ -71,7 +71,7 @@ export function NewRecipePage() {
         title="New recipe"
         backTo="/recipes"
         actions={
-          <Button type="submit" form="new-recipe-form" loading={createRecipe.isPending}>
+          <Button size="3" type="submit" form="new-recipe-form" loading={createRecipe.isPending}>
             Save
           </Button>
         }
@@ -79,12 +79,25 @@ export function NewRecipePage() {
       <form id="new-recipe-form" className="recipe-form-page__body" onSubmit={handleSubmit}>
         <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
           Name
-          <TextField.Root size="3" value={name} onChange={(event) => setName(event.target.value)} autoFocus />
+          <TextField.Root
+            size="3"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            autoFocus
+            autoCapitalize="words"
+            enterKeyHint="next"
+          />
         </Text>
 
         <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
           Description
-          <TextArea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} />
+          <TextArea
+            size="3"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={3}
+            autoCapitalize="sentences"
+          />
         </Text>
 
         <div className="recipe-form-page__field">
@@ -93,9 +106,11 @@ export function NewRecipePage() {
           </Text>
           <div className="recipe-form-page__stepper">
             <IconButton
+              size="3"
               type="button"
               variant="soft"
               aria-label="Decrease servings"
+              className="recipe-form-page__icon-button"
               onClick={() => setServings((s) => Math.max(1, s - 1))}
             >
               <MinusIcon />
@@ -103,7 +118,14 @@ export function NewRecipePage() {
             <Text as="span" size="4" weight="medium" className="recipe-form-page__stepper-value">
               {servings}
             </Text>
-            <IconButton type="button" variant="soft" aria-label="Increase servings" onClick={() => setServings((s) => s + 1)}>
+            <IconButton
+              size="3"
+              type="button"
+              variant="soft"
+              aria-label="Increase servings"
+              className="recipe-form-page__icon-button"
+              onClick={() => setServings((s) => s + 1)}
+            >
               <PlusIcon />
             </IconButton>
           </div>
@@ -113,6 +135,10 @@ export function NewRecipePage() {
           Source URL
           <TextField.Root
             type="url"
+            inputMode="url"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
             size="3"
             placeholder="https://…"
             value={webLink}
@@ -158,7 +184,7 @@ export function NewRecipePage() {
         </div>
 
         {error && (
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>

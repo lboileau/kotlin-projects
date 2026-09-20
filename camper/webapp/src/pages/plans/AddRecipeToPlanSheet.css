@@ -35,6 +35,14 @@
   cursor: pointer;
 }
 
+.add-recipe-to-plan-sheet__row-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .add-recipe-to-plan-sheet__row:hover:not(:disabled) {
   background: var(--accent-3);
 }

@@ -5,6 +5,7 @@ import { ListBulletIcon, Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/reac
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { Stepper } from '../../components/Stepper';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { ApiError } from '../../api/http';
 import { usePlan, useAddRecipeToPlan, useRemoveRecipeFromPlan, useUpdatePlan } from '../../queries/plans';
 import { flattenMealPlan, type FlatPlanRecipe } from '../../lib/flatPlan';
@@ -16,7 +17,7 @@ import './PlanDetailPage.css';
 export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>();
   useMealPlanSync(planId);
-  const { data: plan, isLoading, isError, error } = usePlan(planId);
+  const { data: plan, isLoading, isError, error, refetch } = usePlan(planId);
   const updatePlan = useUpdatePlan(planId ?? '');
   const addRecipe = useAddRecipeToPlan(planId);
   const removeRecipe = useRemoveRecipeFromPlan(planId);
@@ -128,14 +129,24 @@ export function PlanDetailPage() {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="plan-detail-page">
+        <PageHeader title="Plan" backTo="/plans" />
+        <QueryErrorState message="Couldn't load this plan." onRetry={() => void refetch()} />
+        <Outlet />
+      </div>
+    );
+  }
+
   if (isLoading || !plan) {
     return (
       <div className="plan-detail-page">
         <PageHeader title="Plan" backTo="/plans" />
-        <div className="plan-detail-page__skeleton">
-          <Skeleton height="40px" />
-          <Skeleton height="60px" />
-          <Skeleton height="60px" />
+        <div className="plan-detail-page__skeleton" aria-busy="true" aria-label="Loading plan">
+          <Skeleton height="40px" aria-hidden="true" />
+          <Skeleton height="60px" aria-hidden="true" />
+          <Skeleton height="60px" aria-hidden="true" />
         </div>
         <Outlet />
       </div>

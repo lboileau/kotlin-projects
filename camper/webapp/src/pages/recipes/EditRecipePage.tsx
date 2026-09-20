@@ -4,10 +4,12 @@ import { Badge, Button, Callout, Heading, IconButton, Select, Skeleton, Text, Te
 import { ExclamationTriangleIcon, ExternalLinkIcon, MinusIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { useRecipe, useUpdateRecipe } from '../../queries/recipes';
 import { MEALS, THEMES, capitalize } from '../../lib/ingredientConstants';
 import { formatQuantity } from '../../lib/formatQuantity';
 import { toast } from '../../lib/toastStore';
+import { ApiError } from '../../api/http';
 import type { RecipeDetailResponse } from '../../api/recipes';
 import './RecipeForm.css';
 
@@ -26,7 +28,7 @@ function fieldPatch(original: string | null, current: string): string | undefine
 
 export function EditRecipePage() {
   const { recipeId } = useParams<{ recipeId: string }>();
-  const { data: recipe, isLoading, isError } = useRecipe(recipeId);
+  const { data: recipe, isLoading, isError, error, refetch } = useRecipe(recipeId);
   const backTo = recipeId ? `/recipes/${recipeId}` : '/recipes';
 
   if (isLoading) {
@@ -42,16 +44,21 @@ export function EditRecipePage() {
   }
 
   if (isError || !recipe) {
+    const notFound = error instanceof ApiError && error.status === 404;
     return (
       <div className="recipe-form-page">
         <PageHeader title="Edit recipe" backTo="/recipes" />
         <div className="recipe-form-page__body">
-          <Callout.Root color="red" variant="surface">
-            <Callout.Icon>
-              <ExclamationTriangleIcon />
-            </Callout.Icon>
-            <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
-          </Callout.Root>
+          {notFound ? (
+            <Callout.Root color="red" variant="surface" role="alert">
+              <Callout.Icon>
+                <ExclamationTriangleIcon />
+              </Callout.Icon>
+              <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
+            </Callout.Root>
+          ) : (
+            <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
+          )}
         </div>
         <Outlet />
       </div>
@@ -111,7 +118,7 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
         title="Edit recipe"
         backTo={backTo}
         actions={
-          <Button type="submit" form="edit-recipe-form" loading={updateRecipe.isPending}>
+          <Button size="3" type="submit" form="edit-recipe-form" loading={updateRecipe.isPending}>
             Save
           </Button>
         }
@@ -119,12 +126,24 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
       <form id="edit-recipe-form" className="recipe-form-page__body" onSubmit={handleSave}>
         <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
           Name
-          <TextField.Root size="3" value={name} onChange={(event) => setName(event.target.value)} />
+          <TextField.Root
+            size="3"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            autoCapitalize="words"
+            enterKeyHint="next"
+          />
         </Text>
 
         <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
           Description
-          <TextArea value={description} onChange={(event) => setDescription(event.target.value)} rows={3} />
+          <TextArea
+            size="3"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={3}
+            autoCapitalize="sentences"
+          />
         </Text>
 
         <div className="recipe-form-page__field">
@@ -133,9 +152,11 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
           </Text>
           <div className="recipe-form-page__stepper">
             <IconButton
+              size="3"
               type="button"
               variant="soft"
               aria-label="Decrease servings"
+              className="recipe-form-page__icon-button"
               onClick={() => setServings((s) => Math.max(1, s - 1))}
             >
               <MinusIcon />
@@ -143,7 +164,14 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
             <Text as="span" size="4" weight="medium" className="recipe-form-page__stepper-value">
               {servings}
             </Text>
-            <IconButton type="button" variant="soft" aria-label="Increase servings" onClick={() => setServings((s) => s + 1)}>
+            <IconButton
+              size="3"
+              type="button"
+              variant="soft"
+              aria-label="Increase servings"
+              className="recipe-form-page__icon-button"
+              onClick={() => setServings((s) => s + 1)}
+            >
               <PlusIcon />
             </IconButton>
           </div>
@@ -196,7 +224,7 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
         </div>
 
         {error && (
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>
@@ -225,7 +253,7 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
                   {/* Relative: these are children of THIS route (`/recipes/:id/edit/lines/...`),
                       not of the detail route, so a save/cancel here returns to this edit page. */}
                   <SheetLink to={`lines/${line.id}`} className="recipe-form-page__line">
-                    <Text as="span" size="2">
+                    <Text as="span" size="2" className="recipe-form-page__line-text">
                       {formatQuantity(line.quantity)} {line.unit} {ingredientName}
                     </Text>
                     {line.status === 'pending_review' && (

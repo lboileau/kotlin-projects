@@ -3,7 +3,8 @@ import { useParams } from 'react-router-dom';
 import { Badge, Button, Skeleton, Text, TextField } from '@radix-ui/themes';
 import { CheckIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { useAuth } from '../../auth/useAuth';
 import { useRecipes } from '../../queries/recipes';
 import type { RecipeResponse } from '../../api/recipes';
@@ -14,10 +15,10 @@ import './AddRecipeToPlanSheet.css';
 
 export function AddRecipeToPlanSheet() {
   const { planId } = useParams<{ planId: string }>();
-  const closeSheet = useCloseSheet(`/plans/${planId}`);
+  const sheet = useSheet(`/plans/${planId}`);
   const { user } = useAuth();
 
-  const { data: recipes, isLoading } = useRecipes();
+  const { data: recipes, isLoading, isError, refetch } = useRecipes();
   const { data: plan } = usePlan(planId);
   const addRecipe = useAddRecipeToPlan(planId);
 
@@ -52,7 +53,7 @@ export function AddRecipeToPlanSheet() {
   }
 
   return (
-    <Sheet title="Add recipes" onClose={closeSheet} fullHeight>
+    <Sheet {...sheet.sheetProps} title="Add recipes" fullHeight>
       <div className="add-recipe-to-plan-sheet">
         <div className="add-recipe-to-plan-sheet__search">
           <TextField.Root
@@ -70,20 +71,25 @@ export function AddRecipeToPlanSheet() {
 
         <div className="add-recipe-to-plan-sheet__list">
           {isLoading && (
-            <>
-              <Skeleton height="52px" />
-              <Skeleton height="52px" />
-              <Skeleton height="52px" />
-            </>
+            <div aria-busy="true" aria-label="Loading recipes">
+              <Skeleton height="52px" aria-hidden="true" />
+              <Skeleton height="52px" aria-hidden="true" />
+              <Skeleton height="52px" aria-hidden="true" />
+            </div>
           )}
 
-          {!isLoading && visibleRecipes.length === 0 && (
+          {!isLoading && isError && (
+            <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />
+          )}
+
+          {!isLoading && !isError && visibleRecipes.length === 0 && (
             <Text color="gray" size="2" className="add-recipe-to-plan-sheet__empty">
               {query ? 'No recipes match.' : 'No recipes yet — create one from the Recipes tab.'}
             </Text>
           )}
 
           {!isLoading &&
+            !isError &&
             visibleRecipes.map((recipe) => {
               const added = alreadyAdded.has(recipe.id);
               return (
@@ -94,7 +100,7 @@ export function AddRecipeToPlanSheet() {
                   disabled={added}
                   onClick={() => handleAdd(recipe)}
                 >
-                  <span>{recipe.name}</span>
+                  <span className="add-recipe-to-plan-sheet__row-name">{recipe.name}</span>
                   {added ? (
                     <Badge color="green" variant="soft">
                       <CheckIcon /> Added
@@ -108,7 +114,7 @@ export function AddRecipeToPlanSheet() {
         </div>
 
         <div className="add-recipe-to-plan-sheet__footer">
-          <Button variant="solid" size="3" onClick={closeSheet} className="add-recipe-to-plan-sheet__done">
+          <Button variant="solid" size="3" onClick={() => sheet.close()} className="add-recipe-to-plan-sheet__done">
             Done
           </Button>
         </div>

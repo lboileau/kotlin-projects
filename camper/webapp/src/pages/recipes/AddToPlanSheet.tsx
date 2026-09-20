@@ -4,7 +4,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Badge, Skeleton, Text } from '@radix-ui/themes';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { planKey, useAddRecipeToPlan, usePlans } from '../../queries/plans';
 import type { MealPlanDetailResponse, MealPlanResponse } from '../../api/mealPlans';
 import { recipeIdsInPlan } from '../../lib/flatPlan';
@@ -14,10 +15,10 @@ import './AddToPlanSheet.css';
 
 export function AddToPlanSheet() {
   const { recipeId } = useParams<{ recipeId: string }>();
-  const closeSheet = useCloseSheet(`/recipes/${recipeId}`);
+  const sheet = useSheet(`/recipes/${recipeId}`);
   const queryClient = useQueryClient();
 
-  const { data: plans, isLoading } = usePlans();
+  const { data: plans, isLoading, isError, refetch } = usePlans();
   const addRecipe = useAddRecipeToPlan();
 
   // One shared mutation instance is used for every row (the target plan
@@ -55,7 +56,7 @@ export function AddToPlanSheet() {
       {
         onSuccess: (result) => {
           toast.info(result.alreadyInPlan ? `Already in ${plan.name}` : `Added to ${plan.name}`);
-          closeSheet();
+          sheet.close();
         },
         onSettled: () => {
           setPendingPlanIds((current) => {
@@ -69,16 +70,24 @@ export function AddToPlanSheet() {
   }
 
   return (
-    <Sheet title="Add to plan" onClose={closeSheet}>
-      {isLoading && <Skeleton height="48px" />}
+    <Sheet {...sheet.sheetProps} title="Add to plan">
+      {isLoading && (
+        <div aria-busy="true" aria-label="Loading plans">
+          <Skeleton height="48px" aria-hidden="true" />
+        </div>
+      )}
 
-      {!isLoading && orderedPlans.length === 0 && (
+      {!isLoading && isError && (
+        <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />
+      )}
+
+      {!isLoading && !isError && orderedPlans.length === 0 && (
         <Text color="gray" size="2" className="add-to-plan-sheet__empty">
           You don&apos;t have any plans yet — create one from the Plans tab first.
         </Text>
       )}
 
-      {!isLoading && orderedPlans.length > 0 && (
+      {!isLoading && !isError && orderedPlans.length > 0 && (
         <div className="add-to-plan-sheet__list">
           {orderedPlans.map((plan) => {
             const added = isAlreadyAdded(plan.id);
@@ -90,7 +99,7 @@ export function AddToPlanSheet() {
                 disabled={added || pendingPlanIds.has(plan.id)}
                 onClick={() => handleAdd(plan)}
               >
-                <span>{plan.name}</span>
+                <span className="add-to-plan-sheet__row-name">{plan.name}</span>
                 {added && (
                   <Badge color="green" variant="soft">
                     <CheckIcon /> Added

@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Separator, Spinner, Text, TextField } from '@radix-ui/themes';
 import { CopyIcon, Share2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { ApiError } from '../../api/http';
 import { duplicatePlan, plansKey, usePlan, useDeletePlan, useUpdatePlan } from '../../queries/plans';
 import { flattenMealPlan } from '../../lib/flatPlan';
@@ -15,11 +16,10 @@ import './EditPlanSheet.css';
 
 export function EditPlanSheet() {
   const { planId } = useParams<{ planId: string }>();
-  const closeSheet = useCloseSheet(`/plans/${planId}`);
-  const navigate = useNavigate();
+  const sheet = useSheet(`/plans/${planId}`);
   const queryClient = useQueryClient();
 
-  const { data: plan } = usePlan(planId);
+  const { data: plan, isError, refetch } = usePlan(planId);
   const updatePlan = useUpdatePlan(planId ?? '');
   const deletePlan = useDeletePlan();
 
@@ -54,7 +54,7 @@ export function EditPlanSheet() {
       if (failedRecipeNames.length > 0) {
         toast.error(`Copied the plan, but couldn't add: ${failedRecipeNames.join(', ')}`);
       }
-      navigate(`/plans/${newPlanId}`);
+      sheet.close({ to: `/plans/${newPlanId}` });
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Could not duplicate the plan.';
       toast.error(message);
@@ -80,15 +80,17 @@ export function EditPlanSheet() {
     deletePlan.mutate(planId, {
       onSuccess: () => {
         if (getSelectedPlanId() === planId) clearSelectedPlanId();
-        navigate('/plans', { replace: true });
+        sheet.close({ to: '/plans', replace: true });
       },
     });
   }
 
   return (
-    <Sheet title="Edit plan" onClose={closeSheet}>
-      {!plan ? (
-        <div className="edit-plan-sheet__loading">
+    <Sheet {...sheet.sheetProps} title="Edit plan">
+      {isError ? (
+        <QueryErrorState message="Couldn't load this plan." onRetry={() => void refetch()} />
+      ) : !plan ? (
+        <div className="edit-plan-sheet__loading" aria-busy="true" aria-label="Loading plan">
           <Spinner size="3" />
         </div>
       ) : confirmingDelete ? (

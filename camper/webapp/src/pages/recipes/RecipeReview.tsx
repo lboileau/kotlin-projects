@@ -80,6 +80,9 @@ export function RecipeReview({ recipe }: { recipe: RecipeDetailResponse }) {
   const matchedLines = recipe.ingredients.filter((line) => line.status === 'approved');
   const proposals = pendingLines.map((line) => classifyProposal(line, ingredientsList ?? []));
   const acceptableCount = proposals.filter((p) => p.kind !== 'none').length;
+  // How many of THIS batch are still in flight — recipe data itself doesn't
+  // refresh until the batch finishes, so this is read from lineStates instead.
+  const stillPending = proposals.filter((p) => lineStates[p.line.id]?.status === 'pending').length;
 
   async function acceptOne(proposal: Proposal) {
     if (proposal.kind === 'none') return;
@@ -235,6 +238,11 @@ export function RecipeReview({ recipe }: { recipe: RecipeDetailResponse }) {
               </Button>
             )}
           </div>
+          {acceptingAll && (
+            <Text role="status" aria-live="polite" as="p" size="1" color="gray">
+              Resolving {acceptableCount - stillPending} of {acceptableCount}&hellip;
+            </Text>
+          )}
           <ul className="recipe-review__list">
             {proposals.map((proposal) => (
               <PendingLineRow
@@ -311,8 +319,9 @@ function DuplicateBanner({ recipe }: { recipe: RecipeDetailResponse }) {
       </Callout.Text>
       <div className="recipe-review__banner-actions">
         <Button
-          size="1"
+          size="2"
           variant="soft"
+          className="recipe-review__banner-button"
           disabled={resolveDuplicate.isPending}
           loading={pendingAction === 'NOT_DUPLICATE'}
           onClick={markNotDuplicate}
@@ -321,7 +330,7 @@ function DuplicateBanner({ recipe }: { recipe: RecipeDetailResponse }) {
         </Button>
         <AlertDialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
           <AlertDialog.Trigger>
-            <Button size="1" variant="soft" color="red" disabled={resolveDuplicate.isPending}>
+            <Button size="2" variant="soft" color="red" className="recipe-review__banner-button" disabled={resolveDuplicate.isPending}>
               Use existing
             </Button>
           </AlertDialog.Trigger>
@@ -333,10 +342,12 @@ function DuplicateBanner({ recipe }: { recipe: RecipeDetailResponse }) {
             </AlertDialog.Description>
             <div className="recipe-review__dialog-actions">
               <AlertDialog.Cancel>
-                <Button variant="soft">Cancel</Button>
+                <Button size="3" variant="soft">
+                  Cancel
+                </Button>
               </AlertDialog.Cancel>
               <AlertDialog.Action>
-                <Button color="red" loading={pendingAction === 'USE_EXISTING'} onClick={useExisting}>
+                <Button size="3" color="red" loading={pendingAction === 'USE_EXISTING'} onClick={useExisting}>
                   Use existing
                 </Button>
               </AlertDialog.Action>
@@ -384,11 +395,10 @@ function PendingLineRow({
             ))}
           </div>
         )}
-        {isError && (
-          <Text as="span" size="1" color="red">
-            {lineState?.error}
-          </Text>
-        )}
+        {/* Always rendered (even empty) so screen readers pick up the region before it has anything to say. */}
+        <Text as="span" size="1" color="red" role="status" aria-live="polite">
+          {isError ? lineState?.error : ''}
+        </Text>
       </SheetLink>
       {proposal.kind !== 'none' && (
         <Button

@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Badge, Button, Callout, IconButton, Skeleton, Switch, Text, TextField } from '@radix-ui/themes';
-import { Cross2Icon, DownloadIcon, ExclamationTriangleIcon, Link2Icon, MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
+import { Badge, Button, IconButton, Skeleton, Switch, Text, TextField } from '@radix-ui/themes';
+import { Cross2Icon, DownloadIcon, Link2Icon, MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { useAuth } from '../../auth/useAuth';
 import { useRecipes } from '../../queries/recipes';
 import { MEALS, capitalize } from '../../lib/ingredientConstants';
@@ -29,14 +30,16 @@ function updateParams(
 export function RecipesPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: recipes, isLoading, isError } = useRecipes();
+  const { data: recipes, isLoading, isError, refetch } = useRecipes();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const q = searchParams.get('q') ?? '';
   const meal = searchParams.get('meal') ?? 'all';
   const mine = searchParams.get('mine') === '1';
+  const hasFilters = q.trim().length > 0 || meal !== 'all' || mine;
 
   const patch = (values: Record<string, string | null>) => updateParams(searchParams, setSearchParams, values);
+  const clearFilters = () => patch({ q: null, meal: null, mine: null });
 
   const mealsPresent = useMemo(() => {
     const present = new Set((recipes ?? []).map((r) => r.meal).filter((m): m is string => Boolean(m)));
@@ -59,13 +62,15 @@ export function RecipesPage() {
         actions={
           <>
             <IconButton
+              size="3"
               variant="soft"
               aria-label="Import recipe"
+              className="recipes-page__icon-button"
               onClick={() => navigate('/recipes/import')}
             >
               <DownloadIcon />
             </IconButton>
-            <Button onClick={() => navigate('/recipes/new')}>
+            <Button size="3" onClick={() => navigate('/recipes/new')}>
               <PlusIcon /> New
             </Button>
           </>
@@ -79,6 +84,11 @@ export function RecipesPage() {
           size="3"
           placeholder="Search recipes"
           aria-label="Search recipes"
+          type="search"
+          enterKeyHint="search"
+          autoCapitalize="off"
+          autoCorrect="off"
+          autoComplete="off"
           value={q}
           onChange={(event) => patch({ q: event.target.value })}
         >
@@ -87,7 +97,7 @@ export function RecipesPage() {
           </TextField.Slot>
           {q && (
             <TextField.Slot>
-              <IconButton size="1" variant="ghost" aria-label="Clear search" onClick={() => patch({ q: null })}>
+              <IconButton size="2" variant="ghost" aria-label="Clear search" onClick={() => patch({ q: null })}>
                 <Cross2Icon />
               </IconButton>
             </TextField.Slot>
@@ -133,20 +143,36 @@ export function RecipesPage() {
           </div>
         )}
 
-        {isError && (
-          <Callout.Root color="red" variant="surface" m="4">
-            <Callout.Icon>
-              <ExclamationTriangleIcon />
-            </Callout.Icon>
-            <Callout.Text>Couldn&apos;t load recipes. Pull to refresh or try again shortly.</Callout.Text>
-          </Callout.Root>
-        )}
+        {isError && <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />}
 
         {!isLoading && !isError && filtered.length === 0 && (
           <div className="recipes-page__empty">
-            <Text color="gray" size="2">
-              {recipes && recipes.length > 0 ? 'No recipes match your filters.' : 'No recipes yet — add your first one.'}
-            </Text>
+            {recipes && recipes.length > 0 ? (
+              <>
+                <Text as="p" color="gray" size="2">
+                  No recipes match your filters.
+                </Text>
+                {hasFilters && (
+                  <Button size="2" variant="soft" onClick={clearFilters}>
+                    Clear filters
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <Text as="p" color="gray" size="2">
+                  No recipes yet.
+                </Text>
+                <div className="recipes-page__empty-actions">
+                  <Button size="2" onClick={() => navigate('/recipes/new')}>
+                    <PlusIcon /> New recipe
+                  </Button>
+                  <Button size="2" variant="soft" onClick={() => navigate('/recipes/import')}>
+                    <DownloadIcon /> Import
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -173,7 +199,7 @@ function RecipeRow({ recipe, onOpen }: { recipe: RecipeResponse; onOpen: () => v
           </Badge>
         )}
         {recipe.webLink && (
-          <span className="recipes-page__row-imported" title="Imported from a link">
+          <span className="recipes-page__row-imported" role="img" aria-label="Imported from a link" title="Imported from a link">
             <Link2Icon />
           </span>
         )}

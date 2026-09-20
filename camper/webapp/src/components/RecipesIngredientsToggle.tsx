@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { SegmentedControl } from '@radix-ui/themes';
+import './RecipesIngredientsToggle.css';
 
 /** The Recipes/Ingredients segmented control shown atop both `RecipesPage` and `IngredientsPage`. */
 export function RecipesIngredientsToggle({ active }: { active: 'recipes' | 'ingredients' }) {
@@ -7,13 +8,19 @@ export function RecipesIngredientsToggle({ active }: { active: 'recipes' | 'ingr
 
   return (
     <SegmentedControl.Root
+      size="3"
+      className="recipes-ingredients-toggle"
       value={active}
       onValueChange={(next) => {
         if (next !== active) navigate(next === 'ingredients' ? '/ingredients' : '/recipes');
       }}
     >
-      <SegmentedControl.Item value="recipes">Recipes</SegmentedControl.Item>
-      <SegmentedControl.Item value="ingredients">Ingredients</SegmentedControl.Item>
+      <SegmentedControl.Item value="recipes" aria-current={active === 'recipes' ? 'page' : undefined}>
+        Recipes
+      </SegmentedControl.Item>
+      <SegmentedControl.Item value="ingredients" aria-current={active === 'ingredients' ? 'page' : undefined}>
+        Ingredients
+      </SegmentedControl.Item>
     </SegmentedControl.Root>
   );
 }

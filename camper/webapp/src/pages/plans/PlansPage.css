@@ -33,9 +33,17 @@
   outline-offset: 2px;
 }
 
+.plans-page__row-main {
+  min-width: 0;
+  flex: 1;
+}
+
 .plans-page__row-name {
   font-weight: 600;
   color: var(--gray-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .plans-page__row-meta {

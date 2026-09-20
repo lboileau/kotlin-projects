@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Text } from '@radix-ui/themes';
 import { PageHeader } from './PageHeader';
 import { Sheet } from './Sheet';
-import { useCloseSheet } from './useCloseSheet';
+import { useSheet } from './useSheet';
 import './Placeholder.css';
 
 interface PlaceholderPageProps {
@@ -33,9 +33,9 @@ interface PlaceholderSheetProps {
 
 /** Stand-in for a sheet not built yet. */
 export function PlaceholderSheet({ title, parentPath, fullHeight }: PlaceholderSheetProps) {
-  const closeSheet = useCloseSheet(parentPath);
+  const sheet = useSheet(parentPath);
   return (
-    <Sheet title={title} onClose={closeSheet} fullHeight={fullHeight}>
+    <Sheet {...sheet.sheetProps} title={title} fullHeight={fullHeight}>
       <Text color="gray" size="2">
         Coming soon.
       </Text>

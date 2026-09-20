@@ -2,16 +2,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Badge, Skeleton, Text } from '@radix-ui/themes';
 import { CheckIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { usePlans } from '../../queries/plans';
 import { setSelectedPlanId } from '../../lib/selectedPlan';
 import './SwitchPlanSheet.css';
 
 export function SwitchPlanSheet() {
   const { planId } = useParams<{ planId: string }>();
-  const closeSheet = useCloseSheet(`/plans/${planId}/shopping`);
+  const sheet = useSheet(`/plans/${planId}/shopping`);
   const navigate = useNavigate();
-  const { data: plans, isLoading } = usePlans();
+  const { data: plans, isLoading, isError, refetch } = usePlans();
 
   function handleSelect(id: string) {
     setSelectedPlanId(id);
@@ -19,16 +20,24 @@ export function SwitchPlanSheet() {
   }
 
   return (
-    <Sheet title="Switch plan" onClose={closeSheet}>
-      {isLoading && <Skeleton height="48px" />}
+    <Sheet {...sheet.sheetProps} title="Switch plan">
+      {isLoading && (
+        <div aria-busy="true" aria-label="Loading plans">
+          <Skeleton height="48px" aria-hidden="true" />
+        </div>
+      )}
 
-      {!isLoading && (!plans || plans.length === 0) && (
+      {!isLoading && isError && (
+        <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />
+      )}
+
+      {!isLoading && !isError && (!plans || plans.length === 0) && (
         <Text color="gray" size="2">
           You don&apos;t have any plans yet.
         </Text>
       )}
 
-      {!isLoading && plans && plans.length > 0 && (
+      {!isLoading && !isError && plans && plans.length > 0 && (
         <div className="switch-plan-sheet__list">
           {plans.map((plan) => {
             const current = plan.id === planId;
@@ -40,7 +49,7 @@ export function SwitchPlanSheet() {
                 disabled={current}
                 onClick={() => handleSelect(plan.id)}
               >
-                <span>{plan.name}</span>
+                <span className="switch-plan-sheet__row-name">{plan.name}</span>
                 {current && (
                   <Badge variant="soft">
                     <CheckIcon /> Current

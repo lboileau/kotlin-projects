@@ -76,7 +76,7 @@ export function LinesEditor({ lines, onChange }: LinesEditorProps) {
           {lines.map((line) => (
             <li key={line.clientId} className="lines-editor__row">
               <div className="lines-editor__row-info">
-                <Text as="span" size="2" weight="medium">
+                <Text as="span" size="2" weight="medium" className="lines-editor__row-name">
                   {line.ingredient.name}
                 </Text>
                 <Text as="span" size="1" color="gray">
@@ -91,6 +91,11 @@ export function LinesEditor({ lines, onChange }: LinesEditorProps) {
                 aria-label={`Quantity for ${line.ingredient.name}`}
                 value={line.quantity}
                 color={isValidQuantity(line.quantity) ? undefined : 'red'}
+                autoCapitalize="off"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete="off"
+                enterKeyHint="done"
                 onChange={(event) => updateLine(line.clientId, { quantity: event.target.value })}
               />
               <Select.Root
@@ -112,6 +117,7 @@ export function LinesEditor({ lines, onChange }: LinesEditorProps) {
                 variant="soft"
                 color="red"
                 aria-label={`Remove ${line.ingredient.name}`}
+                className="lines-editor__icon-button"
                 onClick={() => removeLine(line.clientId)}
               >
                 <TrashIcon />
@@ -142,6 +148,11 @@ export function LinesEditor({ lines, onChange }: LinesEditorProps) {
             placeholder="1 1/2"
             aria-label="Quantity"
             value={quantity}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            autoComplete="off"
+            enterKeyHint="done"
             onChange={(event) => setQuantity(event.target.value)}
             onKeyDown={handleQuantityKeyDown}
           />
@@ -155,7 +166,13 @@ export function LinesEditor({ lines, onChange }: LinesEditorProps) {
               ))}
             </Select.Content>
           </Select.Root>
-          <IconButton type="button" aria-label="Add ingredient line" disabled={!canAdd} onClick={handleAdd}>
+          <IconButton
+            type="button"
+            aria-label="Add ingredient line"
+            className="lines-editor__icon-button"
+            disabled={!canAdd}
+            onClick={handleAdd}
+          >
             <PlusIcon />
           </IconButton>
         </div>

@@ -3,6 +3,7 @@ import { AlertDialog, Badge, Button, Callout, Heading, IconButton, Skeleton, Tex
 import { ExclamationTriangleIcon, ExternalLinkIcon, Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { useAuth } from '../../auth/useAuth';
 import { useDeleteRecipe, usePublishRecipe, useRecipe } from '../../queries/recipes';
 import { capitalize } from '../../lib/ingredientConstants';
@@ -17,7 +18,7 @@ export function RecipeDetailPage() {
   const { recipeId } = useParams<{ recipeId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: recipe, isLoading, isError } = useRecipe(recipeId);
+  const { data: recipe, isLoading, isError, error, refetch } = useRecipe(recipeId);
   const deleteRecipe = useDeleteRecipe();
   const publishRecipe = usePublishRecipe(recipeId ?? '');
 
@@ -61,16 +62,23 @@ export function RecipeDetailPage() {
   }
 
   if (isError || !recipe) {
+    // A 404 means the recipe genuinely doesn't exist — retrying won't help.
+    // Any other failure (network, 5xx) is worth a Retry.
+    const notFound = error instanceof ApiError && error.status === 404;
     return (
       <div className="recipe-detail-page">
         <PageHeader title="Recipe" backTo="/recipes" />
         <div className="recipe-detail-page__body">
-          <Callout.Root color="red" variant="surface">
-            <Callout.Icon>
-              <ExclamationTriangleIcon />
-            </Callout.Icon>
-            <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
-          </Callout.Root>
+          {notFound ? (
+            <Callout.Root color="red" variant="surface" role="alert">
+              <Callout.Icon>
+                <ExclamationTriangleIcon />
+              </Callout.Icon>
+              <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
+            </Callout.Root>
+          ) : (
+            <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
+          )}
         </div>
         <Outlet />
       </div>
@@ -85,12 +93,24 @@ export function RecipeDetailPage() {
         actions={
           isOwner && (
             <>
-              <IconButton variant="soft" aria-label="Edit recipe" onClick={() => navigate(`/recipes/${recipe.id}/edit`)}>
+              <IconButton
+                size="3"
+                variant="soft"
+                aria-label="Edit recipe"
+                className="recipe-detail-page__icon-button"
+                onClick={() => navigate(`/recipes/${recipe.id}/edit`)}
+              >
                 <Pencil2Icon />
               </IconButton>
               <AlertDialog.Root>
                 <AlertDialog.Trigger>
-                  <IconButton variant="soft" color="red" aria-label="Delete recipe">
+                  <IconButton
+                    size="3"
+                    variant="soft"
+                    color="red"
+                    aria-label="Delete recipe"
+                    className="recipe-detail-page__icon-button"
+                  >
                     <TrashIcon />
                   </IconButton>
                 </AlertDialog.Trigger>
@@ -101,10 +121,12 @@ export function RecipeDetailPage() {
                   </AlertDialog.Description>
                   <div className="recipe-detail-page__dialog-actions">
                     <AlertDialog.Cancel>
-                      <Button variant="soft">Cancel</Button>
+                      <Button size="3" variant="soft">
+                        Cancel
+                      </Button>
                     </AlertDialog.Cancel>
                     <AlertDialog.Action>
-                      <Button color="red" loading={deleteRecipe.isPending} onClick={handleDelete}>
+                      <Button size="3" color="red" loading={deleteRecipe.isPending} onClick={handleDelete}>
                         Delete
                       </Button>
                     </AlertDialog.Action>
@@ -124,7 +146,7 @@ export function RecipeDetailPage() {
         )}
 
         {recipe.description && (
-          <Text as="p" size="2" color="gray">
+          <Text as="p" size="2" color="gray" className="recipe-detail-page__wrap">
             {recipe.description}
           </Text>
         )}
@@ -223,7 +245,7 @@ export function IngredientLineRow({
   const name = line.ingredient?.name ?? line.matchedIngredient?.name ?? line.suggestedIngredientName ?? line.originalText ?? 'Unknown ingredient';
   const content = (
     <>
-      <Text as="span" size="2">
+      <Text as="span" size="2" className="recipe-detail-page__line-text">
         {formatQuantity(line.quantity)} {line.unit} {name}
       </Text>
       {line.status === 'pending_review' && (

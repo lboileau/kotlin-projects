@@ -32,9 +32,14 @@
   border-radius: var(--radius-3);
   cursor: pointer;
   color: var(--gray-12);
+  touch-action: manipulation;
 }
 
 .ingredient-picker__row-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.9375rem;
 }
 

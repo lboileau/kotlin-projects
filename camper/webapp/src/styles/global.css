@@ -17,6 +17,8 @@ body {
   background: var(--color-background, #ffffff);
   color-scheme: light;
   -webkit-tap-highlight-color: transparent;
+  /* Stops pull-to-refresh and scroll chaining from fighting an open sheet or the page scroll container. */
+  overscroll-behavior-y: none;
 }
 
 #root {
@@ -29,4 +31,24 @@ button {
 
 a {
   color: inherit;
+}
+
+/* Every button/link is tappable UI here — this kills the double-tap-to-
+   zoom gesture and any residual tap delay on touch browsers. */
+button,
+a {
+  touch-action: manipulation;
+}
+
+/* Shared accessible-name-only utility — visually hidden, still read by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

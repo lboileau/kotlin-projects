@@ -3,7 +3,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Button, Callout, Select, Text, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
 import { IngredientPicker } from '../../components/IngredientPicker';
 import { useAddRecipeIngredient } from '../../queries/recipes';
 import { UNITS } from '../../lib/ingredientConstants';
@@ -15,7 +15,7 @@ import './LineSheet.css';
 export function AddLineSheet() {
   const { recipeId } = useParams<{ recipeId: string }>();
   const location = useLocation();
-  const closeSheet = useCloseSheet(lineSheetParentPath(location.pathname));
+  const sheet = useSheet(lineSheetParentPath(location.pathname));
   const addLine = useAddRecipeIngredient(recipeId ?? '');
 
   const [ingredient, setIngredient] = useState<IngredientResponse | null>(null);
@@ -42,11 +42,11 @@ export function AddLineSheet() {
     }
     setError(null);
     await addLine.mutateAsync({ ingredientId: ingredient.id, quantity: parsedQuantity, unit });
-    closeSheet();
+    sheet.close();
   }
 
   return (
-    <Sheet title="Add ingredient" onClose={closeSheet}>
+    <Sheet {...sheet.sheetProps} title="Add ingredient">
       <form className="line-sheet__form" onSubmit={handleSubmit}>
         <IngredientPicker value={ingredient} onSelect={handleSelect} autoFocus placeholder="Search ingredients" />
 
@@ -58,6 +58,11 @@ export function AddLineSheet() {
               placeholder="1 1/2"
               size="3"
               value={quantity}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              autoComplete="off"
+              enterKeyHint="done"
               onChange={(event) => setQuantity(event.target.value)}
             />
           </Text>
@@ -77,7 +82,7 @@ export function AddLineSheet() {
         </div>
 
         {error && (
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>

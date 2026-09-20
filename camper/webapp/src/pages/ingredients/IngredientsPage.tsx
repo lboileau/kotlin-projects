@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Button, Callout, Skeleton, Text, TextField } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
+import { Button, Skeleton, Text, TextField } from '@radix-ui/themes';
+import { MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
 import { SheetLink } from '../../components/SheetLink';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { useIngredients } from '../../queries/ingredients';
 import { CATEGORIES, capitalize } from '../../lib/ingredientConstants';
 import type { IngredientResponse } from '../../api/ingredients';
@@ -12,7 +13,7 @@ import './IngredientsPage.css';
 
 export function IngredientsPage() {
   const navigate = useNavigate();
-  const { data: ingredients, isLoading, isError } = useIngredients();
+  const { data: ingredients, isLoading, isError, refetch } = useIngredients();
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') ?? '';
 
@@ -55,7 +56,7 @@ export function IngredientsPage() {
         title="Ingredients"
         backTo="/recipes"
         actions={
-          <Button onClick={() => navigate('/ingredients/new')}>
+          <Button size="3" onClick={() => navigate('/ingredients/new')}>
             <PlusIcon /> Add
           </Button>
         }
@@ -67,6 +68,11 @@ export function IngredientsPage() {
           size="3"
           placeholder="Search ingredients"
           aria-label="Search ingredients"
+          type="search"
+          enterKeyHint="search"
+          autoCapitalize="off"
+          autoCorrect="off"
+          autoComplete="off"
           value={q}
           onChange={(event) => handleSearch(event.target.value)}
         >
@@ -85,20 +91,29 @@ export function IngredientsPage() {
           </div>
         )}
 
-        {isError && (
-          <Callout.Root color="red" variant="surface" m="4">
-            <Callout.Icon>
-              <ExclamationTriangleIcon />
-            </Callout.Icon>
-            <Callout.Text>Couldn&apos;t load ingredients. Try again shortly.</Callout.Text>
-          </Callout.Root>
-        )}
+        {isError && <QueryErrorState message="Couldn't load ingredients." onRetry={() => void refetch()} />}
 
         {!isLoading && !isError && groups.length === 0 && (
           <div className="ingredients-page__empty">
-            <Text color="gray" size="2">
-              {ingredients && ingredients.length > 0 ? 'No ingredients match your search.' : 'No ingredients yet.'}
-            </Text>
+            {ingredients && ingredients.length > 0 ? (
+              <>
+                <Text as="p" color="gray" size="2">
+                  No ingredients match your search.
+                </Text>
+                <Button size="2" variant="soft" onClick={() => handleSearch('')}>
+                  Clear search
+                </Button>
+              </>
+            ) : (
+              <>
+                <Text as="p" color="gray" size="2">
+                  No ingredients yet.
+                </Text>
+                <Button size="2" onClick={() => navigate('/ingredients/new')}>
+                  <PlusIcon /> Add ingredients
+                </Button>
+              </>
+            )}
           </div>
         )}
 
@@ -113,7 +128,7 @@ export function IngredientsPage() {
                 {group.items.map((ingredient) => (
                   <li key={ingredient.id}>
                     <SheetLink to={`/ingredients/${ingredient.id}`} className="ingredients-page__row">
-                      <Text as="span" size="2">
+                      <Text as="span" size="2" className="ingredients-page__row-name">
                         {ingredient.name}
                       </Text>
                       <Text as="span" size="1" color="gray">

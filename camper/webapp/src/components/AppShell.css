@@ -11,7 +11,14 @@
 .app-shell__scroll {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+.app-shell__scroll:focus {
+  /* Receives programmatic focus on route change (for screen readers) —
+     not part of the normal tab order (tabIndex=-1), so no visible ring. */
+  outline: none;
 }
 
 @media (min-width: 641px) {

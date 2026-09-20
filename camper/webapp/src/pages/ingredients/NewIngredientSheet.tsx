@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState, type FormEvent } from 'react';
+import { useId, useMemo, useRef, useState, type FormEvent } from 'react';
 import { Badge, Button, Callout, Select, Text, TextField } from '@radix-ui/themes';
 import { CheckIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
 import { findIngredientByName, useCreateIngredient, useIngredients } from '../../queries/ingredients';
 import { ApiError } from '../../api/http';
 import { CATEGORIES, DEFAULT_CATEGORY, DEFAULT_UNIT, UNITS, capitalize } from '../../lib/ingredientConstants';
@@ -10,7 +10,7 @@ import type { IngredientResponse } from '../../api/ingredients';
 import './NewIngredientSheet.css';
 
 export function NewIngredientSheet() {
-  const closeSheet = useCloseSheet('/ingredients');
+  const sheet = useSheet('/ingredients');
   const { data: ingredients } = useIngredients();
   const createIngredient = useCreateIngredient();
   const nameRef = useRef<HTMLInputElement>(null);
@@ -22,6 +22,7 @@ export function NewIngredientSheet() {
   const [unit, setUnit] = useState<string>(DEFAULT_UNIT);
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState<IngredientResponse[]>([]);
+  const errorId = useId();
 
   const trimmed = name.trim();
   const suggestions = useMemo(() => {
@@ -59,7 +60,7 @@ export function NewIngredientSheet() {
   }
 
   return (
-    <Sheet title="Add ingredients" onClose={closeSheet}>
+    <Sheet {...sheet.sheetProps} title="Add ingredients">
       <form className="new-ingredient-sheet__form" onSubmit={handleSubmit}>
         <Text as="label" size="2" weight="medium" className="new-ingredient-sheet__field">
           Name
@@ -68,6 +69,10 @@ export function NewIngredientSheet() {
             autoFocus
             size="3"
             value={name}
+            autoCapitalize="words"
+            enterKeyHint="done"
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? errorId : undefined}
             onChange={(event) => setName(event.target.value)}
           />
         </Text>
@@ -117,7 +122,7 @@ export function NewIngredientSheet() {
         </div>
 
         {error && (
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root id={errorId} color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>
@@ -145,7 +150,7 @@ export function NewIngredientSheet() {
         </div>
       )}
 
-      <Button variant="soft" size="3" className="new-ingredient-sheet__done" onClick={closeSheet}>
+      <Button variant="soft" size="3" className="new-ingredient-sheet__done" onClick={() => sheet.close()}>
         Done
       </Button>
     </Sheet>

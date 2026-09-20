@@ -36,6 +36,11 @@
   gap: 16px;
 }
 
+.recipe-form-page__icon-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 .recipe-form-page__stepper-value {
   min-width: 28px;
   text-align: center;
@@ -45,6 +50,7 @@
   color: var(--accent-11);
   font-size: 0.875rem;
   word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .recipe-form-page__lines-header {
@@ -74,11 +80,17 @@
   border-bottom: 1px solid var(--gray-4);
   color: inherit;
   text-decoration: none;
+  touch-action: manipulation;
 }
 
 .recipe-form-page__line:hover,
 .recipe-form-page__line:focus-visible {
   background: var(--accent-2);
+}
+
+.recipe-form-page__line-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .recipe-form-page__add-line {
@@ -92,4 +104,5 @@
   font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
+  touch-action: manipulation;
 }

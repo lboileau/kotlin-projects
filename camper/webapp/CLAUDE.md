@@ -18,7 +18,7 @@ src/
   main.tsx, router.tsx, theme.ts
   api/         http.ts (request + ApiError), queryClient.ts, types.ts, one file per domain
   auth/        AuthProvider, useAuth, RequireAuth, storage
-  components/  AppShell, TabBar, PageHeader, Sheet, SheetLink, useCloseSheet, Toast, Placeholder
+  components/  AppShell, TabBar, PageHeader, Sheet, SheetLink, useSheet, Toast, Placeholder
   lib/         historyIndex, safeNext, selectedPlan, toastStore, mealPlanSummary
   pages/       sign-in, account, plans, shopping, recipes, ingredients
   styles/      global.css (reset and body only)
@@ -27,7 +27,7 @@ src/
 ## Conventions
 
 - **Every screen state has a URL.** Sheets are child routes rendered through the parent page's `<Outlet/>`. Never open a sheet or dialog from local state.
-- **Sheets** use `components/Sheet` and close through `useCloseSheet(parentPath)`, which goes back when there is in-app history and replaces to the parent otherwise. Content portalled outside the app tree must be wrapped in a nested `<Theme>` or the Radix tokens do not apply.
+- **Sheets** use `components/Sheet` and close through `useSheet(parentPath, options?)`, which returns `{ sheetProps, close }` — spread `sheetProps` onto `<Sheet>`, call `close()` (goes back when there is in-app history, replaces to the parent otherwise) or `close({ to, replace })` to land somewhere else after a mutation. `canClose`/`onBlockedClose` options let a sheet refuse to close while async work is in flight. Content portalled outside the app tree must be wrapped in a nested `<Theme>` or the Radix tokens do not apply.
 - **API calls** go through `api/http.ts`. Callers only ever see `ApiError { status, code, message }` (network failure is `status 0`, code `NETWORK`). Branch on status or code, never on message text.
 - **Errors** surface through the global mutation error toast. Optimistic mutations that show their own message set `meta: { suppressErrorToast: true }`.
 - **Optimistic updates** for predictable actions (check-off, quick add, add or remove recipe from a plan, rename, servings): edit the cache, roll back on error, invalidate on settle. Creating or importing recipes, creating ingredients and publishing wait for the server.

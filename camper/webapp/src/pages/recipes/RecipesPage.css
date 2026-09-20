@@ -22,7 +22,7 @@
 
 .recipes-page__chip {
   flex-shrink: 0;
-  min-height: 36px;
+  min-height: 44px;
   padding: 0 14px;
   border-radius: 999px;
   border: 1px solid var(--gray-5);
@@ -32,6 +32,7 @@
   font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
+  touch-action: manipulation;
 }
 
 .recipes-page__chip--active {
@@ -67,13 +68,27 @@
   border-radius: var(--radius-4);
 }
 
+.recipes-page__icon-button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
 .recipes-page__empty {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 12px;
   padding: 48px 24px;
   text-align: center;
+}
+
+.recipes-page__empty-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .recipes-page__row {
@@ -90,6 +105,7 @@
   cursor: pointer;
   color: inherit;
   font: inherit;
+  touch-action: manipulation;
 }
 
 .recipes-page__row:hover,
@@ -109,6 +125,7 @@
 }
 
 .recipes-page__row-name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

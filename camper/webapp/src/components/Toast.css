@@ -11,6 +11,13 @@
   pointer-events: none;
 }
 
+/* The two aria-live wrapper divs stay real DOM nodes (for reliable
+   announcement) but shouldn't introduce their own box in the flex
+   layout — their toast children become direct flex items instead. */
+.toast-region__live-group {
+  display: contents;
+}
+
 .toast-region__item {
   pointer-events: auto;
   display: flex;

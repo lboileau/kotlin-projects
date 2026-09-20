@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Callout, Spinner, Text, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet } from '../../components/useSheet';
 import { useImportRecipe, recipesKey } from '../../queries/recipes';
 import { ApiError } from '../../api/http';
 import { toast } from '../../lib/toastStore';
@@ -31,16 +31,19 @@ function describeImportError(err: unknown, submittedUrl: string, cached: RecipeR
 }
 
 export function ImportRecipeSheet() {
-  const closeSheet = useCloseSheet('/recipes');
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const importRecipe = useImportRecipe();
+  const sheet = useSheet('/recipes', {
+    // Never let an accidental overlay tap or Escape silently drop a request already in flight.
+    canClose: () => !importRecipe.isPending,
+    onBlockedClose: () => toast.info('Still reading the recipe — hang tight.'),
+  });
+  const queryClient = useQueryClient();
 
   // The import can take up to a minute; the browser BACK button (unlike
-  // overlay/Escape/X, which `handleClose` already blocks) unmounts this
-  // sheet without asking, so the async work below must check this before
-  // touching component state or navigating out from under whatever the
-  // user is looking at by the time it resolves.
+  // overlay/Escape/X, which the sheet's `canClose` already blocks)
+  // unmounts this sheet without asking, so the async work below must
+  // check this before touching component state or navigating out from
+  // under whatever the user is looking at by the time it resolves.
   const mountedRef = useRef(true);
   useEffect(
     () => () => {
@@ -52,15 +55,7 @@ export function ImportRecipeSheet() {
   const [url, setUrl] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [duplicate, setDuplicate] = useState<RecipeResponse | null>(null);
-
-  function handleClose() {
-    if (importRecipe.isPending) {
-      // Never let an accidental overlay tap or Escape silently drop a request already in flight.
-      toast.info('Still reading the recipe — hang tight.');
-      return;
-    }
-    closeSheet();
-  }
+  const errorId = useId();
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -76,7 +71,7 @@ export function ImportRecipeSheet() {
       // useImportRecipe's onSuccess already cached the detail and invalidated
       // ['recipes'] regardless of mount state — only the navigation needs guarding.
       if (mountedRef.current) {
-        navigate(`/recipes/${created.id}`, { replace: true });
+        sheet.close({ to: `/recipes/${created.id}`, replace: true });
       } else {
         toast.info('Recipe imported.', {
           label: 'Open',
@@ -96,7 +91,7 @@ export function ImportRecipeSheet() {
   }
 
   return (
-    <Sheet title="Import recipe" onClose={handleClose}>
+    <Sheet {...sheet.sheetProps} title="Import recipe">
       <form className="import-recipe-sheet__form" onSubmit={handleSubmit}>
         <Text as="label" size="2" weight="medium" className="import-recipe-sheet__field">
           Recipe URL
@@ -106,15 +101,21 @@ export function ImportRecipeSheet() {
             size="3"
             autoFocus
             autoComplete="url"
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
+            enterKeyHint="go"
             placeholder="https://example.com/recipe"
             value={url}
             disabled={importRecipe.isPending}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? errorId : undefined}
             onChange={(event) => setUrl(event.target.value)}
           />
         </Text>
 
         {importRecipe.isPending && (
-          <Callout.Root color="gray" variant="surface" size="1">
+          <Callout.Root color="gray" variant="surface" size="1" role="status" aria-live="polite">
             <Callout.Icon>
               <Spinner size="1" />
             </Callout.Icon>
@@ -123,7 +124,7 @@ export function ImportRecipeSheet() {
         )}
 
         {error && (
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root id={errorId} color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>

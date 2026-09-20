@@ -6,6 +6,8 @@ import './Sheet.css';
 
 interface SheetProps {
   title: string;
+  /** From useSheet() — false plays the exit animation before the route actually changes. */
+  open: boolean;
   onClose: () => void;
   /** Grows to ~90dvh height instead of hugging its content (e.g. the recipe picker). */
   fullHeight?: boolean;
@@ -13,16 +15,19 @@ interface SheetProps {
 }
 
 /**
- * Bottom-anchored sheet over the Radix Dialog primitive. Always rendered
- * because its route matched — see `useCloseSheet` for how it decides
- * whether closing should go back in history or replace to its parent.
+ * Bottom-anchored sheet over the Radix Dialog primitive. Purely
+ * presentational — `useSheet` owns `open` and what closing means
+ * (go back vs. replace to the parent), so every close (the sheet's own
+ * X button / overlay tap / Escape, or a page calling `close()` directly
+ * after a successful mutation) goes through the exact same animated
+ * path with nothing sheet-specific for a page to wire up.
  */
-export function Sheet({ title, onClose, fullHeight = false, children }: SheetProps) {
+export function Sheet({ title, open, onClose, fullHeight = false, children }: SheetProps) {
   return (
     <Dialog.Root
-      open
-      onOpenChange={(open) => {
-        if (!open) onClose();
+      open={open}
+      onOpenChange={(next) => {
+        if (!next) onClose();
       }}
     >
       <Dialog.Portal>

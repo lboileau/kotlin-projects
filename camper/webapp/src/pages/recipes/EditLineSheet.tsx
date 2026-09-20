@@ -3,7 +3,7 @@ import { useLocation, useParams } from 'react-router-dom';
 import { Button, Callout, Select, Spinner, Text, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
-import { useCloseSheet } from '../../components/useCloseSheet';
+import { useSheet, type UseSheetResult } from '../../components/useSheet';
 import { IngredientPicker } from '../../components/IngredientPicker';
 import { useRecipe, useRemoveRecipeIngredient, useResolveRecipeIngredient } from '../../queries/recipes';
 import { UNITS, normalizeCategory, normalizeUnit } from '../../lib/ingredientConstants';
@@ -16,14 +16,14 @@ import './LineSheet.css';
 export function EditLineSheet() {
   const { recipeId, lineId } = useParams<{ recipeId: string; lineId: string }>();
   const location = useLocation();
-  const closeSheet = useCloseSheet(lineSheetParentPath(location.pathname));
+  const sheet = useSheet(lineSheetParentPath(location.pathname));
   const { data: recipe, isLoading } = useRecipe(recipeId);
 
   const line = recipe?.ingredients.find((l) => l.id === lineId);
 
   if (isLoading) {
     return (
-      <Sheet title="Edit ingredient" onClose={closeSheet}>
+      <Sheet {...sheet.sheetProps} title="Edit ingredient">
         <Spinner />
       </Sheet>
     );
@@ -31,7 +31,7 @@ export function EditLineSheet() {
 
   if (!recipeId || !line) {
     return (
-      <Sheet title="Edit ingredient" onClose={closeSheet}>
+      <Sheet {...sheet.sheetProps} title="Edit ingredient">
         <Text as="p" size="2" color="gray">
           This ingredient line is no longer on the recipe.
         </Text>
@@ -42,17 +42,17 @@ export function EditLineSheet() {
   // Keyed on the line id so the form's local state below is seeded
   // fresh from `line` exactly once via useState's lazy initializer,
   // rather than synced from a prop with an effect.
-  return <EditLineForm key={line.id} recipeId={recipeId} line={line} closeSheet={closeSheet} />;
+  return <EditLineForm key={line.id} recipeId={recipeId} line={line} sheet={sheet} />;
 }
 
 function EditLineForm({
   recipeId,
   line,
-  closeSheet,
+  sheet,
 }: {
   recipeId: string;
   line: RecipeIngredientResponse;
-  closeSheet: () => void;
+  sheet: UseSheetResult;
 }) {
   const resolveLine = useResolveRecipeIngredient(recipeId);
   const removeLine = useRemoveRecipeIngredient(recipeId);
@@ -87,16 +87,16 @@ function EditLineForm({
         unit,
       },
     });
-    closeSheet();
+    sheet.close();
   }
 
   async function handleRemove() {
     await removeLine.mutateAsync(line.id);
-    closeSheet();
+    sheet.close();
   }
 
   return (
-    <Sheet title="Edit ingredient" onClose={closeSheet}>
+    <Sheet {...sheet.sheetProps} title="Edit ingredient">
       {line.status === 'pending_review' && line.originalText && (
         <Callout.Root color="amber" variant="surface" size="1" className="line-sheet__scraped">
           <Callout.Text>Scraped as &ldquo;{line.originalText}&rdquo;.</Callout.Text>
@@ -121,6 +121,11 @@ function EditLineForm({
               placeholder="1 1/2"
               size="3"
               value={quantity}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              autoComplete="off"
+              enterKeyHint="done"
               onChange={(event) => setQuantity(event.target.value)}
             />
           </Text>
@@ -140,7 +145,7 @@ function EditLineForm({
         </div>
 
         {error && (
-          <Callout.Root color="red" variant="surface" size="1">
+          <Callout.Root color="red" variant="surface" size="1" role="alert">
             <Callout.Icon>
               <ExclamationTriangleIcon />
             </Callout.Icon>

@@ -27,6 +27,7 @@
   min-height: 48px;
   padding: 4px 4px;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .shopping-row__text {

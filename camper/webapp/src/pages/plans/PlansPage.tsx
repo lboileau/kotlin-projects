@@ -3,12 +3,13 @@ import { Badge, Button, Heading, Skeleton, Text } from '@radix-ui/themes';
 import { ChevronRightIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { SheetLink } from '../../components/SheetLink';
+import { QueryErrorState } from '../../components/QueryErrorState';
 import { usePlans } from '../../queries/plans';
 import { formatRelativeTime } from '../../lib/relativeTime';
 import './PlansPage.css';
 
 export function PlansPage() {
-  const { data: plans, isLoading } = usePlans();
+  const { data: plans, isLoading, isError, refetch } = usePlans();
   const hasPlans = !!plans && plans.length > 0;
 
   return (
@@ -16,14 +17,18 @@ export function PlansPage() {
       <PageHeader title="Plans" />
       <div className="plans-page__body">
         {isLoading && (
-          <>
-            <Skeleton className="plans-page__skeleton-row" />
-            <Skeleton className="plans-page__skeleton-row" />
-            <Skeleton className="plans-page__skeleton-row" />
-          </>
+          <div aria-busy="true" aria-label="Loading plans">
+            <Skeleton className="plans-page__skeleton-row" aria-hidden="true" />
+            <Skeleton className="plans-page__skeleton-row" aria-hidden="true" />
+            <Skeleton className="plans-page__skeleton-row" aria-hidden="true" />
+          </div>
         )}
 
-        {!isLoading && !hasPlans && (
+        {!isLoading && isError && (
+          <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />
+        )}
+
+        {!isLoading && !isError && !hasPlans && (
           <div className="plans-page__empty">
             <Heading as="h2" size="4">
               No plans yet
@@ -40,10 +45,11 @@ export function PlansPage() {
         )}
 
         {!isLoading &&
+          !isError &&
           hasPlans &&
           plans.map((plan) => (
             <Link key={plan.id} to={`/plans/${plan.id}`} className="plans-page__row">
-              <div>
+              <div className="plans-page__row-main">
                 <div className="plans-page__row-name">{plan.name}</div>
                 <div className="plans-page__row-meta">
                   <Badge variant="soft">
