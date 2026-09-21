@@ -2,6 +2,7 @@ package com.acme.services.camperservice.features.recipe.actions
 
 import com.acme.clients.common.Result
 import com.acme.clients.recipeclient.api.GetAllParam
+import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.services.camperservice.features.recipe.dto.RecipeResponse
 import com.acme.services.camperservice.features.recipe.error.RecipeError
@@ -26,9 +27,29 @@ internal class ListRecipesAction(
             .distinctBy { it.id }
             .sortedBy { it.name }
 
-        // PLACEHOLDER (service-contracts PR): the real favourite counts come from a single
-        // batched recipeClient.getFavoriteSummaries(visible.map { it.id }, param.userId) read,
-        // wired in the service-implementation PR. Until then every row reports 0 / false.
-        return Result.Success(visible.map { RecipeMapper.toRecipeResponse(it, 0, false) })
+        // ONE batched favourite read for the whole page — never one per recipe. Total client
+        // calls stays at 3 (two getAll plus this), independent of how many recipes come back.
+        val summaries = if (visible.isEmpty()) {
+            emptyMap()
+        } else {
+            when (val result = recipeClient.getFavoriteSummaries(
+                GetRecipeFavoriteSummariesParam(recipeIds = visible.map { it.id }, userId = param.userId)
+            )) {
+                is Result.Success -> result.value.associateBy { it.recipeId }
+                is Result.Failure -> return Result.Failure(RecipeError.Invalid("favorites", result.error.message))
+            }
+        }
+
+        // Recipes nobody has favourited are absent from the summaries, so default them to 0 / false.
+        return Result.Success(
+            visible.map { recipe ->
+                val summary = summaries[recipe.id]
+                RecipeMapper.toRecipeResponse(
+                    recipe,
+                    summary?.favoriteCount ?: 0,
+                    summary?.favoritedByMe ?: false
+                )
+            }
+        )
     }
 }

@@ -5,6 +5,7 @@ import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.ingredientclient.api.GetByIdParam as IngredientGetByIdParam
 import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.clients.recipeclient.api.GetByIdParam as RecipeGetByIdParam
+import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
 import com.acme.clients.recipeclient.api.GetRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
@@ -39,12 +40,25 @@ internal class GetRecipeAction(
         val ingredientMap = buildIngredientMap(ingredientIds)
             ?: return Result.Failure(RecipeError.Invalid("ingredients", "Failed to load ingredient details"))
 
-        // PLACEHOLDER (service-contracts PR): both the recipe and its nested duplicateOf get
-        // their real counts from one batched getFavoriteSummaries read over
-        // listOfNotNull(recipe.id, recipe.duplicateOfId), wired in the service-implementation PR.
+        // One batched read covers both this recipe and its nested duplicateOf. Ids absent from
+        // the result have no favourites at all, so they default to 0 / false.
+        val summaries = when (val result = recipeClient.getFavoriteSummaries(
+            GetRecipeFavoriteSummariesParam(
+                recipeIds = listOfNotNull(recipe.id, recipe.duplicateOfId),
+                userId = param.userId
+            )
+        )) {
+            is Result.Success -> result.value.associateBy { it.recipeId }
+            is Result.Failure -> return Result.Failure(RecipeError.Invalid("favorites", result.error.message))
+        }
+
         val duplicateOf = recipe.duplicateOfId?.let { dupId ->
             when (val result = recipeClient.getById(RecipeGetByIdParam(dupId))) {
-                is Result.Success -> RecipeMapper.toRecipeResponse(result.value, 0, false)
+                is Result.Success -> RecipeMapper.toRecipeResponse(
+                    result.value,
+                    summaries[dupId]?.favoriteCount ?: 0,
+                    summaries[dupId]?.favoritedByMe ?: false
+                )
                 is Result.Failure -> null
             }
         }
@@ -58,7 +72,13 @@ internal class GetRecipeAction(
         }
 
         return Result.Success(
-            RecipeMapper.toRecipeDetailResponse(recipe, duplicateOf, ingredientResponses, 0, false)
+            RecipeMapper.toRecipeDetailResponse(
+                recipe,
+                duplicateOf,
+                ingredientResponses,
+                summaries[recipe.id]?.favoriteCount ?: 0,
+                summaries[recipe.id]?.favoritedByMe ?: false
+            )
         )
     }
 

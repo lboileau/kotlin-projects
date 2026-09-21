@@ -3,6 +3,7 @@ package com.acme.services.camperservice.features.recipe.actions
 import com.acme.clients.common.Result
 import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.recipeclient.api.GetByIdParam
+import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.clients.recipeclient.api.UpdateRecipeParam as ClientUpdateRecipeParam
 import com.acme.services.camperservice.features.recipe.dto.RecipeResponse
@@ -24,7 +25,7 @@ internal class UpdateRecipeAction(
 
         // For description, meal, and theme: null/absent means "unchanged", a present-but-blank
         // string means "clear this field" (NULL it out), and a non-blank string updates it.
-        return when (val result = recipeClient.update(ClientUpdateRecipeParam(
+        val updated = when (val result = recipeClient.update(ClientUpdateRecipeParam(
             id = param.recipeId,
             name = param.name,
             description = param.description?.takeIf { it.isNotBlank() },
@@ -35,11 +36,22 @@ internal class UpdateRecipeAction(
             theme = param.theme?.takeIf { it.isNotBlank() },
             clearTheme = param.theme != null && param.theme.isBlank(),
         ))) {
-            // PLACEHOLDER (service-contracts PR): the real count comes from a
-            // getFavoriteSummaries read for param.recipeId after the update succeeds,
-            // wired in the service-implementation PR.
-            is Result.Success -> Result.Success(RecipeMapper.toRecipeResponse(result.value, 0, false))
-            is Result.Failure -> Result.Failure(RecipeError.Invalid("recipe", result.error.message))
+            is Result.Success -> result.value
+            is Result.Failure -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))
         }
+
+        // An edit never changes who favourited the recipe, but the response must still carry the
+        // real numbers — returning 0 / false here would poison the frontend's cache.
+        val summaries = when (val result = recipeClient.getFavoriteSummaries(
+            GetRecipeFavoriteSummariesParam(recipeIds = listOf(param.recipeId), userId = param.userId)
+        )) {
+            is Result.Success -> result.value.associateBy { it.recipeId }
+            is Result.Failure -> return Result.Failure(RecipeError.Invalid("favorites", result.error.message))
+        }
+
+        val summary = summaries[param.recipeId]
+        return Result.Success(
+            RecipeMapper.toRecipeResponse(updated, summary?.favoriteCount ?: 0, summary?.favoritedByMe ?: false)
+        )
     }
 }

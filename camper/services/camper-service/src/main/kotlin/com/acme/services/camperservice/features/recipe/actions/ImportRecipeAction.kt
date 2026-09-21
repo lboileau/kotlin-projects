@@ -7,6 +7,7 @@ import com.acme.clients.recipeclient.api.AddRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.FindByWebLinkParam
 import com.acme.clients.recipeclient.api.FindSimilarParam
 import com.acme.clients.recipeclient.api.GetByIdParam
+import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
 import com.acme.clients.recipeclient.api.GetRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.clients.recipeclient.api.UpdateRecipeParam as ClientUpdateRecipeParam
@@ -162,12 +163,25 @@ internal class ImportRecipeAction(
 
         val ingredientMap = allIngredients.associateBy({ it.id }, { RecipeMapper.toIngredientResponse(it) })
 
-        // PLACEHOLDER (service-contracts PR): the imported draft really is 0 / false, but its
-        // nested duplicateOf may already have favourites. Both come from one batched
-        // getFavoriteSummaries read, wired in the service-implementation PR.
+        // The imported draft really is 0 / false, but its nested duplicateOf may already have
+        // favourites. One batched read covers both, keeping the same shape as GetRecipeAction.
+        val summaries = when (val result = recipeClient.getFavoriteSummaries(
+            GetRecipeFavoriteSummariesParam(
+                recipeIds = listOfNotNull(finalRecipe.id, finalRecipe.duplicateOfId),
+                userId = param.userId
+            )
+        )) {
+            is Result.Success -> result.value.associateBy { it.recipeId }
+            is Result.Failure -> return Result.Failure(RecipeError.Invalid("favorites", result.error.message))
+        }
+
         val duplicateOf = finalRecipe.duplicateOfId?.let { dupId ->
             when (val result = recipeClient.getById(GetByIdParam(dupId))) {
-                is Result.Success -> RecipeMapper.toRecipeResponse(result.value, 0, false)
+                is Result.Success -> RecipeMapper.toRecipeResponse(
+                    result.value,
+                    summaries[dupId]?.favoriteCount ?: 0,
+                    summaries[dupId]?.favoritedByMe ?: false
+                )
                 is Result.Failure -> null
             }
         }
@@ -181,7 +195,13 @@ internal class ImportRecipeAction(
         }
 
         return Result.Success(
-            RecipeMapper.toRecipeDetailResponse(finalRecipe, duplicateOf, ingredientResponses, 0, false)
+            RecipeMapper.toRecipeDetailResponse(
+                finalRecipe,
+                duplicateOf,
+                ingredientResponses,
+                summaries[finalRecipe.id]?.favoriteCount ?: 0,
+                summaries[finalRecipe.id]?.favoritedByMe ?: false
+            )
         )
     }
 }
