@@ -1,0 +1,27 @@
+.have-amount-sheet__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 8px;
+}
+
+.have-amount-sheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 16px so iOS does not zoom the page when the field takes focus. */
+.have-amount-sheet__field input {
+  font-size: 16px;
+}
+
+.have-amount-sheet__submit {
+  width: 100%;
+}
+
+.have-amount-sheet__loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
+}

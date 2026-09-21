@@ -1,0 +1,32 @@
+.edit-ingredient-sheet__form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edit-ingredient-sheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.edit-ingredient-sheet__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.edit-ingredient-sheet__confirm-delete {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-ingredient-sheet__confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-ingredient-sheet__confirm-actions > * {
+  flex: 1;
+}

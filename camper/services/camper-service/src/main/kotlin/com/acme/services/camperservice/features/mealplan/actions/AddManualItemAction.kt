@@ -6,6 +6,7 @@ import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.clients.mealplanclient.api.MealPlanClient
 import com.acme.libs.mealplancalculator.model.PurchaseStatus
+import com.acme.services.camperservice.features.mealplan.auth.MealPlanAuthorizer
 import com.acme.services.camperservice.features.mealplan.dto.ManualItemResponse
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
 import com.acme.services.camperservice.features.mealplan.params.AddManualItemParam
@@ -20,10 +21,16 @@ internal class AddManualItemAction(
     private val ingredientClient: IngredientClient,
 ) {
     private val validate = ValidateAddManualItem()
+    private val authorizer = MealPlanAuthorizer(mealPlanClient)
 
     fun execute(param: AddManualItemParam): Result<ManualItemResponse, MealPlanError> {
         when (val validation = validate.execute(param)) {
             is Result.Failure -> return validation
+            is Result.Success -> {}
+        }
+
+        when (val access = authorizer.authorize(param.mealPlanId, param.userId)) {
+            is Result.Failure -> return access
             is Result.Success -> {}
         }
 

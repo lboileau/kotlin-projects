@@ -10,6 +10,10 @@ import com.acme.clients.mealplanclient.internal.validations.ValidateRemoveManual
 import org.jdbi.v3.core.Jdbi
 import org.slf4j.LoggerFactory
 
+/**
+ * Removes a manual item, scoped to [RemoveManualItemParam.mealPlanId] — an item id that exists
+ * but belongs to a different meal plan is treated the same as a nonexistent one (`NotFoundError`).
+ */
 internal class RemoveManualItem(private val jdbi: Jdbi) {
     private val logger = LoggerFactory.getLogger(RemoveManualItem::class.java)
     private val validate = ValidateRemoveManualItem()
@@ -18,10 +22,11 @@ internal class RemoveManualItem(private val jdbi: Jdbi) {
         val validation = validate.execute(param)
         if (validation is Result.Failure) return validation
 
-        logger.debug("Removing manual item id={}", param.id)
+        logger.debug("Removing manual item id={} mealPlanId={}", param.id, param.mealPlanId)
         val deleted = jdbi.withHandle<Int, Exception> { handle ->
-            handle.createUpdate("DELETE FROM shopping_list_manual_items WHERE id = :id")
+            handle.createUpdate("DELETE FROM shopping_list_manual_items WHERE id = :id AND meal_plan_id = :mealPlanId")
                 .bind("id", param.id)
+                .bind("mealPlanId", param.mealPlanId)
                 .execute()
         }
         return if (deleted > 0) success(Unit) else failure(NotFoundError("ShoppingListManualItem", param.id.toString()))

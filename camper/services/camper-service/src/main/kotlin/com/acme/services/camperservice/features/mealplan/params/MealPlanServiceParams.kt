@@ -26,6 +26,36 @@ data class GetTemplatesParam(
     val userId: UUID
 )
 
+data class ListMealPlansByCreatorParam(
+    val createdBy: UUID,
+    val userId: UUID
+)
+
+data class GetMineParam(
+    val userId: UUID
+)
+
+data class GetShareTokenParam(
+    val mealPlanId: UUID,
+    val userId: UUID
+)
+
+data class AcceptInviteParam(
+    val token: String,
+    val userId: UUID
+)
+
+data class GetMealPlanMembersParam(
+    val mealPlanId: UUID,
+    val userId: UUID
+)
+
+data class RemoveMealPlanMemberParam(
+    val mealPlanId: UUID,
+    val targetUserId: UUID,
+    val userId: UUID
+)
+
 data class UpdateMealPlanParam(
     val mealPlanId: UUID,
     val userId: UUID,
@@ -37,6 +67,12 @@ data class UpdateMealPlanParam(
 data class DeleteMealPlanParam(
     val mealPlanId: UUID,
     val userId: UUID
+)
+
+data class DuplicateMealPlanParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val name: String?
 )
 
 data class CopyToTripParam(
@@ -75,6 +111,18 @@ data class AddRecipeToMealParam(
 data class RemoveRecipeFromMealParam(
     val mealPlanRecipeId: UUID,
     val userId: UUID
+)
+
+data class AddRecipeToPlanParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val recipeId: UUID
+)
+
+data class RemoveRecipeFromPlanParam(
+    val mealPlanId: UUID,
+    val userId: UUID,
+    val recipeId: UUID
 )
 
 data class GetShoppingListParam(

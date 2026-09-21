@@ -1,0 +1,22 @@
+.new-plan-sheet__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 8px;
+}
+
+.new-plan-sheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.new-plan-sheet__servings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.new-plan-sheet__submit {
+  width: 100%;
+}

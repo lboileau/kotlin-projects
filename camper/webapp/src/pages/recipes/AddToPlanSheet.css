@@ -1,0 +1,60 @@
+.add-to-plan-sheet__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.add-to-plan-sheet__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 12px 14px;
+  border-radius: var(--radius-4);
+  border: none;
+  background: var(--accent-2);
+  color: var(--gray-12);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.add-to-plan-sheet__row-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.add-to-plan-sheet__row-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.add-to-plan-sheet__row:hover:not(:disabled) {
+  background: var(--accent-3);
+}
+
+.add-to-plan-sheet__row:disabled {
+  cursor: default;
+}
+
+.add-to-plan-sheet__row:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.add-to-plan-sheet__empty {
+  padding: 16px 4px;
+}
+
+.add-to-plan-sheet__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

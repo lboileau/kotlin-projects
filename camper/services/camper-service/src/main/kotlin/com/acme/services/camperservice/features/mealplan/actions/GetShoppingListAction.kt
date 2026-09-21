@@ -15,6 +15,8 @@ import com.acme.libs.mealplancalculator.model.IngredientInfo
 import com.acme.libs.mealplancalculator.UnitConverter
 import com.acme.libs.mealplancalculator.model.PurchaseStatus
 import com.acme.libs.mealplancalculator.model.RecipeIngredientWithMeta
+import com.acme.services.camperservice.features.mealplan.auth.MealPlanAuthorizer
+import com.acme.services.camperservice.features.mealplan.dto.RecipeRefResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListCategoryResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListItemResponse
 import com.acme.services.camperservice.features.mealplan.dto.ShoppingListResponse
@@ -33,10 +35,16 @@ internal class GetShoppingListAction(
     private val ingredientClient: IngredientClient,
 ) {
     private val validate = ValidateGetShoppingList()
+    private val authorizer = MealPlanAuthorizer(mealPlanClient)
 
     fun execute(param: GetShoppingListParam): Result<ShoppingListResponse, MealPlanError> {
         when (val validation = validate.execute(param)) {
             is Result.Failure -> return validation
+            is Result.Success -> {}
+        }
+
+        when (val access = authorizer.authorize(param.mealPlanId, param.userId)) {
+            is Result.Failure -> return access
             is Result.Success -> {}
         }
 
@@ -113,6 +121,7 @@ internal class GetShoppingListAction(
                         category = ingredientInfoMap[ingredientId]!!.category,
                         quantity = ri.quantity,
                         unit = ri.unit,
+                        recipeId = recipe.id,
                         recipeName = recipe.name,
                         baseServings = recipe.baseServings,
                     )
@@ -178,6 +187,7 @@ internal class GetShoppingListAction(
                 unit = row.unit,
                 status = status,
                 usedInRecipes = row.usedInRecipes,
+                usedInRecipeRefs = row.usedInRecipeRefs.map { RecipeRefResponse(id = it.id, name = it.name) },
                 source = "recipe",
                 manualItemId = null,
             )
@@ -223,6 +233,7 @@ internal class GetShoppingListAction(
                     unit = purchase.unit,
                     status = PurchaseStatus.NO_LONGER_NEEDED.name.lowercase(),
                     usedInRecipes = emptyList(),
+                    usedInRecipeRefs = emptyList(),
                     source = "recipe",
                     manualItemId = null,
                 )
@@ -255,6 +266,7 @@ internal class GetShoppingListAction(
         return Result.Success(
             ShoppingListResponse(
                 mealPlanId = mealPlan.id,
+                mealPlanName = mealPlan.name,
                 servings = mealPlan.servings,
                 scalingMode = mealPlan.scalingMode,
                 totalItems = allItems.size,
@@ -306,6 +318,7 @@ internal class GetShoppingListAction(
                 unit = item.unit,
                 status = status,
                 usedInRecipes = emptyList(),
+                usedInRecipeRefs = emptyList(),
                 source = "manual",
                 manualItemId = item.id,
             ) to manualCategory

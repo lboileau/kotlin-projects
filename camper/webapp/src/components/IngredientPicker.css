@@ -1,0 +1,92 @@
+.ingredient-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.ingredient-picker__label {
+  display: block;
+}
+
+.ingredient-picker__list {
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--gray-5);
+  border-radius: var(--radius-4);
+  background: var(--color-panel-solid);
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.ingredient-picker__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: var(--radius-3);
+  cursor: pointer;
+  color: var(--gray-12);
+  touch-action: manipulation;
+}
+
+.ingredient-picker__row-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.9375rem;
+}
+
+.ingredient-picker__row-category {
+  font-size: 0.75rem;
+  color: var(--gray-10);
+  flex-shrink: 0;
+}
+
+.ingredient-picker__row--active {
+  background: var(--accent-4);
+}
+
+.ingredient-picker__row--create {
+  color: var(--accent-11);
+  font-weight: 500;
+}
+
+.ingredient-picker__row--empty {
+  color: var(--gray-9);
+  cursor: default;
+}
+
+.ingredient-picker__create {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--gray-5);
+  border-radius: var(--radius-4);
+  background: var(--color-panel-solid);
+}
+
+.ingredient-picker__create-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ingredient-picker__create-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.ingredient-picker__create-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

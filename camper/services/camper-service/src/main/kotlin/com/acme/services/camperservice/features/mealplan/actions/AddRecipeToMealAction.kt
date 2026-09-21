@@ -8,6 +8,7 @@ import com.acme.clients.mealplanclient.api.MealPlanClient
 import com.acme.clients.recipeclient.api.GetRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.libs.mealplancalculator.model.ScalingMode
+import com.acme.services.camperservice.features.mealplan.auth.MealPlanAuthorizer
 import com.acme.services.camperservice.features.mealplan.dto.MealPlanIngredientResponse
 import com.acme.services.camperservice.features.mealplan.dto.MealPlanRecipeDetailResponse
 import com.acme.services.camperservice.features.mealplan.error.MealPlanError
@@ -25,10 +26,16 @@ internal class AddRecipeToMealAction(
     private val ingredientClient: IngredientClient,
 ) {
     private val validate = ValidateAddRecipeToMeal()
+    private val authorizer = MealPlanAuthorizer(mealPlanClient)
 
     fun execute(param: AddRecipeToMealParam): Result<MealPlanRecipeDetailResponse, MealPlanError> {
         when (val validation = validate.execute(param)) {
             is Result.Failure -> return validation
+            is Result.Success -> {}
+        }
+
+        when (val access = authorizer.authorize(param.mealPlanId, param.userId)) {
+            is Result.Failure -> return access
             is Result.Success -> {}
         }
 
@@ -52,13 +59,17 @@ internal class AddRecipeToMealAction(
 
         val mpr = when (val result = mealPlanClient.addRecipe(
             ClientAddRecipeParam(
+                mealPlanId = param.mealPlanId,
                 mealPlanDayId = param.dayId,
                 mealType = param.mealType,
                 recipeId = param.recipeId,
             )
         )) {
             is Result.Success -> result.value
-            is Result.Failure -> return Result.Failure(MealPlanError.Invalid("recipe", result.error.message))
+            is Result.Failure -> return when (result.error) {
+                is NotFoundError -> Result.Failure(MealPlanError.DayNotFound(param.dayId))
+                else -> Result.Failure(MealPlanError.Invalid("recipe", result.error.message))
+            }
         }
 
         // Build the recipe detail response

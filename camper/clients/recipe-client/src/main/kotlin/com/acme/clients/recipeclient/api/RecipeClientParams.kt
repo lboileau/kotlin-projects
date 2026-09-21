@@ -24,17 +24,27 @@ data class GetAllParam(
     val createdBy: UUID? = null
 )
 
-/** Parameter for updating an existing recipe. Null fields are left unchanged. */
+/**
+ * Parameter for updating an existing recipe. Null fields are left unchanged.
+ *
+ * [description], [meal], and [theme] can be explicitly cleared to NULL via their
+ * respective `clear*` flags (mirroring [clearDuplicateOf]) — the field itself should
+ * stay null when clearing; callers should not set both a non-null value and its
+ * clear flag at once.
+ */
 data class UpdateRecipeParam(
     val id: UUID,
     val name: String? = null,
     val description: String? = null,
+    val clearDescription: Boolean = false,
     val baseServings: Int? = null,
     val status: String? = null,
     val duplicateOfId: UUID? = null,
     val clearDuplicateOf: Boolean = false,
     val meal: String? = null,
-    val theme: String? = null
+    val clearMeal: Boolean = false,
+    val theme: String? = null,
+    val clearTheme: Boolean = false
 )
 
 /** Parameter for deleting a recipe by its unique identifier. */

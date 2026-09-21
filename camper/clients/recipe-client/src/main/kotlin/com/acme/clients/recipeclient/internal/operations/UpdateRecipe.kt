@@ -31,15 +31,24 @@ internal class UpdateRecipe(
         return try {
             val sets = mutableListOf<String>()
             if (param.name != null) sets.add("name = :name")
-            if (param.description != null) sets.add("description = :description")
+            when {
+                param.clearDescription -> sets.add("description = NULL")
+                param.description != null -> sets.add("description = :description")
+            }
             if (param.baseServings != null) sets.add("base_servings = :baseServings")
             if (param.status != null) sets.add("status = :status")
             when {
                 param.clearDuplicateOf -> sets.add("duplicate_of_id = NULL")
                 param.duplicateOfId != null -> sets.add("duplicate_of_id = :duplicateOfId")
             }
-            if (param.meal != null) sets.add("meal = :meal")
-            if (param.theme != null) sets.add("theme = :theme")
+            when {
+                param.clearMeal -> sets.add("meal = NULL")
+                param.meal != null -> sets.add("meal = :meal")
+            }
+            when {
+                param.clearTheme -> sets.add("theme = NULL")
+                param.theme != null -> sets.add("theme = :theme")
+            }
             sets.add("updated_at = :updatedAt")
 
             val entity = jdbi.withHandle<Recipe, Exception> { handle ->
@@ -47,12 +56,12 @@ internal class UpdateRecipe(
                 handle.createUpdate("UPDATE recipes SET ${sets.joinToString(", ")} WHERE id = :id")
                     .bind("id", param.id)
                     .also { q -> if (param.name != null) q.bind("name", param.name) }
-                    .also { q -> if (param.description != null) q.bind("description", param.description) }
+                    .also { q -> if (param.description != null && !param.clearDescription) q.bind("description", param.description) }
                     .also { q -> if (param.baseServings != null) q.bind("baseServings", param.baseServings) }
                     .also { q -> if (param.status != null) q.bind("status", param.status) }
                     .also { q -> if (param.duplicateOfId != null && !param.clearDuplicateOf) q.bind("duplicateOfId", param.duplicateOfId) }
-                    .also { q -> if (param.meal != null) q.bind("meal", param.meal) }
-                    .also { q -> if (param.theme != null) q.bind("theme", param.theme) }
+                    .also { q -> if (param.meal != null && !param.clearMeal) q.bind("meal", param.meal) }
+                    .also { q -> if (param.theme != null && !param.clearTheme) q.bind("theme", param.theme) }
                     .bind("updatedAt", now)
                     .execute()
 

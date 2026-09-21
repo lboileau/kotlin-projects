@@ -181,6 +181,18 @@ fun MealPlanError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("NOT_FOUND", message))
     is MealPlanError.DuplicateManualItem -> ResponseEntity.status(409)
         .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is MealPlanError.Forbidden -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is MealPlanError.CannotRemoveOwner -> ResponseEntity.status(400)
+        .body(ApiResponse.ErrorBody("BAD_REQUEST", message))
+    is MealPlanError.InviteNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is MealPlanError.PlanBoundToRealTrip -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("CONFLICT", "This plan belongs to a trip. Invite people to the trip instead."))
+    is MealPlanError.PlanAccessDenied -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
+    is MealPlanError.CreatedByFilterForbidden -> ResponseEntity.status(403)
+        .body(ApiResponse.ErrorBody("FORBIDDEN", message))
 }
 
 @JvmName("mealPlanResultToResponseEntity")

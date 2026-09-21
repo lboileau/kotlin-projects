@@ -10,6 +10,7 @@ data class RecipeIngredientWithMeta(
     val category: String,
     val quantity: BigDecimal,
     val unit: String,
+    val recipeId: UUID,
     val recipeName: String,
     val baseServings: Int,
 )

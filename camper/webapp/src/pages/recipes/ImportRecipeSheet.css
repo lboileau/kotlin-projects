@@ -1,0 +1,19 @@
+.import-recipe-sheet__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.import-recipe-sheet__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.import-recipe-sheet__reading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}

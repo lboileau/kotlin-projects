@@ -1,0 +1,116 @@
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Badge, Button, Heading, Text } from '@radix-ui/themes';
+import { ChevronRightIcon, PlusIcon } from '@radix-ui/react-icons';
+import { PageLoader } from '../../components/PageLoader';
+import { PageHeader } from '../../components/PageHeader';
+import { SheetLink } from '../../components/SheetLink';
+import { QueryErrorState } from '../../components/QueryErrorState';
+import { BottomBar } from '../../components/BottomBar';
+import { usePlans } from '../../queries/plans';
+import { formatRelativeTime } from '../../lib/relativeTime';
+import { planShareMeta } from '../../lib/planShareMeta';
+import { getSelectedPlanId } from '../../lib/selectedPlan';
+import './PlansPage.css';
+
+function recipeCountLabel(recipeCount: number): string {
+  if (recipeCount === 0) return 'No recipes yet';
+  return `${recipeCount} ${recipeCount === 1 ? 'recipe' : 'recipes'}`;
+}
+
+/**
+ * /plans. The Plans tab is one view, the plan being worked on, and plans are
+ * switched from its header (PlanHeader) — so with a plan selected this just
+ * goes there, the same way /shopping does (ShoppingRedirect). What renders
+ * below is only what there is to show without one: the first-run empty
+ * state, or the list to pick from after the selected plan was deleted or
+ * left. /plans/new still renders over it, for the first plan.
+ */
+export function PlansPage() {
+  const selectedPlanId = getSelectedPlanId();
+  const atRoot = /^\/plans\/?$/.test(useLocation().pathname);
+  const { data: plans, isLoading, isError, refetch } = usePlans();
+
+  if (selectedPlanId && atRoot) {
+    return <Navigate to={`/plans/${selectedPlanId}`} replace />;
+  }
+
+  const hasPlans = !!plans && plans.length > 0;
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!plans;
+
+  return (
+    <div className="plans-page">
+      <PageHeader title="Plans" />
+      <div className="plans-page__body">
+        {isLoading && <PageLoader area="plans" label="Loading plans" />}
+
+        {!isLoading && isError && !hasData && (
+          <QueryErrorState message="Couldn't load your plans." onRetry={() => void refetch()} />
+        )}
+
+        {!isLoading && (hasData || !isError) && !hasPlans && (
+          <div className="plans-page__empty">
+            <Heading as="h2" size="4">
+              No plans yet
+            </Heading>
+            <Text color="gray" size="2">
+              Create a plan to start adding recipes and building a shopping list.
+            </Text>
+            <Button asChild size="3" variant="solid">
+              <SheetLink to="new">
+                <PlusIcon /> New plan
+              </SheetLink>
+            </Button>
+          </div>
+        )}
+
+        {!isLoading &&
+          (hasData || !isError) &&
+          hasPlans &&
+          plans.map((plan) => {
+            const { shared, metaText } = planShareMeta(plan);
+            return (
+              <Link key={plan.id} to={`/plans/${plan.id}`} className="plans-page__row">
+                <div className="plans-page__row-main">
+                  <div className="plans-page__row-name-line">
+                    <div className="plans-page__row-name">{plan.name}</div>
+                    {shared && (
+                      <Badge variant="soft" color="gray" size="1">
+                        Shared
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="plans-page__row-meta">
+                    <Badge variant="soft">
+                      {plan.servings} {plan.servings === 1 ? 'serving' : 'servings'}
+                    </Badge>
+                    <Text size="1" color="gray">
+                      {recipeCountLabel(plan.recipeCount)}
+                    </Text>
+                    <Text size="1" color="gray">
+                      {metaText ?? `Updated ${formatRelativeTime(plan.updatedAt)}`}
+                    </Text>
+                  </div>
+                </div>
+                <ChevronRightIcon color="var(--gray-9)" />
+              </Link>
+            );
+          })}
+      </div>
+
+      {hasPlans && (
+        <BottomBar>
+          <Button asChild size="3" variant="solid" className="plans-page__new-plan">
+            <SheetLink to="new">
+              <PlusIcon /> New plan
+            </SheetLink>
+          </Button>
+        </BottomBar>
+      )}
+
+      <Outlet />
+    </div>
+  );
+}

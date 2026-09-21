@@ -4,7 +4,7 @@ import type {
   MealPlanDetailResponse,
   MealPlanDayResponse,
   MealPlanRecipeDetailResponse,
-} from '../api/client';
+} from '../api/types';
 
 function makeRecipe(
   id: string,
@@ -54,6 +54,9 @@ function makePlan(...days: MealPlanDayResponse[]): MealPlanDetailResponse {
     isTemplate: false,
     sourceTemplateId: null,
     createdBy: 'user-1',
+    role: 'owner',
+    memberCount: 0,
+    ownerName: 'Test User',
     days,
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',

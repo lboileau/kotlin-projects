@@ -1,0 +1,46 @@
+.sign-in-page {
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--accent-2);
+}
+
+.sign-in-page__card {
+  width: 100%;
+  max-width: 360px;
+}
+
+.sign-in-page__title {
+  margin-bottom: 4px;
+}
+
+.sign-in-page__subtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.sign-in-page__subtitle p {
+  margin: 0;
+}
+
+.sign-in-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sign-in-page__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sign-in-page__submit {
+  margin-top: 4px;
+  width: 100%;
+}

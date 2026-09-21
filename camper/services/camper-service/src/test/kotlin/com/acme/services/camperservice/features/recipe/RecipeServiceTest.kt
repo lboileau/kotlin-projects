@@ -355,7 +355,7 @@ class RecipeServiceTest {
         }
 
         @Test
-        fun `list includes other users drafts`() {
+        fun `list excludes other users drafts`() {
             val draftByOther = Recipe(
                 id = UUID.randomUUID(),
                 name = "Other Draft",
@@ -374,7 +374,7 @@ class RecipeServiceTest {
 
             assertThat(result.isSuccess).isTrue()
             val recipes = (result as Result.Success).value
-            assertThat(recipes.map { it.name }).contains("Other Draft")
+            assertThat(recipes.map { it.name }).doesNotContain("Other Draft")
         }
 
         @Test

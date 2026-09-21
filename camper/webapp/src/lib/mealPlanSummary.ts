@@ -1,4 +1,4 @@
-import type { MealPlanDetailResponse } from '../api/client';
+import type { MealPlanDetailResponse } from '../api/types';
 
 export function buildMealPlanSummary(mealPlan: MealPlanDetailResponse): string {
   const seen = new Set<string>();

@@ -1,0 +1,84 @@
+.plans-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.plans-page__body {
+  /* flex: 1, not just padding, reserves room for the BottomBar below: it
+     grows to fill the column's height (from .plans-page's
+     min-height: 100%) so the bar's own natural flow position lands at
+     the bottom of the screen even with only one or two plans, not fixed
+     clearance guessed as a pixel count. */
+  flex: 1;
+  padding: 12px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plans-page__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  min-height: 44px;
+  border-radius: var(--radius-4);
+  background: var(--accent-2);
+  text-decoration: none;
+  color: inherit;
+}
+
+.plans-page__row:hover {
+  background: var(--accent-3);
+}
+
+.plans-page__row:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.plans-page__row-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.plans-page__row-name-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.plans-page__row-name {
+  font-weight: 600;
+  color: var(--gray-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.plans-page__row-meta {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.plans-page__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.plans-page__new-plan {
+  width: 100%;
+}

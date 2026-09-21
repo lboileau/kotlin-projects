@@ -6,6 +6,7 @@ import java.util.UUID
 data class ScaledIngredient(
     val ingredientId: UUID,
     val recipeIngredientId: UUID,
+    val recipeId: UUID,
     val recipeName: String,
     val quantity: BigDecimal,
     val unit: String,

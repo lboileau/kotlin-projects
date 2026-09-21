@@ -1,0 +1,150 @@
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import { Badge, Button, Skeleton, Text, TextField } from '@radix-ui/themes';
+import { CheckIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
+import { Sheet } from '../../components/Sheet';
+import { useSheet } from '../../components/useSheet';
+import { QueryErrorState } from '../../components/QueryErrorState';
+import { ApiError } from '../../api/http';
+import { useAuth } from '../../auth/useAuth';
+import { useRecipes } from '../../queries/recipes';
+import type { RecipeResponse } from '../../api/recipes';
+import { useAddRecipeToPlan, usePlan } from '../../queries/plans';
+import { recipeIdsInPlan } from '../../lib/flatPlan';
+import { toast } from '../../lib/toastStore';
+import './AddRecipeToPlanSheet.css';
+
+export function AddRecipeToPlanSheet() {
+  const { planId } = useParams<{ planId: string }>();
+  // Mounted under both the plan and its shopping list (router.tsx): the
+  // parent is whichever page this sheet is open over.
+  const sheet = useSheet(useLocation().pathname.replace(/\/add\/?$/, ''));
+  const { user } = useAuth();
+
+  const { data: recipes, isLoading, isError, refetch } = useRecipes();
+  // Whether there's already data to show — used below so a background
+  // refetch error (window focus) falls through to the normal render
+  // instead of blanking an already-loaded list.
+  const hasData = !!recipes;
+  const { data: plan, isError: isPlanError, error: planError } = usePlan(planId);
+  const addRecipe = useAddRecipeToPlan(planId);
+
+  // Same derivation as PlanDetailPage/EditPlanSheet — a stale `plan`
+  // stays in cache, so without this the sheet would keep showing the
+  // recipe picker over a page that's already switched to its "not
+  // found"/"no access" state underneath (e.g. removed as a member via
+  // the `members` event while this sheet is open).
+  const planNotFound = isPlanError && planError instanceof ApiError && planError.status === 404;
+  const planForbidden = isPlanError && planError instanceof ApiError && planError.status === 403;
+
+  useEffect(() => {
+    if (planNotFound || planForbidden) sheet.close();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planNotFound, planForbidden]);
+
+  const [query, setQuery] = useState('');
+
+  const alreadyAdded = useMemo(() => (plan ? recipeIdsInPlan(plan) : new Set<string>()), [plan]);
+
+  const visibleRecipes = useMemo(() => {
+    if (!recipes) return [];
+    const mine = recipes.filter((recipe) => recipe.status === 'published' || recipe.createdBy === user?.id);
+    const q = query.trim().toLowerCase();
+    const filtered = q ? mine.filter((recipe) => recipe.name.toLowerCase().includes(q)) : mine;
+    return filtered.slice().sort((a, b) => a.name.localeCompare(b.name));
+  }, [recipes, user, query]);
+
+  function handleAdd(recipe: RecipeResponse) {
+    if (!planId) return;
+    addRecipe.mutate(
+      {
+        planId,
+        recipeId: recipe.id,
+        recipeName: recipe.name,
+        recipeWebLink: recipe.webLink,
+        baseServings: recipe.baseServings,
+      },
+      {
+        onSuccess: (result) => {
+          if (result.alreadyInPlan) toast.info(`${recipe.name} is already in this plan.`);
+        },
+      },
+    );
+  }
+
+  return (
+    <Sheet {...sheet.sheetProps} title="Add recipes" fullHeight>
+      <div className="add-recipe-to-plan-sheet">
+        <div className="add-recipe-to-plan-sheet__search">
+          <TextField.Root
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search recipes"
+            aria-label="Search recipes"
+            type="search"
+            enterKeyHint="search"
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoComplete="off"
+            size="3"
+            autoFocus
+          >
+            <TextField.Slot>
+              <MagnifyingGlassIcon />
+            </TextField.Slot>
+          </TextField.Root>
+        </div>
+
+        <div className="add-recipe-to-plan-sheet__list">
+          {isLoading && (
+            <div aria-busy="true" aria-label="Loading recipes">
+              <Skeleton height="52px" aria-hidden="true" />
+              <Skeleton height="52px" aria-hidden="true" />
+              <Skeleton height="52px" aria-hidden="true" />
+            </div>
+          )}
+
+          {!isLoading && isError && !hasData && (
+            <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />
+          )}
+
+          {!isLoading && (hasData || !isError) && visibleRecipes.length === 0 && (
+            <Text color="gray" size="2" className="add-recipe-to-plan-sheet__empty">
+              {query ? 'No recipes match.' : 'No recipes yet — create one from the Recipes tab.'}
+            </Text>
+          )}
+
+          {!isLoading &&
+            (hasData || !isError) &&
+            visibleRecipes.map((recipe) => {
+              const added = alreadyAdded.has(recipe.id);
+              return (
+                <button
+                  key={recipe.id}
+                  type="button"
+                  className="add-recipe-to-plan-sheet__row"
+                  disabled={added}
+                  onClick={() => handleAdd(recipe)}
+                >
+                  <span className="add-recipe-to-plan-sheet__row-name">{recipe.name}</span>
+                  {added ? (
+                    <Badge color="green" variant="soft">
+                      <CheckIcon /> Added
+                    </Badge>
+                  ) : (
+                    recipe.status === 'draft' && <Badge variant="soft">Draft</Badge>
+                  )}
+                </button>
+              );
+            })}
+        </div>
+
+        <div className="add-recipe-to-plan-sheet__footer">
+          <Button variant="solid" size="3" onClick={() => sheet.close()} className="add-recipe-to-plan-sheet__done">
+            Done
+          </Button>
+        </div>
+      </div>
+    </Sheet>
+  );
+}

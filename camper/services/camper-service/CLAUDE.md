@@ -225,74 +225,99 @@ API service for camping trip planning — user registration, authentication, pla
 ### Recipe (`features/recipe/`)
 - **Models:** `Recipe(id, name, description?, webLink?, baseServings, status, createdBy, duplicateOfId?, createdAt, updatedAt)`, `RecipeIngredient(id, recipeId, ingredientId?, originalText?, quantity, unit, status, matchedIngredientId?, suggestedIngredientName?, reviewFlags, createdAt, updatedAt)` (from recipe-client)
 - **DTOs:**
-  - Requests: `CreateRecipeRequest`, `ImportRecipeRequest(url)`, `UpdateRecipeRequest(name?, description?, baseServings?)`, `ResolveIngredientRequest(action, ingredientId?, newIngredient?)`, `ResolveDuplicateRequest(action)`
+  - Requests: `CreateRecipeRequest`, `ImportRecipeRequest(url)`, `UpdateRecipeRequest(name?, description?, baseServings?, meal?, theme?)`, `ResolveIngredientRequest(action, ingredientId?, newIngredient?)`, `ResolveDuplicateRequest(action)`
   - Responses: `RecipeResponse`, `RecipeDetailResponse` (with `duplicateOf?` + `ingredients`), `RecipeIngredientResponse`
 - **Error:** `RecipeError` sealed class — `NotFound(id)`, `NotCreator(id, userId)`, `Invalid(field, reason)`, `DuplicateWebLink(url)`, `DuplicateIngredientName(name)`, `UnresolvedIngredients(id, count)`, `UnresolvedDuplicate(id)`, `ImportFailed(url, reason)`, `ScrapeFailed(reason)`, `IngredientNotFound(id)`, `AlreadyPublished(id)`
-- **Service params:** `CreateRecipeParam`, `ImportRecipeParam(userId, url)`, `GetRecipeParam(recipeId, userId)`, `ListRecipesParam(userId)`, `UpdateRecipeParam(recipeId, userId, name?, description?, baseServings?)`, `DeleteRecipeParam(recipeId, userId)`, `ResolveIngredientParam(recipeId, recipeIngredientId, userId, action, ingredientId?, newIngredient?)`, `ResolveDuplicateParam(recipeId, userId, action)`, `PublishRecipeParam(recipeId, userId)`
+- **Service params:** `CreateRecipeParam`, `ImportRecipeParam(userId, url)`, `GetRecipeParam(recipeId, userId)`, `ListRecipesParam(userId)`, `UpdateRecipeParam(recipeId, userId, name?, description?, baseServings?, meal?, theme?)`, `DeleteRecipeParam(recipeId, userId)`, `ResolveIngredientParam(recipeId, recipeIngredientId, userId, action, ingredientId?, newIngredient?)`, `ResolveDuplicateParam(recipeId, userId, action)`, `PublishRecipeParam(recipeId, userId)`
 - **Actions:**
   - `CreateRecipeAction`: validates name/servings, checks all ingredientIds exist, creates as `published`
   - `ImportRecipeAction`: validates URL not blank, checks not duplicate webLink, fetches HTML via `java.net.http.HttpClient`, loads all ingredients, calls `RecipeScraperClient`, detects similar recipes, creates as `draft`, adds ingredients with `pending_review`/`approved` status based on `reviewFlags`
   - `GetRecipeAction`: fetches recipe + ingredients, enriches with `IngredientResponse` map, resolves `duplicateOf`
-  - `ListRecipesAction`: fetches published recipes + user's own drafts, deduplicates by ID
-  - `UpdateRecipeAction`: checks creator, delegates to `recipeClient.update`
-  - `DeleteRecipeAction`: checks creator, delegates to `recipeClient.delete`
-  - `ResolveIngredientAction`: checks creator; handles `CONFIRM_MATCH` (use matchedIngredientId), `CREATE_NEW` (create ingredient then assign), `SELECT_EXISTING` (validate ingredient exists then assign); updates recipe_ingredient to `approved`
-  - `ResolveDuplicateAction`: checks creator; `NOT_DUPLICATE` clears `duplicate_of_id`; `USE_EXISTING` deletes the recipe (returns null → 204)
-  - `PublishRecipeAction`: checks creator, checks not already published, checks no unresolved duplicate, checks all ingredients approved, updates status to `published`
+  - `ListRecipesAction`: fetches published recipes + caller's own drafts, deduplicates by ID (calls `recipeClient.getAll(status="published")` + `recipeClient.getAll(createdBy=userId)`)
+  - `UpdateRecipeAction`: delegates to `recipeClient.update`. Blank `description`, `meal`, or `theme` clears the field (NULL); absent field means unchanged. No ownership enforcement.
+  - `DeleteRecipeAction`: delegates to `recipeClient.delete`. No ownership enforcement.
+  - `ResolveIngredientAction`: handles `CONFIRM_MATCH` (use matchedIngredientId), `CREATE_NEW` (create ingredient then assign), `SELECT_EXISTING` (validate ingredient exists then assign); updates recipe_ingredient to `approved`. No ownership enforcement.
+  - `ResolveDuplicateAction`: `NOT_DUPLICATE` clears `duplicate_of_id`; `USE_EXISTING` deletes the recipe (returns null → 204). No ownership enforcement.
+  - `PublishRecipeAction`: checks not already published, checks no unresolved duplicate, checks all ingredients approved, updates status to `published`. No ownership enforcement.
 - **Service:** `RecipeService` facade (takes `RecipeClient`, `IngredientClient`, `RecipeScraperClient`)
 - **Routes:** (all require `X-User-Id` header)
   - `POST /api/recipes` — create recipe (201)
   - `POST /api/recipes/import` — import recipe from URL (201)
-  - `GET /api/recipes` — list recipes (published + own drafts)
+  - `GET /api/recipes` — list recipes (published + caller's own drafts)
   - `GET /api/recipes/{id}` — get recipe detail
-  - `PUT /api/recipes/{id}` — update recipe (creator only)
-  - `DELETE /api/recipes/{id}` — delete recipe (204, creator only)
-  - `PUT /api/recipes/{id}/ingredients/{ingredientId}` — resolve pending ingredient (creator only)
-  - `PUT /api/recipes/{id}/resolve-duplicate` — resolve duplicate flag (creator only; 204 if USE_EXISTING)
-  - `POST /api/recipes/{id}/publish` — publish recipe (creator only)
+  - `PUT /api/recipes/{id}` — update recipe (blank description/meal/theme clears the field)
+  - `DELETE /api/recipes/{id}` — delete recipe (204)
+  - `PUT /api/recipes/{id}/ingredients/{ingredientId}` — resolve pending ingredient
+  - `PUT /api/recipes/{id}/resolve-duplicate` — resolve duplicate flag (204 if USE_EXISTING)
+  - `POST /api/recipes/{id}/publish` — publish recipe
 
 ### Meal Plan (`features/mealplan/`)
-- **Models:** Uses `MealPlan`, `MealPlanDay`, `MealPlanRecipe`, `ShoppingListPurchase` from meal-plan-client; `Recipe`, `RecipeIngredient` from recipe-client; `Ingredient` from ingredient-client
+- **Access rule (private plans):** A meal plan can only be used by its **owner** (`meal_plans.created_by`) or a **member** — someone with access to its *backing trip plan* (`meal_plans.plan_id` → a `plans` row): that plan's `owner_id`, or a row in its `plan_members`. Anyone else gets `403 FORBIDDEN`; a missing plan is still `404`. A meal plan with no backing plan (`plan_id IS NULL`) is owner-only. Templates follow the same rule — `GET /api/meal-plans/templates` returns only the caller's own templates. Enforced by `MealPlanAuthorizer` (`features/mealplan/auth/MealPlanAuthorizer.kt`, modelled on `common/auth/PlanRoleAuthorizer`), which resolves `MealPlanRole` (OWNER/MEMBER) via a single `MealPlanClient.getAccess` call and is invoked at the top of every action below except `CreateMealPlanAction` and `GetTemplatesAction`/`ListMealPlansByCreatorAction` (which filter by `createdBy` instead) and `GetMealPlanByPlanIdAction` (only checked when a meal plan actually exists for the trip — no meal plan means nothing to protect). Members can do everything except: rename the plan (`PUT` with a non-null `name` from a member is `403`; `servings`/`scalingMode` are fine), delete the plan, and remove another member — those are owner-only (`MealPlanAuthorizer.authorizeOwner`). `AddRecipeToPlanAction` checks access *before* calling `MealPlanClient.addRecipeToPlanIfAbsent` (which holds a row lock inside a transaction and isn't restructured to also authorize).
+- **Sharing has no dedicated schema** — see `clients/meal-plan-client/CLAUDE.md` and `docs/meal-app-frontend/sharing.md` for the full design. In short: the share token *is* the backing trip plan's id; `GET /share` lazily creates a private `plans` row (race-safe) and attaches it via `meal_plans.plan_id`; accepting an invite is just `getByPlanId` on the parsed token plus an idempotent `plan_members` insert; there is no reset-token endpoint (that would need a token column, which this design avoids). Deleting a meal plan leaves its backing `plans` row behind.
+- **Models:** Uses `MealPlan` (now carries `memberCount`, `ownerName`, resolved via subselect/join in every read — see meal-plan-client CLAUDE.md), `MealPlanDay`, `MealPlanRecipe`, `MealPlanAccess`, `MealPlanMember`, `ShoppingListPurchase` from meal-plan-client; `Recipe`, `RecipeIngredient` from recipe-client; `Ingredient` from ingredient-client; `User` from user-client (member/owner display name enrichment)
 - **DTOs:**
-  - Requests: `CreateMealPlanRequest(name, servings, scalingMode?, isTemplate?, planId?)`, `UpdateMealPlanRequest(name?, servings?, scalingMode?)`, `AddDayRequest(dayNumber)`, `AddRecipeRequest(mealType, recipeId)`, `CopyToTripRequest(planId, servings?)`, `SaveAsTemplateRequest(name)`, `UpdatePurchaseRequest(ingredientId, unit, quantityPurchased)`
-  - Responses: `MealPlanDetailResponse` (nested days → meals → recipes with scaled ingredients), `MealPlanRecipeDetailResponse` (id, recipeId, recipeName, recipeWebLink, baseServings, scaleFactor, isFullyPurchased, ingredients), `ShoppingListResponse` (computed categories → items with purchase status)
-- **Error:** `MealPlanError` sealed class — `MealPlanNotFound(id)`, `DayNotFound(id)`, `RecipeNotFound(id)`, `DuplicateDayNumber(dayNumber)`, `PlanAlreadyHasMealPlan(planId)`, `NotATemplate(id)`, `IsATemplate(id)`, `Invalid(field, reason)`
-- **Service params:** `CreateMealPlanParam`, `GetMealPlanDetailParam`, `GetMealPlanByPlanIdParam`, `GetTemplatesParam`, `UpdateMealPlanParam`, `DeleteMealPlanParam`, `CopyToTripParam`, `SaveAsTemplateParam`, `AddDayParam`, `RemoveDayParam`, `AddRecipeToMealParam`, `RemoveRecipeFromMealParam`, `GetShoppingListParam`, `UpdatePurchaseParam`, `ResetPurchasesParam`
+  - Requests: `CreateMealPlanRequest(name, servings, scalingMode?, isTemplate?, planId?)`, `UpdateMealPlanRequest(name?, servings?, scalingMode?)`, `AddDayRequest(dayNumber)`, `AddRecipeRequest(mealType, recipeId)`, `CopyToTripRequest(planId, servings?)`, `SaveAsTemplateRequest(name)`, `UpdatePurchaseRequest(ingredientId, unit, quantityPurchased)`, `DuplicateMealPlanRequest(name?)`, `AddRecipeToPlanRequest(recipeId)`, `AddManualItemRequest(ingredientId?, description?, quantity?, unit?)`
+  - Responses: `MealPlanResponse` (id, name, servings, recipeCount, `role` ["owner"|"member"], `memberCount`, `ownerName`, etc.), `MealPlanDetailResponse` (nested days → meals → recipes with scaled ingredients, plus `role`/`memberCount`/`ownerName`), `MealPlanRecipeDetailResponse`, `ShoppingListResponse` (mealPlanName, categories with items), `ShoppingListItemResponse` (usedInRecipeRefs: List<{id, name}>), `ShareTokenResponse(token)`, `AcceptInviteResponse(mealPlanId, name, role, alreadyMember)`, `MealPlanMemberResponse(userId, username, role, joinedAt)`
+- **Error:** `MealPlanError` sealed class — `MealPlanNotFound(id)`, `DayNotFound(id)`, `RecipeNotFound(id)`, `DuplicateDayNumber(dayNumber)`, `PlanAlreadyHasMealPlan(planId)`, `NotATemplate(id)`, `IsATemplate(id)`, `Invalid(field, reason)`, `Forbidden(mealPlanId, userId)` (403), `CannotRemoveOwner(mealPlanId)` (400 — trying to remove the owner via the members endpoint), `InviteNotFound(token)` (404 — unknown share token)
+- **Service params:** `CreateMealPlanParam`, `GetMealPlanDetailParam`, `GetMealPlanByPlanIdParam`, `ListMealPlansByCreatorParam(createdBy, userId)`, `GetTemplatesParam`, `GetMineParam(userId)`, `UpdateMealPlanParam`, `DeleteMealPlanParam`, `CopyToTripParam`, `SaveAsTemplateParam`, `DuplicateMealPlanParam`, `AddRecipeToPlanParam`, `RemoveRecipeFromPlanParam`, `AddDayParam`, `RemoveDayParam`, `AddRecipeToMealParam`, `RemoveRecipeFromMealParam`, `GetShoppingListParam`, `UpdatePurchaseParam`, `ResetPurchasesParam`, `AddManualItemParam`, `RemoveManualItemParam`, `GetShareTokenParam(mealPlanId, userId)`, `AcceptInviteParam(token, userId)`, `GetMealPlanMembersParam(mealPlanId, userId)`, `RemoveMealPlanMemberParam(mealPlanId, targetUserId, userId)`
 - **Actions:**
-  - `CreateMealPlanAction`: Creates trip or template meal plan; validates plan doesn't already have one
-  - `GetMealPlanDetailAction`: Fetches meal plan with full nested detail via `MealPlanDetailBuilder`
-  - `GetMealPlanByPlanIdAction`: Lookup meal plan by trip planId (returns null if none)
-  - `GetTemplatesAction`: Lists template meal plans for a user
-  - `UpdateMealPlanAction`: Updates name, servings, scaling mode
-  - `DeleteMealPlanAction`: Deletes meal plan (cascades)
-  - `CopyToTripAction`: Deep-copies template to a trip (new days, recipes; no purchases)
-  - `SaveAsTemplateAction`: Deep-copies trip meal plan as a template (new days, recipes; no purchases)
-  - `AddDayAction`: Adds a day to the meal plan (validates unique day number)
-  - `RemoveDayAction`: Removes a day from the meal plan
-  - `AddRecipeToMealAction`: Adds a recipe to a specific meal type on a day
-  - `RemoveRecipeFromMealAction`: Removes a recipe from a meal
-  - `GetShoppingListAction`: Computes shopping list using `ShoppingListCalculator` (scale → convert → aggregate → join purchases); purchase status derived via `PurchaseStatus.derive()`. Purchases are matched to shopping list rows by ingredient, with unit conversion via `UnitConverter` when bestFit changes the row's unit (e.g. purchase in `g` matched to a `kg` row). Orphaned purchases only show as `no_longer_needed` when the ingredient is fully removed or the purchase unit is not convertible to any current row unit; zero-quantity orphans are filtered out.
-  - `UpdatePurchaseAction`: Creates/updates purchase quantity for an ingredient+unit
-  - `ResetPurchasesAction`: Deletes all purchases for a meal plan
-  - `MealPlanDetailBuilder`: Shared builder that assembles the nested detail response (days → meals → recipes with scaled ingredients, `isFullyPurchased` flag)
-- **Service:** `MealPlanService` facade (takes MealPlanClient + RecipeClient + IngredientClient)
+  - `CreateMealPlanAction`: Creates trip or template meal plan; auto-creates day 1; validates plan doesn't already have one; caller becomes owner
+  - `GetMealPlanDetailAction`: Authorizes (owner/member), fetches meal plan with full nested detail via `MealPlanDetailBuilder`
+  - `GetMealPlanByPlanIdAction`: Lookup meal plan by trip planId (returns null if none — that's not access-checked, since there's nothing to protect); if a meal plan exists, authorizes the caller against it
+  - `ListMealPlansByCreatorAction`: `403` unless `createdBy == userId`; lists all meal plans created by a user, ordered by updatedAt DESC
+  - `GetTemplatesAction`: Lists template meal plans, filtered to `createdBy == userId`
+  - `GetMineAction`: Meal plans the caller owns plus meal plans shared with them (member rows), newest updated first; includes templates
+  - `UpdateMealPlanAction`: Authorizes; members may send `servings`/`scalingMode` but a non-null `name` from a member is `403`; publishes `meal-plan/updated` event
+  - `DeleteMealPlanAction`: Owner-only; deletes meal plan (cascades to days, recipes, purchases; the backing trip plan row, if any, is left behind); publishes `meal-plan/deleted` event
+  - `DuplicateMealPlanAction`: Authorizes source; flat copy of a meal plan — creates new plan (owned by the caller, no members, no share token) with day 1, adds all recipes from all days of the source
+  - `AddRecipeToPlanAction`: Authorizes *before* the row-locked check-and-insert; plan-level add recipe (flat plans): finds lowest-numbered day, adds to `dinner` mealType, idempotent (201 on create, 200 if already in plan); publishes event
+  - `RemoveRecipeFromPlanAction`: Authorizes; plan-level remove recipe: removes every occurrence across all days, idempotent; publishes event
+  - `CopyToTripAction`: Authorizes source template; deep-copies template to a trip (new days, recipes; no purchases); caller becomes owner of the new trip plan
+  - `SaveAsTemplateAction`: Authorizes source; deep-copies trip meal plan as a template (new days, recipes; no purchases); caller becomes owner of the new template
+  - `AddDayAction`: Authorizes; adds a day to the meal plan (validates unique day number); publishes event
+  - `RemoveDayAction`: Authorizes; removes a day from the meal plan; publishes event
+  - `AddRecipeToMealAction`: Authorizes; adds a recipe to a specific meal type on a day; publishes event
+  - `RemoveRecipeFromMealAction`: Resolves the owning meal plan id first, then authorizes against it; removes a recipe from a meal; publishes event and returns the owning meal plan id for the controller
+  - `AddManualItemAction`: Authorizes; adds a manual shopping item (no ingredient); publishes event
+  - `RemoveManualItemAction`: Authorizes; removes a manual shopping item; publishes event
+  - `GetShoppingListAction`: Authorizes; computes shopping list using `ShoppingListCalculator` (scale → convert → aggregate → join purchases); includes `usedInRecipeRefs` (list of {id, name}) alongside `usedInRecipes`. Purchase status derived via `PurchaseStatus.derive()`. Purchases are matched to shopping list rows by ingredient, with unit conversion via `UnitConverter` when bestFit changes the row's unit (e.g. purchase in `g` matched to a `kg` row). Orphaned purchases only show as `no_longer_needed` when the ingredient is fully removed or the purchase unit is not convertible to any current row unit; zero-quantity orphans are filtered out.
+  - `UpdatePurchaseAction`: Authorizes; creates/updates purchase quantity for an ingredient+unit or manual item; publishes event
+  - `ResetPurchasesAction`: Authorizes; deletes all purchases for a meal plan; publishes event
+  - `GetShareTokenAction`: Owner or member; lazily creates the backing trip plan on first call and returns its id as the token (race-safe: `MealPlanClient.getOrCreateBackingPlan`)
+  - `AcceptInviteAction`: Anyone signed in; parses the token as a UUID (404 `InviteNotFound` if it doesn't parse) and resolves it via `MealPlanClient.getByPlanId` (404 `InviteNotFound` if no meal plan has that backing plan), joins as a member (idempotent insert); the owner opening their own link gets `role: "owner", alreadyMember: true` with no insert
+  - `GetMembersAction`: Owner or member; lists members owner-first (`joinedAt` = plan `createdAt`) then by join time, enriching `username` (falling back to email) via `UserClient` per member — same service-layer enrichment pattern as `GetPlanMembersAction`
+  - `RemoveMemberAction`: Owner may remove anyone (except the owner — `400 CannotRemoveOwner`); a member may only remove themselves (leave), else `403`; removing the backing plan's `owner_id` (a legacy trip owner) is also `400 CannotRemoveOwner`; removing someone who isn't a member is idempotent (`204`, no event)
+  - `MealPlanDetailBuilder`: Shared builder that assembles the nested detail response (days → meals → recipes with scaled ingredients, `isFullyPurchased` flag, `role`/`memberCount`/`ownerName`) — takes the caller's `userId` to compute `role`
+- **WebSocket:** `MealPlanEventPublisher` publishes `{resource, action}` to `/topic/meal-plans/{mealPlanId}` (resources: `meal-plan`, `shopping-list`, `members`; actions: `updated`, `deleted`, etc.) after successful mutations. Auto-created day 1 does not publish an event. `("members", "updated")` is published after a join (only when a row was actually inserted — not on a repeat accept), a removal, or a leave (only when a row was actually removed).
+- **Service:** `MealPlanService` facade (takes MealPlanClient + RecipeClient + IngredientClient + UserClient)
 - **Routes:** (all require `X-User-Id` header)
   - `POST /api/meal-plans` — create meal plan (201)
-  - `GET /api/meal-plans/{id}` — get meal plan detail
-  - `GET /api/meal-plans?planId={planId}` — get meal plan for a trip
-  - `GET /api/meal-plans/templates` — list templates
-  - `PUT /api/meal-plans/{id}` — update meal plan
-  - `DELETE /api/meal-plans/{id}` — delete meal plan (204)
-  - `POST /api/meal-plans/{id}/copy-to-trip` — copy template to trip (201)
-  - `POST /api/meal-plans/{id}/save-as-template` — save trip as template (201)
-  - `POST /api/meal-plans/{id}/days` — add day (201)
-  - `DELETE /api/meal-plans/{mealPlanId}/days/{dayId}` — remove day (204)
-  - `POST /api/meal-plans/{mealPlanId}/days/{dayId}/recipes` — add recipe to meal (201)
-  - `DELETE /api/meal-plan-recipes/{mealPlanRecipeId}` — remove recipe from meal (204, separate controller)
+  - `GET /api/meal-plans/{id}` — get meal plan detail (owner or member, else 403; 404 if missing)
+  - `GET /api/meal-plans?createdBy={userId}` — list meal plans created by a user, newest first (403 unless `createdBy` is the caller)
+  - `GET /api/meal-plans?planId={planId}` — get meal plan for a trip (403 if a meal plan exists and the caller lacks access; `null` if none exists yet)
+  - `GET /api/meal-plans/mine` — meal plans the caller owns plus meal plans shared with them, newest updated first (includes templates)
+  - `GET /api/meal-plans/templates` — list the caller's own templates
+  - `PUT /api/meal-plans/{id}` — update meal plan (owner or member; member renaming is 403; publishes event)
+  - `DELETE /api/meal-plans/{id}` — delete meal plan (owner only, 204, publishes event)
+  - `POST /api/meal-plans/{id}/duplicate` — duplicate meal plan (owner or member of source; 201)
+  - `POST /api/meal-plans/{id}/recipes` — add recipe to plan, idempotent (201 created / 200 existing, publishes event)
+  - `DELETE /api/meal-plans/{id}/recipes/{recipeId}` — remove recipe from plan, idempotent (publishes event)
+  - `POST /api/meal-plans/{id}/copy-to-trip` — copy template to trip (owner or member of the template; 201)
+  - `POST /api/meal-plans/{id}/save-as-template` — save trip as template (owner or member of the trip plan; 201)
+  - `POST /api/meal-plans/{id}/days` — add day (201, publishes event)
+  - `DELETE /api/meal-plans/{mealPlanId}/days/{dayId}` — remove day (204, publishes event)
+  - `POST /api/meal-plans/{mealPlanId}/days/{dayId}/recipes` — add recipe to meal (201, publishes event)
+  - `DELETE /api/meal-plan-recipes/{mealPlanRecipeId}` — remove recipe from meal (204, separate controller, publishes event)
+  - `POST /api/meal-plans/{id}/shopping-list/items` — add manual item (201, publishes event)
+  - `DELETE /api/meal-plans/{id}/shopping-list/items/{itemId}` — remove manual item (204, publishes event)
   - `GET /api/meal-plans/{id}/shopping-list` — get computed shopping list
-  - `PATCH /api/meal-plans/{id}/shopping-list` — update purchase
-  - `DELETE /api/meal-plans/{id}/shopping-list` — reset all purchases (204)
-- **Key design:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles scaling and unit conversion. Only purchase records are stored.
+  - `PATCH /api/meal-plans/{id}/shopping-list` — update purchase (publishes event)
+  - `DELETE /api/meal-plans/{id}/shopping-list` — reset all purchases (204, publishes event)
+  - `GET /api/meal-plans/{id}/share` — get the share link token (the backing trip plan's id), creating the backing plan on first call (owner or member)
+  - `POST /api/meal-plan-invites/{token}/accept` — accept a share link, idempotent (separate controller, different base path; publishes `members/updated` on a real join)
+  - `GET /api/meal-plans/{id}/members` — list members, owner first (owner or member)
+  - `DELETE /api/meal-plans/{id}/members/{userId}` — owner removes anyone (not the owner), a member removes themselves (204, publishes `members/updated` when a row was actually removed)
+- **Key design:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles scaling and unit conversion. Only purchase records are stored. Standalone meal plans (no trip planId) are the normal case. Flat plans (day 1 only) are created implicitly. Sharing reuses the existing `plans`/`plan_members` tables (no dedicated schema) — see the `Sharing has no dedicated schema` note above and `clients/meal-plan-client/CLAUDE.md`.
 
 ### Activity Ladder (`features/activityladder/`)
 - **Models:** Uses `Ladder`, `LadderActivity`, `LadderBracket`, `LadderStatus`, `LadderParticipant`, `LadderVote` from activity-ladder-client
@@ -380,7 +405,7 @@ API service for camping trip planning — user registration, authentication, pla
 - `GearPackClientConfig` — creates gear pack client via factory function
 - `GearPackServiceConfig` — wires GearPackService (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - `MealPlanClientConfig` — creates meal plan client via factory function
-- `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient)
+- `MealPlanServiceConfig` — wires MealPlanService (takes MealPlanClient + RecipeClient + IngredientClient + UserClient)
 - `ActivityLadderClientConfig` — creates activity ladder client via factory function
 - `ActivityLadderServiceConfig` — wires ActivityLadderService (takes ActivityLadderClient + LadderPresenceTracker + LadderEventPublisher)
 

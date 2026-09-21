@@ -20,7 +20,11 @@ internal class GetTemplatesAction(
         }
 
         return when (val result = mealPlanClient.getTemplates()) {
-            is Result.Success -> Result.Success(result.value.map { MealPlanMapper.toMealPlanResponse(it) })
+            is Result.Success -> Result.Success(
+                result.value
+                    .filter { it.createdBy == param.userId }
+                    .map { MealPlanMapper.toMealPlanResponse(it, param.userId) }
+            )
             is Result.Failure -> Result.Failure(MealPlanError.Invalid("templates", result.error.message))
         }
     }

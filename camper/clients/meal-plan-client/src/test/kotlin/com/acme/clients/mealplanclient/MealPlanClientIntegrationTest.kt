@@ -402,7 +402,7 @@ class MealPlanClientIntegrationTest {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
 
-            val result = client.removeDay(RemoveDayParam(day.id))
+            val result = client.removeDay(RemoveDayParam(mp.id, day.id))
             assertThat(result).isInstanceOf(Result.Success::class.java)
 
             val days = (client.getDays(GetDaysParam(mealPlanId = mp.id)) as Result.Success).value
@@ -411,7 +411,7 @@ class MealPlanClientIntegrationTest {
 
         @Test
         fun `removeDay returns NotFoundError when day does not exist`() {
-            val result = client.removeDay(RemoveDayParam(UUID.randomUUID()))
+            val result = client.removeDay(RemoveDayParam(UUID.randomUUID(), UUID.randomUUID()))
             assertThat(result).isInstanceOf(Result.Failure::class.java)
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(NotFoundError::class.java)
@@ -421,9 +421,9 @@ class MealPlanClientIntegrationTest {
         fun `removeDay cascades to recipes on that day`() {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
 
-            client.removeDay(RemoveDayParam(day.id))
+            client.removeDay(RemoveDayParam(mp.id, day.id))
 
             val recipes = (client.getRecipesByMealPlanId(GetRecipesByMealPlanIdParam(mp.id)) as Result.Success).value
             assertThat(recipes).isEmpty()
@@ -437,7 +437,7 @@ class MealPlanClientIntegrationTest {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
 
-            val result = client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
+            val result = client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
             assertThat(result).isInstanceOf(Result.Success::class.java)
             val recipe = (result as Result.Success).value
             assertThat(recipe.id).isNotNull()
@@ -451,8 +451,8 @@ class MealPlanClientIntegrationTest {
         fun `getRecipesByDayId returns recipes for a day`() {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "dinner", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "dinner", recipeId = testRecipeId))
 
             val result = client.getRecipesByDayId(GetRecipesByDayIdParam(mealPlanDayId = day.id))
             assertThat(result).isInstanceOf(Result.Success::class.java)
@@ -466,8 +466,8 @@ class MealPlanClientIntegrationTest {
             val mp = createTemplate()
             val day1 = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
             val day2 = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 2)) as Result.Success).value
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day1.id, mealType = "breakfast", recipeId = testRecipeId))
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day2.id, mealType = "lunch", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day1.id, mealType = "breakfast", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day2.id, mealType = "lunch", recipeId = testRecipeId))
 
             val result = client.getRecipesByMealPlanId(GetRecipesByMealPlanIdParam(mealPlanId = mp.id))
             assertThat(result).isInstanceOf(Result.Success::class.java)
@@ -488,7 +488,7 @@ class MealPlanClientIntegrationTest {
         fun `removeRecipe returns success`() {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
-            val recipe = (client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId)) as Result.Success).value
+            val recipe = (client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId)) as Result.Success).value
 
             val result = client.removeRecipe(RemoveRecipeParam(recipe.id))
             assertThat(result).isInstanceOf(Result.Success::class.java)
@@ -510,8 +510,8 @@ class MealPlanClientIntegrationTest {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
 
-            val r1 = client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
-            val r2 = client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "dinner", recipeId = testRecipeId))
+            val r1 = client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
+            val r2 = client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "dinner", recipeId = testRecipeId))
 
             assertThat(r1).isInstanceOf(Result.Success::class.java)
             assertThat(r2).isInstanceOf(Result.Success::class.java)
@@ -626,7 +626,7 @@ class MealPlanClientIntegrationTest {
         fun `delete meal plan cascades to recipes via days`() {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
 
             client.delete(DeleteMealPlanParam(mp.id))
 
@@ -659,10 +659,10 @@ class MealPlanClientIntegrationTest {
         fun `delete day cascades to recipes on that day`() {
             val mp = createTemplate()
             val day = (client.addDay(AddDayParam(mealPlanId = mp.id, dayNumber = 1)) as Result.Success).value
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
-            client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "lunch", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = testRecipeId))
+            client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "lunch", recipeId = testRecipeId))
 
-            client.removeDay(RemoveDayParam(day.id))
+            client.removeDay(RemoveDayParam(mp.id, day.id))
 
             val count = jdbi.withHandle<Long, Exception> { handle ->
                 handle.createQuery("SELECT count(*) FROM meal_plan_recipes WHERE meal_plan_day_id = :dayId")
@@ -701,7 +701,7 @@ class MealPlanClientIntegrationTest {
             val bogusRecipeId = UUID.randomUUID()
 
             val result = try {
-                client.addRecipe(AddRecipeParam(mealPlanDayId = day.id, mealType = "breakfast", recipeId = bogusRecipeId))
+                client.addRecipe(AddRecipeParam(mealPlanId = mp.id, mealPlanDayId = day.id, mealType = "breakfast", recipeId = bogusRecipeId))
                 null
             } catch (e: Exception) {
                 e
@@ -1031,7 +1031,7 @@ class MealPlanClientIntegrationTest {
                 )
             ) as Result.Success).value
 
-            val result = client.removeManualItem(RemoveManualItemParam(item.id))
+            val result = client.removeManualItem(RemoveManualItemParam(mp.id, item.id))
             assertThat(result).isInstanceOf(Result.Success::class.java)
 
             val items = (client.getManualItems(GetManualItemsParam(mealPlanId = mp.id)) as Result.Success).value
@@ -1040,7 +1040,7 @@ class MealPlanClientIntegrationTest {
 
         @Test
         fun `returns NotFoundError for non-existent item ID`() {
-            val result = client.removeManualItem(RemoveManualItemParam(UUID.randomUUID()))
+            val result = client.removeManualItem(RemoveManualItemParam(UUID.randomUUID(), UUID.randomUUID()))
             assertThat(result).isInstanceOf(Result.Failure::class.java)
             val error = (result as Result.Failure).error
             assertThat(error).isInstanceOf(NotFoundError::class.java)
@@ -1060,7 +1060,7 @@ class MealPlanClientIntegrationTest {
             ) as Result.Success).value
 
             val result = client.updateManualItemPurchase(
-                UpdateManualItemPurchaseParam(id = item.id, quantityPurchased = BigDecimal("250"))
+                UpdateManualItemPurchaseParam(mealPlanId = mp.id, id = item.id, quantityPurchased = BigDecimal("250"))
             )
             assertThat(result).isInstanceOf(Result.Success::class.java)
             val updated = (result as Result.Success).value
@@ -1072,7 +1072,7 @@ class MealPlanClientIntegrationTest {
         @Test
         fun `returns NotFoundError for non-existent item ID`() {
             val result = client.updateManualItemPurchase(
-                UpdateManualItemPurchaseParam(id = UUID.randomUUID(), quantityPurchased = BigDecimal("10"))
+                UpdateManualItemPurchaseParam(mealPlanId = UUID.randomUUID(), id = UUID.randomUUID(), quantityPurchased = BigDecimal("10"))
             )
             assertThat(result).isInstanceOf(Result.Failure::class.java)
             val error = (result as Result.Failure).error
@@ -1090,7 +1090,7 @@ class MealPlanClientIntegrationTest {
             ) as Result.Success).value
 
             val result = client.updateManualItemPurchase(
-                UpdateManualItemPurchaseParam(id = item.id, quantityPurchased = BigDecimal("-1"))
+                UpdateManualItemPurchaseParam(mealPlanId = mp.id, id = item.id, quantityPurchased = BigDecimal("-1"))
             )
             assertThat(result).isInstanceOf(Result.Failure::class.java)
             val error = (result as Result.Failure).error
@@ -1108,7 +1108,7 @@ class MealPlanClientIntegrationTest {
             ) as Result.Success).value
 
             val result = client.updateManualItemPurchase(
-                UpdateManualItemPurchaseParam(id = item.id, quantityPurchased = BigDecimal.ZERO)
+                UpdateManualItemPurchaseParam(mealPlanId = mp.id, id = item.id, quantityPurchased = BigDecimal.ZERO)
             )
             assertThat(result).isInstanceOf(Result.Success::class.java)
             val updated = (result as Result.Success).value
@@ -1134,8 +1134,8 @@ class MealPlanClientIntegrationTest {
                 )
             ) as Result.Success).value
 
-            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item1.id, quantityPurchased = BigDecimal("250")))
-            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item2.id, quantityPurchased = BigDecimal("1")))
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(mealPlanId = mp.id, id = item1.id, quantityPurchased = BigDecimal("250")))
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(mealPlanId = mp.id, id = item2.id, quantityPurchased = BigDecimal("1")))
 
             val result = client.resetManualItemPurchases(ResetManualItemPurchasesParam(mealPlanId = mp.id))
             assertThat(result).isInstanceOf(Result.Success::class.java)
@@ -1163,8 +1163,8 @@ class MealPlanClientIntegrationTest {
                 )
             ) as Result.Success).value
 
-            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item1.id, quantityPurchased = BigDecimal("1")))
-            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(id = item2.id, quantityPurchased = BigDecimal("1")))
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(mealPlanId = mp1.id, id = item1.id, quantityPurchased = BigDecimal("1")))
+            client.updateManualItemPurchase(UpdateManualItemPurchaseParam(mealPlanId = mp2.id, id = item2.id, quantityPurchased = BigDecimal("1")))
 
             client.resetManualItemPurchases(ResetManualItemPurchasesParam(mealPlanId = mp1.id))
 

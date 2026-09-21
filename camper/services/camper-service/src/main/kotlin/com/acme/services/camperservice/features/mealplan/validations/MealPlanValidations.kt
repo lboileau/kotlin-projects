@@ -32,6 +32,10 @@ internal class ValidateGetTemplates {
     fun execute(param: GetTemplatesParam): Result<Unit, MealPlanError> = success(Unit)
 }
 
+internal class ValidateListMealPlansByCreator {
+    fun execute(param: ListMealPlansByCreatorParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
 internal class ValidateUpdateMealPlan {
     fun execute(param: UpdateMealPlanParam): Result<Unit, MealPlanError> {
         if (param.name != null && param.name.isBlank()) return Result.Failure(MealPlanError.Invalid("name", "must not be blank"))
@@ -46,6 +50,14 @@ internal class ValidateUpdateMealPlan {
 
 internal class ValidateDeleteMealPlan {
     fun execute(param: DeleteMealPlanParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateDuplicateMealPlan {
+    fun execute(param: DuplicateMealPlanParam): Result<Unit, MealPlanError> {
+        if (param.name != null && param.name.isBlank()) return Result.Failure(MealPlanError.Invalid("name", "must not be blank"))
+        if (param.name != null && param.name.length > 255) return Result.Failure(MealPlanError.Invalid("name", "must not exceed 255 characters"))
+        return success(Unit)
+    }
 }
 
 internal class ValidateCopyToTrip {
@@ -87,6 +99,14 @@ internal class ValidateAddRecipeToMeal {
 
 internal class ValidateRemoveRecipeFromMeal {
     fun execute(param: RemoveRecipeFromMealParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateAddRecipeToPlan {
+    fun execute(param: AddRecipeToPlanParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateRemoveRecipeFromPlan {
+    fun execute(param: RemoveRecipeFromPlanParam): Result<Unit, MealPlanError> = success(Unit)
 }
 
 internal class ValidateGetShoppingList {
@@ -151,4 +171,27 @@ internal class ValidateRemoveManualItem {
 
 internal class ValidateResetPurchases {
     fun execute(param: ResetPurchasesParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateGetMine {
+    fun execute(param: GetMineParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateGetShareToken {
+    fun execute(param: GetShareTokenParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateAcceptInvite {
+    fun execute(param: AcceptInviteParam): Result<Unit, MealPlanError> {
+        if (param.token.isBlank()) return Result.Failure(MealPlanError.Invalid("token", "must not be blank"))
+        return success(Unit)
+    }
+}
+
+internal class ValidateGetMealPlanMembers {
+    fun execute(param: GetMealPlanMembersParam): Result<Unit, MealPlanError> = success(Unit)
+}
+
+internal class ValidateRemoveMealPlanMember {
+    fun execute(param: RemoveMealPlanMemberParam): Result<Unit, MealPlanError> = success(Unit)
 }

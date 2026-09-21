@@ -1,0 +1,114 @@
+.toast-region {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Above the tab bar, and above the page's docked BottomBar when it has one
+     (BottomBar.tsx publishes its height), so a toast never covers a button. */
+  bottom: calc(76px + var(--bottom-bar-height, 0px) + env(safe-area-inset-bottom));
+  width: min(calc(100% - 32px), 640px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* A toast can fire while a sheet is open (e.g. adding an ingredient) —
+   the bottom-anchored position above is right for the normal case (just
+   above the tab bar), but a sheet is *also* bottom-anchored (see
+   `.sheet-content`, `bottom: 0`) and stays flush with the viewport's
+   bottom edge even when short, so the toast would otherwise land right
+   over the sheet's own content instead of above it. Moving it to the
+   top of the screen instead whenever any sheet is open sits above every
+   sheet by construction, regardless of that sheet's actual height —
+   no need to measure it. Reading the sheet's own `data-state` via
+   `:has()`, rather than tracking "a sheet is open" as separate JS state,
+   means this can't drift out of sync with what's actually on screen. */
+body:has(.sheet-content[data-state='open']) .toast-region {
+  top: calc(16px + env(safe-area-inset-top));
+  bottom: auto;
+}
+
+/* The two aria-live wrapper divs stay real DOM nodes (for reliable
+   announcement) but shouldn't introduce their own box in the flex
+   layout — their toast children become direct flex items instead. */
+.toast-region__live-group {
+  display: contents;
+}
+
+.toast-region__item {
+  /* Radix's `variant="surface"` Callout background is a translucent
+     alpha wash (`--accent-a2`, with an inset `--accent-a6` ring for its
+     edge) — fine sitting directly on the plain page background, but a
+     toast can also fire while a sheet is open, rendering over that
+     sheet's dark `--black-a8` overlay (see Toast.tsx's portal comment).
+     The alpha background lets that darkness bleed through and muddies
+     it. `--color-panel-solid` is fully opaque (the same token
+     `.sheet-content` itself uses for its own panel), so the toast reads
+     as the same crisp, legible panel color no matter what's behind it.
+     The tone ring stays — appended as a second shadow layer, not
+     replaced, since a plain `box-shadow` override would otherwise drop
+     Radix's own inset ring entirely — and a real drop shadow is added
+     for depth against either backdrop. Text/icon color are already
+     Radix's own high-contrast tokens (still switches red for errors via
+     `color`) and didn't need overriding. */
+  background: var(--color-panel-solid);
+  box-shadow:
+    inset 0 0 0 1px var(--accent-a6),
+    0 4px 20px var(--black-a6);
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.toast-region__text {
+  flex: 1;
+}
+
+.toast-region__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.toast-region__action {
+  background: none;
+  border: none;
+  color: var(--accent-11);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  /* A full touch target: Undo is tapped in a hurry. */
+  min-height: 44px;
+  min-width: 64px;
+  padding: 0 12px;
+  touch-action: manipulation;
+}
+
+.toast-region__dismiss {
+  background: none;
+  border: none;
+  color: var(--gray-11);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 8px;
+  touch-action: manipulation;
+}
+
+.toast-region__dismiss:hover {
+  background: var(--gray-4);
+}
+
+.toast-region__dismiss:focus-visible,
+.toast-region__action:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}

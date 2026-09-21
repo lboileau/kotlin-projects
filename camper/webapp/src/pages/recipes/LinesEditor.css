@@ -1,0 +1,77 @@
+.lines-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.lines-editor__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lines-editor__row {
+  display: grid;
+  grid-template-columns: 1fr 72px 88px 44px;
+  align-items: center;
+  gap: 8px;
+}
+
+.lines-editor__row-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.lines-editor__row-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lines-editor__row-quantity {
+  width: 100%;
+}
+
+/* Radix's size="2" is 14px, below the 16px iOS uses as its zoom-on-focus
+   threshold — kept at size 2 for the row's compact height, with just the
+   font size raised so focusing it doesn't zoom the page. */
+.lines-editor__row-quantity input {
+  font-size: 16px;
+}
+
+.lines-editor__icon-button {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+.lines-editor__add-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed var(--gray-6);
+  border-radius: var(--radius-4);
+}
+
+.lines-editor__add-fields {
+  display: grid;
+  grid-template-columns: 1fr 100px 44px;
+  gap: 8px;
+  align-items: center;
+}
+
+.lines-editor__add-quantity {
+  width: 100%;
+}
+
+@media (max-width: 360px) {
+  .lines-editor__row {
+    /* The last column must stay 44px — it's the remove button's min tap size. */
+    grid-template-columns: 1fr 60px 80px 44px;
+  }
+}

@@ -1,293 +1,140 @@
-# Camper Webapp
+# Meal Planner Webapp
 
-Interactive camping trip planner frontend. Aesthetic: **"Enchanted Expedition Journal"** — watercolor storybook meets cozy RPG. Parallax wilderness backgrounds, animated campfire campsite scene, SVG illustrated art, soft pastel palette.
+Mobile-first meal planning app: recipes, ingredients, meal plans, shopping lists. Written from scratch on the `meal-app-frontend` branch, replacing the old camping UI. Source of truth for product and design decisions: `../docs/meal-app-frontend/requirements.md` and `../docs/meal-app-frontend/plan.md`.
 
 ## Tech Stack
 
-- **Framework:** React 19 + TypeScript
-- **Build:** Vite 7
-- **Routing:** react-router-dom
-- **WebSocket:** @stomp/stompjs for STOMP-over-WebSocket live updates
-- **Styling:** Plain CSS (no framework) with CSS custom properties
-- **Fonts:** Cinzel Decorative (display), Fredericka the Great (headings), Lora (body) — via Google Fonts
+- **Framework:** React 19 + TypeScript, Vite 7
+- **Routing:** react-router-dom 7 (`createBrowserRouter`, nested routes)
+- **Server state:** TanStack Query 5
+- **UI:** Radix Themes 3 (light only, accent set in `src/theme.ts`), Radix `Dialog` primitive for bottom sheets, `@radix-ui/react-icons`
+- **Live sync:** `@stomp/stompjs` over `/ws`, topic `/topic/meal-plans/{mealPlanId}`
+- **Styling:** Radix props and tokens first; co-located CSS for custom parts. Custom CSS uses the generic `--accent-*` / `--gray-*` / `--area-*` tokens, never a named colour scale or hard-coded colours (`--area-*` is the header bar's tint, see `styles/areas.css`).
 
-## Project Structure
+## Structure
 
 ```
-webapp/
-├── CLAUDE.md
-├── index.html              # Entry HTML with Google Fonts
-├── vite.config.ts          # Dev server (port 3000), API proxy to :8080
-├── src/
-│   ├── main.tsx            # React entry point
-│   ├── App.tsx             # Router + AuthProvider
-│   ├── api/
-│   │   └── client.ts       # API client (typed fetch wrapper)
-│   ├── hooks/
-│   │   ├── usePlanUpdates.ts # STOMP WebSocket hook for live plan updates
-│   │   └── useLadderUpdates.ts # STOMP WebSocket hook for live ladder updates + presence tracking
-│   ├── context/
-│   │   └── AuthContext.tsx  # Auth state (localStorage-persisted)
-│   ├── lib/
-│   │   ├── avatarConstants.ts          # Shared color maps (SKIN_COLORS, HAIR_COLORS, etc.)
-│   │   └── profileConstants.ts         # Shared option arrays (DIETARY_OPTIONS, EXPERIENCE_OPTIONS)
-│   ├── components/
-│   │   ├── ui/                         # Shared UI primitives
-│   │   │   ├── Button.tsx/css          # Shared button (variants: primary/secondary/danger/ghost/icon)
-│   │   │   ├── Input.tsx               # Shared text input (forwardRef, error prop)
-│   │   │   ├── Select.tsx              # Shared select dropdown (options array)
-│   │   │   ├── FormField.tsx           # Label + children wrapper
-│   │   │   ├── CheckboxGroup.tsx       # 2-column checkbox grid
-│   │   │   ├── Modal.tsx               # Shared modal shell (overlay, close, escape, sizes sm/md/lg/xl)
-│   │   │   └── ui.css                  # Consolidated input/select/checkbox/field styles
-│   │   ├── AvatarPreview.tsx           # Full-body seated avatar SVG preview
-│   │   ├── ProfileForm.tsx/css         # Shared profile editing form (used by modal + account page)
-│   │   ├── ParallaxBackground.tsx/css  # Layered parallax with mouse tracking
-│   │   ├── Campfire.tsx/css            # Animated CSS campfire (flames, embers, smoke, logs, stones)
-│   │   ├── CamperAvatar.tsx/css        # SVG illustrated person seated around fire
-│   │   ├── CampsiteItems.tsx           # SVG art: TentSVG, EquipmentPileSVG, KitchenSVG, MapTableSVG
-│   │   ├── InteractableItem.tsx/css    # Hoverable/clickable campsite object with glow + tooltip
-│   │   ├── GearModal.tsx/css            # Equipment & gear management modal (checklist per owner)
-│   │   ├── GearPacksPanel.tsx/css      # Collapsible gear pack browser (preview, scale, apply)
-│   │   ├── MealPlanModal.tsx/css       # Meal plan modal — overview, recipe book, shopping list
-│   │   ├── AssignmentsModal.tsx/css    # Tent & canoe group assignments modal
-│   │   ├── ComingSoonModal.tsx         # Themed "not ready" modal with flavor text
-│   │   ├── AddMemberModal.tsx          # Form modal to invite member by email
-│   │   ├── Modal.css                   # Shared modal styles (parchment aesthetic)
-│   │   ├── activityladder/             # Activity ladder components
-│   │   │   ├── LadderPeoplePanel.tsx/css # People sidebar: voters + spectators, online/offline + voted indicators
-│   │   │   ├── MatchupDisplay.tsx/css   # Current matchup with two activity cards
-│   │   │   └── VoteProgress.tsx/css     # "N of M voted" progress bar
-│   │   └── ProtectedRoute.tsx          # Auth guard (redirect to /login)
-│   ├── pages/
-│   │   ├── LoginPage.tsx/css           # Login/register with night-sky parallax
-│   │   ├── HomePage.tsx/css            # Trip list with dusk parallax, flag trail markers
-│   │   ├── PlanPage.tsx/css            # THE CENTERPIECE — campsite scene
-│   │   ├── RecipesPage.tsx/css         # Recipe book — list, detail, create, import, review
-│   │   ├── LadderListPage.tsx/css      # Activity ladder list page at `/activities` — all ladders with status badges
-│   │   ├── NewLadderPage.tsx/css       # Create ladder form at `/activities/new` — title + add/remove activities inline
-│   │   └── LadderPage.tsx/css          # Live ladder detail page at `/activities/:ladderId` — matchup display, voting, presence
-│   └── styles/
-│       ├── theme.css                   # Design tokens (colors, typography, spacing, shadows)
-│       └── animations.css              # All @keyframes (fire, float, twinkle, fade, etc.)
+src/
+  main.tsx, router.tsx, theme.ts
+  api/         http.ts (request + ApiError), queryClient.ts, types.ts, one file per domain
+  auth/        AuthProvider, useAuth, RequireAuth, storage
+  queries/     TanStack Query hooks and keys: plans, shopping, recipes, ingredients
+  sync/        SyncProvider (one STOMP client), useMealPlanSync
+  components/  AppShell, TabBar, PageHeader (+ HeaderBar), PlanHeader, PageHero, useBack, usePagePath, areaIcons, Sheet,
+               useSheetContainer, SheetSelectContent, SheetLink, useSheet, Toast, Stepper,
+               BottomBar, RowActionButton, CategoryChips, IngredientPicker, QueryErrorState, RouteFallback, RecipesIngredientsToggle
+  lib/         pure helpers: flatPlan, shoppingRows, parseQuantity, formatQuantity, splitDictation, dictationSelection,
+               ingredientConstants, normalizeUrl, asyncPool, historyIndex, safeNext, selectedPlan,
+               toastStore, usePageTitle, mealPlanSummary, areas, navHistory
+  pages/       sign-in, account, plans, shopping, recipes, ingredients (each area has an
+               index.ts barrel that is one lazy chunk)
+  styles/      global.css (reset and body only), areas.css (the header bar's tint)
 ```
 
-## Architecture
+## Conventions
 
-### Shared UI Components (`components/ui/`)
-All UI primitives are defined once and reused everywhere. Never create ad-hoc styled buttons, inputs, or modals.
-- **`Button`** — variants: `primary`, `secondary`, `danger`, `ghost`, `icon`. Sizes: `sm`, `md`, `lg`. Props: `loading`, `disabled`, `className`, standard HTML button attributes.
-- **`Input`** — styled text input with `forwardRef` and optional `error` prop. CSS class: `ui-input`.
-- **`Select`** — styled select with `options: {value, label}[]` and optional `placeholder`.
-- **`FormField`** — label + children wrapper. CSS classes: `form-field`, `form-field__label`.
-- **`CheckboxGroup`** — 2-column checkbox grid with `options`, `selected`, `onChange`.
-- **`Modal`** — shared modal shell with overlay, close button, escape-to-close. Sizes: `sm` (340px), `md` (420px, default), `lg` (600px), `xl` (860px). Props: `isOpen`, `onClose`, `title?`, `flavor?`, `size`, `closable` (default true), `className`.
+- **Every screen state has a URL.** Sheets are child routes rendered through the parent page's `<Outlet/>`. Never open a sheet or dialog from local state.
+- **Sheets** use `components/Sheet` and close through `useSheet(parentPath, options?)`, which returns `{ sheetProps, close }` — spread `sheetProps` onto `<Sheet>`, call `close()` (goes back when there is in-app history, replaces to the parent otherwise) or `close({ to, replace })` to land somewhere else after a mutation. `canClose`/`onBlockedClose` options let a sheet refuse to close while async work is in flight. Content portalled outside the app tree must be wrapped in a nested `<Theme>` or the Radix tokens do not apply.
+- **API calls** go through `api/http.ts`. Callers only ever see `ApiError { status, code, message }` (network failure is `status 0`, code `NETWORK`). Branch on status or code, never on message text.
+- **Errors** surface through the global mutation error toast. Optimistic mutations that show their own message set `meta: { suppressErrorToast: true }`.
+- **Optimistic updates** for predictable actions (check-off, quick add, add or remove recipe from a plan, rename, servings): edit the cache, roll back on error, invalidate on settle. Creating or importing recipes, creating ingredients and publishing wait for the server.
+- **Identity** is the `X-User-Id` header, read from auth storage on each request. All localStorage access is wrapped in try/catch.
+- **Mobile first:** design for 360 to 430px, no horizontal scroll, 44px touch targets, safe-area insets. Desktop centres a max-width column.
+- **Types:** `verbatimModuleSyntax` is on, so type-only imports use `import type`.
+- **Tests:** pure-function Vitest suites only, in `lib/` beside the module they cover (`mealPlanSummary.test.ts`, `splitDictation.test.ts`, `dictationSelection.test.ts`, `shoppingRows.test.ts`, `parseQuantity.test.ts`); all must keep passing. There is deliberately **no DOM test runner** — no jsdom, no `@testing-library/react`, and the default node environment is what runs `.test.ts`. Logic that needs covering therefore belongs in a pure `lib/` module, leaving the component a thin shell a reviewer can check by reading. Components themselves are not unit-tested.
 
-### Shared Constants (`lib/`)
-- `avatarConstants.ts` — `SKIN_COLORS`, `HAIR_COLORS`, `SHIRT_COLORS`, `PANTS_COLORS`, `FALLBACK_COLORS`
-- `profileConstants.ts` — `DIETARY_OPTIONS`, `EXPERIENCE_OPTIONS`
+## Navigation and screen identity
 
-### Shared Feature Components
-- **`AvatarPreview`** — full-body seated avatar SVG. Props: `avatar: AvatarResponse | null`, `size?: number`.
-- **`ProfileForm`** — shared profile editing form (trail name, experience, dietary, avatar preview + randomize, submit). Used by both `ProfileSetupModal` and `AccountPage`. Avatar randomize is preview-only (no persistence until save). Props: `user`, `onSave`, `submitLabel?`, `showEmail?`, `markProfileCompleted?`.
-- **`AppHeader`** — shared page header with logo, page title, user avatar, logout. Used by `PlanPage`, `AccountPage`, `HomePage`, `RecipesPage`.
+Rules every screen follows. They exist because the app was hard to keep track of: screens looked alike, and where an action landed depended on where you came from (`../docs/meal-app-frontend/ux-review-plan.md`, part 3).
 
-### API Layer (`api/client.ts`)
-- Typed interfaces: `User`, `Plan`, `PlanMember`, `Item` (includes `gearPackId`, `gearPackName`), `Assignment`, `AssignmentDetail`, `AssignmentMember`, `GearPackSummary`, `GearPackDetail`, `GearPackItem`, `ApplyGearPackResponse`, `IngredientResponse`, `RecipeResponse`, `RecipeDetailResponse`, `RecipeIngredientResponse`, `MealPlanResponse`, `MealPlanDetailResponse`, `MealPlanDayResponse`, `MealsByTypeResponse`, `MealPlanRecipeDetailResponse` (id, recipeId, recipeName, recipeWebLink, baseServings, scaleFactor, isFullyPurchased, ingredients), `ShoppingListResponse`, `ShoppingListCategoryResponse`, `ShoppingListItemResponse`
-- `request<T>()` helper auto-injects `X-User-Id` from localStorage
-- All methods return typed promises; throws on non-OK responses
+- **An area is where you are, and it comes from the URL alone** (`lib/areas.ts` `areaForPath`): `recipes` (also `/ingredients`), `plans`, `shopping` (everything under `/plans/:id/shopping`), `account`. The highlighted tab, the header's icon and title, and the loading icon all read it from there.
+- **Sheets never change your tab; a recipe link does, on purpose.** "Add recipes" on an empty shopping list is `/plans/:planId/shopping/add` (the same `AddRecipeToPlanSheet`, mounted under the list too), so it closes back to the list. A recipe tapped in a plan or on the shopping list, though, opens the real recipe page in the Recipes tab (`/recipes/:id`) — with everything a recipe page has (edit, delete, add to plan) — and its back button returns to the plan or list it came from ("‹ Plan"). A read-only copy of the recipe page mounted under the plan was tried first, to keep the user in their tab; the owner preferred one real recipe page.
+- **One meaning for Back** (`components/useBack.ts`, used by `PageHeader`). `backTo` is the screen's parent in the hierarchy, not necessarily where the button goes: it goes back in history when the previous page is in the same area (so the arrow, a swipe and browser Back agree and scroll comes back), and otherwise replaces to `backTo`. It stays in the tab, with three exceptions that return to wherever they were opened from (`backAcrossAreas`): Account, the recipe page (reached from a plan or the shopping list as well as the Recipes list), and any `task` form. The button names its destination ("‹ Recipes", "‹ Plan"). This needs to know what is behind the current history entry, which the History API won't say, so `AppShell` records the page of every entry by history index in `lib/navHistory.ts` (sessionStorage).
+- **A tab always opens its base screen** (`TabBar.tsx` `tabTarget`): the recipe list, the selected plan, the selected plan's shopping list — never wherever you last were inside the tab (per-tab memory was built first and removed at the owner's request: a tab that reopens mid-task made it harder, not easier, to know where you are). Returning to a base screen puts its scroll position back; tapping the tab you are already in starts it at the top.
+- **After a save:** create lands on the new thing (replace); edit goes back to where it was opened from, with a toast (`EditRecipePage`, `EditIngredientSheet`); delete goes to the parent list (replace). The rapid-add ingredient sheet staying open is deliberate — it is a create, and the next one follows.
+- **Recipes and Ingredients are siblings**, both root screens of the Recipes tab; the toggle between them replaces history.
+- **One colour for the whole app: the accent** (`theme.ts`, violet). The static header bar is a tint of it that sits between the other purples on a screen — deeper than list rows (`accent-2`) and soft buttons (`accent-3`), well short of solid buttons (`accent-9`): `--area-4` for the bar, `--area-6` for its icon chip and account button (`styles/areas.css`, where `--area-*` currently just maps to `--accent-*`; it is the one place the header's tint is decided, and `.app-shell` still carries `data-area`). What says which tab you are in is the tab's icon and title in the bar plus the active tab, not colour. Tried and rejected, in order: tab colours on identity parts throughout the page; the whole accent changing per tab (orange, then amber buttons); per-tab header colours only (orange / blue / teal — they clashed with the purple).
+- **Every screen has the same static header** (`PageHeader.tsx` `HeaderBar`): the tab's icon (the same one as in the tab bar), the tab's title, and the account button. It is identical at any depth inside a tab, so the top of the screen always says which tab this is. It holds no actions. Everything a screen can do sits below it: a plain toolbar row from `PageHeader` for non-root screens (back button naming its destination, or ✕ for a `task` form; the title unless a `PageHero` shows it; the screen's actions such as Save or Edit), and list actions on the list itself (Recipes' Import / New beside the Mine switch, Ingredients' Add).
+- **Plans and Shopping are each one view of the selected plan, with the same top** (`components/PlanHeader.tsx`): the static bar, then the plan's name as a dropdown (`switch` sheet: `SwitchPlanSheet`, mounted under both pages, stays on the same kind of screen, and offers New plan → `new`) plus the screen's actions. Neither has a back button. `/plans` redirects to the selected plan exactly as `/shopping` does (`PlansPage`, `ShoppingRedirect`); the plans list only renders with no plan selected (first run, or after deleting/leaving the selected one). `PlanHeader` renders in the loading and error states too, with the name from the cached plans list, so the top never changes shape while the plan loads; `PageHero` does the same for the recipe page with a placeholder title.
+- **`<main>` is keyed by page path** (`AppShell.tsx`, `usePagePath`): every page gets a fresh scroller at the top (one shared scroller used to leak its position into the next page), and the enter animation says direction — deeper from the right, back from the left, sideways fades. A sheet opening keeps the page path, so it neither remounts nor animates the page. Scroll is restored on Back/Forward (by history entry) and when returning to a tab (by page).
 
-### Live Updates (`hooks/usePlanUpdates.ts`)
-- `usePlanUpdates(planId, onUpdate)` — connects to `/ws` via STOMP, subscribes to `/topic/plans/{planId}`
-- Calls `onUpdate({ resource, action })` when the server publishes a change notification
-- Reconnects automatically on disconnect (5s delay)
-- PlanPage routes updates by resource type: `plan`/`members` → refetch plan & members immediately; `assignments` → increment `assignmentsRefreshKey`; `itinerary` → increment `itineraryRefreshKey`
-- AssignmentsModal and ItineraryModal accept a `refreshKey` prop — when it increments while the modal is open, they refetch their data
-- Items are not live-updated (modals refetch on open)
+## Non-obvious decisions
 
-### Auth (`context/AuthContext.tsx`)
-- `AuthProvider` wraps app — stores user in state + localStorage
-- `useAuth()` hook: `{ user, login, logout, isAuthenticated }`
-- `ProtectedRoute` redirects unauthenticated users to `/login`
+Things a reasonable refactor would undo by accident. Each is deliberate; read the why before changing it.
 
-### Pages
-- **LoginPage** — Night sky parallax. Toggle login/register. Calls `api.login()` or `api.register()`. If sign-in fails because user has no username, auto-switches to Register tab with error message.
-- **HomePage** — Dusk parallax. Lists trips as flag trail-marker cards. Create new trip inline. Owners see delete on hover; guest members see leave on hover; non-members of public plans see a "Join" action instead of the arrow (joins then navigates to plan).
-- **PlanPage** — Night campsite parallax. Central campfire with members around it. Four interactable background items (tent, equipment, kitchen, map table). Equipment opens GearModal; kitchen opens MealPlanModal; tent opens AssignmentsModal; map table shows ComingSoonModal. Owner sees "Manage Plan" button in header (edit plan name + toggle public/private visibility). Non-members of public plans see a "Join Camp" avatar below the fire; members see the invite "+" ghost. Members can remove themselves; owner can remove others. Pending (invited but not registered) members show their email address. Campfire circle radius scales dynamically with member count to prevent avatar overlap.
-  - **GearModal** — Large modal with two sections: "Shared Camp Gear" (plan-level items, editable by plan owner only) and "Personal Packs" (per-member item lists scoped to the current plan, each editable only by the owning user). Supports inline add/edit/delete, category grouping (camp, canoe, kitchen, personal, food, misc), quantity, and packed status with progress bars. Pending adventurers (no username) are filtered from personal pack lists. **Gear Packs:** A collapsible `GearPacksPanel` at the top of shared gear lets owners/managers browse predefined gear templates, preview items with quantity scaling by group size, and apply packs to bulk-add items.
-  - **MealPlanModal** — Fixed-height (88vh) three-view modal opened from the kitchen campsite item. Three tab views:
-    - **Overview:** Editable meal plan name (blur-to-save), servings-per-recipe stepper, save-as-template / load-from-template links. Day tabs (add/remove days). Four meal type sections (Breakfast, Lunch, Dinner, Snacks) each with inline recipe search-and-add and remove buttons. Empty state shows a create form with name input, servings stepper, and optional template loader with preview.
-    - **Recipe Book:** Open-book layout (left page: search + filter pills + scrollable recipe list; spine; right page: selected recipe detail with ingredients). "Add to Meal Plan" button pinned at bottom with day + meal type popover (pre-selects active day). Left and right pages scroll independently.
-    - **Shopping List:** Progress bar (X of Y purchased). Items grouped by ingredient category. Each row: checkbox toggle, ingredient name, quantity display, status badge (done/more needed/needed/removed). Merges multi-unit entries per ingredient. Reset purchases with confirmation.
-    - **Templates:** Save current meal plan as template. Load from template with day-by-day preview (grouped by meal type with icons). Loading a template replaces all days/recipes but preserves the existing meal plan name.
-  - **AssignmentsModal** — Fixed-height modal with two tabs (Tents / Canoes). Cards show assignment name, owner, occupancy bar, and member list with mini SVG avatar heads. Features: "Add Tent" / "Add Canoe" buttons (creator auto-added if not already in a group of that type); join (auto-leaves current group of same type); leave (including owner self-leave); owner/plan-owner "Add Member" panel showing available plan members with greyed-out entries for those already in another group of the same type; inline edit name/max occupancy; delete. Pending adventurers are filtered from the add-member list.
-- **RecipesPage** — Standalone page at `/recipes` with dusk parallax background. Multi-view single-page flow: `list`, `detail`, `create`, `edit`, `import`.
-  - **List view:** Searchable recipe cards (filter by name). Shows published and own draft recipes. "New Recipe" and "Import Recipe" buttons. Each card shows name, status badge (draft/published), base servings, and description snippet. Click to view detail.
-  - **Create view:** Form with name, description, optional web link, base servings, and ingredient picker. Ingredient picker is a search-as-you-type dropdown over the global ingredients list; each selected ingredient gets a quantity + unit row. Submits to `POST /api/recipes`.
-  - **Import view:** Single URL input. Submits to `POST /api/recipes/import` which scrapes the page and creates a draft recipe via Claude API. Redirects to detail view of the created draft.
-  - **Detail view:** Shows full recipe info. For draft recipes, the creator sees a review panel for any `pending_review` ingredients. Each pending ingredient shows `originalText`, suggested match info, and three resolve actions: confirm match, select existing ingredient (search dropdown), or create new ingredient (name + category + unit form). After all ingredients are resolved and no duplicate flag, a "Publish" button appears. Duplicate recipes show a banner with "Not a duplicate" / "Use existing" resolve options.
-  - **Edit view:** Form to update name, description, base servings. Submits to `PUT /api/recipes/{id}`.
-  - Loads all ingredients on mount alongside recipe list (`GET /api/ingredients`) so the ingredient picker is immediately available.
+- **Shopping check-off is serialized and coalesced per row, keyed by `${planId}:${row.key}`** (`queries/shopping.ts`, `rowChains` / `rowLatestPurchases`, `chainKey`). A check-off and an amount set from the "have" sheet are the same mutation (`useSetRowPurchases`, a quantity per unit entry; a check-off is `rowPurchasesForToggle`), so they share the chain. Two PATCHes for one row can reach the server out of order (check then uncheck quickly). Each row's sends are chained, and a superseded tap sends nothing, so only the latest desired state goes out. The optimistic write in `onMutate` keeps the UI instant; the chain is only about network ordering. The plan id is part of the key because `row.key` alone is `ingredient-{id}` / `manual-{id}`, and ingredients are a global table — the same ingredient can appear in two different plans' shopping lists, so a row-only key let a toggle in one plan coalesce with a toggle of the same ingredient in another.
+- **`isMutating(...) === 1`, not `=== 0`, gates the settle-time invalidation** (`invalidateIfLast` in `queries/shopping.ts`, and the check in `sync/useMealPlanSync.ts`). When a mutation's `onSettled` runs, TanStack Query still counts that mutation as in flight, so "I am the last one" is `1`.
+- **Rollbacks are targeted and applied to the current cache, never a whole-list snapshot** (`queries/shopping.ts`, `queries/plans.ts`). Restoring a pre-mutation snapshot would also wipe a different concurrent mutation that already succeeded.
+- **Adding, removing and duplicating a plan's recipes are server-side, plan-level operations** (`POST /api/meal-plans/{id}/recipes`, `DELETE /api/meal-plans/{id}/recipes/{recipeId}`, `POST /api/meal-plans/{id}/duplicate`). The server picks the day (creating day 1 lazily on first add), is concurrency-safe, and removal is idempotent — the frontend no longer resolves days, retries on 409, or drives per-recipe duplicate progress itself. `addRecipeToPlan`'s `201` vs `200` status (not the body shape) is how the frontend tells "created" apart from "already in the plan" — see `api/http.ts`'s `requestWithStatus`.
+- **Optimistic rows with `temp-` ids are not actionable, for two different reasons.** Shopping (`ShoppingRowItem` `isTempRow`): the row has no real id yet to PATCH by. Plan recipes (`PlanDetailPage.tsx` `isPendingOnly`): the remove endpoint targets `recipeId`, which IS known immediately, so this isn't about having a real id — it guards against a DELETE racing ahead of the still-in-flight add POST, landing first as a no-op, only for the POST to then add the recipe back.
+- **Plan servings: 400ms debounce, flushed on unmount, override cleared only when nothing newer is queued** (`PlanDetailPage.tsx`). Displayed value is `override ?? server value`, with no effect-based sync.
+- **Shopping rows never reorder by checked state** (`lib/shoppingRows.ts` `buildShoppingRows`) — sorted by name only, by design, so nothing shifts position mid-shop just from tapping it. (An earlier version sank checked/no-longer-needed rows to the bottom of their category, with a "settle pin" to stop the row sliding into a just-toggled row's place from absorbing the next tap — removed along with the reordering it existed to smooth over.)
+- **`ShoppingPage` splits into an outer component and a `<ShoppingListBody key={planId} .../>`** (`ShoppingPage.tsx`). The route (`/plans/:planId/shopping`) doesn't remount when `SwitchPlanSheet` navigates from one plan's list to another's — same route, just a new `:planId` param — so anything held as component state (the quick-add draft, the reset-confirm dialog, each mutation's own `isPending`) would otherwise carry over from the previous plan. Keying the inner component on `planId` remounts all of that state fresh on every plan switch; the outer component (data fetching, `notFound`/error/loading branches, `<Outlet/>`) stays unkeyed since queries already key themselves off `planId`. (Since `AppShell` keys `<main>` by page path, which includes the plan id, a plan switch now remounts the whole page anyway and fades it in as a sideways move; the inner key is kept so the reset doesn't depend on that.)
+- **Live sync** (`sync/SyncProvider.tsx`, `sync/useMealPlanSync.ts`): one STOMP client, mounted in `AppShell` while signed in. Topic subscriptions are reference counted. On reconnect every subscribed topic gets a synthetic `null` message so handlers refetch. A message arriving while a mutation for that plan is in flight is deferred (300ms recheck), so the user's own echo never flickers their optimistic rows.
+- **Sheets close by history index, not `location.key`** (`lib/historyIndex.ts`, `components/useSheet.ts`). Any navigation, including `replace`, mints a fresh key, so a sign-in redirect chain looks like in-app navigation. `window.history.state.idx` survives `replace` and reloads.
+- **`useSheet(parentPath, options?)` is the only way to close a sheet.** `close()` goes back or replaces to the parent; `close({ to, replace })` closes then lands elsewhere; `canClose` / `onBlockedClose` refuse closing during async work (`ImportRecipeSheet`). The options are read through a ref synced in a no-deps effect because refs cannot be written during render.
+- **`Dialog.Portal` content is wrapped in a nested `<Theme hasBackground={false}>`** (`components/Sheet.tsx`). The portal renders into `document.body`, outside the root theme's DOM subtree, so tokens would not apply otherwise. Radix Themes' own `AlertDialog` and `DropdownMenu` handle this themselves.
+- **The root `<Theme>` in `main.tsx` traps ordinary z-index comparisons.** Radix Themes gives `[data-is-root-theme='true']` `position: relative; z-index: 0`, which makes it a stacking context — any normal descendant's z-index, however high, is only ever compared to its siblings *inside* that context, never against something outside it. Anything portalled to `document.body` (a Sheet, an `AlertDialog`, a `Select`/`DropdownMenu`) escapes the root theme entirely and always wins a stacking comparison against ordinary page content, regardless of the page content's own z-index. `components/Toast.tsx`'s `ToastRegion` used to be ordinary page content for exactly this reason: it rendered behind an open Sheet despite `z-index: 1000`, because that 1000 never left the root theme's z-index: 0 context. It's now portalled to `document.body` (nested `<Theme hasBackground={false}>`, same as Sheet) so its z-index is compared in the same un-trapped tier as everything else that's portalled.
+- **A `Select`/`DropdownMenu` opened from inside a sheet must portal INTO the sheet, not to `document.body`** (`components/useSheetContainer.ts`, `components/SheetSelectContent.tsx`; `Sheet.tsx` provides the context but keeps its own file free of anything but the `Sheet` component itself, for Fast Refresh). The Dialog's scroll lock (`react-remove-scroll`) only treats wheel/touch-move as "inside the dialog" within the sheet's own content node (its `shards` target) — a `Select` portalled past it to `document.body` reads as scrolling the page behind the sheet, which works for a moment and then gets locked. `SheetSelectContent` is a drop-in replacement for `<Select.Content>` that reads the container from context — but it (or whatever calls `useSheetContainer()`) must be rendered as a genuine JSX descendant of `<Sheet>`, e.g. inside a component a page renders as `<Sheet>`'s child (`IngredientPicker`) or directly inside the page's own `return <Sheet>...</Sheet>`. Calling `useSheetContainer()` from the same component instance that *creates* the `<Sheet>` element returns the context's default (`null`, portals to `document.body` as before) — that component's own position in the tree is above the sheet, not inside it.
+- **Full z-index layering order, lowest to highest** (`styles/global.css`): page content < docked bars (`components/BottomBar.tsx`, `z-index: 5`) < sheet overlay (`100`) / sheet content (`101`) < popups and alert dialogs (`200`) < toasts (`1000`, always topmost — an error or an Undo action must survive anything else being open). The `200` tier is one global rule covering the whole family by shared attribute/class rather than enumerating components: `[data-radix-popper-content-wrapper]` (every `@radix-ui/react-popper`-based popup — `Select`, `DropdownMenu`, anything else built on it) plus `.rt-BaseDialogOverlay`/`.rt-BaseDialogContent` (`AlertDialog`, and Radix Themes' own `Dialog` if ever used — both built on the same internal base). It's a fallback for whatever isn't (or can't be) portalled into a sheet via `useSheetContainer` — chiefly `AlertDialog`, which has no container-portalling mechanism of its own. The popper wrapper rule needs `!important`: `@radix-ui/react-popper`'s `Content` mirrors its own computed z-index onto that wrapper as an inline style on every render (reads `.rt-SelectContent` etc., `auto` by default here), and a plain rule can't out-rank an inline style regardless of value — the one place in the app fighting a library-managed inline style rather than another stylesheet rule, which is the legitimate case for `!important`. `AlertDialog`/`Dialog` have no such mechanism, so their rule doesn't need it.
+- **Radix CSS is imported modularly** (`main.tsx`): base tokens plus only the colour scales in use (violet, purple, iris, mauve, red, green, amber). A new `color="…"` anywhere needs a matching `tokens/colors/<name>.css` import or it silently renders wrong.
+- **Private plans and sharing** (see `../docs/meal-app-frontend/sharing.md` — source of truth for the API contract): a plan detail or shopping-list fetch that comes back `403` is handled exactly like `404` — `usePlan`/`useShoppingList` stop retrying on it, and `PlanDetailPage`/`ShoppingPage` derive a `forbidden` flag the same way they derive `notFound` (checked first, before the "keep showing stale cached data" branch, so a background refetch's `403` — e.g. after the `members` sync event fires because the owner just removed this user — wins over whatever was cached). Both clear the remembered selected-plan id when it matches. The share link (`useShareLink`, `queries/plans.ts`) is deliberately NOT fetched just by opening the edit sheet — `enabled: false`, fetched only via `refetch()` when the Share button is actually tapped, since the first fetch is what creates the link server-side. The `/join/:token` route lives inside the guarded route tree (under `RequireAuth`/`AppShell`), not beside `/sign-in`, so a signed-out visitor is redirected to sign in and comes back to accept automatically — see `JoinPlanPage`'s `attemptedRef` for how it accepts exactly once despite StrictMode's double-invoke. A plan's `role` always comes from the API (`MealPlanResponse.role`/`MealPlanDetailResponse.role`) — never derived by comparing `createdBy`/`userId` on the client, which would be wrong for a member.
+- **Code splitting is per area, not per route.** Each `pages/{area}/index.ts` barrel is one lazy chunk, so opening a sheet never waits on the network. `routePrefetch.ts` idle-prefetches the other tab areas once from `AppShell`.
+- **Route-change focus relies on effect ordering** (`AppShell.tsx`): it focuses `<main>` only when nothing has claimed focus, and a sheet's autofocused input always claims it first because a descendant's mount focus precedes an ancestor's effect.
+- **Two toast live regions are always mounted** (`components/Toast.tsx`), polite for info and assertive for errors, because some screen readers only announce changes to a region that already existed.
+- **A new toast replaces any other of the same tone, rather than stacking** (`lib/toastStore.ts` `pushToast`). A rapid flow (e.g. adding several ingredients back to back in `NewIngredientSheet`, now that success is toast-only with no "added this session" list) can fire one info toast every second or two — without this, they'd pile up several deep before any expired. Info and error replace independently, matching the two separate live regions.
+- **Quantities go through `lib/parseQuantity.ts`** ("1.5", "1,5", "1/2", "1 1/2", "1½"). Never `parseFloat`: it reads "1/2" as 1. Quantity fields use `inputMode="decimal"` — the number pad, at the owner's request (they were `text` first, because the pad has no slash or space). Fractions are still parsed (paste, desktop, an existing "1½"), but on a phone they are typed as decimals, so the parser takes ".5" and reads "0.33" / "0.66" / "0.67" as the third they stand for (`snapThirds`). The pad also has no return key: every quantity field needs a visible button that does what Enter would (Save, the add-line ＋).
+- **Every input declares its keyboard**: `type`/`inputMode` (`decimal` for quantities, `url`, `email`, `search`), `enterKeyHint`, and `autoCapitalize` / `autoCorrect` / `spellCheck` to suit (words for names of people, recipes and ingredients; off for searches, emails and links). A new field should not be left as a bare text input.
+- **Scraper suggestions are normalised** (`normalizeCategory` / `normalizeUnit` in `lib/ingredientConstants.ts`) before any ingredient create; the database rejects values outside its fixed lists.
+- **`createOrFindIngredient` force-fetches the ingredient list and matches names case-insensitively before creating** (`queries/ingredients.ts`). The database's unique constraint is case-sensitive, so "butter" beside "Butter" raises no 409.
+- **`IngredientPicker` reads `value` / `initialQuery` only on mount.** Remount it with a changing `key` to reset it. Options select on `pointerdown` with `preventDefault` so the input's blur cannot swallow the tap. Enter inside the picker never submits the surrounding form.
+- **Never `element.scrollIntoView()`; use `lib/scrollIntoContainer.ts`** (`scrollIntoContainer`, `revealInContainer`). `scrollIntoView` scrolls every ancestor it can, including `<body>`, which `overflow: hidden` protects from the user but not from a script. Each call shifted the whole frame up a little (header and Save off the top, tab bar mid-screen) with no way to scroll back. The helpers scroll only the nearest real scroller and clear its sticky header and docked bar. `viewportGuard` also zeroes `document.body.scrollTop` as a backstop.
+- **`sheet.close({ force: true })` skips `canClose`** (`useSheet.ts`). `canClose` reads render state (`isPending`), which is still the old value in the tick a mutation resolves — so closing from inside the very work the guard protects was blocked, and a successful import left the user stuck on the import sheet.
+- **Long forms don't submit on Enter** (`lib/enterMovesOn.ts` on the recipe forms' `onKeyDown`): browsers submit a form on Enter in any text input and `enterKeyHint` only relabels the key, so Enter in Name saved an empty recipe. Enter moves to the next field; Save is the only submit.
+- **The recipe import waits with a dog, not a spinner** (`pages/recipes/DogChef.tsx` + `.css`, shown by `ImportRecipeSheet` while the import is pending): a slightly dim dog in a chef's hat peeking over a cookbook he holds upside down. Hand-written SVG animated with CSS keyframes — no image, no library, Radix tokens for every colour, still under reduced motion, `aria-hidden` (the status text is what is announced). How goofy he is was the owner's pick between a tidy version and a much sillier one; the amounts are the custom properties at the top of the CSS. `transform-box: fill-box` is set on the animated wrapper classes only, never on `.dog-chef *`: it also moves the origin of an element's own `transform` *attribute*, which threw the hat and the book's label across the drawing. On the dev server only (`import.meta.env.DEV`, `api/recipes.ts` `importRecipe`), an import's answer is held until five seconds have passed, because the local stub scraper answers at once and the waiting state could not be seen.
+- **The new-recipe form is auto-saved to sessionStorage** (`pages/recipes/newRecipeDraft.ts`) and restored with a "Draft restored · Discard" toast, instead of a discard dialog: it also survives reloads and tab taps. A complete line still sitting in the add row is saved (and submitted) as a line — `LinesEditor` reports it through `onPendingChange`; an incomplete one blocks Save with a message rather than being dropped.
+- **Rapid ingredient add never awaits or disables** (`NewIngredientSheet.tsx`): name cleared and refocused at once, `mutate` not `mutateAsync`, the Add button never in a loading state — awaiting wiped the next name typed and the disabled button swallowed its Enter. Category has no default and is required (`components/CategoryChips.tsx`, also in the picker's inline create): with "Other" preselected and Enter submitting, fast entry filled the shared list with uncategorised items, which the shopping list groups by. Picking a category suggests its usual unit (`UNIT_FOR_CATEGORY`).
+- **Search boxes are local state that the URL follows** (`lib/useSearchText.ts`), never an input controlled by the search param: React Router applies URL updates asynchronously, so a param-controlled input drops characters when typed into quickly. Filter on the hook's text, not on `searchParams`.
+- **Toasts sit above the docked `BottomBar`**, which publishes its measured height as `--bottom-bar-height` (`BottomBar.tsx`, `Toast.css`). A toast used to cover the bar's button, and an Undo tap just after expiry hit the button underneath. Toasts with an action last 7s and their buttons are 44px.
+- **A shopping row bought and then needed more of is half-ticked** ("1 clove more · have 2", `formatStillNeededText`), from the server's `more_needed` status, instead of silently looking never bought. Shopping quantities themselves are shown exactly as computed — not rounded up to buyable amounts — by the owner's decision.
+- **"Hide bought" on the shopping list** (the toggle in the progress row, `ShoppingPage.tsx`; `lib/shoppingRows.ts` `onlyStillToBuy`, preference in `lib/hideBought.ts`) shows only rows with something left to buy — half-ticked ones included — and drops categories with nothing left. A row ticked off while it is on disappears at once, by the owner's choice — keeping it in place, struck through, until the view was toggled again was built first and rejected. That is the one exception to the never-reorder rule above. There is deliberately no Undo toast either (also offered, also declined): a mis-tap is undone by switching the toggle off and un-ticking the row. It is a per-device preference in localStorage rather than a URL param, because a tab always reopens its base URL and the view should survive that mid-shop. The progress count still counts the whole list.
+- **Tapping a shopping row's quantity sets how much of it you already have** (`pages/shopping/HaveAmountSheet.tsx`, route `have/:ingredientId`; one plain amount field per unit entry, blank or 0 meaning none — `parseQuantityOrZero`). The row then reads as any half-ticked row does. Quantities are right-justified in a column of their own, outside the check-off `<label>` and as tall as the row, at the owner's suggestion: under the name the link was a thin target that was easy to miss into a tick. It is a rare action, so its only hint is a dotted underline on the quantity; the owner chose this over a link in the ⓘ panel, a long-press and a swipe, and asked for no None/Half/All shortcuts. The sheet only sends the fields that were typed into — an untouched field displays a rounded amount ("⅓"), and sending that back would quietly change the stored one. Manual items have no quantity and no link. Optimistic statuses come from `derivePurchaseStatus`, a mirror of the server's `PurchaseStatus.derive`.
+- **Recipes' ＋ adds straight to the plan when the user has exactly one** (with an Undo toast); with several it opens the sheet, and with none the sheet offers "Create a plan and add this recipe" (`lib/planDefaults.ts` holds the defaults shared with the New plan sheet).
+- **Every icon button at the end of a list row is a `RowActionButton`** (one 44px target and icon size; the row's main action is a soft square, secondary ones — info, delete — are `quiet`: icon only, accent for info and `color="red"` to take it away): Recipes' add-to-plan, a plan's remove-recipe, the shopping list's info and remove, a new recipe's remove-line, a plan's remove-member. The three tabs had three different styles.
+- **Anyone may edit a published recipe; only its creator may delete it or work on its draft** (`RecipeDetailPage.tsx` `mayEdit` / `canDelete`). Recipes are one shared library and the backend never restricted edits; the screen used to hide Edit from everyone but the creator (`plan.md`'s "owner only, cosmetic"), which left most recipes with no way to fix a typo. Changed at the owner's request.
+- **New recipe and Edit recipe are one form** (`pages/recipes/RecipeFormFields.tsx`, state and validation in `recipeForm.ts`): every field and every ingredient line is edited in place (quantity, unit, a delete button per line, an add row at the bottom) and nothing is sent until Save. New sends it all in the create request. Edit works out what changed and saves it through `useSaveRecipeEdits` (fields, then line removals, changes and additions via the per-line endpoints, one after another — there is no replace-all-lines endpoint), then refetches; on a failure part-way it still leaves the form, since the form's idea of the recipe may no longer be true. The edit page used to list lines as links into per-line sheets that saved immediately, with no visible delete. The recipe PAGE is now read-only for a published recipe: the pencil is the one way to edit. `AddLineSheet` / `EditLineSheet` remain only for reviewing an imported draft's lines (`RecipeReview`); lines still in review are not shown in the edit form and are never touched by its save. The source link can only be set at creation (`UpdateRecipeRequest` has no `webLink`), so Edit shows it read-only.
 
-### Visual Design System
-- **Palette:** Defined in `theme.css` as CSS variables (`--lavender`, `--sage`, `--tan`, `--rose`, `--mint`, `--ember`, `--flame`, `--night-sky`, `--parchment`, etc.)
-- **Parallax:** Three variants (`night`, `dusk`, `campsite`) with mouse-tracked layer offsets via CSS custom properties
-- **Campfire:** Multi-layered CSS (outer/mid/inner/core flames) + ember particles + smoke + log/stone ring
-- **Campsite Items:** Pure SVG components for tent, equipment pile, kitchen, map table
-- **Avatars:** SVG-illustrated people with randomized pastel colors, positioned in a semicircle around campfire using trigonometry. Circle radius scales dynamically (15% per member beyond 4) to prevent overlap
-- **Modals:** Parchment-textured with category-specific flavor text
+## Viewport sizing on iOS
 
-## API Endpoints Used
+- **The document never scrolls; no viewport units size the frame.** `html`, `body`, `#root`, Radix's root Theme wrapper and `.app-shell` are all `height: 100%`, with `overflow: hidden` on `html, body`. Only `.app-shell__scroll` and sheet bodies scroll. A scrollable document is what collapses and restores Safari's toolbars, and each toolbar change resizes the viewport, which pushed the tab bar below the visible screen. The full explanation is the comment at the top of `styles/global.css`.
+- **Never use `100vh`.** On iOS it is the tall viewport (toolbars hidden). Radix Themes sets `min-height: 100vh` on its root wrapper; `styles/global.css` overrides it. `dvh` is fine for sheet max-heights, not for the frame.
+- **`lib/viewportGuard.ts`** resets the document pan iOS can leave behind after the keyboard closes.
+- **`?debug=viewport`** on any URL shows a live on-device readout (inner and visual viewport, what `100vh` and `100dvh` resolve to, safe-area insets, shell height, and whether the tab bar is cut off and by how much). It stays on for the browser session; `?debug=off` turns it off. Not yet confirmed on a real iPhone.
+- **The top of every screen is white, above the tinted bar** (`PageHeader.css` `.page-header::before`, a 6px strip that also takes the top safe-area inset). The phone's status bar area is coloured by the browser; newer Safari ignores `theme-color` (white here) and looks at the top of the page, and it made the status bar purple on the Plans tab but white on Recipes and Shopping. Matching everything to purple was tried (`theme-color` + body background) and the owner preferred white everywhere, so the page now has white at its top edge for the browser to find. Not yet confirmed on a real phone.
+- **The shopping list's plan selector tucks away on scroll down and returns on scroll up** (`PlanHeader` `collapseOnScroll`, `components/useScrollDirection.ts`), leaving the bar and the progress row, to give the list more room. It slides up behind the bar with a `transform`; the header's height never changes. The header is sticky and in the page's flow, so changing its height would shift the whole list under the user's finger mid-scroll and flip the very scroll direction that triggered it. The strip it vacates is see-through and lets taps through (`pointer-events`), the tucked-away row is `inert`, overscroll is ignored (the iOS bounce at the bottom reads as a scroll up), and it takes 16px of travel in one direction to switch.
+- **Manual shopping items keep the order they were added** (`lib/shoppingRows.ts` `sortRows`): ingredient rows sort by name, the user's own items follow in creation order, so a quick-add always lands last.
+- **Never write to a field from code while it is being dictated into.** On iOS, changing a focused field's value from script ends the keyboard's dictation session — so the shopping list's quick-add field (`ShoppingPage.tsx`), which is where items are dictated, echoes `event.target.value` verbatim from its `onChange` and is otherwise only cleared on submit: no trim, no normalise, and no auto-resize script (it grows through CSS). The consequence that looks like a bug but isn't: **removing a chip must not edit the text.** Chips maintain a set of excluded `itemKey`s and the parsed list is filtered through it, which is also why a chip tap toggles — dimmed and struck through, tappable again — instead of hiding the item, since code may not undo it by rewriting the text. The field is `font-size: 16px` so iOS does not zoom on focus.
+- **The quick-add bar turns into a several-items bar on its own, by what arrives, not by detecting the mic** (`ShoppingPage.tsx` `ShoppingListBody`, `lib/dictationSelection.ts` `isMultiItem` / `quickAddItems`, `pages/shopping/DictationChips.tsx`). A page cannot tell that the keyboard's dictation mic was pressed — dictated text arrives through the same input events as typing — so the bar parses its own text on every change and, once it holds two or more items (dictated, pasted or typed), shows them as chips above the field and the `+` becomes "Add N". It happens **in place, around the field that already has focus**: navigating to the dictate sheet, or swapping the field for another element, would move focus and end an iOS dictation mid-sentence. The same never-write rule as above applies: `quickAddText` is written only from the field's `onChange` (verbatim) and cleared on submit; chips and "Add as one item instead" (the way out when a split is wrong, e.g. "salt and pepper" not in the catalogue) only touch their own state, and both keep focus in the field with `preventDefault` on `pointerdown` (as `IngredientPicker`'s options do) so the keyboard stays up. The field is a `<textarea rows={1}>` styled like a size-3 TextField that grows to three lines through CSS `field-sizing: content` alone — no resize script — and Enter submits via `requestSubmit()`, since a textarea would otherwise insert a newline. A single item is added as parsed too ("um some milk" → "Milk"); text that parses to nothing is added as written. This is the only way to add several items: a separate dictate sheet behind a mic button (`/plans/:planId/shopping/dictate`) was built first and removed at the owner's request, so there is one flow.
+- **Manual-item adds go to the server one at a time per plan** (`queries/shopping.ts` `sendManualItemInOrder`, the same promise-chain idiom as `rowChains`). Manual items are listed in server creation order, and a dictated list fired as parallel POSTs landed shuffled. The optimistic rows still all appear at once. TanStack's mutation `scope` was tried first and dropped: a scoped mutation only resumes while `focusManager` says the page is focused, so queued adds stalled in a hidden tab.
+- **Dictated text is split into items by `lib/splitDictation.ts`** (pure, with `lib/dictationSelection.ts` deriving the chips, the excluded-set filtering and the button label). It splits on newline / comma / semicolon / full stop — but not a decimal point, found by a character scan rather than regex lookbehind, which older iOS Safari lacks — then on a standalone `and` / `&`, protecting known ingredient names that themselves contain "and" ("mac and cheese") longest-first before that split. Filler words and leading filler phrases are stripped (`FILLERS` / `FILLER_PHRASES` in that file are the source of truth; `some` is among them). A run with no separators at all ("milk eggs bread") is only split when the **entire** run is covered by known catalogue names plus optional quantity words — any unexplained word leaves the segment as one item, because guessing wrong is worse than leaving the user something to fix. Items stay free text ("two avocados" is added as "Two avocados", never relinked to an ingredient id), and an empty catalogue is a supported parse mode, not a failure state, so the bar works while `useIngredients()` is loading or failed.
 
-All calls go through Vite proxy (`/api` → `localhost:8080`).
+## Debug flags
 
-| Method | Endpoint | Auth | Used By |
-|--------|----------|------|---------|
-| POST | `/api/auth` | No | LoginPage (sign in) |
-| POST | `/api/users` | No | LoginPage (register) |
-| GET | `/api/plans` | X-User-Id | HomePage |
-| POST | `/api/plans` | X-User-Id | HomePage (create trip) |
-| GET | `/api/plans/:id/members` | X-User-Id | PlanPage |
-| PUT | `/api/plans/:id` | X-User-Id | PlanPage (update name/visibility) |
-| POST | `/api/plans/:id/members` | X-User-Id | PlanPage (invite), HomePage (join) |
-| DELETE | `/api/plans/:id/members/:memberId` | X-User-Id | PlanPage (leave/remove), HomePage (leave) |
-| GET | `/api/items?ownerType=&ownerId=&planId=` | X-User-Id | GearModal (list items; planId scopes personal items) |
-| POST | `/api/items` | X-User-Id | GearModal (create item) |
-| PUT | `/api/items/:id` | X-User-Id | GearModal (update item) |
-| DELETE | `/api/items/:id` | X-User-Id | GearModal (delete item) |
-| GET | `/api/gear-packs` | X-User-Id | GearPacksPanel (list packs) |
-| GET | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (preview pack items) |
-| POST | `/api/gear-packs` | X-User-Id | GearPacksPanel (create pack) |
-| PUT | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (edit pack) |
-| DELETE | `/api/gear-packs/:id` | X-User-Id | GearPacksPanel (delete pack) |
-| POST | `/api/gear-packs/:id/items` | X-User-Id | GearPacksPanel (add item to pack) |
-| PUT | `/api/gear-packs/:id/items/:itemId` | X-User-Id | GearPacksPanel (edit item) |
-| DELETE | `/api/gear-packs/:id/items/:itemId` | X-User-Id | GearPacksPanel (remove item) |
-| GET | `/api/gear-pack-items/search?q=` | X-User-Id | GearPacksPanel (search items) |
-| POST | `/api/gear-packs/:id/apply` | X-User-Id | GearPacksPanel (apply pack to plan) |
-| GET | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (list) |
-| GET | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (detail) |
-| POST | `/api/plans/:id/assignments` | X-User-Id | AssignmentsModal (create) |
-| PUT | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (update) |
-| DELETE | `/api/plans/:id/assignments/:assignmentId` | X-User-Id | AssignmentsModal (delete) |
-| POST | `/api/plans/:id/assignments/:assignmentId/members` | X-User-Id | AssignmentsModal (add member) |
-| DELETE | `/api/plans/:id/assignments/:assignmentId/members/:userId` | X-User-Id | AssignmentsModal (remove member) |
-| PUT | `/api/plans/:id/assignments/:assignmentId/owner` | X-User-Id | AssignmentsModal (transfer ownership) |
-| GET | `/api/ingredients` | X-User-Id | RecipesPage (ingredient picker) |
-| GET | `/api/recipes` | X-User-Id | RecipesPage (list) |
-| POST | `/api/recipes` | X-User-Id | RecipesPage (create) |
-| POST | `/api/recipes/import` | X-User-Id | RecipesPage (import from URL) |
-| GET | `/api/recipes/:id` | X-User-Id | RecipesPage (detail) |
-| PUT | `/api/recipes/:id` | X-User-Id | RecipesPage (edit) |
-| DELETE | `/api/recipes/:id` | X-User-Id | RecipesPage (delete) |
-| PUT | `/api/recipes/:id/ingredients/:ingredientId` | X-User-Id | RecipesPage (resolve pending ingredient) |
-| PUT | `/api/recipes/:id/resolve-duplicate` | X-User-Id | RecipesPage (resolve duplicate flag) |
-| POST | `/api/recipes/:id/publish` | X-User-Id | RecipesPage (publish draft) |
-| GET | `/api/meal-plans?planId=` | X-User-Id | MealPlanModal (get meal plan for trip) |
-| GET | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (detail / template preview) |
-| POST | `/api/meal-plans` | X-User-Id | MealPlanModal (create) |
-| PUT | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (update name/servings) |
-| DELETE | `/api/meal-plans/:id` | X-User-Id | MealPlanModal (delete) |
-| POST | `/api/meal-plans/:id/days` | X-User-Id | MealPlanModal (add day) |
-| DELETE | `/api/meal-plans/:id/days/:dayId` | X-User-Id | MealPlanModal (remove day) |
-| POST | `/api/meal-plans/:id/days/:dayId/recipes` | X-User-Id | MealPlanModal (add recipe to meal) |
-| DELETE | `/api/meal-plan-recipes/:id` | X-User-Id | MealPlanModal (remove recipe from meal) |
-| GET | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (shopping list) |
-| PATCH | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (update purchase) |
-| DELETE | `/api/meal-plans/:id/shopping-list` | X-User-Id | MealPlanModal (reset purchases) |
-| GET | `/api/meal-plans/templates` | X-User-Id | MealPlanModal (list templates) |
-| POST | `/api/meal-plans/:id/save-as-template` | X-User-Id | MealPlanModal (save as template) |
-| POST | `/api/meal-plans/:id/copy-to-trip` | X-User-Id | MealPlanModal (load template) |
-| POST | `/api/ladders` | X-User-Id | NewLadderPage (create ladder) |
-| GET | `/api/ladders` | X-User-Id | LadderListPage (list ladders) |
-| GET | `/api/ladders/:id` | X-User-Id | LadderPage (ladder detail) |
-| POST | `/api/ladders/:id/activities` | X-User-Id | NewLadderPage / LadderPage (add activity; DRAFT only, creator only) |
-| DELETE | `/api/ladders/:id/activities/:activityId` | X-User-Id | NewLadderPage / LadderPage (remove activity; DRAFT only, creator only) |
-| POST | `/api/ladders/:id/start` | X-User-Id | LadderPage (start ladder; DRAFT only, creator only) |
-| POST | `/api/ladders/:id/vote` | X-User-Id | LadderPage (cast vote; ACTIVE only, eligible voter only) |
-| POST | `/api/ladders/:id/restart` | X-User-Id | LadderPage (restart ladder; creator only) |
-| GET | `/api/users/:userId/avatar` | X-User-Id | LadderPeoplePanel (fetch avatar for participant if needed) |
+- **`?debug=slow`** delays every API request by 2 seconds (`?debug=slow&ms=5000` for another delay) to feel the app on a bad connection (`lib/slowNetwork.ts`, applied in `api/http.ts`). Stays on for the browser session; `?debug=off` turns it off (the same switch also turns off `?debug=viewport`). The live-sync WebSocket is not delayed.
 
-## Activity Ladder Feature
+## Browser verification status
 
-### Pages
-- **`LadderListPage` (`/activities`)** — Lists all ladders with status badges (DRAFT/ACTIVE/COMPLETED). Create new ladder CTA button.
-- **`NewLadderPage` (`/activities/new`)** — Create ladder form: title input, add/remove activities inline (name, imageUrl, distanceMinutes, costPerPerson fields). Submit creates ladder in DRAFT status.
-- **`LadderPage` (`/activities/:ladderId`)** — Live ladder detail:
-  - **DRAFT (creator):** Activity list with add/remove, "Start Ladder" button, people panel.
-  - **DRAFT (non-creator):** Activity list (read-only), people panel, waiting message.
-  - **ACTIVE (voter, not voted):** Current matchup display (two activity cards), vote buttons, progress bar (N of M voted), final-round/reset banners, people panel, creator's restart button.
-  - **ACTIVE (voter, voted):** Same matchup (voting locked), progress, people panel, creator's restart button.
-  - **ACTIVE (spectator):** Matchup, progress, "You are watching" message, people panel.
-  - **COMPLETED:** Winning activity highlighted, people panel, creator's restart button available.
+Checked by hand in desktop Chrome at a narrow width (2026-09-19): sign-in redirect with `next`, registration, create plan, create recipe with inline ingredient create and back-to-back line entry, add to plan, Shopping tab redirect, rapid quick add, check-off, two-tab live sync, browser Back closing a sheet, a plan deleted elsewhere switching open tabs to not found, no console errors.
 
-### Components
-- **`LadderPeoplePanel`** — Sidebar showing:
-  - **DRAFT:** Single section "In the room" with all connected users (from `useLadderUpdates`).
-  - **ACTIVE/COMPLETED:** Two sections: Voters (from `ladder_participants`, with online/offline + voted indicators), Watching (currently connected spectators, no persistence).
-  - Reuses `AvatarHead` (compact variant) for avatars, not full `CamperAvatar`.
-  - Updates live via presence-changed and vote events.
-  
-- **`MatchupDisplay`** — Shows two current-match activities as side-by-side cards:
-  - Activity name, image, distanceMinutes, costPerPerson (purely informational).
-  - Vote buttons (A/B) if voter has not voted; buttons disabled if already voted.
-  
-- **`VoteProgress`** — Displays "N of M voted" with progress bar. Updates as votes arrive.
-
-### Live Updates Hook
-- **`useLadderUpdates(ladderId, onUpdate)`** — Connects to `/ws` via STOMP, subscribes to `/topic/ladders/{ladderId}` with `X-User-Id` in STOMP `connectHeaders` (required for server to associate session with user).
-  - Receives: `presence-changed`, `started`, `round-resolved`, `round-started`, `completed`, `restarted`.
-  - Frontend subscribes and refetches ladder detail + participants on most events.
-  - Vote progress updates incrementally on each vote event (no full refetch needed).
-
-### API Namespace (`api.ladders`)
-- `createLadder(title, activities)` — POST /api/ladders
-- `getLadderList()` — GET /api/ladders
-- `getLadderDetail(id)` — GET /api/ladders/{id}
-- `addActivity(ladderId, name, imageUrl, distanceMinutes, costPerPerson)` — POST /api/ladders/{id}/activities
-- `removeActivity(ladderId, activityId)` — DELETE /api/ladders/{id}/activities/{activityId}
-- `startLadder(ladderId)` — POST /api/ladders/{id}/start
-- `castVote(ladderId, votedForActivityId)` — POST /api/ladders/{id}/vote
-- `restartLadder(ladderId)` — POST /api/ladders/{id}/restart
-
-### Key Implementation Notes
-- **Avatar resolution:** `LadderParticipantResponse` carries `avatarSeed?`. Frontend fetches full avatar on-demand via `api.getAvatar(userId)` if seed is present (causes N HTTP round-trips for N participants). Consider caching fetched avatars in component state.
-- **First render bug fix:** `useEffect` for avatar fetching must run AFTER the participant list is populated; don't pre-seed with `avatar: null` in initial state.
-- **Validation fix:** Create form must check `name.trim()`, `imageUrl.trim()`, and numeric fields for negative values.
+Not yet checked by hand: recipe import (the backend needs `ANTHROPIC_API_KEY`), draft review and Accept all, blocked close and Back during an import, duplicate and delete plan from the edit sheet, STOMP reconnect, reduced-motion sheet close, the timing constants (400ms, 600ms, 180ms, 300ms), and a real phone (iOS keyboard, zoom on focus, safe areas).
 
 ## Running
 
 ```bash
-# Dev (requires API running on :8080)
-npm run dev        # → http://localhost:3000
-
-# Build (canonical type-check gate)
-npm run build      # → dist/
-```
-
-## Testing
-
-```bash
-# Run tests once (for CI)
+npm run dev     # http://localhost:3000, proxies /api and /ws to localhost:8080
+npm run build   # authoritative type-check gate (tsc -b + vite build)
+npm run lint
 npm run test
-
-# Run tests in watch mode (for development)
-npm run test:watch
 ```
 
-Test files use Vitest and are co-located with source code using `.test.ts` / `.test.tsx` suffix. The test runner is configured with `environment: 'node'` (appropriate for pure functions; component tests would use `jsdom`).
-
-**Important:** `npm run build` is the authoritative type-check gate, not `npx tsc --noEmit`. The build runs `tsc -b` which enforces `verbatimModuleSyntax`, whereas `--noEmit` does not. Always use `npm run build` for final verification.
-
-## Conventions
-
-- **No UI framework** — all styling is custom CSS with CSS variables
-- **Shared UI components** — all buttons, inputs, selects, modals, and form fields use shared primitives from `components/ui/`. Never create ad-hoc styled versions.
-- **Shared constants** — color maps and option arrays live in `lib/`. Never duplicate in component files.
-- **SVG art** — all illustrations are inline SVG, no external image files
-- **Animations** — CSS-only (keyframes in animations.css), no JS animation libraries
-- **Component pattern:** Each visual component has co-located `.tsx` + `.css` files
-- **Modals** use `<Modal>` from `components/ui/Modal` for overlay, close button, escape-to-close. `Modal.css` provides base parchment styling. Custom modal CSS should only add layout (flex, height, overflow), not re-declare background/border/shadow.
-- **Pages** use `<AppHeader>` for the header — never create custom headers
-- **Avatar randomize** is preview-only — the `randomizeAvatar` endpoint returns a preview without persisting. The seed is saved when the profile form is submitted via `updateUser`.
-- **Parallax** uses CSS `calc()` with `--mouse-x`/`--mouse-y` custom properties set via JS mousemove listener
+Point the dev proxy at a different backend with `VITE_API_TARGET=http://localhost:8081 npm run dev` (`vite.config.ts`); it defaults to `localhost:8080` when unset.

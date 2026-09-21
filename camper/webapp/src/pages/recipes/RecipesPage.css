@@ -1,0 +1,162 @@
+.recipes-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.recipes-page__controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-5);
+}
+
+.recipes-page__chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.recipes-page__chip {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-5);
+  background: transparent;
+  color: var(--gray-11);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.recipes-page__chip--active {
+  background: var(--accent-9);
+  border-color: var(--accent-9);
+  color: var(--accent-contrast);
+}
+
+.recipes-page__actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recipes-page__mine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+
+.recipes-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recipes-page__list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px 16px;
+}
+
+.recipes-page__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.recipes-page__empty-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Each recipe is a card, like a plan on the Plans page: a large, obvious
+   tap target on a phone rather than a hairline-separated text row. */
+.recipes-page__row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 72px;
+  border-radius: var(--radius-4);
+  background: var(--accent-2);
+  overflow: hidden;
+}
+
+.recipes-page__row:hover {
+  background: var(--accent-3);
+}
+
+.recipes-page__row-open {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  min-height: 72px;
+  justify-content: center;
+  padding: 16px 8px 16px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  touch-action: manipulation;
+}
+
+.recipes-page__row-open:focus-visible {
+  background: var(--accent-3);
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+}
+
+.recipes-page__row-info {
+  margin-right: 8px;
+}
+
+.recipes-page__row-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recipes-page__row-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--gray-12);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recipes-page__row-imported {
+  display: inline-flex;
+  align-items: center;
+  color: var(--gray-9);
+}
+
+.recipes-page__row-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}

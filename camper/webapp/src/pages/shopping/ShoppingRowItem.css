@@ -1,0 +1,179 @@
+.shopping-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: var(--radius-3);
+}
+
+.shopping-row--checked .shopping-row__name,
+.shopping-row--checked .shopping-row__quantity {
+  color: var(--gray-9);
+  text-decoration: line-through;
+}
+
+.shopping-row__main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shopping-row__hit-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 4px 4px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.shopping-row__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.shopping-row__name {
+  font-weight: 500;
+  color: var(--gray-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Right-justified, in a column of its own beside the name. */
+.shopping-row__quantity {
+  flex: none;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: right;
+  font-size: 0.8125rem;
+  color: var(--gray-10);
+}
+
+/* The Clear row keeps its quantity inline after the name. */
+.shopping-row--no-longer-needed .shopping-row__quantity {
+  display: inline;
+  max-width: none;
+}
+
+/* The quantity opens the "have" sheet. A dotted underline is the only hint
+   (it is a rare action); the target is the whole height of the row. */
+.shopping-row__quantity--link {
+  min-height: 48px;
+  padding-left: 12px;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.shopping-row__quantity--link > span {
+  text-decoration: underline dotted var(--gray-8);
+  text-underline-offset: 3px;
+}
+
+.shopping-row--checked .shopping-row__quantity--link > span {
+  text-decoration: line-through;
+}
+
+.shopping-row__quantity--link:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+}
+
+.shopping-row__hit-area:focus-within {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.shopping-row__recipes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 2px 16px 12px 60px;
+}
+
+.shopping-row__recipe-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0 10px 0 14px;
+  border-radius: var(--radius-4);
+  background: var(--accent-3);
+  color: var(--accent-11);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.shopping-row__recipe-link:hover {
+  background: var(--accent-4);
+}
+
+.shopping-row__recipe-link:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.shopping-row__recipe-link-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shopping-row--no-longer-needed {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 48px;
+  padding: 6px 8px 6px 16px;
+}
+
+.shopping-row--no-longer-needed .shopping-row__name,
+.shopping-row--no-longer-needed .shopping-row__quantity {
+  color: var(--gray-9);
+  text-decoration: line-through;
+}
+
+.shopping-row--no-longer-needed .shopping-row__text {
+  flex-direction: row;
+  gap: 6px;
+}
+
+/* Bought some, now needs more: amber, the app's "needs attention" colour. */
+.shopping-row__quantity--more {
+  color: var(--amber-11);
+  font-weight: 500;
+}
+
+/* A quick-added item lands in the last group, usually off screen: the row is
+   scrolled into view (ShoppingRowItem) and flashes once. */
+.shopping-row--highlight {
+  border-radius: var(--radius-3);
+  animation: shopping-row-highlight 1400ms ease-out;
+}
+
+@keyframes shopping-row-highlight {
+  from {
+    background: var(--accent-5);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shopping-row--highlight {
+    animation: none;
+    background: var(--accent-3);
+  }
+}

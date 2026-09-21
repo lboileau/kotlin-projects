@@ -1,0 +1,26 @@
+/*
+ * The static header's colour (components/PageHeader.tsx `HeaderBar`).
+ *
+ * One colour for the whole app: the accent. The header bar is a tint of it
+ * that sits between the two other purples on a screen — deeper than the list
+ * rows (accent-2) and the soft buttons (accent-3), well short of the solid
+ * buttons (accent-9) — so it reads as the top of the app without competing
+ * with anything tappable. The tab's icon in the bar and the active tab are
+ * what say which tab this is.
+ *
+ * `--area-*` is what the bar, the active tab and the loading icon use.
+ * Per-tab header colours (orange / blue / teal) were tried and dropped: they
+ * clashed with the purple. The tokens are kept as the single place the
+ * header's tint is decided; `AppShell` still sets `data-area` from the URL
+ * (lib/areas.ts) should a screen ever need its own.
+ */
+.app-shell {
+  --area-2: var(--accent-2);
+  --area-3: var(--accent-3);
+  --area-4: var(--accent-4);
+  --area-5: var(--accent-5);
+  --area-6: var(--accent-6);
+  --area-8: var(--accent-8);
+  --area-9: var(--accent-9);
+  --area-11: var(--accent-11);
+}

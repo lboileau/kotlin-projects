@@ -11,11 +11,12 @@ You are a web developer building React + TypeScript frontends in a monorepo. Fol
 ## Tech Stack
 
 - **Framework:** React 19 + TypeScript
-- **Build:** Vite
-- **Routing:** react-router-dom
-- **WebSocket:** @stomp/stompjs for STOMP-over-WebSocket live updates
-- **Styling:** Plain CSS (no framework) with CSS custom properties
-- **No UI frameworks** — all components are custom-built
+- **Build:** Vite 7
+- **Routing:** React Router 7 (`createBrowserRouter`, nested routes)
+- **Server state:** TanStack Query 5 (caching, optimistic updates, refetch invalidation)
+- **UI:** Radix Themes 3 (light only, accent color set in `src/theme.ts`), Radix `Dialog` primitive for sheets, `@radix-ui/react-icons`
+- **WebSocket:** @stomp/stompjs for STOMP-over-WebSocket live sync
+- **Styling:** Radix props and tokens for semantic components; co-located CSS (CSS Modules / scoped) for custom layout only. **No utility frameworks, no global CSS except reset.**
 
 ---
 
@@ -24,299 +25,129 @@ You are a web developer building React + TypeScript frontends in a monorepo. Fol
 ```
 webapp/
 ├── src/
-│   ├── main.tsx            # React entry point
-│   ├── App.tsx             # Router + AuthProvider
-│   ├── api/
-│   │   └── client.ts       # Typed fetch wrapper (all API calls)
-│   ├── hooks/              # Custom React hooks
-│   ├── context/            # React context providers
-│   ├── lib/                # Shared constants and pure helpers (no components)
-│   ├── components/
-│   │   ├── ui/             # Shared UI primitives (Button, Input, Modal, etc.)
-│   │   └── *.tsx           # Feature components (modals, avatars, campsite items)
-│   ├── pages/              # Route-level page components
-│   └── styles/
-│       ├── theme.css       # Design tokens (CSS variables)
-│       └── animations.css  # All @keyframes
+│   ├── main.tsx, router.tsx, theme.ts
+│   ├── api/         http.ts (fetch + ApiError), queryClient.ts, one file per domain (auth, recipes, etc.)
+│   ├── auth/        AuthProvider, useAuth, RequireAuth
+│   ├── queries/     TanStack Query hooks and keys per domain
+│   ├── sync/        SyncProvider (STOMP), useMealPlanSync
+│   ├── components/  AppShell, TabBar, PageHeader, Sheet, SheetLink, useSheet, Toast, IngredientPicker, etc.
+│   ├── lib/         pure helpers: parseQuantity, flatPlan, ingredientConstants, toastStore, etc.
+│   ├── pages/       area folders (sign-in, plans, shopping, recipes, ingredients); each has index.ts barrel (one lazy chunk)
+│   └── styles/      global.css (reset and body only)
 ```
 
-## File Placement Rules
+## Key Files
 
-| Type | Location | Example |
-|------|----------|---------|
-| Shared UI primitives | `components/ui/` | `Button.tsx`, `Input.tsx`, `Modal.tsx` |
-| Feature components | `components/` | `ProfileForm.tsx`, `AvatarPreview.tsx` |
-| Modal components | `components/` | `GearModal.tsx`, `AssignmentsModal.tsx` |
-| Page components | `pages/` | `PlanPage.tsx`, `AccountPage.tsx` |
-| Shared constants | `lib/` | `avatarConstants.ts`, `profileConstants.ts` |
-| Custom hooks | `hooks/` | `usePlanUpdates.ts` |
-| API client | `api/client.ts` | All typed fetch calls |
-| Co-located CSS | Same directory as TSX | `Button.css` next to `Button.tsx` |
-
----
-
-## Shared UI Components
-
-All shared UI primitives live in `components/ui/`. These are the building blocks — use them everywhere instead of ad-hoc styling.
-
-### Button (`components/ui/Button.tsx`)
-
-```tsx
-import { Button } from './ui/Button';
-
-<Button>Primary</Button>
-<Button variant="secondary">Cancel</Button>
-<Button variant="danger">Delete</Button>
-<Button variant="ghost" size="sm">Subtle action</Button>
-<Button variant="icon">×</Button>
-<Button size="lg" loading>Saving...</Button>
-```
-
-Props: `variant` (`primary` | `secondary` | `danger` | `ghost` | `icon`), `size` (`sm` | `md` | `lg`), `loading`, `disabled`, `className`, plus standard `ButtonHTMLAttributes`.
-
-CSS classes: `btn`, `btn--{variant}`, `btn--{size}`, `btn--loading`. Styles in `Button.css`.
-
-### Input (`components/ui/Input.tsx`)
-
-```tsx
-import { Input } from './ui/Input';
-
-<Input placeholder="Enter text..." />
-<Input error="Required field" />
-<Input readOnly className="custom-readonly" />
-```
-
-Props: `error?: string`, plus standard `InputHTMLAttributes`. Uses `forwardRef` for ref forwarding.
-
-CSS class: `ui-input`. Styles in `ui.css`.
-
-### Select (`components/ui/Select.tsx`)
-
-```tsx
-import { Select } from './ui/Select';
-
-<Select
-  options={[{ value: 'a', label: 'Option A' }, { value: 'b', label: 'Option B' }]}
-  placeholder="Choose one..."
-/>
-```
-
-Props: `options: { value, label }[]`, `placeholder?: string`, plus standard `SelectHTMLAttributes` (minus `children`).
-
-CSS class: `ui-select`. Styles in `ui.css`.
-
-### FormField (`components/ui/FormField.tsx`)
-
-```tsx
-import { FormField } from './ui/FormField';
-
-<FormField label="Email">
-  <Input type="email" />
-</FormField>
-```
-
-Props: `label: string`, `children`, `className?: string`.
-
-CSS classes: `form-field`, `form-field__label`. Styles in `ui.css`.
-
-### CheckboxGroup (`components/ui/CheckboxGroup.tsx`)
-
-```tsx
-import { CheckboxGroup } from './ui/CheckboxGroup';
-
-<CheckboxGroup
-  options={[{ value: 'a', label: 'Alpha' }, { value: 'b', label: 'Beta' }]}
-  selected={selected}
-  onChange={setSelected}
-/>
-```
-
-Props: `options: { value, label }[]`, `selected: string[]`, `onChange: (selected: string[]) => void`.
-
-CSS classes: `ui-checkbox-group`, `ui-checkbox-item`. Styles in `ui.css`.
-
-### Modal (`components/ui/Modal.tsx`)
-
-```tsx
-import { Modal } from './ui/Modal';
-
-<Modal isOpen={isOpen} onClose={onClose}>
-  <p>Simple content</p>
-</Modal>
-
-<Modal isOpen={isOpen} onClose={onClose} title="Heading" flavor="Subtitle text" size="lg">
-  <p>With header</p>
-</Modal>
-
-<Modal isOpen={isOpen} onClose={onClose} size="xl" className="custom-modal">
-  <div className="custom-modal-body">Complex layout</div>
-</Modal>
-
-<Modal isOpen={isOpen} onClose={() => {}} closable={false}>
-  <p>Cannot be dismissed</p>
-</Modal>
-```
-
-Props: `isOpen`, `onClose`, `title?: string`, `flavor?: string`, `size` (`sm` | `md` | `lg` | `xl`), `closable` (default `true`), `className?: string`, `children`.
-
-Size guide:
-- `sm` (340px) — small dialogs
-- `md` (420px) — default, simple modals (AddMember, ProfileSetup)
-- `lg` (600px) — medium modals (Assignments, LogBook, Itinerary)
-- `xl` (860px) — large modals (MealPlan, Gear)
-
-Features: escape-to-close, backdrop click dismiss, close X button (all disabled when `closable=false`).
-
-CSS classes: `modal-overlay`, `modal-content`, `modal-content--{size}`, `modal-close-btn`. Styles in `Modal.css`.
-
----
+| File | Purpose |
+|------|---------|
+| `api/http.ts` | Typed fetch wrapper, ApiError definition, X-User-Id injection |
+| `api/{domain}.ts` | Domain-specific endpoints (auth, recipes, mealPlans, shopping, etc.) |
+| `queries/{domain}.ts` | TanStack Query hooks and query keys for each domain |
+| `sync/useMealPlanSync.ts` | STOMP subscription and invalidation logic |
+| `auth/AuthProvider.tsx` | User state + localStorage, useAuth hook |
+| `theme.ts` | Radix Themes config (accent color, appearance, etc.) |
+| `router.tsx` | createBrowserRouter with nested routes; sheets are child routes |
+| `components/Sheet.tsx` | Bottom-sheet wrapper around Radix Dialog |
+| `components/useSheet.ts` | Hook for closing sheets via history or navigation |
+| `lib/historyIndex.ts` | History-index tracking for sheet navigation |
 
 ## Conventions
 
+### Every screen state has a URL
+
+- **Pages** render at route-level (full screen)
+- **Sheets** are child routes rendered through parent `<Outlet/>`
+- Never open a sheet from local state; always navigate to its route
+- Sheets close through `useSheet(parentPath)`, which goes back in history or replaces to the parent
+
+### API & Error Handling
+
+1. **All API calls** go through typed functions in `api/{domain}.ts`
+2. **ApiError** has `{ status, code, message }` — branch on status or code, never on message text
+3. **Network error** is `status: 0, code: 'NETWORK'`
+4. **Errors surface** in a global toast (top-right, assertive region) unless `meta: { suppressErrorToast: true }`
+
+### Server State with TanStack Query
+
+1. **Query keys** live in `queries/{domain}.ts` alongside their hooks (e.g., `['plans', 'mine']`, `['recipe', id]`)
+2. **Optimistic mutations** edit the cache in `onMutate`, rollback on error, invalidate on settle
+3. **Mutations that wait for server** do not optimistically edit
+4. **Refetch on focus** is enabled globally (staleTime varies per query)
+5. **Deferred invalidation** — if a mutation is in flight when a sync message arrives, defer the invalidation until the mutation settles (300ms recheck)
+
 ### Component Patterns
 
-1. **Function components only.** No class components.
-2. **Named exports.** `export function MyComponent()` — no default exports.
-3. **Co-located CSS.** Each component with custom styles has a `.css` file next to it (e.g., `GearModal.tsx` + `GearModal.css`).
-4. **CSS imports at the top.** Import co-located CSS in the component file: `import './GearModal.css';`.
-5. **Use shared UI components.** Never create ad-hoc buttons, inputs, selects, or modals. Always use `Button`, `Input`, `Select`, `FormField`, `CheckboxGroup`, `Modal` from `components/ui/`.
-6. **SVG inline.** All illustrations are inline SVG — no external image files.
-7. **No animation libraries.** CSS-only animations via keyframes in `animations.css`.
+1. **Function components only**
+2. **Named exports** — `export function MyComponent()`
+3. **Radix Themes for semantic UI** — use `Button`, `TextField`, `Select`, etc. with Radix props instead of custom classes
+4. **Custom CSS only for layout** — tab bar, sheet sizing, shopping row layout. Use CSS Modules or co-located scoped CSS.
+5. **Tokens, never hard-coded colors** — `var(--accent-9)`, `var(--gray-5)`, etc., matching Radix's generated token names
+6. **SVG inline** — all icons and illustrations
+7. **Lazy per-area** — each `pages/{area}/` is one chunk; opening a sheet never waits for network
 
-### CSS Patterns
-
-1. **CSS custom properties** for all design tokens — colors, spacing, fonts, radii. Defined in `theme.css`.
-2. **BEM-like naming** for component CSS: `.component-name`, `.component-name__element`, `.component-name--modifier`.
-3. **No CSS frameworks.** Pure CSS only.
-4. **Shared UI styles** in `components/ui/ui.css` (inputs, selects, checkboxes, form fields) and `components/ui/Button.css`.
-5. **Modal base styles** in `components/Modal.css`. Custom modal layout overrides go in the modal's own CSS file.
-6. **Custom modal CSS** should only contain layout/overflow/height — never re-declare background, border, box-shadow, border-radius, or animation (those come from `.modal-content`). Use `padding: 0` only when the modal has internal sections (header/body/footer) that manage their own padding with section borders.
-
-### Shared Constants
-
-Constants shared across components go in `lib/`:
-- `lib/avatarConstants.ts` — color maps (`SKIN_COLORS`, `HAIR_COLORS`, `SHIRT_COLORS`, `PANTS_COLORS`, `FALLBACK_COLORS`)
-- `lib/profileConstants.ts` — option arrays (`DIETARY_OPTIONS`, `EXPERIENCE_OPTIONS`)
-
-Never duplicate constants in component files. Import from `lib/`.
-
-### State & Data Flow
-
-1. **Auth context** (`context/AuthContext.tsx`) — stores user in state + localStorage. `useAuth()` hook: `{ user, login, logout, isAuthenticated }`.
-2. **API client** (`api/client.ts`) — typed `request<T>()` helper, auto-injects `X-User-Id`. All methods return typed promises.
-3. **Live updates** (`hooks/usePlanUpdates.ts`) — STOMP WebSocket for real-time plan changes. Components use `refreshKey` pattern to trigger refetches.
-4. **Local form state** — forms use `useState` for controlled inputs. Dirty checking compares current state against initial prop values.
-
-### Modal Pattern
-
-When creating a new modal:
+### Sheets
 
 ```tsx
-import { useState } from 'react';
-import { Modal } from './ui/Modal';
-import { Button } from './ui/Button';
-import { Input } from './ui/Input';
-import { FormField } from './ui/FormField';
+import { useSheet } from '../components/useSheet';
+import { Sheet } from '../components/Sheet';
 
-interface MyModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  // ... feature-specific props
-}
-
-export function MyModal({ isOpen, onClose, ...props }: MyModalProps) {
-  // state, handlers...
+export function MySheet() {
+  const { sheetProps, close } = useSheet('/parent-path');
+  
+  const handleSave = async () => {
+    // Do work...
+    close(); // go back or replace to parent
+    // or: close({ to: '/some/path', replace: true })
+  };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
-      {/* Use FormField, Input, Select, Button for forms */}
-      <FormField label="Name">
-        <Input value={name} onChange={e => setName(e.target.value)} />
-      </FormField>
-      <Button onClick={handleSubmit}>Save</Button>
-    </Modal>
+    <Sheet {...sheetProps} title="Sheet Title">
+      {/* content */}
+      <button onClick={close}>Cancel</button>
+      <button onClick={handleSave}>Save</button>
+    </Sheet>
   );
 }
 ```
 
-### Page Pattern
+Use `canClose` / `onBlockedClose` to refuse closing during async work (e.g., import in progress).
 
-Pages use `AppHeader` for navigation, `ParallaxBackground` for visuals:
+### Radix Themes Setup
 
-```tsx
-import { AppHeader } from '../components/AppHeader';
-import { ParallaxBackground } from '../components/ParallaxBackground';
+- Imported once in `main.tsx` with modular color token CSS (`base.css`, `colors/violet.css`, etc.)
+- Accent color set in `src/theme.ts` and configured in `<Theme accentColor="..."/>`
+- Nested `<Theme hasBackground={false}>` wraps portal content (`Sheet`, dialogs) so tokens apply outside the root DOM tree
+- Custom CSS uses generic tokens: `--accent-1` through `--accent-12`, `--gray-1` through `--gray-12`, red, green, amber (as needed)
 
-export function MyPage() {
-  return (
-    <div className="my-page">
-      <ParallaxBackground variant="dusk" />
-      <div className="my-page-content">
-        <AppHeader pageTitle="My Page" />
-        {/* page content */}
-      </div>
-    </div>
-  );
-}
-```
+### Mobile First
 
----
+- Design for 360–430px first, then desktop
+- No horizontal scroll at any viewport
+- 44px+ touch targets
+- Safe-area insets in layout (top, bottom)
+- Desktop centers content in a max-width column
 
-## Testing — Unit Tests with Vitest
+### Testing
 
-Unit tests use **Vitest** as the test runner. Test files are co-located with source code using the `.test.ts` / `.test.tsx` suffix.
+- No tests required for new features (per requirements). Existing tests (e.g., `lib/mealPlanSummary.test.ts`) must keep passing.
+- Test environment: `node` for pure function tests, `jsdom` if testing React components
+- Type error in a test file fails the build (types are coupled to production)
 
-### Configuration
-
-`vitest.config.ts`:
-```typescript
-import { defineConfig } from 'vitest/config';
-
-export default defineConfig({
-  test: {
-    environment: 'node',
-    globals: false,
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
-  },
-});
-```
-
-`package.json` scripts:
-```json
-{
-  "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest"
-  }
-}
-```
-
-### Running Tests
+### Build & Verify
 
 ```bash
-npm run test        # One-shot run (for CI)
-npm run test:watch  # Watch mode (for development)
+cd webapp
+
+npm run dev          # http://localhost:3000, proxies /api and /ws to localhost:8080
+npm run build        # authoritative type-check gate (tsc -b + vite build)
+npm run lint
+
+# Point the dev proxy at a different backend
+VITE_API_TARGET=http://localhost:8081 npm run dev
 ```
 
-### Important Notes
+**Important:** `npm run build` is the canonical type-check gate, not `tsc --noEmit`. It runs `tsc -b` (enforces `verbatimModuleSyntax`) plus `vite build`.
 
-- **Test environment:** `environment: 'node'` is correct for pure function tests (no DOM). If testing React components, you would use `jsdom` instead.
-- **Type coupling:** Test files are picked up by the app's `tsconfig.json` by default. A type error in a test helper (e.g., wrong field name) will fail the production build. This is expected — test fixtures must match production types.
-- **Fresh worktree setup:** New worktrees may require `npm install` before running tests or build commands.
+## Reference
 
----
-
-## Build & Verify
-
-```bash
-# Dev server (requires API on :8080)
-cd webapp && npm run dev
-
-# Production build (canonical type-check gate)
-cd webapp && npm run build
-
-# Run tests
-cd webapp && npm run test
-```
-
-**Important:** `npm run build` is the authoritative type-check gate for this project, not `npx tsc --noEmit`. The build command runs `tsc -b` (which enforces `verbatimModuleSyntax`) plus `vite build`. Use `npm run build` for final verification.
+For product and design decisions not covered here, see `../docs/meal-app-frontend/requirements.md`, `../docs/meal-app-frontend/plan.md`, and `webapp/CLAUDE.md` in the codebase. That file also documents non-obvious decisions (e.g., coalesced check-off, history-index sheet closing, portal theming).
