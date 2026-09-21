@@ -1,0 +1,35 @@
+/* The row scrolls sideways by itself; the page never does. */
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-chips__chip {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-5);
+  background: transparent;
+  color: var(--gray-11);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.filter-chips__chip--active {
+  background: var(--accent-9);
+  border-color: var(--accent-9);
+  color: var(--accent-contrast);
+}
+
+.filter-chips__chip:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
