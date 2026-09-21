@@ -619,6 +619,27 @@ class RecipeAcceptanceTest {
         }
 
         @Test
+        fun `DELETE favorite twice returns 200 both times and leaves the other user's favourite`() {
+            val recipeId = fixture.insertRecipe(name = "Chili", createdBy = otherUserId)
+            fixture.insertFavorite(recipeId = recipeId, userId = userId)
+            fixture.insertFavorite(recipeId = recipeId, userId = otherUserId)
+            restTemplate.exchange(
+                "/api/recipes/$recipeId/favorite", HttpMethod.DELETE, entityWithUser(null, userId), RecipeFavoriteStatusResponse::class.java
+            )
+
+            val response = restTemplate.exchange(
+                "/api/recipes/$recipeId/favorite",
+                HttpMethod.DELETE,
+                entityWithUser(null, userId),
+                RecipeFavoriteStatusResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(response.body!!.favoriteCount).isEqualTo(1)
+            assertThat(response.body!!.favoritedByMe).isFalse()
+        }
+
+        @Test
         fun `DELETE favorite when never favourited returns 200 with count 0`() {
             val recipeId = fixture.insertRecipe(name = "Chili", createdBy = otherUserId)
 
@@ -868,9 +889,10 @@ class RecipeAcceptanceTest {
         @Test
         fun `PUT recipe returns the current favourite count`() {
             val recipeId = fixture.insertRecipe(name = "Old Name", createdBy = userId)
-            restTemplate.exchange(
-                "/api/recipes/$recipeId/favorite", HttpMethod.PUT, entityWithUser(null, otherUserId), RecipeFavoriteStatusResponse::class.java
-            )
+            // Favourited by someone else AND by the editor, so neither field's
+            // real value (2, true) is what a hardcoded default (0, false) would be.
+            fixture.insertFavorite(recipeId = recipeId, userId = otherUserId)
+            fixture.insertFavorite(recipeId = recipeId, userId = userId)
 
             val response = restTemplate.exchange(
                 "/api/recipes/$recipeId",
@@ -881,7 +903,8 @@ class RecipeAcceptanceTest {
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.name).isEqualTo("New Name")
-            assertThat(response.body!!.favoriteCount).isEqualTo(1)
+            assertThat(response.body!!.favoriteCount).isEqualTo(2)
+            assertThat(response.body!!.favoritedByMe).isTrue()
         }
 
         @Test
@@ -903,6 +926,8 @@ class RecipeAcceptanceTest {
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body!!.status).isEqualTo("published")
             assertThat(response.body!!.favoriteCount).isEqualTo(1)
+            // The publisher is the one who favourited it: a hardcoded default would say false.
+            assertThat(response.body!!.favoritedByMe).isTrue()
         }
 
         @Test
