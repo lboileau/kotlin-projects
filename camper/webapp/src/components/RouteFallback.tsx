@@ -1,17 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Spinner } from '@radix-ui/themes';
-import { PageLoader, type LoaderArea } from './PageLoader';
+import { PageLoader } from './PageLoader';
+import { areaForPath } from '../lib/areas';
 import './RouteFallback.css';
-
-const SHOPPING_UNDER_PLAN = /^\/plans\/[^/]+\/shopping/;
-
-function areaFor(pathname: string): LoaderArea | null {
-  if (pathname.startsWith('/recipes') || pathname.startsWith('/ingredients')) return 'recipes';
-  if (pathname.startsWith('/shopping') || SHOPPING_UNDER_PLAN.test(pathname)) return 'shopping';
-  if (pathname.startsWith('/plans') || pathname.startsWith('/join')) return 'plans';
-  return null;
-}
 
 /**
  * Suspense fallback for lazy routes. Delayed by ~150ms so a fast (cached
@@ -30,8 +22,8 @@ export function RouteFallback() {
 
   if (!visible) return null;
 
-  const area = areaFor(pathname);
-  if (area) return <PageLoader area={area} label="Loading" />;
+  const area = areaForPath(pathname);
+  if (area && area !== 'account') return <PageLoader area={area} label="Loading" />;
 
   return (
     <div className="route-fallback" role="status" aria-label="Loading">

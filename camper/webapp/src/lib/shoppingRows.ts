@@ -130,13 +130,50 @@ export function formatQuantityText(row: ShoppingRow): string {
     .join(' + ');
 }
 
+/**
+ * For a row that is partly in the basket: what is still to buy and what is
+ * already bought, e.g. "1 clove more · have 2 clove", or "300 g more · have
+ * 2 cup" when one ingredient is needed in two unit families and only one of
+ * them has been bought. That happens when a recipe is added or the servings
+ * go up after shopping started. Empty when nothing of the row has been
+ * bought, or nothing is left to buy.
+ */
+export function formatStillNeededText(row: ShoppingRow): string {
+  const withUnit = (quantity: number, unit: string | null) => `${formatQuantity(quantity)}${unit ? ` ${unit}` : ''}`;
+  const needed = row.entries
+    .filter((entry) => entry.quantityRequired > entry.quantityPurchased)
+    .map((entry) => withUnit(entry.quantityRequired - entry.quantityPurchased, entry.unit));
+  const have = row.entries
+    .filter((entry) => entry.quantityPurchased > 0)
+    .map((entry) => withUnit(entry.quantityPurchased, entry.unit));
+  if (needed.length === 0 || have.length === 0) return '';
+  return `${needed.join(' + ')} more · have ${have.join(' + ')}`;
+}
+
 function rowDisplayName(row: ShoppingRow): string {
   return row.ingredientName ?? row.description ?? '';
 }
 
 /**
- * Categories in store-walk order, each with its rows merged and sorted by
- * name only — a row's position never changes when it's checked off (or
+ * Ingredient rows by name; then the items the user typed in themselves, in
+ * the order they were added (the server returns them by creation time, and a
+ * quick-add's optimistic row is appended) — so a new item always lands at
+ * the very end, where the quick-add field is, instead of being filed
+ * alphabetically somewhere in the middle. `sort` is stable, so returning 0
+ * for two manual rows keeps their incoming order.
+ */
+function sortRows(rows: ShoppingRow[]): ShoppingRow[] {
+  return rows.sort((a, b) => {
+    const aManual = a.source === 'manual';
+    const bManual = b.source === 'manual';
+    if (aManual || bManual) return aManual === bManual ? 0 : aManual ? 1 : -1;
+    return rowDisplayName(a).localeCompare(rowDisplayName(b));
+  });
+}
+
+/**
+ * Categories in store-walk order, each with its rows merged and ordered by
+ * `sortRows` — a row's position never changes when it's checked off (or
  * marked no longer needed), by design: nothing should jump around the
  * list mid-shop just because you tapped it.
  */
@@ -144,7 +181,7 @@ export function buildShoppingRows(list: ShoppingListResponse): ShoppingCategoryG
   return list.categories
     .map((category) => ({
       category: category.category,
-      rows: mergeShoppingItems(category.items).sort((a, b) => rowDisplayName(a).localeCompare(rowDisplayName(b))),
+      rows: sortRows(mergeShoppingItems(category.items)),
     }))
     .filter((group) => group.rows.length > 0)
     .sort((a, b) => categoryRank(a.category) - categoryRank(b.category));
@@ -159,33 +196,59 @@ function categoryRank(category: string): number {
 // All take and return a whole ShoppingListResponse so mutations can do a
 // single queryClient.setQueryData call.
 
-function matchesRow(item: ShoppingListItemResponse, row: ShoppingRow): boolean {
-  return row.entries.some((entry) =>
-    entry.manualItemId
-      ? entry.manualItemId === item.manualItemId
-      : entry.ingredientId === item.ingredientId && entry.unit === item.unit,
-  );
+function matchesEntry(item: ShoppingListItemResponse, entry: ShoppingRowEntry): boolean {
+  return entry.manualItemId
+    ? entry.manualItemId === item.manualItemId
+    : entry.ingredientId === item.ingredientId && entry.unit === item.unit;
 }
 
-/** Sets every entry of a merged row to fully purchased or fully unpurchased, adjusting `fullyPurchasedCount`. */
-export function applyRowToggle(list: ShoppingListResponse, row: ShoppingRow, checked: boolean): ShoppingListResponse {
+/** Mirrors the server's `PurchaseStatus.derive` (meal-plan-calculator), for optimistic writes. */
+export function derivePurchaseStatus(quantityRequired: number, quantityPurchased: number): ShoppingItemStatus {
+  if (quantityRequired === 0 && quantityPurchased > 0) return 'no_longer_needed';
+  if (quantityPurchased > 0 && quantityPurchased >= quantityRequired) return 'done';
+  if (quantityPurchased > 0) return 'more_needed';
+  return 'not_purchased';
+}
+
+/** How much of one entry of a row is bought (or already at home) — what a PATCH sends, one per entry. */
+export interface RowPurchase {
+  entry: ShoppingRowEntry;
+  quantityPurchased: number;
+}
+
+/** Check-off: every entry of the row fully purchased, or none of it. */
+export function rowPurchasesForToggle(row: ShoppingRow, checked: boolean): RowPurchase[] {
+  return row.entries.map((entry) => ({ entry, quantityPurchased: checked ? entry.quantityRequired : 0 }));
+}
+
+/**
+ * Sets the purchased quantity of a row's entries — a check-off
+ * (`rowPurchasesForToggle`) or an amount typed into the "have" sheet —
+ * re-deriving each status and adjusting `fullyPurchasedCount`.
+ */
+export function applyRowPurchases(list: ShoppingListResponse, purchases: RowPurchase[]): ShoppingListResponse {
   let purchasedDelta = 0;
 
   const categories = list.categories.map((category) => ({
     ...category,
     items: category.items.map((item) => {
-      if (!matchesRow(item, row)) return item;
+      const purchase = purchases.find((candidate) => matchesEntry(item, candidate.entry));
+      if (!purchase) return item;
 
       const wasDone = item.status === 'done';
-      const quantityPurchased = checked ? item.quantityRequired : 0;
-      const status: ShoppingItemStatus = checked ? 'done' : 'not_purchased';
+      const status = derivePurchaseStatus(item.quantityRequired, purchase.quantityPurchased);
       if (wasDone !== (status === 'done')) purchasedDelta += status === 'done' ? 1 : -1;
 
-      return { ...item, quantityPurchased, status };
+      return { ...item, quantityPurchased: purchase.quantityPurchased, status };
     }),
   }));
 
   return { ...list, categories, fullyPurchasedCount: list.fullyPurchasedCount + purchasedDelta };
+}
+
+/** The entries of a row that the "have" sheet asks about: anything needed or already bought. */
+export function haveSheetEntries(row: ShoppingRow): ShoppingRowEntry[] {
+  return row.entries.filter((entry) => entry.quantityRequired > 0 || entry.quantityPurchased > 0);
 }
 
 function findOrCreateCategory(
@@ -286,11 +349,7 @@ export function restoreRowEntries(list: ShoppingListResponse, previousEntries: S
   const categories = list.categories.map((category) => ({
     ...category,
     items: category.items.map((item) => {
-      const previousEntry = previousEntries.find((entry) =>
-        entry.manualItemId
-          ? entry.manualItemId === item.manualItemId
-          : entry.ingredientId === item.ingredientId && entry.unit === item.unit,
-      );
+      const previousEntry = previousEntries.find((entry) => matchesEntry(item, entry));
       if (!previousEntry) return item;
 
       const wasDone = item.status === 'done';

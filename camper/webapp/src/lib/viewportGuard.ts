@@ -18,6 +18,10 @@ export function installViewportGuard(): void {
     if (window.scrollX !== 0 || window.scrollY !== 0) window.scrollTo(0, 0);
     const scroller = document.scrollingElement;
     if (scroller && scroller.scrollTop !== 0) scroller.scrollTop = 0;
+    // <body> is `overflow: hidden`, which stops the user scrolling it but
+    // not a script (a stray scrollIntoView) — and it is not the document's
+    // scrolling element, so the line above never reaches it.
+    if (document.body.scrollTop !== 0) document.body.scrollTop = 0;
   }
 
   // After the keyboard's closing animation, and again a little later: iOS

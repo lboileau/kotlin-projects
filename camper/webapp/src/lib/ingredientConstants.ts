@@ -58,6 +58,23 @@ export const THEMES = [
 ] as const;
 export type Theme = (typeof THEMES)[number];
 
+/**
+ * The unit an ingredient of each category is most often measured in, offered
+ * when the category is picked (the user can still change it).
+ */
+export const UNIT_FOR_CATEGORY: Record<Category, Unit> = {
+  produce: 'whole',
+  dairy: 'cup',
+  meat: 'lb',
+  seafood: 'lb',
+  pantry: 'cup',
+  spice: 'tsp',
+  condiment: 'tbsp',
+  frozen: 'g',
+  bakery: 'pieces',
+  other: 'pieces',
+};
+
 export const DEFAULT_CATEGORY: Category = 'other';
 export const DEFAULT_UNIT: Unit = 'pieces';
 

@@ -44,9 +44,46 @@
   white-space: nowrap;
 }
 
+/* Right-justified, in a column of its own beside the name. */
 .shopping-row__quantity {
+  flex: none;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  text-align: right;
   font-size: 0.8125rem;
   color: var(--gray-10);
+}
+
+/* The Clear row keeps its quantity inline after the name. */
+.shopping-row--no-longer-needed .shopping-row__quantity {
+  display: inline;
+  max-width: none;
+}
+
+/* The quantity opens the "have" sheet. A dotted underline is the only hint
+   (it is a rare action); the target is the whole height of the row. */
+.shopping-row__quantity--link {
+  min-height: 48px;
+  padding-left: 12px;
+  text-decoration: none;
+  touch-action: manipulation;
+}
+
+.shopping-row__quantity--link > span {
+  text-decoration: underline dotted var(--gray-8);
+  text-underline-offset: 3px;
+}
+
+.shopping-row--checked .shopping-row__quantity--link > span {
+  text-decoration: line-through;
+}
+
+.shopping-row__quantity--link:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
 }
 
 .shopping-row__hit-area:focus-within {
@@ -112,8 +149,31 @@
   gap: 6px;
 }
 
-.shopping-row__info {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
+/* Bought some, now needs more: amber, the app's "needs attention" colour. */
+.shopping-row__quantity--more {
+  color: var(--amber-11);
+  font-weight: 500;
+}
+
+/* A quick-added item lands in the last group, usually off screen: the row is
+   scrolled into view (ShoppingRowItem) and flashes once. */
+.shopping-row--highlight {
+  border-radius: var(--radius-3);
+  animation: shopping-row-highlight 1400ms ease-out;
+}
+
+@keyframes shopping-row-highlight {
+  from {
+    background: var(--accent-5);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shopping-row--highlight {
+    animation: none;
+    background: var(--accent-3);
+  }
 }

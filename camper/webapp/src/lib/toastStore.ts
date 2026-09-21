@@ -54,7 +54,8 @@ function pushToast(tone: ToastEntry['tone'], message: string, action?: ToastActi
   const overflow = new Set(keptActions.slice(0, Math.max(0, keptActions.length - (action ? 1 : 2))).map((entry) => entry.id));
   toasts = [...kept.filter((entry) => !overflow.has(entry.id)), { id, tone, message, action }];
   emit();
-  window.setTimeout(() => dismissToast(id), tone === 'error' ? 6000 : 4000);
+  // A toast with an action stays longer: there has to be time to read it, decide, and reach Undo.
+  window.setTimeout(() => dismissToast(id), action ? 7000 : tone === 'error' ? 6000 : 4000);
 }
 
 export const toast = {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Badge, Button, Skeleton, Text, TextField } from '@radix-ui/themes';
 import { CheckIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
@@ -16,7 +16,9 @@ import './AddRecipeToPlanSheet.css';
 
 export function AddRecipeToPlanSheet() {
   const { planId } = useParams<{ planId: string }>();
-  const sheet = useSheet(`/plans/${planId}`);
+  // Mounted under both the plan and its shopping list (router.tsx): the
+  // parent is whichever page this sheet is open over.
+  const sheet = useSheet(useLocation().pathname.replace(/\/add\/?$/, ''));
   const { user } = useAuth();
 
   const { data: recipes, isLoading, isError, refetch } = useRecipes();

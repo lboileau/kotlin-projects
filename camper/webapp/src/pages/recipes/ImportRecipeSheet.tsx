@@ -74,7 +74,9 @@ export function ImportRecipeSheet() {
       // useImportRecipe's onSuccess already cached the detail and invalidated
       // ['recipes'] regardless of mount state — only the navigation needs guarding.
       if (mountedRef.current) {
-        sheet.close({ to: `/recipes/${created.id}`, replace: true });
+        // `force`: importRecipe.isPending is still true in this tick, so the
+        // canClose guard above would block this close and strand the user here.
+        sheet.close({ to: `/recipes/${created.id}`, replace: true, force: true });
       } else {
         toast.info('Recipe imported.', {
           label: 'Open',

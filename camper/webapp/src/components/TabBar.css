@@ -33,12 +33,14 @@
   transition: background-color 150ms ease;
 }
 
+/* The active tab wears its area's identity colour (styles/areas.css) — the
+   same colour as the header at the top of the screen. */
 .tab-bar__item--active .tab-bar__pill {
-  background: var(--accent-3);
+  background: var(--area-4);
 }
 
 .tab-bar__item--active {
-  color: var(--accent-11);
+  color: var(--area-11);
 }
 
 .tab-bar__icon {

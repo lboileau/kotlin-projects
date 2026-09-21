@@ -9,6 +9,12 @@ const EXIT_ANIMATION_MS = 180;
 export interface CloseTarget {
   to: string;
   replace?: boolean;
+  /**
+   * Skip `canClose`. For closing from inside the very work `canClose` guards,
+   * once it has finished: the guard reads render state (`isPending`), which
+   * is still the pre-completion value in the same tick the work resolves.
+   */
+  force?: boolean;
 }
 
 export interface UseSheetOptions {
@@ -78,7 +84,7 @@ export function useSheet(parentPath: string, options?: UseSheetOptions): UseShee
 
   function close(target?: CloseTarget) {
     const opts = optionsRef.current;
-    if (opts?.canClose && !opts.canClose()) {
+    if (!target?.force && opts?.canClose && !opts.canClose()) {
       opts.onBlockedClose?.();
       return;
     }

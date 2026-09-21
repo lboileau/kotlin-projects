@@ -52,3 +52,9 @@
 .add-to-plan-sheet__empty {
   padding: 16px 4px;
 }
+
+.add-to-plan-sheet__empty {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

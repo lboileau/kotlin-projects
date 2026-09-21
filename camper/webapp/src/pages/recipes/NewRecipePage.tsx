@@ -1,67 +1,98 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Callout, IconButton, Select, Text, TextArea, TextField } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, MinusIcon, PlusIcon } from '@radix-ui/react-icons';
+import { Button } from '@radix-ui/themes';
 import { PageHeader } from '../../components/PageHeader';
 import { useCreateRecipe } from '../../queries/recipes';
-import { MEALS, THEMES, capitalize } from '../../lib/ingredientConstants';
+import { enterMovesOn } from '../../lib/enterMovesOn';
 import { parseQuantity } from '../../lib/parseQuantity';
-import { LinesEditor, type DraftLine } from './LinesEditor';
+import { toast } from '../../lib/toastStore';
+import type { PendingLine } from './LinesEditor';
+import { RecipeFormFields } from './RecipeFormFields';
+import { validateRecipeForm, type RecipeFormValues } from './recipeForm';
+import { EMPTY_DRAFT, clearNewRecipeDraft, readNewRecipeDraft, writeNewRecipeDraft } from './newRecipeDraft';
 import './RecipeForm.css';
 
 export function NewRecipePage() {
   const navigate = useNavigate();
   const createRecipe = useCreateRecipe();
 
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [servings, setServings] = useState(2);
-  const [webLink, setWebLink] = useState('');
-  const [meal, setMeal] = useState('');
-  const [theme, setTheme] = useState('');
-  const [lines, setLines] = useState<DraftLine[]>([]);
+  // Whatever was typed here before and never saved (see newRecipeDraft.ts).
+  const [restored] = useState(readNewRecipeDraft);
+  const [values, setValues] = useState<RecipeFormValues>(restored ?? EMPTY_DRAFT);
   const [error, setError] = useState<string | null>(null);
+  // The add row's contents: a line typed but not yet added with +.
+  const [pendingLine, setPendingLine] = useState<PendingLine | null>(null);
+  const [linesEditorKey, setLinesEditorKey] = useState(0);
+  // StrictMode runs mount effects twice in development; one toast is enough.
+  const announcedRef = useRef(false);
+  // Set once the recipe is created, so the unmount that follows doesn't re-save the draft.
+  const savedRef = useRef(false);
 
-  function validate(): string | null {
-    if (!name.trim()) return 'Name is required.';
-    if (!Number.isFinite(servings) || servings < 1) return 'Servings must be at least 1.';
-    if (webLink.trim()) {
-      try {
-        const parsed = new URL(webLink.trim());
-        if (!parsed.protocol.startsWith('http')) return 'Enter a valid source URL.';
-      } catch {
-        return 'Enter a valid source URL.';
-      }
+  function resetForm() {
+    setValues(EMPTY_DRAFT);
+    setError(null);
+    // The add row's ingredient and quantity live inside LinesEditor: remount
+    // it, or a half-typed line survives Discard and is auto-saved straight back.
+    setPendingLine(null);
+    setLinesEditorKey((key) => key + 1);
+  }
+
+  useEffect(() => {
+    if (restored && !announcedRef.current) {
+      announcedRef.current = true;
+      toast.info('Draft restored.', { label: 'Discard', onClick: resetForm });
     }
-    if (lines.some((line) => parseQuantity(line.quantity) === null)) {
-      return 'Every ingredient needs a valid quantity (e.g. "1", "1.5", or "1 1/2").';
+    // Once, on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // A complete line still sitting in the add row is kept as a line, so it comes back too.
+  const completePendingLine = pendingLine && parseQuantity(pendingLine.quantity) !== null ? pendingLine : null;
+
+  useEffect(() => {
+    if (savedRef.current) return;
+    const lines = completePendingLine
+      ? [...values.lines, { clientId: crypto.randomUUID(), ...completePendingLine }]
+      : values.lines;
+    writeNewRecipeDraft({ ...values, lines });
+  }, [values, completePendingLine]);
+
+  function validateSource(): string | null {
+    const webLink = values.webLink.trim();
+    if (!webLink) return null;
+    try {
+      return new URL(webLink).protocol.startsWith('http') ? null : 'Enter a valid source URL.';
+    } catch {
+      return 'Enter a valid source URL.';
     }
-    return null;
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    const validationError = validate();
-    if (validationError) {
+    const result = validateRecipeForm(values, pendingLine);
+    const validationError = 'error' in result ? result.error : validateSource();
+    if (validationError || 'error' in result) {
       setError(validationError);
       return;
     }
     setError(null);
 
     const created = await createRecipe.mutateAsync({
-      name: name.trim(),
-      description: description.trim() || undefined,
-      webLink: webLink.trim() || undefined,
-      baseServings: servings,
-      meal: meal || undefined,
-      theme: theme || undefined,
-      // validate() above already confirmed every line parses; the `?? 0` fallback never triggers.
-      ingredients: lines.map((line) => ({
+      name: values.name.trim(),
+      description: values.description.trim() || undefined,
+      webLink: values.webLink.trim() || undefined,
+      baseServings: values.servings,
+      meal: values.meal || undefined,
+      theme: values.theme || undefined,
+      // validateRecipeForm confirmed every line parses; the `?? 0` fallback never triggers.
+      ingredients: result.lines.map((line) => ({
         ingredientId: line.ingredient.id,
         quantity: parseQuantity(line.quantity) ?? 0,
         unit: line.unit,
       })),
     });
+    savedRef.current = true;
+    clearNewRecipeDraft();
     navigate(`/recipes/${created.id}`, { replace: true });
   }
 
@@ -70,127 +101,23 @@ export function NewRecipePage() {
       <PageHeader
         title="New recipe"
         backTo="/recipes"
+        task
         actions={
           <Button size="3" type="submit" form="new-recipe-form" loading={createRecipe.isPending}>
             Save
           </Button>
         }
       />
-      <form id="new-recipe-form" className="recipe-form-page__body" onSubmit={handleSubmit}>
-        <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-          Name
-          <TextField.Root
-            size="3"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            autoFocus
-            autoCapitalize="words"
-            enterKeyHint="next"
-          />
-        </Text>
-
-        <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-          Description
-          <TextArea
-            size="3"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={3}
-            autoCapitalize="sentences"
-          />
-        </Text>
-
-        <div className="recipe-form-page__field">
-          <Text as="span" size="2" weight="medium">
-            Servings
-          </Text>
-          <div className="recipe-form-page__stepper">
-            <IconButton
-              size="3"
-              type="button"
-              variant="soft"
-              aria-label="Decrease servings"
-              className="recipe-form-page__icon-button"
-              onClick={() => setServings((s) => Math.max(1, s - 1))}
-            >
-              <MinusIcon />
-            </IconButton>
-            <Text as="span" size="4" weight="medium" className="recipe-form-page__stepper-value">
-              {servings}
-            </Text>
-            <IconButton
-              size="3"
-              type="button"
-              variant="soft"
-              aria-label="Increase servings"
-              className="recipe-form-page__icon-button"
-              onClick={() => setServings((s) => s + 1)}
-            >
-              <PlusIcon />
-            </IconButton>
-          </div>
-        </div>
-
-        <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-          Source URL
-          <TextField.Root
-            type="url"
-            inputMode="url"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck={false}
-            size="3"
-            placeholder="https://…"
-            value={webLink}
-            onChange={(event) => setWebLink(event.target.value)}
-          />
-        </Text>
-
-        <div className="recipe-form-page__row">
-          <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-            Meal
-            <Select.Root value={meal} onValueChange={setMeal} size="3">
-              <Select.Trigger placeholder="None" />
-              <Select.Content>
-                {MEALS.map((m) => (
-                  <Select.Item key={m} value={m}>
-                    {capitalize(m)}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </Text>
-
-          <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-            Theme
-            <Select.Root value={theme} onValueChange={setTheme} size="3">
-              <Select.Trigger placeholder="None" />
-              <Select.Content>
-                {THEMES.map((t) => (
-                  <Select.Item key={t} value={t}>
-                    {capitalize(t)}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </Text>
-        </div>
-
-        <div className="recipe-form-page__field">
-          <Text as="span" size="2" weight="medium">
-            Ingredients
-          </Text>
-          <LinesEditor lines={lines} onChange={setLines} />
-        </div>
-
-        {error && (
-          <Callout.Root color="red" variant="surface" size="1" role="alert">
-            <Callout.Icon>
-              <ExclamationTriangleIcon />
-            </Callout.Icon>
-            <Callout.Text>{error}</Callout.Text>
-          </Callout.Root>
-        )}
+      <form id="new-recipe-form" className="recipe-form-page__body" onSubmit={handleSubmit} onKeyDown={enterMovesOn}>
+        <RecipeFormFields
+          values={values}
+          onChange={(patch) => setValues((current) => ({ ...current, ...patch }))}
+          onPendingLineChange={setPendingLine}
+          linesEditorKey={linesEditorKey}
+          sourceEditable
+          autoFocusName
+          error={error}
+        />
       </form>
     </div>
   );

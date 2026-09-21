@@ -1,4 +1,4 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { Badge, Button, Heading, Text } from '@radix-ui/themes';
 import { ChevronRightIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageLoader } from '../../components/PageLoader';
@@ -9,6 +9,7 @@ import { BottomBar } from '../../components/BottomBar';
 import { usePlans } from '../../queries/plans';
 import { formatRelativeTime } from '../../lib/relativeTime';
 import { planShareMeta } from '../../lib/planShareMeta';
+import { getSelectedPlanId } from '../../lib/selectedPlan';
 import './PlansPage.css';
 
 function recipeCountLabel(recipeCount: number): string {
@@ -16,8 +17,23 @@ function recipeCountLabel(recipeCount: number): string {
   return `${recipeCount} ${recipeCount === 1 ? 'recipe' : 'recipes'}`;
 }
 
+/**
+ * /plans. The Plans tab is one view, the plan being worked on, and plans are
+ * switched from its header (PlanHeader) — so with a plan selected this just
+ * goes there, the same way /shopping does (ShoppingRedirect). What renders
+ * below is only what there is to show without one: the first-run empty
+ * state, or the list to pick from after the selected plan was deleted or
+ * left. /plans/new still renders over it, for the first plan.
+ */
 export function PlansPage() {
+  const selectedPlanId = getSelectedPlanId();
+  const atRoot = /^\/plans\/?$/.test(useLocation().pathname);
   const { data: plans, isLoading, isError, refetch } = usePlans();
+
+  if (selectedPlanId && atRoot) {
+    return <Navigate to={`/plans/${selectedPlanId}`} replace />;
+  }
+
   const hasPlans = !!plans && plans.length > 0;
   // Whether there's already data to show — used below so a background
   // refetch error (window focus) falls through to the normal render

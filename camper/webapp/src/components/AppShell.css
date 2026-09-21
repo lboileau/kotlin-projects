@@ -28,3 +28,48 @@
     border-right: 1px solid var(--gray-5);
   }
 }
+
+/*
+ * Direction says depth: a page one level deeper arrives from the right,
+ * going back arrives from the left, and a sideways move (another tab, a
+ * sibling screen) fades. Enter-only and short, so it never delays a tap.
+ * <main> is keyed by page (AppShell.tsx), so each page is a fresh element
+ * and the animation simply runs on mount; sheets have their own motion.
+ */
+.app-shell__scroll[data-transition='forward'] {
+  animation: app-shell-enter-forward 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app-shell__scroll[data-transition='back'] {
+  animation: app-shell-enter-back 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.app-shell__scroll[data-transition='fade'] {
+  animation: app-shell-enter-fade 160ms ease-out;
+}
+
+@keyframes app-shell-enter-forward {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+@keyframes app-shell-enter-back {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes app-shell-enter-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell__scroll[data-transition] {
+    animation: none;
+  }
+}

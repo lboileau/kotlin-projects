@@ -4,6 +4,7 @@ import { getUser, type AuthUser } from '../api/auth';
 import { ApiError } from '../api/http';
 import { AuthContext, type AuthContextValue } from './AuthContext';
 import { readStoredUser, writeStoredUser } from './storage';
+import { clearNavMemory } from '../lib/navHistory';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
@@ -15,6 +16,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     writeStoredUser(null);
     setUser(null);
     queryClient.clear();
+    clearNavMemory();
   }, [queryClient]);
 
   const signIn = useCallback((nextUser: AuthUser) => {

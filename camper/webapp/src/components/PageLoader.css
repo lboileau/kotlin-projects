@@ -5,7 +5,8 @@
   justify-content: center;
   min-height: 240px;
   padding: 32px 16px;
-  color: var(--accent-9);
+  /* The area's identity colour (styles/areas.css), like the header above it. */
+  color: var(--area-9);
 }
 
 .page-loader__icon path {
@@ -16,7 +17,7 @@
 
 /* The small inner marks follow the outline, in a lighter tone. */
 .page-loader__icon .page-loader__detail {
-  stroke: var(--accent-8);
+  stroke: var(--area-8);
   animation-delay: 0.35s;
 }
 

@@ -1,16 +1,19 @@
 import { useState, type FormEvent } from 'react';
-import { Outlet, useParams } from 'react-router-dom';
-import { Badge, Button, Callout, Heading, IconButton, Select, Skeleton, Text, TextArea, TextField } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, ExternalLinkIcon, MinusIcon, PlusIcon } from '@radix-ui/react-icons';
+import { useParams } from 'react-router-dom';
+import { Button, Callout, Skeleton, Text } from '@radix-ui/themes';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
-import { SheetLink } from '../../components/SheetLink';
+import { useBack } from '../../components/useBack';
 import { QueryErrorState } from '../../components/QueryErrorState';
-import { useRecipe, useUpdateRecipe } from '../../queries/recipes';
-import { MEALS, THEMES, capitalize } from '../../lib/ingredientConstants';
-import { formatQuantity } from '../../lib/formatQuantity';
+import { useRecipe, useSaveRecipeEdits, type RecipeEdits } from '../../queries/recipes';
+import { parseQuantity } from '../../lib/parseQuantity';
+import { enterMovesOn } from '../../lib/enterMovesOn';
 import { toast } from '../../lib/toastStore';
 import { ApiError } from '../../api/http';
-import type { RecipeDetailResponse } from '../../api/recipes';
+import type { RecipeDetailResponse, UpdateRecipeRequest } from '../../api/recipes';
+import type { DraftLine, PendingLine } from './LinesEditor';
+import { RecipeFormFields } from './RecipeFormFields';
+import { validateRecipeForm, type RecipeFormValues } from './recipeForm';
 import './RecipeForm.css';
 
 /**
@@ -34,11 +37,10 @@ export function EditRecipePage() {
   if (isLoading) {
     return (
       <div className="recipe-form-page">
-        <PageHeader title="Edit recipe" backTo={backTo} />
+        <PageHeader title="Edit recipe" backTo={backTo} task />
         <div className="recipe-form-page__body">
           <Skeleton className="recipe-form-page__skeleton-block" />
         </div>
-        <Outlet />
       </div>
     );
   }
@@ -50,7 +52,7 @@ export function EditRecipePage() {
   if (notFound) {
     return (
       <div className="recipe-form-page">
-        <PageHeader title="Edit recipe" backTo="/recipes" />
+        <PageHeader title="Edit recipe" backTo="/recipes" task />
         <div className="recipe-form-page__body">
           <Callout.Root color="red" variant="surface" role="alert">
             <Callout.Icon>
@@ -59,7 +61,6 @@ export function EditRecipePage() {
             <Callout.Text>This recipe couldn&apos;t be found.</Callout.Text>
           </Callout.Root>
         </div>
-        <Outlet />
       </div>
     );
   }
@@ -69,11 +70,10 @@ export function EditRecipePage() {
   if (isError && !recipe) {
     return (
       <div className="recipe-form-page">
-        <PageHeader title="Edit recipe" backTo="/recipes" />
+        <PageHeader title="Edit recipe" backTo="/recipes" task />
         <div className="recipe-form-page__body">
           <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
         </div>
-        <Outlet />
       </div>
     );
   }
@@ -91,42 +91,87 @@ export function EditRecipePage() {
 }
 
 function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; backTo: string }) {
-  const updateRecipe = useUpdateRecipe(recipe.id);
+  const saveEdits = useSaveRecipeEdits(recipe.id);
+  // Across tabs too: the form may have been opened from a plan's view of the recipe.
+  const { goBack } = useBack(backTo, { acrossAreas: true });
 
-  const [name, setName] = useState(recipe.name);
-  const [description, setDescription] = useState(recipe.description ?? '');
-  const [servings, setServings] = useState(recipe.baseServings);
-  const [meal, setMeal] = useState(recipe.meal ?? '');
-  const [theme, setTheme] = useState(recipe.theme ?? '');
+  // Lines with a confirmed ingredient are edited here. An imported draft's
+  // lines that are still in review have none yet; they are resolved on the
+  // recipe's page and left alone by this form.
+  const [editableLines] = useState<DraftLine[]>(() =>
+    recipe.ingredients.flatMap((line) =>
+      line.ingredient
+        ? [{ clientId: line.id, lineId: line.id, ingredient: line.ingredient, quantity: formatEditableQuantity(line.quantity), unit: line.unit }]
+        : [],
+    ),
+  );
+  const inReviewCount = recipe.ingredients.length - editableLines.length;
+
+  const [values, setValues] = useState<RecipeFormValues>({
+    name: recipe.name,
+    description: recipe.description ?? '',
+    servings: recipe.baseServings,
+    webLink: recipe.webLink ?? '',
+    meal: recipe.meal ?? '',
+    theme: recipe.theme ?? '',
+    lines: editableLines,
+  });
+  const [pendingLine, setPendingLine] = useState<PendingLine | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave(event: FormEvent) {
     event.preventDefault();
-    if (!name.trim()) {
-      setError('Name is required.');
-      return;
-    }
-    if (!Number.isFinite(servings) || servings < 1) {
-      setError('Servings must be at least 1.');
+    const result = validateRecipeForm(values, pendingLine);
+    if ('error' in result) {
+      setError(result.error);
       return;
     }
     setError(null);
+
     // description/meal/theme are omitted when unchanged, but sent as "" (not
     // omitted) when the user cleared a previously non-empty value — the
     // backend only clears a field it's explicitly given "" for, so omitting
     // it there would silently leave the old value in place.
-    const payload: Parameters<typeof updateRecipe.mutateAsync>[0] = {
-      name: name.trim(),
-      baseServings: servings,
+    const fields: UpdateRecipeRequest = {};
+    if (values.name.trim() !== recipe.name) fields.name = values.name.trim();
+    if (values.servings !== recipe.baseServings) fields.baseServings = values.servings;
+    const descriptionPatch = fieldPatch(recipe.description, values.description);
+    if (descriptionPatch !== undefined) fields.description = descriptionPatch;
+    const mealPatch = fieldPatch(recipe.meal, values.meal);
+    if (mealPatch !== undefined) fields.meal = mealPatch;
+    const themePatch = fieldPatch(recipe.theme, values.theme);
+    if (themePatch !== undefined) fields.theme = themePatch;
+
+    // What happened to the lines this form started with, and what is new.
+    // validateRecipeForm confirmed every quantity parses; `?? 0` never triggers.
+    const kept = new Map(result.lines.flatMap((line) => (line.lineId ? [[line.lineId, line] as const] : [])));
+    const edits: RecipeEdits = {
+      fields: Object.keys(fields).length > 0 ? fields : undefined,
+      removedLineIds: editableLines.flatMap((line) => (line.lineId && !kept.has(line.lineId) ? [line.lineId] : [])),
+      changedLines: editableLines.flatMap((original) => {
+        const current = original.lineId ? kept.get(original.lineId) : undefined;
+        if (!current || !original.lineId) return [];
+        const quantity = parseQuantity(current.quantity) ?? 0;
+        const unchanged = quantity === (parseQuantity(original.quantity) ?? 0) && current.unit === original.unit;
+        return unchanged ? [] : [{ lineId: original.lineId, ingredientId: current.ingredient.id, quantity, unit: current.unit }];
+      }),
+      addedLines: result.lines
+        .filter((line) => !line.lineId)
+        .map((line) => ({ ingredientId: line.ingredient.id, quantity: parseQuantity(line.quantity) ?? 0, unit: line.unit })),
     };
-    const descriptionPatch = fieldPatch(recipe.description, description);
-    if (descriptionPatch !== undefined) payload.description = descriptionPatch;
-    const mealPatch = fieldPatch(recipe.meal, meal);
-    if (mealPatch !== undefined) payload.meal = mealPatch;
-    const themePatch = fieldPatch(recipe.theme, theme);
-    if (themePatch !== undefined) payload.theme = themePatch;
-    await updateRecipe.mutateAsync(payload);
+
+    try {
+      await saveEdits.mutateAsync(edits);
+    } catch {
+      // The global mutation error toast said what failed. Some of the changes
+      // may have been saved before it; the recipe is being refetched, so
+      // leave the form rather than show it a state that may no longer be true.
+      goBack();
+      return;
+    }
     toast.info('Recipe updated.');
+    // An edit is done once it is saved: back to where it was opened from.
+    goBack();
   }
 
   return (
@@ -134,162 +179,34 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
       <PageHeader
         title="Edit recipe"
         backTo={backTo}
+        task
         actions={
-          <Button size="3" type="submit" form="edit-recipe-form" loading={updateRecipe.isPending}>
+          <Button size="3" type="submit" form="edit-recipe-form" loading={saveEdits.isPending}>
             Save
           </Button>
         }
       />
-      <form id="edit-recipe-form" className="recipe-form-page__body" onSubmit={handleSave}>
-        <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-          Name
-          <TextField.Root
-            size="3"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            autoCapitalize="words"
-            enterKeyHint="next"
-          />
-        </Text>
-
-        <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-          Description
-          <TextArea
-            size="3"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            rows={3}
-            autoCapitalize="sentences"
-          />
-        </Text>
-
-        <div className="recipe-form-page__field">
-          <Text as="span" size="2" weight="medium">
-            Servings
-          </Text>
-          <div className="recipe-form-page__stepper">
-            <IconButton
-              size="3"
-              type="button"
-              variant="soft"
-              aria-label="Decrease servings"
-              className="recipe-form-page__icon-button"
-              onClick={() => setServings((s) => Math.max(1, s - 1))}
-            >
-              <MinusIcon />
-            </IconButton>
-            <Text as="span" size="4" weight="medium" className="recipe-form-page__stepper-value">
-              {servings}
+      <form id="edit-recipe-form" className="recipe-form-page__body" onSubmit={handleSave} onKeyDown={enterMovesOn}>
+        <RecipeFormFields
+          values={values}
+          onChange={(patch) => setValues((current) => ({ ...current, ...patch }))}
+          onPendingLineChange={setPendingLine}
+          sourceEditable={false}
+          error={error}
+        >
+          {inReviewCount > 0 && (
+            <Text as="p" size="1" color="gray">
+              {inReviewCount === 1 ? '1 imported ingredient is' : `${inReviewCount} imported ingredients are`} still in
+              review and not shown here. Review {inReviewCount === 1 ? 'it' : 'them'} on the recipe&apos;s page.
             </Text>
-            <IconButton
-              size="3"
-              type="button"
-              variant="soft"
-              aria-label="Increase servings"
-              className="recipe-form-page__icon-button"
-              onClick={() => setServings((s) => s + 1)}
-            >
-              <PlusIcon />
-            </IconButton>
-          </div>
-        </div>
-
-        {recipe.webLink && (
-          <div className="recipe-form-page__field">
-            <Text as="span" size="2" weight="medium">
-              Source
-            </Text>
-            <a
-              href={recipe.webLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="recipe-form-page__readonly-link"
-            >
-              {recipe.webLink} <ExternalLinkIcon />
-            </a>
-          </div>
-        )}
-
-        <div className="recipe-form-page__row">
-          <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-            Meal
-            <Select.Root value={meal} onValueChange={setMeal} size="3">
-              <Select.Trigger placeholder="None" />
-              <Select.Content>
-                {MEALS.map((m) => (
-                  <Select.Item key={m} value={m}>
-                    {capitalize(m)}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </Text>
-
-          <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-            Theme
-            <Select.Root value={theme} onValueChange={setTheme} size="3">
-              <Select.Trigger placeholder="None" />
-              <Select.Content>
-                {THEMES.map((t) => (
-                  <Select.Item key={t} value={t}>
-                    {capitalize(t)}
-                  </Select.Item>
-                ))}
-              </Select.Content>
-            </Select.Root>
-          </Text>
-        </div>
-
-        {error && (
-          <Callout.Root color="red" variant="surface" size="1" role="alert">
-            <Callout.Icon>
-              <ExclamationTriangleIcon />
-            </Callout.Icon>
-            <Callout.Text>{error}</Callout.Text>
-          </Callout.Root>
-        )}
-
-        <div className="recipe-form-page__lines-header">
-          <Heading size="3">Ingredients</Heading>
-          <Text as="span" size="1" color="gray">
-            Changes save immediately
-          </Text>
-        </div>
-
-        {recipe.ingredients.length === 0 ? (
-          <Text as="p" size="2" color="gray">
-            No ingredients yet.
-          </Text>
-        ) : (
-          <ul className="recipe-form-page__lines">
-            {recipe.ingredients.map((line) => {
-              const ingredientName =
-                line.ingredient?.name ?? line.matchedIngredient?.name ?? line.suggestedIngredientName ?? line.originalText ?? 'Unknown ingredient';
-              return (
-                <li key={line.id}>
-                  {/* Relative: these are children of THIS route (`/recipes/:id/edit/lines/...`),
-                      not of the detail route, so a save/cancel here returns to this edit page. */}
-                  <SheetLink to={`lines/${line.id}`} className="recipe-form-page__line">
-                    <Text as="span" size="2" className="recipe-form-page__line-text">
-                      {formatQuantity(line.quantity)} {line.unit} {ingredientName}
-                    </Text>
-                    {line.status === 'pending_review' && (
-                      <Badge color="amber" variant="soft" size="1">
-                        Needs review
-                      </Badge>
-                    )}
-                  </SheetLink>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-
-        <SheetLink to="lines/new" className="recipe-form-page__add-line">
-          <PlusIcon /> Add ingredient
-        </SheetLink>
+          )}
+        </RecipeFormFields>
       </form>
-      <Outlet />
     </div>
   );
+}
+
+/** A saved quantity as the text the line's quantity field shows: "1.5", not "1½", so it can be edited and re-parsed. */
+function formatEditableQuantity(quantity: number): string {
+  return String(Math.round(quantity * 1000) / 1000);
 }

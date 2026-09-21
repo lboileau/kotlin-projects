@@ -2,7 +2,9 @@
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
-  bottom: calc(76px + env(safe-area-inset-bottom));
+  /* Above the tab bar, and above the page's docked BottomBar when it has one
+     (BottomBar.tsx publishes its height), so a toast never covers a button. */
+  bottom: calc(76px + var(--bottom-bar-height, 0px) + env(safe-area-inset-bottom));
   width: min(calc(100% - 32px), 640px);
   display: flex;
   flex-direction: column;
@@ -79,7 +81,11 @@ body:has(.sheet-content[data-state='open']) .toast-region {
   font-weight: 600;
   font-size: 0.875rem;
   cursor: pointer;
-  padding: 4px 8px;
+  /* A full touch target: Undo is tapped in a hurry. */
+  min-height: 44px;
+  min-width: 64px;
+  padding: 0 12px;
+  touch-action: manipulation;
 }
 
 .toast-region__dismiss {
@@ -90,8 +96,11 @@ body:has(.sheet-content[data-state='open']) .toast-region {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
-  border-radius: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 8px;
+  touch-action: manipulation;
 }
 
 .toast-region__dismiss:hover {

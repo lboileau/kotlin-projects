@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Badge, Skeleton, Text } from '@radix-ui/themes';
-import { CheckIcon } from '@radix-ui/react-icons';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Badge, Button, Skeleton, Text } from '@radix-ui/themes';
+import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { QueryErrorState } from '../../components/QueryErrorState';
@@ -10,9 +10,17 @@ import { setSelectedPlanId } from '../../lib/selectedPlan';
 import { planShareMeta } from '../../lib/planShareMeta';
 import './SwitchPlanSheet.css';
 
+/**
+ * The plan-name dropdown of `PlanHeader`. Mounted under both screens that
+ * show one plan — the plan itself and its shopping list (router.tsx) — and
+ * switching keeps the user on the same kind of screen, in the same tab.
+ */
 export function SwitchPlanSheet() {
   const { planId } = useParams<{ planId: string }>();
-  const sheet = useSheet(`/plans/${planId}/shopping`);
+  // `/plans/:id/switch` or `/plans/:id/shopping/switch`: the parent is the page this is open over.
+  const parentPath = useLocation().pathname.replace(/\/switch\/?$/, '');
+  const overShopping = parentPath.endsWith('/shopping');
+  const sheet = useSheet(parentPath);
   const navigate = useNavigate();
   const { data: plans, isLoading, isError, refetch } = usePlans();
   // Whether there's already data to show — used below so a background
@@ -35,7 +43,7 @@ export function SwitchPlanSheet() {
 
   function handleSelect(id: string) {
     setSelectedPlanId(id);
-    navigate(`/plans/${id}/shopping`, { replace: true });
+    navigate(overShopping ? `/plans/${id}/shopping` : `/plans/${id}`, { replace: true });
   }
 
   return (
@@ -87,6 +95,16 @@ export function SwitchPlanSheet() {
           })}
         </div>
       )}
+
+      {/* Replaces this sheet with the New plan sheet over the same page. */}
+      <Button
+        size="3"
+        variant="soft"
+        className="switch-plan-sheet__new"
+        onClick={() => navigate(`${parentPath}/new`, { replace: true })}
+      >
+        <PlusIcon /> New plan
+      </Button>
     </Sheet>
   );
 }

@@ -4,64 +4,9 @@
   min-height: 100%;
 }
 
-.shopping-page__header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--color-background);
-  border-bottom: 1px solid var(--gray-5);
-  padding: 12px 16px 10px;
-  padding-top: calc(12px + env(safe-area-inset-top));
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.shopping-page__header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.shopping-page__plan-name {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 44px;
-  min-width: 0;
-  flex: 1;
-  padding: 10px 16px;
-  border: none;
-  border-radius: var(--radius-4);
-  background: var(--accent-2);
-  color: var(--gray-12);
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.shopping-page__plan-name:hover {
-  background: var(--accent-3);
-}
-
-.shopping-page__plan-name-text {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.shopping-page__plan-name:focus-visible {
-  outline: 2px solid var(--accent-9);
-  outline-offset: 2px;
-}
-
-.shopping-page__header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+.shopping-page__progress-count {
+  color: var(--gray-11);
+  font-variant-numeric: tabular-nums;
 }
 
 .shopping-page__progress-row {
@@ -121,11 +66,62 @@
 .shopping-page__quick-add {
   display: flex;
   gap: 8px;
-  align-items: center;
+  align-items: flex-end; /* the buttons stay on the last line as the field grows */
 }
 
+/* A textarea made to look like a size-3 Radix TextField: one line until the
+   text wraps, then up to three. It grows through CSS alone (`field-sizing`) —
+   never a script writing to a field that may be mid-dictation. Browsers
+   without `field-sizing` keep one line and scroll inside it. */
 .shopping-page__quick-add-input {
   flex: 1;
+  min-width: 0; /* without this a flex item refuses to shrink past its content */
+  box-sizing: border-box;
+  field-sizing: content;
+  min-height: var(--space-7);
+  max-height: calc(var(--space-7) + 2 * 1.4em);
+  resize: none;
+  font: inherit;
+  font-size: 16px; /* < 16px makes iOS Safari zoom the page on focus */
+  line-height: 1.4;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-3);
+  box-shadow: inset 0 0 0 1px var(--gray-a7);
+  background: var(--color-surface);
+  color: var(--gray-12);
+}
+.shopping-page__quick-add-input::placeholder {
+  color: var(--gray-a10);
+}
+.shopping-page__quick-add-input:focus-visible {
+  outline: 2px solid var(--accent-8);
+  outline-offset: -1px;
+}
+
+/* Shown above the field once the text parses into several items. */
+.shopping-page__quick-add-multi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.shopping-page__quick-add-as-one {
+  min-height: 44px;
+  padding: 0 2px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--font-size-2);
+  color: var(--accent-11);
+  text-decoration: underline;
+}
+
+/* The button may not be squeezed out of its 44px target. */
+.shopping-page__quick-add > button[type='submit'] {
+  flex: 0 0 auto;
 }
 
 .shopping-page__alert-actions {

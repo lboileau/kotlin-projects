@@ -4,8 +4,10 @@ import { Button, Select, Text, TextField } from '@radix-ui/themes';
 import { ApiError } from '../api/http';
 import type { IngredientResponse } from '../api/ingredients';
 import { createOrFindIngredient, useIngredients } from '../queries/ingredients';
-import { CATEGORIES, UNITS, capitalize, normalizeCategory, normalizeUnit } from '../lib/ingredientConstants';
+import { UNITS, UNIT_FOR_CATEGORY, capitalize, normalizeCategory, normalizeUnit, type Category } from '../lib/ingredientConstants';
+import { scrollIntoContainer } from '../lib/scrollIntoContainer';
 import { toast } from '../lib/toastStore';
+import { CategoryChips } from './CategoryChips';
 import { SheetSelectContent } from './SheetSelectContent';
 import './IngredientPicker.css';
 
@@ -82,11 +84,14 @@ export function IngredientPicker({
   const [activeIndex, setActiveIndex] = useState(0);
   const [creating, setCreating] = useState(false);
   const [createName, setCreateName] = useState('');
-  const [createCategory, setCreateCategory] = useState<string>(normalizeCategory(suggestedCategory));
+  // No default category unless the recipe import suggested one: see CategoryChips.
+  const [createCategory, setCreateCategory] = useState<string>(suggestedCategory ? normalizeCategory(suggestedCategory) : '');
   const [createUnit, setCreateUnit] = useState<string>(normalizeUnit(suggestedUnit));
 
   const inputId = useId();
   const listId = useId();
+  const categoryLabelId = useId();
+  const [createCategoryMissing, setCreateCategoryMissing] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const trimmedQuery = query.trim();
@@ -111,9 +116,21 @@ export function IngredientPicker({
 
   function startCreate() {
     setCreateName(trimmedQuery);
-    setCreateCategory(normalizeCategory(suggestedCategory));
+    setCreateCategory(suggestedCategory ? normalizeCategory(suggestedCategory) : '');
     setCreateUnit(normalizeUnit(suggestedUnit));
     setCreating(true);
+    // The panel opens below the input, often under the tab bar or the
+    // keyboard: bring the whole picker, panel included, to the top.
+    window.setTimeout(() => {
+      if (containerRef.current) scrollIntoContainer(containerRef.current);
+    }, 50);
+  }
+
+  function handleCreateCategoryChange(category: string) {
+    setCreateCategory(category);
+    setCreateCategoryMissing(false);
+    // Suggest the category's usual unit, unless the import already suggested one.
+    if (!suggestedUnit) setCreateUnit(UNIT_FOR_CATEGORY[category as Category]);
   }
 
   function cancelCreate() {
@@ -139,6 +156,10 @@ export function IngredientPicker({
   async function confirmCreate() {
     const name = createName.trim();
     if (!name) return;
+    if (!createCategory) {
+      setCreateCategoryMissing(true);
+      return;
+    }
     try {
       // Resolves to the existing ingredient on a 409 name collision rather than throwing.
       const result = await createIngredient.mutateAsync({
@@ -219,8 +240,9 @@ export function IngredientPicker({
           // Inside a scrolling sheet body, the on-screen keyboard can push the
           // results (and especially the Create row) out of view — nudge the
           // picker back into view once the keyboard's animation has settled.
+          // Not scrollIntoView: it also scrolls <body>, shifting the whole app.
           window.setTimeout(() => {
-            containerRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+            if (containerRef.current) scrollIntoContainer(containerRef.current);
           }, 300);
         }}
         onChange={(event) => {
@@ -293,34 +315,35 @@ export function IngredientPicker({
               enterKeyHint="done"
             />
           </Text>
-          <div className="ingredient-picker__create-row">
-            <Text as="label" size="2" weight="medium" className="ingredient-picker__create-field">
+          <div className="ingredient-picker__create-field">
+            <Text as="span" size="2" weight="medium" id={categoryLabelId}>
               Category
-              <Select.Root value={createCategory} onValueChange={setCreateCategory} size="3">
-                <Select.Trigger />
-                <SheetSelectContent>
-                  {CATEGORIES.map((category) => (
-                    <Select.Item key={category} value={category}>
-                      {capitalize(category)}
-                    </Select.Item>
-                  ))}
-                </SheetSelectContent>
-              </Select.Root>
             </Text>
-            <Text as="label" size="2" weight="medium" className="ingredient-picker__create-field">
-              Unit
-              <Select.Root value={createUnit} onValueChange={setCreateUnit} size="3">
-                <Select.Trigger />
-                <SheetSelectContent>
-                  {UNITS.map((unit) => (
-                    <Select.Item key={unit} value={unit}>
-                      {unit}
-                    </Select.Item>
-                  ))}
-                </SheetSelectContent>
-              </Select.Root>
-            </Text>
+            <CategoryChips
+              value={createCategory}
+              onChange={handleCreateCategoryChange}
+              labelledBy={categoryLabelId}
+              invalid={createCategoryMissing}
+            />
+            {createCategoryMissing && (
+              <Text as="p" size="1" color="red" role="alert">
+                Choose a category.
+              </Text>
+            )}
           </div>
+          <Text as="label" size="2" weight="medium" className="ingredient-picker__create-field">
+            Unit
+            <Select.Root value={createUnit} onValueChange={setCreateUnit} size="3">
+              <Select.Trigger />
+              <SheetSelectContent>
+                {UNITS.map((unit) => (
+                  <Select.Item key={unit} value={unit}>
+                    {unit}
+                  </Select.Item>
+                ))}
+              </SheetSelectContent>
+            </Select.Root>
+          </Text>
           <div className="ingredient-picker__create-actions">
             <Button size="3" type="button" variant="soft" onClick={cancelCreate} disabled={createIngredient.isPending}>
               Cancel

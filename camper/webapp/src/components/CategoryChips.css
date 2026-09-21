@@ -1,0 +1,33 @@
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-chips__chip {
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--gray-6);
+  background: transparent;
+  color: var(--gray-11);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.category-chips[aria-invalid='true'] .category-chips__chip {
+  border-color: var(--red-8);
+}
+
+.category-chips__chip--active {
+  background: var(--accent-9);
+  border-color: var(--accent-9);
+  color: var(--accent-contrast);
+}
+
+.category-chips__chip:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}

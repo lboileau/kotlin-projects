@@ -1,4 +1,5 @@
 import { readStoredUser } from '../auth/storage';
+import { slowNetworkDelay } from '../lib/slowNetwork';
 
 export interface ApiErrorBody {
   code: string;
@@ -71,6 +72,7 @@ async function requestCore<T>(path: string, options: RequestOptions = {}): Promi
 
   let response: Response;
   try {
+    await slowNetworkDelay();
     response = await fetch(path, {
       ...rest,
       headers: finalHeaders,

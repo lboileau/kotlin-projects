@@ -1,22 +1,21 @@
 import { useState, type FormEvent } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Button, Text, TextField } from '@radix-ui/themes';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { Stepper } from '../../components/Stepper';
 import { useCreatePlan } from '../../queries/plans';
+import { DEFAULT_PLAN_SERVINGS, todaysDateLabel } from '../../lib/planDefaults';
 import './NewPlanSheet.css';
 
-/** "Sep 20" — today's date, used as the default plan name when the field is left blank. */
-function todaysDateLabel(): string {
-  return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date());
-}
-
 export function NewPlanSheet() {
-  const sheet = useSheet('/plans');
+  // Mounted under /plans (first plan) and under both one-plan screens, from
+  // the header's plan dropdown (router.tsx): the parent is the page under it.
+  const sheet = useSheet(useLocation().pathname.replace(/\/new\/?$/, ''));
   const createPlan = useCreatePlan();
 
   const [name, setName] = useState('');
-  const [servings, setServings] = useState(2);
+  const [servings, setServings] = useState(DEFAULT_PLAN_SERVINGS);
   const defaultName = todaysDateLabel();
 
   function handleSubmit(event: FormEvent) {
@@ -54,9 +53,9 @@ export function NewPlanSheet() {
 
         <div className="new-plan-sheet__servings">
           <Text as="span" size="2" weight="medium">
-            Servings
+            Servings per recipe
           </Text>
-          <Stepper value={servings} onChange={setServings} min={1} ariaLabel="Servings" />
+          <Stepper value={servings} onChange={setServings} min={1} ariaLabel="Servings per recipe" />
         </div>
 
         <Button

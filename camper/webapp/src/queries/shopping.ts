@@ -5,18 +5,20 @@ import {
   removeManualItem,
   resetPurchases,
   updatePurchase,
+  type ManualShoppingItemResponse,
   type ShoppingListResponse,
 } from '../api/shopping';
 import { ApiError } from '../api/http';
 import { shoppingKey } from './plans';
 import {
-  applyRowToggle,
+  applyRowPurchases,
   captureManualItem,
   insertTempManualItem,
   reinsertManualItem,
   removeManualItemFromList,
   replaceTempManualItem,
   restoreRowEntries,
+  type RowPurchase,
   type ShoppingRow,
 } from '../lib/shoppingRows';
 import { toast } from '../lib/toastStore';
@@ -52,11 +54,13 @@ function invalidateIfLast(queryClient: ReturnType<typeof useQueryClient>, planId
 // PATCHes for the same row can otherwise reach the server out of order
 // (tap check then uncheck fast — "uncheck" can land first). `rowChains`
 // serializes: each row's next send waits for its previous one to
-// settle. `rowLatestChecked` coalesces: if a newer tap for that row
+// settle. `rowLatestPurchases` coalesces: if a newer change for that row
 // arrives before an earlier one's turn comes, the earlier one is
 // skipped entirely and only the latest desired state is ever sent — the
 // optimistic cache write (in onMutate, unaffected by any of this) is
-// what keeps the UI feeling instant regardless.
+// what keeps the UI feeling instant regardless. A check-off and an amount
+// set from the "have" sheet are the same kind of change (a quantity per
+// entry), so they share one chain and can't overtake each other either.
 //
 // Keyed by `${planId}:${row.key}`, not `row.key` alone: ingredients are a
 // global table, so the same ingredient can appear in two different
@@ -65,16 +69,15 @@ function invalidateIfLast(queryClient: ReturnType<typeof useQueryClient>, planId
 // in another plan (e.g. switching plans quickly via SwitchPlanSheet),
 // silently dropping one of the two sends.
 const rowChains = new Map<string, Promise<void>>();
-const rowLatestChecked = new Map<string, boolean>();
+const rowLatestPurchases = new Map<string, RowPurchase[]>();
 
 function chainKey(planId: string, row: ShoppingRow): string {
   return `${planId}:${row.key}`;
 }
 
-function sendRowState(planId: string, row: ShoppingRow, checked: boolean): Promise<void> {
+function sendRowState(planId: string, purchases: RowPurchase[]): Promise<void> {
   return Promise.all(
-    row.entries.map((entry) => {
-      const quantityPurchased = checked ? entry.quantityRequired : 0;
+    purchases.map(({ entry, quantityPurchased }) => {
       return entry.manualItemId
         ? updatePurchase(planId, { manualItemId: entry.manualItemId, quantityPurchased })
         : updatePurchase(planId, { ingredientId: entry.ingredientId!, unit: entry.unit!, quantityPurchased });
@@ -82,9 +85,9 @@ function sendRowState(planId: string, row: ShoppingRow, checked: boolean): Promi
   ).then(() => undefined);
 }
 
-function syncRowState(planId: string, row: ShoppingRow, checked: boolean): Promise<void> {
+function syncRowState(planId: string, row: ShoppingRow, purchases: RowPurchase[]): Promise<void> {
   const rowKey = chainKey(planId, row);
-  rowLatestChecked.set(rowKey, checked);
+  rowLatestPurchases.set(rowKey, purchases);
 
   const previousLink = rowChains.get(rowKey) ?? Promise.resolve();
   const thisLink = previousLink
@@ -94,31 +97,32 @@ function syncRowState(planId: string, row: ShoppingRow, checked: boolean): Promi
       // future taps from ever running.
     })
     .then(() => {
-      const desired = rowLatestChecked.get(rowKey);
+      const desired = rowLatestPurchases.get(rowKey);
       if (desired === undefined) return undefined; // a later link already sent it
-      rowLatestChecked.delete(rowKey);
-      return sendRowState(planId, row, desired);
+      rowLatestPurchases.delete(rowKey);
+      return sendRowState(planId, desired);
     });
 
   rowChains.set(rowKey, thisLink);
   return thisLink;
 }
 
-interface ToggleRowInput {
+interface SetRowPurchasesInput {
   row: ShoppingRow;
-  checked: boolean;
+  /** `rowPurchasesForToggle(row, checked)` for a check-off, or the amounts typed into the "have" sheet. */
+  purchases: RowPurchase[];
 }
 
-/** Optimistic check-off: flips every entry of a merged row together. Network sends are serialized and coalesced per row (see `syncRowState`) — the cache write below is what makes it feel instant. */
-export function useToggleShoppingRow(planId: string) {
+/** Optimistic purchased-quantity write for one merged row: a check-off, or a set amount. Network sends are serialized and coalesced per row (see `syncRowState`) — the cache write below is what makes it feel instant. */
+export function useSetRowPurchases(planId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: shoppingKey(planId),
-    mutationFn: ({ row, checked }: ToggleRowInput) => syncRowState(planId, row, checked),
-    onMutate: async ({ row, checked }) => {
+    mutationFn: ({ row, purchases }: SetRowPurchasesInput) => syncRowState(planId, row, purchases),
+    onMutate: async ({ purchases }) => {
       await queryClient.cancelQueries({ queryKey: shoppingKey(planId) });
       queryClient.setQueryData<ShoppingListResponse>(shoppingKey(planId), (current) =>
-        current ? applyRowToggle(current, row, checked) : current,
+        current ? applyRowPurchases(current, purchases) : current,
       );
     },
     onError: (_error, { row }) => {
@@ -135,12 +139,28 @@ export function useToggleShoppingRow(planId: string) {
   });
 }
 
+// One add at a time per plan, same chaining as `rowChains` above. Manual
+// items are listed in the order the server created them, and several adds
+// fired together (a dictated list of items) otherwise land in any order. The
+// optimistic rows (onMutate) are unaffected and all appear at once; only the
+// requests queue. Not TanStack's `scope`: a scoped mutation only resumes
+// while the page is focused, a condition these adds have no reason to have.
+const addChains = new Map<string, Promise<unknown>>();
+
+function sendManualItemInOrder(planId: string, description: string): Promise<ManualShoppingItemResponse> {
+  const previousLink = addChains.get(planId) ?? Promise.resolve();
+  // A previous add's failure is reported through its own mutate() call.
+  const thisLink = previousLink.catch(() => undefined).then(() => addManualItem(planId, description));
+  addChains.set(planId, thisLink);
+  return thisLink;
+}
+
 /** Optimistic quick-add: inserts a temp row under Misc, swaps it for the real one on success, removes it on failure. */
 export function useAddManualShoppingItem(planId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: shoppingKey(planId),
-    mutationFn: (description: string) => addManualItem(planId, description),
+    mutationFn: (description: string) => sendManualItemInOrder(planId, description),
     onMutate: async (description) => {
       await queryClient.cancelQueries({ queryKey: shoppingKey(planId) });
       const tempId = `temp-${crypto.randomUUID()}`;

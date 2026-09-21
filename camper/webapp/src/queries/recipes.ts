@@ -58,6 +58,40 @@ export function useUpdateRecipe(recipeId: string) {
   });
 }
 
+export interface RecipeEdits {
+  /** Changed fields only; omitted when none changed. */
+  fields?: UpdateRecipeRequest;
+  removedLineIds: string[];
+  changedLines: { lineId: string; ingredientId: string; quantity: number; unit: string }[];
+  addedLines: CreateRecipeIngredientRequest[];
+}
+
+/**
+ * Saves everything the edit form changed, in one go: the recipe's fields,
+ * then its lines (removals, changes, additions) through the per-line
+ * endpoints, since there is no endpoint that replaces a recipe's lines. One
+ * call after another so a failure stops at a known point; whatever happened,
+ * the recipe is refetched afterwards so the form's next open shows the
+ * server's truth rather than a guess.
+ */
+export function useSaveRecipeEdits(recipeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ fields, removedLineIds, changedLines, addedLines }: RecipeEdits) => {
+      if (fields) await updateRecipe(recipeId, fields);
+      for (const lineId of removedLineIds) await removeRecipeIngredient(recipeId, lineId);
+      for (const { lineId, ...line } of changedLines) {
+        await resolveRecipeIngredient(recipeId, lineId, { action: 'SELECT_EXISTING', ...line });
+      }
+      for (const line of addedLines) await addRecipeIngredient(recipeId, line);
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: recipeKey(recipeId) });
+      queryClient.invalidateQueries({ queryKey: recipesKey });
+    },
+  });
+}
+
 export function useDeleteRecipe() {
   const queryClient = useQueryClient();
   return useMutation({

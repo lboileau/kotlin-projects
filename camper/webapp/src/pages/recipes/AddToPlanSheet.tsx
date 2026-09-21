@@ -1,15 +1,17 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Badge, Skeleton, Text } from '@radix-ui/themes';
-import { CheckIcon } from '@radix-ui/react-icons';
+import { Badge, Button, Skeleton, Text } from '@radix-ui/themes';
+import { CheckIcon, PlusIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { QueryErrorState } from '../../components/QueryErrorState';
-import { planKey, useAddRecipeToPlan, usePlans } from '../../queries/plans';
+import { planKey, useAddRecipeToPlan, useCreatePlan, usePlans } from '../../queries/plans';
 import type { MealPlanDetailResponse, MealPlanResponse } from '../../api/mealPlans';
 import { recipeIdsInPlan } from '../../lib/flatPlan';
-import { getSelectedPlanId } from '../../lib/selectedPlan';
+import { DEFAULT_PLAN_SERVINGS, todaysDateLabel } from '../../lib/planDefaults';
+import { getSelectedPlanId, setSelectedPlanId } from '../../lib/selectedPlan';
+import { router } from '../../router';
 import { planShareMeta } from '../../lib/planShareMeta';
 import { toast } from '../../lib/toastStore';
 import './AddToPlanSheet.css';
@@ -29,6 +31,7 @@ export function AddToPlanSheet() {
   // instead of blanking an already-loaded list.
   const hasData = !!plans;
   const addRecipe = useAddRecipeToPlan();
+  const createPlan = useCreatePlan();
 
   // One shared mutation instance is used for every row (the target plan
   // varies per tap), so its own isPending/variables only ever reflect the
@@ -78,6 +81,29 @@ export function AddToPlanSheet() {
     );
   }
 
+  // No plans yet: make the first one here, with the same defaults as the New
+  // plan sheet, rather than sending a newcomer off to another tab and back.
+  const creatingRef = useRef(false);
+  async function handleCreateAndAdd() {
+    // A ref, not the button's loading state: a second tap can land before that re-render.
+    if (!recipeId || creatingRef.current) return;
+    creatingRef.current = true;
+    try {
+      const plan = await createPlan.mutateAsync({ name: todaysDateLabel(), servings: DEFAULT_PLAN_SERVINGS });
+      setSelectedPlanId(plan.id);
+      await addRecipe.mutateAsync({ planId: plan.id, recipeId });
+      toast.info(`Added to your new plan, ${plan.name}`, {
+        label: 'Open',
+        onClick: () => void router.navigate(`/plans/${plan.id}`),
+      });
+      sheet.close();
+    } catch {
+      // The global mutation error toast already said what went wrong; stay on the sheet to retry.
+    } finally {
+      creatingRef.current = false;
+    }
+  }
+
   return (
     <Sheet {...sheet.sheetProps} title="Add to plan">
       {isLoading && (
@@ -91,9 +117,18 @@ export function AddToPlanSheet() {
       )}
 
       {!isLoading && (hasData || !isError) && orderedPlans.length === 0 && (
-        <Text color="gray" size="2" className="add-to-plan-sheet__empty">
-          You don&apos;t have any plans yet — create one from the Plans tab first.
-        </Text>
+        <div className="add-to-plan-sheet__empty">
+          <Text as="p" color="gray" size="2">
+            You don&apos;t have any plans yet.
+          </Text>
+          <Button
+            size="3"
+            loading={createPlan.isPending || addRecipe.isPending}
+            onClick={() => void handleCreateAndAdd()}
+          >
+            <PlusIcon /> Create a plan and add this recipe
+          </Button>
+        </div>
       )}
 
       {!isLoading && (hasData || !isError) && orderedPlans.length > 0 && (

@@ -1,18 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, Outlet, useParams } from 'react-router-dom';
-import { Badge, Button, IconButton, Separator, Text, TextField } from '@radix-ui/themes';
+import { Button, Separator, Text, TextField } from '@radix-ui/themes';
 import { ListBulletIcon, Pencil2Icon, PlusIcon, Share1Icon, TrashIcon } from '@radix-ui/react-icons';
 import { BottomBar } from '../../components/BottomBar';
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
+import { PlanHeader } from '../../components/PlanHeader';
+import { RowActionButton } from '../../components/RowActionButton';
 import { SheetLink } from '../../components/SheetLink';
 import { Stepper } from '../../components/Stepper';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { ApiError } from '../../api/http';
-import { usePlan, useAddRecipeToPlan, useRemoveRecipeFromPlan, useUpdatePlan } from '../../queries/plans';
+import { usePlan, usePlans, useAddRecipeToPlan, useRemoveRecipeFromPlan, useUpdatePlan } from '../../queries/plans';
 import { flattenMealPlan, type FlatPlanRecipe } from '../../lib/flatPlan';
 import { clearSelectedPlanId, getSelectedPlanId, setSelectedPlanId } from '../../lib/selectedPlan';
 import { toast } from '../../lib/toastStore';
+import { usePageTitle } from '../../lib/usePageTitle';
 import { useMealPlanSync } from '../../sync/useMealPlanSync';
 import { useSharePlan } from './useSharePlan';
 import './PlanDetailPage.css';
@@ -25,6 +28,12 @@ export function PlanDetailPage() {
   const sharePlan = useSharePlan(planId, plan?.name);
   const addRecipe = useAddRecipeToPlan(planId);
   const removeRecipe = useRemoveRecipeFromPlan(planId);
+
+  // The plan's name from the (usually cached) plans list, so the header
+  // already shows it while the plan itself loads and never changes shape.
+  const { data: plans } = usePlans();
+  const cachedPlanName = plans?.find((entry) => entry.id === planId)?.name;
+  usePageTitle(plan?.name ?? cachedPlanName ?? 'Plan');
 
   const notFound = isError && error instanceof ApiError && error.status === 404;
   // Checked the same way as `notFound` — before the "is there stale data
@@ -121,7 +130,7 @@ export function PlanDetailPage() {
   if (notFound) {
     return (
       <div className="plan-detail-page">
-        <PageHeader title="Plan" backTo="/plans" />
+        <PageHeader title="Plans" />
         <div className="plan-detail-page__not-found">
           <Text size="4" weight="medium">
             Plan not found
@@ -141,7 +150,7 @@ export function PlanDetailPage() {
   if (forbidden) {
     return (
       <div className="plan-detail-page">
-        <PageHeader title="Plan" backTo="/plans" />
+        <PageHeader title="Plans" />
         <div className="plan-detail-page__not-found">
           <Text size="4" weight="medium">
             You don&apos;t have access to this plan
@@ -164,7 +173,7 @@ export function PlanDetailPage() {
   if (isError && !plan) {
     return (
       <div className="plan-detail-page">
-        <PageHeader title="Plan" backTo="/plans" />
+        <PlanHeader planName={cachedPlanName} />
         <QueryErrorState message="Couldn't load this plan." onRetry={() => void refetch()} />
         <Outlet />
       </div>
@@ -174,7 +183,7 @@ export function PlanDetailPage() {
   if (isLoading || !plan) {
     return (
       <div className="plan-detail-page">
-        <PageHeader title="Plan" backTo="/plans" />
+        <PlanHeader planName={cachedPlanName} />
         <PageLoader area="plans" label="Loading plan" />
         <Outlet />
       </div>
@@ -185,9 +194,8 @@ export function PlanDetailPage() {
 
   return (
     <div className="plan-detail-page">
-      <PageHeader
-        title={plan.name}
-        backTo="/plans"
+      <PlanHeader
+        planName={plan.name}
         actions={
           <>
             <button
@@ -224,9 +232,9 @@ export function PlanDetailPage() {
       <div className="plan-detail-page__body">
         <div className="plan-detail-page__servings-row">
           <Text as="span" size="2" weight="medium">
-            Servings
+            Servings per recipe
           </Text>
-          <Stepper value={servings} onChange={handleServingsChange} min={1} ariaLabel="Servings" />
+          <Stepper value={servings} onChange={handleServingsChange} min={1} ariaLabel="Servings per recipe" />
         </div>
 
         <Separator size="4" />
@@ -236,18 +244,26 @@ export function PlanDetailPage() {
             <Text as="p" size="3" weight="medium">
               Recipes
             </Text>
-            <Button asChild size="2" variant="soft">
-              <SheetLink to="add">
-                <PlusIcon /> Add recipes
-              </SheetLink>
-            </Button>
+            {/* With no recipes the one Add button is the big one in the empty state below. */}
+            {recipes.length > 0 && (
+              <Button asChild size="3" variant="soft">
+                <SheetLink to="add">
+                  <PlusIcon /> Add recipes
+                </SheetLink>
+              </Button>
+            )}
           </div>
 
           {recipes.length === 0 ? (
             <div className="plan-detail-page__empty-recipes">
               <Text color="gray" size="2">
-                No recipes yet — add some to start building the shopping list.
+                No recipes yet. Add a few and the shopping list builds itself.
               </Text>
+              <Button asChild size="3" variant="solid">
+                <SheetLink to="add">
+                  <PlusIcon /> Add recipes
+                </SheetLink>
+              </Button>
             </div>
           ) : (
             <div className="plan-detail-page__recipes">
@@ -255,21 +271,16 @@ export function PlanDetailPage() {
                 <div key={recipe.recipeId} className="plan-detail-page__recipe-row">
                   <Link to={`/recipes/${recipe.recipeId}`} className="plan-detail-page__recipe-link">
                     <span className="plan-detail-page__recipe-name">{recipe.recipeName}</span>
-                    <Badge variant="soft" size="1" className="plan-detail-page__recipe-badge">
-                      serves {recipe.baseServings}
-                    </Badge>
                   </Link>
-                  <IconButton
-                    type="button"
-                    variant="ghost"
+                  <RowActionButton
+                    quiet
                     color="red"
-                    size="3"
                     aria-label={`Remove ${recipe.recipeName}`}
                     disabled={isPendingOnly(recipe)}
                     onClick={() => handleRemove(recipe)}
                   >
                     <TrashIcon />
-                  </IconButton>
+                  </RowActionButton>
                 </div>
               ))}
             </div>
@@ -278,7 +289,12 @@ export function PlanDetailPage() {
       </div>
 
       <BottomBar>
-        <Button asChild size="3" variant="solid" className="plan-detail-page__shopping-button">
+        <Button
+          asChild
+          size="3"
+          variant={recipes.length === 0 ? 'soft' : 'solid'}
+          className="plan-detail-page__shopping-button"
+        >
           <Link to={`/plans/${planId}/shopping`}>
             <ListBulletIcon /> Shopping list
           </Link>

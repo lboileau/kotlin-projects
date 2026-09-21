@@ -36,7 +36,7 @@ export function AccountPage() {
 
   return (
     <div className="account-page">
-      <PageHeader title="Account" backTo="/plans" showAccount={false} />
+      <PageHeader title="Account" backTo="/plans" backAcrossAreas showAccount={false} />
       <div className="account-page__body">
         <Card size="3" className="account-page__card">
           <Text as="p" size="2" color="gray" className="account-page__email-label">

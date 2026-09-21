@@ -69,6 +69,9 @@ function EditIngredientForm({
     try {
       await updateIngredient.mutateAsync({ name: trimmed, category, defaultUnit: unit });
       toast.info('Ingredient updated.');
+      // An edit is done once it is saved (the add sheet stays open for the
+      // next one; this one has no next one).
+      sheet.close();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not update this ingredient.');
     }

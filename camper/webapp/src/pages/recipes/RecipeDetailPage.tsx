@@ -1,8 +1,14 @@
 import { Outlet, useNavigate, useParams } from 'react-router-dom';
 import { AlertDialog, Badge, Button, Callout, Heading, IconButton, Text } from '@radix-ui/themes';
-import { ExclamationTriangleIcon, ExternalLinkIcon, Pencil2Icon, PlusIcon, TrashIcon } from '@radix-ui/react-icons';
+import {
+  ExclamationTriangleIcon,
+  ExternalLinkIcon,
+  Pencil2Icon,
+  TrashIcon,
+} from '@radix-ui/react-icons';
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
+import { PageHero } from '../../components/PageHero';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { BottomBar } from '../../components/BottomBar';
@@ -26,6 +32,16 @@ export function RecipeDetailPage() {
 
   const isOwner = Boolean(recipe && user && recipe.createdBy === user.id);
   const isDraft = recipe?.status === 'draft';
+  // Recipes are one shared library, so anyone may edit a published recipe
+  // (the backend never restricted it; only this screen did, which left most
+  // recipes with no way to fix a typo or a quantity). A draft is its
+  // creator's until published, and deleting stays with the creator.
+  const mayEdit = !isDraft || isOwner;
+  // This page is for reading. Everything about a published recipe, its
+  // ingredient lines included, is edited in one place: the edit form behind
+  // the pencil, which is the same form a new recipe is written in. (A
+  // draft's lines are reviewed here, in RecipeReview, before publishing.)
+  const canDelete = isOwner;
   const pendingCount = recipe ? recipe.ingredients.filter((line) => line.status === 'pending_review').length : 0;
   const publishBlockers: string[] = [];
   if (recipe?.duplicateOf) publishBlockers.push(`a possible duplicate of "${recipe.duplicateOf.name}" to resolve`);
@@ -52,7 +68,8 @@ export function RecipeDetailPage() {
   if (isLoading) {
     return (
       <div className="recipe-detail-page">
-        <PageHeader title="Recipe" backTo="/recipes" />
+        <PageHeader title="Recipe" backTo="/recipes" backAcrossAreas titleInHero />
+        <PageHero eyebrow="Recipe" title={undefined} />
         <PageLoader area="recipes" label="Loading recipe" />
         <Outlet />
       </div>
@@ -68,7 +85,7 @@ export function RecipeDetailPage() {
   if (notFound) {
     return (
       <div className="recipe-detail-page">
-        <PageHeader title="Recipe" backTo="/recipes" />
+        <PageHeader title="Recipe" backTo="/recipes" backAcrossAreas />
         <div className="recipe-detail-page__body">
           <Callout.Root color="red" variant="surface" role="alert">
             <Callout.Icon>
@@ -89,7 +106,7 @@ export function RecipeDetailPage() {
   if (isError && !recipe) {
     return (
       <div className="recipe-detail-page">
-        <PageHeader title="Recipe" backTo="/recipes" />
+        <PageHeader title="Recipe" backTo="/recipes" backAcrossAreas />
         <div className="recipe-detail-page__body">
           <QueryErrorState message="Couldn't load this recipe." onRetry={() => void refetch()} />
         </div>
@@ -107,82 +124,90 @@ export function RecipeDetailPage() {
       <PageHeader
         title={recipe.name}
         backTo="/recipes"
+        // Back returns to where the recipe was opened from: the Recipes list,
+        // or the plan or shopping list whose link led here.
+        backAcrossAreas
+        titleInHero
         actions={
-          isOwner && (
+          mayEdit && (
             <>
-              <IconButton
-                size="3"
-                variant="soft"
+              <button
+                type="button"
+                className="header-icon-button"
                 aria-label="Edit recipe"
-                className="recipe-detail-page__icon-button"
                 onClick={() => navigate(`/recipes/${recipe.id}/edit`)}
               >
                 <Pencil2Icon />
-              </IconButton>
-              <AlertDialog.Root>
-                <AlertDialog.Trigger>
-                  <IconButton
-                    size="3"
-                    variant="soft"
-                    color="red"
-                    aria-label="Delete recipe"
-                    className="recipe-detail-page__icon-button"
-                  >
-                    <TrashIcon />
-                  </IconButton>
-                </AlertDialog.Trigger>
-                <AlertDialog.Content maxWidth="380px">
-                  <AlertDialog.Title>Delete recipe?</AlertDialog.Title>
-                  <AlertDialog.Description>
-                    This removes &ldquo;{recipe.name}&rdquo; from every meal plan that uses it. This can&apos;t be undone.
-                  </AlertDialog.Description>
-                  <div className="recipe-detail-page__dialog-actions">
-                    <AlertDialog.Cancel>
-                      <Button size="3" variant="soft">
-                        Cancel
-                      </Button>
-                    </AlertDialog.Cancel>
-                    <AlertDialog.Action>
-                      <Button size="3" color="red" loading={deleteRecipe.isPending} onClick={handleDelete}>
-                        Delete
-                      </Button>
-                    </AlertDialog.Action>
-                  </div>
-                </AlertDialog.Content>
-              </AlertDialog.Root>
+              </button>
+              {/* Deleting belongs to the recipe's home in the Recipes tab, not to a plan's view of it. */}
+              {canDelete && (
+                <AlertDialog.Root>
+                  <AlertDialog.Trigger>
+                    <IconButton
+                      size="3"
+                      variant="soft"
+                      color="red"
+                      aria-label="Delete recipe"
+                      className="recipe-detail-page__icon-button"
+                    >
+                      <TrashIcon />
+                    </IconButton>
+                  </AlertDialog.Trigger>
+                  <AlertDialog.Content maxWidth="380px">
+                    <AlertDialog.Title>Delete recipe?</AlertDialog.Title>
+                    <AlertDialog.Description>
+                      This removes &ldquo;{recipe.name}&rdquo; from every meal plan that uses it. This can&apos;t be undone.
+                    </AlertDialog.Description>
+                    <div className="recipe-detail-page__dialog-actions">
+                      <AlertDialog.Cancel>
+                        <Button size="3" variant="soft">
+                          Cancel
+                        </Button>
+                      </AlertDialog.Cancel>
+                      <AlertDialog.Action>
+                        <Button size="3" color="red" loading={deleteRecipe.isPending} onClick={handleDelete}>
+                          Delete
+                        </Button>
+                      </AlertDialog.Action>
+                    </div>
+                  </AlertDialog.Content>
+                </AlertDialog.Root>
+              )}
             </>
           )
         }
       />
 
-      <div className="recipe-detail-page__body">
+      <PageHero eyebrow="Recipe" title={recipe.name}>
         {isDraft && (
-          <Badge color="amber" variant="soft" className="recipe-detail-page__draft-badge">
+          <Badge color="amber" variant="soft">
             Draft
           </Badge>
         )}
+        <span>Serves {recipe.baseServings}</span>
+        {recipe.meal && (
+          <Badge variant="soft" color="gray">
+            {capitalize(recipe.meal)}
+          </Badge>
+        )}
+        {recipe.theme && (
+          <Badge variant="soft" color="gray">
+            {capitalize(recipe.theme)}
+          </Badge>
+        )}
+      </PageHero>
 
+      <div className="recipe-detail-page__body">
         {recipe.description && (
           <Text as="p" size="2" color="gray" className="recipe-detail-page__wrap">
             {recipe.description}
           </Text>
         )}
 
-        <Text as="p" size="2">
-          Serves {recipe.baseServings}
-        </Text>
-
         {recipe.webLink && (
           <a href={recipe.webLink} target="_blank" rel="noopener noreferrer" className="recipe-detail-page__source">
             Source <ExternalLinkIcon />
           </a>
-        )}
-
-        {(recipe.meal || recipe.theme) && (
-          <div className="recipe-detail-page__tags">
-            {recipe.meal && <Badge variant="soft">{capitalize(recipe.meal)}</Badge>}
-            {recipe.theme && <Badge variant="soft">{capitalize(recipe.theme)}</Badge>}
-          </div>
         )}
 
         {isDraft && !isOwner && (
@@ -204,15 +229,9 @@ export function RecipeDetailPage() {
         ) : (
           <ul className="recipe-detail-page__lines">
             {recipe.ingredients.map((line) => (
-              <IngredientLineRow key={line.id} line={line} recipeId={recipe.id} clickable={isOwner} />
+              <IngredientLineRow key={line.id} line={line} recipeId={recipe.id} clickable={false} />
             ))}
           </ul>
-        )}
-
-        {isOwner && (
-          <SheetLink to={`/recipes/${recipe.id}/lines/new`} className="recipe-detail-page__add-line">
-            <PlusIcon /> Add ingredient
-          </SheetLink>
         )}
       </div>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Badge, Button, IconButton, Separator, Skeleton, Spinner, Text, TextField } from '@radix-ui/themes';
+import { Badge, Button, Separator, Skeleton, Spinner, Text, TextField } from '@radix-ui/themes';
 import { CopyIcon, Cross2Icon, ExitIcon, Link2Icon, Share2Icon, TrashIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
@@ -25,6 +25,7 @@ import { useSharePlan } from './useSharePlan';
 import { clearSelectedPlanId, getSelectedPlanId } from '../../lib/selectedPlan';
 import { toast } from '../../lib/toastStore';
 import './EditPlanSheet.css';
+import { RowActionButton } from '../../components/RowActionButton';
 
 export function EditPlanSheet() {
   const { planId } = useParams<{ planId: string }>();
@@ -85,7 +86,8 @@ export function EditPlanSheet() {
     // on the sheet so the user can retry.
     duplicatePlan.mutate(
       { planId },
-      { onSuccess: (newPlan) => sheet.close({ to: `/plans/${newPlan.id}` }) },
+      // Replace, so Back from the copy doesn't reopen this sheet on the original.
+      { onSuccess: (newPlan) => sheet.close({ to: `/plans/${newPlan.id}`, replace: true }) },
     );
   }
 
@@ -267,16 +269,14 @@ export function EditPlanSheet() {
                             </Button>
                           </div>
                         ) : (
-                          <IconButton
-                            type="button"
-                            variant="ghost"
+                          <RowActionButton
+                            quiet
                             color="red"
-                            size="3"
                             aria-label={`Remove ${member.username}`}
                             onClick={() => setConfirmingRemoveUserId(member.userId)}
                           >
                             <Cross2Icon />
-                          </IconButton>
+                          </RowActionButton>
                         )
                       ) : null}
                     </div>

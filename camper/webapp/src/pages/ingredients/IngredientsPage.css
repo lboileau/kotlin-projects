@@ -72,3 +72,8 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.ingredients-page__actions {
+  display: flex;
+  justify-content: flex-end;
+}

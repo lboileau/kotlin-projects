@@ -60,3 +60,14 @@ export function parseQuantity(raw: string): number | null {
 
   return null;
 }
+
+/**
+ * For a "how much do I have" field, where none is a valid answer: blank
+ * and any spelling of zero are 0, everything else as `parseQuantity`.
+ */
+export function parseQuantityOrZero(raw: string): number | null {
+  const trimmed = raw.trim();
+  if (trimmed === '') return 0;
+  if (DECIMAL_RE.test(trimmed) && parseFloat(trimmed.replace(',', '.')) === 0) return 0;
+  return parseQuantity(trimmed);
+}

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import { Button, Text, TextField } from '@radix-ui/themes';
-import { MagnifyingGlassIcon, PlusIcon } from '@radix-ui/react-icons';
+import { MagnifyingGlassIcon, MixIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
@@ -9,6 +9,7 @@ import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { useIngredients } from '../../queries/ingredients';
 import { CATEGORIES, capitalize } from '../../lib/ingredientConstants';
+import { useSearchText } from '../../lib/useSearchText';
 import type { IngredientResponse } from '../../api/ingredients';
 import './IngredientsPage.css';
 
@@ -19,20 +20,7 @@ export function IngredientsPage() {
   // refetch error (window focus) falls through to the normal render
   // instead of blanking an already-loaded list.
   const hasData = !!ingredients;
-  const [searchParams, setSearchParams] = useSearchParams();
-  const q = searchParams.get('q') ?? '';
-
-  function handleSearch(value: string) {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        if (value) next.set('q', value);
-        else next.delete('q');
-        return next;
-      },
-      { replace: true },
-    );
-  }
+  const [q, setQ] = useSearchText();
 
   const filtered = useMemo(() => {
     const list = ingredients ?? [];
@@ -57,15 +45,7 @@ export function IngredientsPage() {
 
   return (
     <div className="ingredients-page">
-      <PageHeader
-        title="Ingredients"
-        backTo="/recipes"
-        actions={
-          <Button size="3" onClick={() => navigate('/ingredients/new')}>
-            <PlusIcon /> Add
-          </Button>
-        }
-      />
+      <PageHeader title="Ingredients" icon={MixIcon} />
 
       <div className="ingredients-page__controls">
         <RecipesIngredientsToggle active="ingredients" />
@@ -79,12 +59,18 @@ export function IngredientsPage() {
           autoCorrect="off"
           autoComplete="off"
           value={q}
-          onChange={(event) => handleSearch(event.target.value)}
+          onChange={(event) => setQ(event.target.value)}
         >
           <TextField.Slot>
             <MagnifyingGlassIcon />
           </TextField.Slot>
         </TextField.Root>
+        {/* Same place as the Recipes list's actions: on the list, not in the header. */}
+        <div className="ingredients-page__actions">
+          <Button size="3" onClick={() => navigate('/ingredients/new')}>
+            <PlusIcon /> Add
+          </Button>
+        </div>
       </div>
 
       <div className="ingredients-page__list">
@@ -99,7 +85,7 @@ export function IngredientsPage() {
                 <Text as="p" color="gray" size="2">
                   No ingredients match your search.
                 </Text>
-                <Button size="2" variant="soft" onClick={() => handleSearch('')}>
+                <Button size="2" variant="soft" onClick={() => setQ('')}>
                   Clear search
                 </Button>
               </>

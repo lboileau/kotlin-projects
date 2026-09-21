@@ -1,7 +1,8 @@
-import { useRef, useState, type KeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { IconButton, Select, Text, TextField } from '@radix-ui/themes';
 import { PlusIcon, TrashIcon } from '@radix-ui/react-icons';
 import { IngredientPicker } from '../../components/IngredientPicker';
+import { RowActionButton } from '../../components/RowActionButton';
 import { UNITS, capitalize } from '../../lib/ingredientConstants';
 import { parseQuantity } from '../../lib/parseQuantity';
 import type { IngredientResponse } from '../../api/ingredients';
@@ -9,8 +10,17 @@ import './LinesEditor.css';
 
 export interface DraftLine {
   clientId: string;
+  /** The saved line this row came from, when editing an existing recipe; absent for a line added in the form. */
+  lineId?: string;
   ingredient: IngredientResponse;
   /** Kept as raw text while editing — see `parseQuantity` for the accepted formats. */
+  quantity: string;
+  unit: string;
+}
+
+/** What is sitting in the add row, not yet added as a line. */
+export interface PendingLine {
+  ingredient: IngredientResponse;
   quantity: string;
   unit: string;
 }
@@ -18,6 +28,12 @@ export interface DraftLine {
 interface LinesEditorProps {
   lines: DraftLine[];
   onChange: (lines: DraftLine[]) => void;
+  /**
+   * Reports the add row's contents (null when no ingredient is picked), so
+   * the form can include a line the user typed but never pressed + on when
+   * they save, instead of silently dropping it.
+   */
+  onPendingChange?: (pending: PendingLine | null) => void;
 }
 
 function isValidQuantity(quantity: string): boolean {
@@ -25,12 +41,12 @@ function isValidQuantity(quantity: string): boolean {
 }
 
 /**
- * Local-state ingredient lines editor for the new-recipe form. All lines
- * are held in memory and sent together in the single create request —
- * see `useAddRecipeIngredient` for the per-line flow an existing
- * recipe uses instead.
+ * Local-state ingredient lines editor for the recipe form, new and edit
+ * alike (`RecipeFormFields`). Lines are held in memory and nothing is sent
+ * until the form's Save: a new recipe sends them in its create request, an
+ * edit works out which were added, changed and removed (`EditRecipePage`).
  */
-export function LinesEditor({ lines, onChange }: LinesEditorProps) {
+export function LinesEditor({ lines, onChange, onPendingChange }: LinesEditorProps) {
   const [pickerKey, setPickerKey] = useState(0);
   const [selected, setSelected] = useState<IngredientResponse | null>(null);
   const [quantity, setQuantity] = useState('');
@@ -38,6 +54,12 @@ export function LinesEditor({ lines, onChange }: LinesEditorProps) {
   const quantityRef = useRef<HTMLInputElement>(null);
 
   const canAdd = selected !== null && isValidQuantity(quantity);
+
+  useEffect(() => {
+    onPendingChange?.(selected ? { ingredient: selected, quantity, unit } : null);
+    // The callback's identity is the parent's business; only the row's contents matter here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, quantity, unit]);
 
   function handleSelect(ingredient: IngredientResponse) {
     setSelected(ingredient);
@@ -112,16 +134,14 @@ export function LinesEditor({ lines, onChange }: LinesEditorProps) {
                   ))}
                 </Select.Content>
               </Select.Root>
-              <IconButton
-                type="button"
-                variant="soft"
+              <RowActionButton
+                quiet
                 color="red"
                 aria-label={`Remove ${line.ingredient.name}`}
-                className="lines-editor__icon-button"
                 onClick={() => removeLine(line.clientId)}
               >
                 <TrashIcon />
-              </IconButton>
+              </RowActionButton>
             </li>
           ))}
         </ul>

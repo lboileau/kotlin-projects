@@ -10,11 +10,15 @@ import {
 } from '@radix-ui/react-icons';
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
+import { RowActionButton } from '../../components/RowActionButton';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { useAuth } from '../../auth/useAuth';
 import { useRecipes } from '../../queries/recipes';
+import { useAddRecipeToPlan, usePlans, useRemoveRecipeFromPlan } from '../../queries/plans';
+import { toast } from '../../lib/toastStore';
 import { MEALS, capitalize } from '../../lib/ingredientConstants';
+import { useSearchText } from '../../lib/useSearchText';
 import type { RecipeResponse } from '../../api/recipes';
 import './RecipesPage.css';
 
@@ -43,14 +47,52 @@ export function RecipesPage() {
   // instead of blanking an already-loaded list.
   const hasData = !!recipes;
   const [searchParams, setSearchParams] = useSearchParams();
+  const { data: plans } = usePlans();
+  const addRecipe = useAddRecipeToPlan();
+  const removeRecipe = useRemoveRecipeFromPlan();
 
-  const q = searchParams.get('q') ?? '';
+  // With exactly one plan there is nothing to choose, so ＋ adds straight to
+  // it, with an Undo in place of the sheet. With several (or none) the sheet
+  // opens as before.
+  function handleAddToPlan(recipe: RecipeResponse) {
+    const onlyPlan = plans?.length === 1 ? plans[0] : null;
+    if (!onlyPlan) {
+      navigate(`/recipes/add-to-plan/${recipe.id}${window.location.search}`);
+      return;
+    }
+    addRecipe.mutate(
+      {
+        planId: onlyPlan.id,
+        recipeId: recipe.id,
+        recipeName: recipe.name,
+        recipeWebLink: recipe.webLink,
+        baseServings: recipe.baseServings,
+      },
+      {
+        onSuccess: (result) => {
+          if (result.alreadyInPlan) {
+            toast.info(`Already in ${onlyPlan.name}`);
+            return;
+          }
+          toast.info(`Added to ${onlyPlan.name}`, {
+            label: 'Undo',
+            onClick: () => removeRecipe.mutate({ planId: onlyPlan.id, recipeId: recipe.id }),
+          });
+        },
+      },
+    );
+  }
+
+  const [q, setQ] = useSearchText();
   const meal = searchParams.get('meal') ?? 'all';
   const mine = searchParams.get('mine') === '1';
   const hasFilters = q.trim().length > 0 || meal !== 'all' || mine;
 
   const patch = (values: Record<string, string | null>) => updateParams(searchParams, setSearchParams, values);
-  const clearFilters = () => patch({ q: null, meal: null, mine: null });
+  const clearFilters = () => {
+    setQ('');
+    patch({ q: null, meal: null, mine: null });
+  };
 
   const mealsPresent = useMemo(() => {
     const present = new Set((recipes ?? []).map((r) => r.meal).filter((m): m is string => Boolean(m)));
@@ -68,25 +110,7 @@ export function RecipesPage() {
 
   return (
     <div className="recipes-page">
-      <PageHeader
-        title="Recipes"
-        actions={
-          <>
-            <IconButton
-              size="3"
-              variant="soft"
-              aria-label="Import recipe"
-              className="recipes-page__icon-button"
-              onClick={() => navigate('/recipes/import')}
-            >
-              <DownloadIcon />
-            </IconButton>
-            <Button size="3" onClick={() => navigate('/recipes/new')}>
-              <PlusIcon /> New
-            </Button>
-          </>
-        }
-      />
+      <PageHeader title="Recipes" />
 
       <div className="recipes-page__controls">
         <RecipesIngredientsToggle active="recipes" />
@@ -101,14 +125,14 @@ export function RecipesPage() {
           autoCorrect="off"
           autoComplete="off"
           value={q}
-          onChange={(event) => patch({ q: event.target.value })}
+          onChange={(event) => setQ(event.target.value)}
         >
           <TextField.Slot>
             <MagnifyingGlassIcon />
           </TextField.Slot>
           {q && (
             <TextField.Slot>
-              <IconButton size="2" variant="ghost" aria-label="Clear search" onClick={() => patch({ q: null })}>
+              <IconButton size="2" variant="ghost" aria-label="Clear search" onClick={() => setQ('')}>
                 <Cross2Icon />
               </IconButton>
             </TextField.Slot>
@@ -137,12 +161,24 @@ export function RecipesPage() {
           ))}
         </div>
 
-        <label className="recipes-page__mine">
-          <Text as="span" size="2">
-            Mine
-          </Text>
-          <Switch checked={mine} onCheckedChange={(checked) => patch({ mine: checked ? '1' : null })} />
-        </label>
+        {/* The list's own actions sit on the list, not in the header: the
+            header only says where you are. */}
+        <div className="recipes-page__actions-row">
+          <label className="recipes-page__mine">
+            <Text as="span" size="2">
+              Mine
+            </Text>
+            <Switch checked={mine} onCheckedChange={(checked) => patch({ mine: checked ? '1' : null })} />
+          </label>
+          <div className="recipes-page__actions">
+            <Button size="3" variant="soft" onClick={() => navigate('/recipes/import')}>
+              <DownloadIcon /> Import
+            </Button>
+            <Button size="3" onClick={() => navigate('/recipes/new')}>
+              <PlusIcon /> New
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className="recipes-page__list">
@@ -188,7 +224,7 @@ export function RecipesPage() {
               key={recipe.id}
               recipe={recipe}
               onOpen={() => navigate(`/recipes/${recipe.id}`)}
-              onAddToPlan={() => navigate(`/recipes/add-to-plan/${recipe.id}${window.location.search}`)}
+              onAddToPlan={() => handleAddToPlan(recipe)}
             />
           ))}
       </div>
@@ -242,16 +278,13 @@ function RecipeRow({
         </div>
       </button>
 
-      <IconButton
-        type="button"
-        variant="soft"
-        size="3"
+      <RowActionButton
         aria-label={`Add ${recipe.name} to a plan`}
         className="recipes-page__row-info"
         onClick={onAddToPlan}
       >
         <PlusIcon />
-      </IconButton>
+      </RowActionButton>
     </div>
   );
 }

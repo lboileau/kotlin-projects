@@ -21,10 +21,6 @@
   min-height: 44px;
 }
 
-.recipe-detail-page__draft-badge {
-  align-self: flex-start;
-}
-
 .recipe-detail-page__wrap {
   overflow-wrap: anywhere;
 }
@@ -37,12 +33,6 @@
   color: var(--accent-11);
   font-size: 0.875rem;
   text-decoration: none;
-}
-
-.recipe-detail-page__tags {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
 }
 
 .recipe-detail-page__section-header {

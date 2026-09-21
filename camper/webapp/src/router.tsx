@@ -24,6 +24,7 @@ const JoinPlanPage = lazy(() => import('./pages/plans').then((m) => ({ default: 
 
 const ShoppingPage = lazy(() => import('./pages/shopping').then((m) => ({ default: m.ShoppingPage })));
 const SwitchPlanSheet = lazy(() => import('./pages/shopping').then((m) => ({ default: m.SwitchPlanSheet })));
+const HaveAmountSheet = lazy(() => import('./pages/shopping').then((m) => ({ default: m.HaveAmountSheet })));
 const ShoppingRedirect = lazy(() => import('./pages/shopping').then((m) => ({ default: m.ShoppingRedirect })));
 
 const RecipesPage = lazy(() => import('./pages/recipes').then((m) => ({ default: m.RecipesPage })));
@@ -80,12 +81,24 @@ export const router = createBrowserRouter([
             children: [
               { path: 'add', element: <AddRecipeToPlanSheet /> },
               { path: 'edit', element: <EditPlanSheet /> },
+              // The plan-name dropdown in the header (PlanHeader): switch
+              // plan, or make a new one from there.
+              { path: 'switch', element: <SwitchPlanSheet /> },
+              { path: 'new', element: <NewPlanSheet /> },
             ],
           },
           {
             path: 'plans/:planId/shopping',
             element: <ShoppingPage />,
-            children: [{ path: 'switch', element: <SwitchPlanSheet /> }],
+            children: [
+              { path: 'switch', element: <SwitchPlanSheet /> },
+              { path: 'new', element: <NewPlanSheet /> },
+              // The same picker as on the plan, so adding recipes from an
+              // empty list closes back to the list.
+              { path: 'add', element: <AddRecipeToPlanSheet /> },
+              // Tapping a row's quantity: set how much of it you already have.
+              { path: 'have/:ingredientId', element: <HaveAmountSheet /> },
+            ],
           },
           { path: 'shopping', element: <ShoppingRedirect /> },
           // Inside the guarded shell so a signed-out visitor goes through
@@ -110,14 +123,7 @@ export const router = createBrowserRouter([
               { path: 'add-to-plan', element: <AddToPlanSheet /> },
             ],
           },
-          {
-            path: 'recipes/:recipeId/edit',
-            element: <EditRecipePage />,
-            children: [
-              { path: 'lines/new', element: <AddLineSheet /> },
-              { path: 'lines/:lineId', element: <EditLineSheet /> },
-            ],
-          },
+          { path: 'recipes/:recipeId/edit', element: <EditRecipePage /> },
           {
             path: 'ingredients',
             element: <IngredientsPage />,
