@@ -1002,14 +1002,19 @@ class RecipeServiceTest {
         }
 
         @Test
-        fun `unfavorite called twice never drops the count below zero`() {
+        fun `unfavorite called twice only removes the caller's favourite once`() {
             val recipe = createRecipe()
+            recipeService.favorite(FavoriteRecipeParam(recipe.id, userId))
+            recipeService.favorite(FavoriteRecipeParam(recipe.id, otherUserId))
             recipeService.unfavorite(UnfavoriteRecipeParam(recipe.id, userId))
 
             val result = recipeService.unfavorite(UnfavoriteRecipeParam(recipe.id, userId))
 
+            // The second call is a no-op: still one favourite (the other user's), not zero.
             assertThat(result.isSuccess).isTrue()
-            assertThat((result as Result.Success).value.favoriteCount).isEqualTo(0)
+            val status = (result as Result.Success).value
+            assertThat(status.favoriteCount).isEqualTo(1)
+            assertThat(status.favoritedByMe).isFalse()
         }
 
         @Test
