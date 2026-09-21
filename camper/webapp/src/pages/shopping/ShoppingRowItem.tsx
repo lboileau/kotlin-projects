@@ -5,6 +5,7 @@ import { RowActionButton } from '../../components/RowActionButton';
 import { SheetLink } from '../../components/SheetLink';
 import { ChevronRightIcon, Cross2Icon, InfoCircledIcon } from '@radix-ui/react-icons';
 import { revealInContainer } from '../../lib/scrollIntoContainer';
+import { primeKeyboard } from '../../lib/primeKeyboard';
 import { formatQuantityText, formatStillNeededText, type ShoppingRow } from '../../lib/shoppingRows';
 import './ShoppingRowItem.css';
 
@@ -115,6 +116,8 @@ export function ShoppingRowItem({
               to={haveTo}
               className={`${quantityClass} shopping-row__quantity--link`}
               aria-label={`${quantityLines.join(', ')}. Set how much ${name} you have`}
+              // The sheet is one field: have the keyboard up with it (see primeKeyboard).
+              onClick={primeKeyboard}
             >
               {quantityContent}
             </SheetLink>

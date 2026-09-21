@@ -187,6 +187,18 @@ export function buildShoppingRows(list: ShoppingListResponse): ShoppingCategoryG
     .sort((a, b) => categoryRank(a.category) - categoryRank(b.category));
 }
 
+/** Still something to buy: never bought, or bought and then needed more of. */
+export function isStillToBuy(row: ShoppingRow): boolean {
+  return row.overallStatus === 'not_purchased' || row.overallStatus === 'more_needed';
+}
+
+/** The "hide bought" view: only rows with something left to buy, and only the categories that still have any. */
+export function onlyStillToBuy(groups: ShoppingCategoryGroup[]): ShoppingCategoryGroup[] {
+  return groups
+    .map((group) => ({ ...group, rows: group.rows.filter(isStillToBuy) }))
+    .filter((group) => group.rows.length > 0);
+}
+
 function categoryRank(category: string): number {
   const index = CATEGORY_ORDER.indexOf(category.toLowerCase());
   return index === -1 ? CATEGORY_ORDER.length : index;

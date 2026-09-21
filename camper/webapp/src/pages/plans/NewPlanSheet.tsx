@@ -48,6 +48,9 @@ export function NewPlanSheet() {
             placeholder={defaultName}
             size="3"
             autoFocus
+            autoCapitalize="sentences"
+            autoComplete="off"
+            enterKeyHint="done"
           />
         </label>
 

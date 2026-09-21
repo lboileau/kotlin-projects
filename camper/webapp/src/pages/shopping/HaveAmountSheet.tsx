@@ -91,7 +91,7 @@ export function HaveAmountSheet() {
                   onFocus={(event) => event.target.select()}
                   placeholder="0"
                   size="3"
-                  inputMode="text"
+                  inputMode="decimal"
                   enterKeyHint="done"
                   autoComplete="off"
                   autoFocus={index === 0}
@@ -102,7 +102,7 @@ export function HaveAmountSheet() {
                 </TextField.Root>
                 {invalid ? (
                   <Text as="span" size="1" color="red">
-                    Enter an amount like 2, 1.5 or 1/2.
+                    Enter an amount like 2 or 1.5.
                   </Text>
                 ) : (
                   <Text as="span" size="1" color="gray">

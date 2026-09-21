@@ -55,6 +55,10 @@ export function AccountPage() {
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 autoComplete="name"
+                autoCapitalize="words"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="done"
                 size="3"
               />
             </label>

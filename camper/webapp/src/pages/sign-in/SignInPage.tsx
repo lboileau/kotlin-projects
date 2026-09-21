@@ -117,6 +117,10 @@ export function SignInPage() {
               type="email"
               inputMode="email"
               autoComplete="email"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="go"
               placeholder="you@example.com"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
@@ -134,6 +138,10 @@ export function SignInPage() {
                 ref={usernameRef}
                 type="text"
                 autoComplete="name"
+                autoCapitalize="words"
+                autoCorrect="off"
+                spellCheck={false}
+                enterKeyHint="go"
                 placeholder="Jamie Rivers"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}

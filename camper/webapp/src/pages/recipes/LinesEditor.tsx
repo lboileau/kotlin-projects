@@ -106,8 +106,8 @@ export function LinesEditor({ lines, onChange, onPendingChange }: LinesEditorPro
                 </Text>
               </div>
               <TextField.Root
-                inputMode="text"
-                placeholder="1 1/2"
+                inputMode="decimal"
+                placeholder="1.5"
                 size="2"
                 className="lines-editor__row-quantity"
                 aria-label={`Quantity for ${line.ingredient.name}`}
@@ -162,10 +162,10 @@ export function LinesEditor({ lines, onChange, onPendingChange }: LinesEditorPro
         <div className="lines-editor__add-fields">
           <TextField.Root
             ref={quantityRef}
-            inputMode="text"
+            inputMode="decimal"
             size="3"
             className="lines-editor__add-quantity"
-            placeholder="1 1/2"
+            placeholder="1.5"
             aria-label="Quantity"
             value={quantity}
             autoCapitalize="off"

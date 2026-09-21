@@ -9,3 +9,11 @@
   flex-direction: column;
   gap: 6px;
 }
+
+.import-recipe-sheet__reading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+}

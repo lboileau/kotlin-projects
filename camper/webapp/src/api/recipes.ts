@@ -123,6 +123,8 @@ export function resolveRecipeIngredient(
   return request(`/api/recipes/${recipeId}/ingredients/${lineId}`, { method: 'PUT', body: payload });
 }
 
+const DEV_IMPORT_MIN_MS = 5000;
+
 /**
  * POST /api/recipes/import — server-side scrape + LLM extraction, expect
  * 10-60s. 400 on a blank/invalid url, 409 (code CONFLICT) when a recipe
@@ -130,7 +132,15 @@ export function resolveRecipeIngredient(
  * SCRAPE_FAILED) when the page couldn't be fetched or read.
  */
 export function importRecipe(url: string): Promise<RecipeDetailResponse> {
-  return request('/api/recipes/import', { method: 'POST', body: { url } });
+  const sent = request<RecipeDetailResponse>('/api/recipes/import', { method: 'POST', body: { url } });
+  if (!import.meta.env.DEV) return sent;
+
+  // Dev server only: a real import takes up to a minute, but locally (no
+  // ANTHROPIC_API_KEY, so the backend's stub scraper) it answers at once and
+  // the waiting state — the dog — is gone before it can be seen. Hold the
+  // answer, success or failure, until it has been up for five seconds.
+  const shown = new Promise<void>((resolve) => window.setTimeout(resolve, DEV_IMPORT_MIN_MS));
+  return Promise.allSettled([sent, shown]).then(() => sent);
 }
 
 export type ResolveDuplicateAction = 'NOT_DUPLICATE' | 'USE_EXISTING';

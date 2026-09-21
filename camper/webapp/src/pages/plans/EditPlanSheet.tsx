@@ -182,6 +182,10 @@ export function EditPlanSheet() {
                     onChange={(event) => setNameOverride(event.target.value)}
                     size="3"
                     className="edit-plan-sheet__rename-input"
+                    aria-label="Plan name"
+                    autoCapitalize="sentences"
+                    autoComplete="off"
+                    enterKeyHint="done"
                   />
                   <Button type="submit" size="3" variant="solid" disabled={!dirty} loading={updatePlan.isPending}>
                     Save

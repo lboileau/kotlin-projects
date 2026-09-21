@@ -25,7 +25,7 @@ export function validateRecipeForm(
   if (!values.name.trim()) return { error: 'Name is required.' };
   if (!Number.isFinite(values.servings) || values.servings < 1) return { error: 'Servings must be at least 1.' };
   if (values.lines.some((line) => parseQuantity(line.quantity) === null)) {
-    return { error: 'Every ingredient needs a valid quantity (e.g. "1", "1.5", or "1 1/2").' };
+    return { error: 'Every ingredient needs a valid quantity (e.g. "2" or "1.5").' };
   }
   if (!pendingLine) return { lines: values.lines };
   if (parseQuantity(pendingLine.quantity) === null) {

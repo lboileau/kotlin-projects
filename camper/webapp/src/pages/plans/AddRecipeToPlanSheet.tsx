@@ -80,6 +80,12 @@ export function AddRecipeToPlanSheet() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search recipes"
+            aria-label="Search recipes"
+            type="search"
+            enterKeyHint="search"
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoComplete="off"
             size="3"
             autoFocus
           >

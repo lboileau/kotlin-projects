@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { Link, Outlet, useParams } from 'react-router-dom';
 import { AlertDialog, Button, Heading, Progress, Text } from '@radix-ui/themes';
-import { PlusIcon, ResetIcon } from '@radix-ui/react-icons';
+import { EyeNoneIcon, EyeOpenIcon, PlusIcon, ResetIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
 import { PlanHeader } from '../../components/PlanHeader';
 import { SheetLink } from '../../components/SheetLink';
@@ -19,7 +19,8 @@ import {
 } from '../../queries/shopping';
 import { usePlans } from '../../queries/plans';
 import { useIngredients } from '../../queries/ingredients';
-import { buildShoppingRows, rowPurchasesForToggle, type ShoppingRow } from '../../lib/shoppingRows';
+import { buildShoppingRows, onlyStillToBuy, rowPurchasesForToggle, type ShoppingRow } from '../../lib/shoppingRows';
+import { getHideBought, setHideBought } from '../../lib/hideBought';
 import { clearSelectedPlanId, getSelectedPlanId, setSelectedPlanId } from '../../lib/selectedPlan';
 import { useMealPlanSync } from '../../sync/useMealPlanSync';
 import {
@@ -169,6 +170,14 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
 
   useEffect(() => () => window.clearTimeout(justAddedTimerRef.current), []);
 
+  // "Hide bought": only what is still to buy.
+  const [hideBought, setHideBoughtState] = useState(getHideBought);
+
+  function handleHideBoughtChange(hide: boolean) {
+    setHideBoughtState(hide);
+    setHideBought(hide);
+  }
+
   function handleToggle(row: ShoppingRow, checked: boolean) {
     setRowPurchases.mutate({ row, purchases: rowPurchasesForToggle(row, checked) });
   }
@@ -250,8 +259,9 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
     });
   }
 
-  const groups = buildShoppingRows(list);
-  const isEmpty = groups.length === 0;
+  const allGroups = buildShoppingRows(list);
+  const isEmpty = allGroups.length === 0;
+  const groups = hideBought ? onlyStillToBuy(allGroups) : allGroups;
   const progress = list.totalItems > 0 ? (list.fullyPurchasedCount / list.totalItems) * 100 : 0;
 
   return (
@@ -275,6 +285,17 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
             {list.fullyPurchasedCount} of {list.totalItems}
           </Text>
           <Progress value={progress} size="2" className="shopping-page__progress-bar" />
+          {!isEmpty && (
+            <button
+              type="button"
+              className="shopping-page__hide-bought"
+              aria-pressed={hideBought}
+              onClick={() => handleHideBoughtChange(!hideBought)}
+            >
+              {hideBought ? <EyeNoneIcon aria-hidden="true" /> : <EyeOpenIcon aria-hidden="true" />}
+              Hide bought
+            </button>
+          )}
         </div>
       </PlanHeader>
 
@@ -294,6 +315,16 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
         </div>
       ) : (
         <div className="shopping-page__body">
+          {groups.length === 0 && (
+            <div className="shopping-page__all-bought">
+              <Text size="4" weight="medium">
+                Everything is bought
+              </Text>
+              <Button size="3" variant="soft" onClick={() => handleHideBoughtChange(false)}>
+                Show bought items
+              </Button>
+            </div>
+          )}
           {groups.map((group) => (
             <div key={group.category}>
               <div className="shopping-page__category-header">

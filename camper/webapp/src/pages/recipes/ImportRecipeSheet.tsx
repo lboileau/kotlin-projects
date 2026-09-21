@@ -1,13 +1,14 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Callout, Spinner, Text, TextField } from '@radix-ui/themes';
+import { Button, Callout, Text, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { useImportRecipe, recipesKey } from '../../queries/recipes';
 import { ApiError } from '../../api/http';
 import { toast } from '../../lib/toastStore';
+import { DogChef } from './DogChef';
 import { normalizeUrl } from '../../lib/normalizeUrl';
 import { router } from '../../router';
 import type { RecipeResponse } from '../../api/recipes';
@@ -120,12 +121,12 @@ export function ImportRecipeSheet() {
         </Text>
 
         {importRecipe.isPending && (
-          <Callout.Root color="gray" variant="surface" size="1" role="status" aria-live="polite">
-            <Callout.Icon>
-              <Spinner size="1" />
-            </Callout.Icon>
-            <Callout.Text>Reading the recipe&hellip; this can take up to a minute.</Callout.Text>
-          </Callout.Root>
+          <div className="import-recipe-sheet__reading" role="status" aria-live="polite">
+            <DogChef />
+            <Text size="2" color="gray" align="center">
+              Reading the recipe&hellip; this can take up to a minute.
+            </Text>
+          </div>
         )}
 
         {error && (

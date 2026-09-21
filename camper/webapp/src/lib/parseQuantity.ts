@@ -28,7 +28,23 @@ const FRACTION_GLYPHS: Record<string, number> = {
 const GLYPH_PATTERN = Object.keys(FRACTION_GLYPHS).join('');
 const GLYPH_RE = new RegExp(`^(\\d+)?\\s*([${GLYPH_PATTERN}])$`);
 const FRACTION_RE = /^(?:(\d+)\s+)?(\d+)\/(\d+)$/;
-const DECIMAL_RE = /^\d+([.,]\d+)?$/;
+// ".5" counts: the number pad makes it the natural way to type a half.
+const DECIMAL_RE = /^(\d+([.,]\d+)?|[.,]\d+)$/;
+
+// Quantity fields show the number pad, which has no slash, so a third can
+// only be typed as a decimal. "0.33" / "0.333" / "0.66" / "0.67" are read as the
+// third they stand for: 0.33 cup scaled by three would otherwise come out
+// as 0.99 instead of 1.
+const THIRD_TOLERANCE = 0.01;
+
+function snapThirds(value: number): number {
+  const whole = Math.floor(value);
+  const fraction = value - whole;
+  for (const third of [1 / 3, 2 / 3]) {
+    if (Math.abs(fraction - third) < THIRD_TOLERANCE) return whole + third;
+  }
+  return value;
+}
 
 function finalize(value: number): number | null {
   if (!Number.isFinite(value) || value <= 0) return null;
@@ -55,7 +71,7 @@ export function parseQuantity(raw: string): number | null {
   }
 
   if (DECIMAL_RE.test(trimmed)) {
-    return finalize(parseFloat(trimmed.replace(',', '.')));
+    return finalize(snapThirds(parseFloat(trimmed.replace(',', '.'))));
   }
 
   return null;

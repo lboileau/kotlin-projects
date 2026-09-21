@@ -6,11 +6,11 @@ import {
   derivePurchaseStatus,
   formatStillNeededText,
   haveSheetEntries,
+  onlyStillToBuy,
   restoreRowEntries,
   rowPurchasesForToggle,
   type ShoppingRow,
 } from './shoppingRows';
-import { parseQuantityOrZero } from './parseQuantity';
 
 function makeItem(overrides: Partial<ShoppingListItemResponse>): ShoppingListItemResponse {
   return {
@@ -139,19 +139,32 @@ describe('haveSheetEntries', () => {
   });
 });
 
-describe('parseQuantityOrZero', () => {
-  it('reads blank and zero as none', () => {
-    expect(parseQuantityOrZero('')).toBe(0);
-    expect(parseQuantityOrZero('  ')).toBe(0);
-    expect(parseQuantityOrZero('0')).toBe(0);
-    expect(parseQuantityOrZero('0,0')).toBe(0);
-  });
-
-  it('reads amounts as parseQuantity does, and rejects the rest', () => {
-    expect(parseQuantityOrZero('2')).toBe(2);
-    expect(parseQuantityOrZero('1/2')).toBe(0.5);
-    expect(parseQuantityOrZero('1½')).toBe(1.5);
-    expect(parseQuantityOrZero('two')).toBeNull();
-    expect(parseQuantityOrZero('-1')).toBeNull();
+describe('onlyStillToBuy', () => {
+  const list: ShoppingListResponse = {
+    ...makeList([]),
+    categories: [
+      {
+        category: 'produce',
+        items: [
+          makeItem({}),
+          makeItem({ ingredientId: 'onion', ingredientName: 'Onion', quantityPurchased: 1, status: 'more_needed' }),
+          makeItem({ ingredientId: 'lime', ingredientName: 'Lime', quantityPurchased: 3, status: 'done' }),
+        ],
+      },
+      {
+        category: 'dairy',
+        items: [
+          makeItem({ ingredientId: 'milk', ingredientName: 'Milk', quantityPurchased: 3, status: 'done' }),
+          makeItem({ ingredientId: 'ghee', ingredientName: 'Ghee', quantityRequired: 0, quantityPurchased: 1, status: 'no_longer_needed' }),
+        ],
+      },
+    ],
+  };
+  it('keeps unbought and part-bought rows, and drops categories with nothing left', () => {
+    const names = onlyStillToBuy(buildShoppingRows(list)).map((group) => [
+      group.category,
+      group.rows.map((row) => row.ingredientName),
+    ]);
+    expect(names).toEqual([['produce', ['Garlic', 'Onion']]]);
   });
 });

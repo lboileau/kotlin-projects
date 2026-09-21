@@ -74,7 +74,7 @@ function EditLineForm({
     }
     const parsedQuantity = parseQuantity(quantity);
     if (parsedQuantity === null) {
-      setError('Enter a valid quantity (e.g. "1", "1.5", or "1 1/2").');
+      setError('Enter a valid quantity (e.g. "2" or "1.5").');
       return;
     }
     setError(null);
@@ -118,8 +118,8 @@ function EditLineForm({
           <Text as="label" size="2" weight="medium" className="line-sheet__field">
             Quantity
             <TextField.Root
-              inputMode="text"
-              placeholder="1 1/2"
+              inputMode="decimal"
+              placeholder="1.5"
               size="3"
               value={quantity}
               autoCapitalize="off"
