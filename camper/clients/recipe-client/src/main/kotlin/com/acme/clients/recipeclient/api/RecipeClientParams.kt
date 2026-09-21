@@ -95,3 +95,20 @@ data class RemoveRecipeIngredientParam(val id: UUID)
 
 /** Parameter for finding recipe ingredients that reference a given global ingredient. */
 data class FindRecipeIngredientsByIngredientIdParam(val ingredientId: UUID)
+
+/** Parameter for favouriting a recipe on behalf of a user. Idempotent. */
+data class AddRecipeFavoriteParam(val recipeId: UUID, val userId: UUID)
+
+/** Parameter for removing a user's favourite of a recipe. Idempotent. */
+data class RemoveRecipeFavoriteParam(val recipeId: UUID, val userId: UUID)
+
+/** Parameter for listing who favourited a recipe, oldest first. */
+data class GetRecipeFavoritesParam(val recipeId: UUID)
+
+/**
+ * Parameter for the batched favourite summary read.
+ *
+ * [recipeIds] may be empty — the operation then returns an empty list without
+ * touching the database (an empty `IN ()` is a SQL syntax error).
+ */
+data class GetRecipeFavoriteSummariesParam(val recipeIds: List<UUID>, val userId: UUID)

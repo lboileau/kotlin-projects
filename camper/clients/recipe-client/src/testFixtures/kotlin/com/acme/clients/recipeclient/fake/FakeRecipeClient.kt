@@ -13,6 +13,8 @@ import com.acme.clients.recipeclient.internal.validations.ValidateCreateRecipe
 import com.acme.clients.recipeclient.internal.validations.ValidateUpdateRecipe
 import com.acme.clients.recipeclient.internal.validations.ValidateUpdateRecipeIngredient
 import com.acme.clients.recipeclient.model.Recipe
+import com.acme.clients.recipeclient.model.RecipeFavorite
+import com.acme.clients.recipeclient.model.RecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient
 import java.time.Instant
 import java.util.UUID
@@ -192,6 +194,18 @@ class FakeRecipeClient : RecipeClient {
     override fun findIngredientsByIngredientId(param: FindRecipeIngredientsByIngredientIdParam): Result<List<RecipeIngredient>, AppError> {
         return success(ingredients.values.filter { it.ingredientId == param.ingredientId }.sortedBy { it.createdAt })
     }
+
+    override fun addFavorite(param: AddRecipeFavoriteParam): Result<Unit, AppError> =
+        TODO("Implementation in client-impl PR")
+
+    override fun removeFavorite(param: RemoveRecipeFavoriteParam): Result<Unit, AppError> =
+        TODO("Implementation in client-impl PR")
+
+    override fun getFavorites(param: GetRecipeFavoritesParam): Result<List<RecipeFavorite>, AppError> =
+        TODO("Implementation in client-impl PR")
+
+    override fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError> =
+        TODO("Implementation in client-impl PR")
 
     fun reset() {
         recipes.clear()

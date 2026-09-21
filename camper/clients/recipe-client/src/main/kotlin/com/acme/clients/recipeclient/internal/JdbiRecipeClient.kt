@@ -5,6 +5,8 @@ import com.acme.clients.common.error.AppError
 import com.acme.clients.recipeclient.api.*
 import com.acme.clients.recipeclient.internal.operations.*
 import com.acme.clients.recipeclient.model.Recipe
+import com.acme.clients.recipeclient.model.RecipeFavorite
+import com.acme.clients.recipeclient.model.RecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient
 import org.jdbi.v3.core.Jdbi
 
@@ -37,4 +39,16 @@ internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
     override fun updateIngredient(param: UpdateRecipeIngredientParam): Result<RecipeIngredient, AppError> = updateRecipeIngredient.execute(param)
     override fun removeIngredient(param: RemoveRecipeIngredientParam): Result<Unit, AppError> = removeRecipeIngredient.execute(param)
     override fun findIngredientsByIngredientId(param: FindRecipeIngredientsByIngredientIdParam): Result<List<RecipeIngredient>, AppError> = findRecipeIngredientsByIngredientId.execute(param)
+
+    override fun addFavorite(param: AddRecipeFavoriteParam): Result<Unit, AppError> =
+        TODO("Implementation in client-impl PR")
+
+    override fun removeFavorite(param: RemoveRecipeFavoriteParam): Result<Unit, AppError> =
+        TODO("Implementation in client-impl PR")
+
+    override fun getFavorites(param: GetRecipeFavoritesParam): Result<List<RecipeFavorite>, AppError> =
+        TODO("Implementation in client-impl PR")
+
+    override fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError> =
+        TODO("Implementation in client-impl PR")
 }
