@@ -162,9 +162,12 @@ internal class ImportRecipeAction(
 
         val ingredientMap = allIngredients.associateBy({ it.id }, { RecipeMapper.toIngredientResponse(it) })
 
+        // PLACEHOLDER (service-contracts PR): the imported draft really is 0 / false, but its
+        // nested duplicateOf may already have favourites. Both come from one batched
+        // getFavoriteSummaries read, wired in the service-implementation PR.
         val duplicateOf = finalRecipe.duplicateOfId?.let { dupId ->
             when (val result = recipeClient.getById(GetByIdParam(dupId))) {
-                is Result.Success -> RecipeMapper.toRecipeResponse(result.value)
+                is Result.Success -> RecipeMapper.toRecipeResponse(result.value, 0, false)
                 is Result.Failure -> null
             }
         }
@@ -177,6 +180,8 @@ internal class ImportRecipeAction(
             )
         }
 
-        return Result.Success(RecipeMapper.toRecipeDetailResponse(finalRecipe, duplicateOf, ingredientResponses))
+        return Result.Success(
+            RecipeMapper.toRecipeDetailResponse(finalRecipe, duplicateOf, ingredientResponses, 0, false)
+        )
     }
 }

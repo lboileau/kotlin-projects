@@ -66,6 +66,8 @@ internal class CreateRecipeAction(
             }
         }
 
-        return Result.Success(RecipeMapper.toRecipeResponse(recipe))
+        // A recipe created microseconds ago cannot have favourites, so 0 / false is the real
+        // answer here — this is the one call site that never reads a favourite summary.
+        return Result.Success(RecipeMapper.toRecipeResponse(recipe, 0, false))
     }
 }

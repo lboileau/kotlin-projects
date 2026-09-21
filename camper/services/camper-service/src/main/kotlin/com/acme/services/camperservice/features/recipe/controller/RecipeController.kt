@@ -180,4 +180,34 @@ class RecipeController(
         return recipeService.publish(PublishRecipeParam(recipeId = id, userId = userId))
             .toResponseEntity { it }
     }
+
+    @PutMapping("/{id}/favorite")
+    fun favorite(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("PUT /api/recipes/{}/favorite", id)
+        return recipeService.favorite(FavoriteRecipeParam(recipeId = id, userId = userId))
+            .toResponseEntity { it }
+    }
+
+    @DeleteMapping("/{id}/favorite")
+    fun unfavorite(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("DELETE /api/recipes/{}/favorite", id)
+        return recipeService.unfavorite(UnfavoriteRecipeParam(recipeId = id, userId = userId))
+            .toResponseEntity { it }
+    }
+
+    @GetMapping("/{id}/favorites")
+    fun favorites(
+        @PathVariable id: UUID,
+        @RequestHeader("X-User-Id") userId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("GET /api/recipes/{}/favorites", id)
+        return recipeService.listFavorites(ListRecipeFavoritesParam(recipeId = id, userId = userId))
+            .toResponseEntity { it }
+    }
 }

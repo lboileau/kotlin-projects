@@ -9,6 +9,7 @@ import com.acme.clients.recipeclient.model.RecipeIngredient
 import com.acme.clients.recipescraperclient.fake.FakeRecipeScraperClient
 import com.acme.clients.recipescraperclient.model.ScrapedIngredient
 import com.acme.clients.recipescraperclient.model.ScrapedRecipe
+import com.acme.clients.userclient.fake.FakeUserClient
 import com.acme.services.camperservice.features.recipe.actions.HtmlFetcher
 import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.recipe.params.*
@@ -27,10 +28,15 @@ class RecipeServiceTest {
     private val fakeRecipeClient = FakeRecipeClient()
     private val fakeIngredientClient = FakeIngredientClient()
     private val fakeScraperClient = FakeRecipeScraperClient()
+    private val fakeUserClient = FakeUserClient()
     private val fakeHtmlFetcher = HtmlFetcher { "<html>fake</html>" }
 
     private val recipeService = RecipeService(
-        fakeRecipeClient, fakeIngredientClient, fakeScraperClient, fakeHtmlFetcher
+        recipeClient = fakeRecipeClient,
+        ingredientClient = fakeIngredientClient,
+        recipeScraperClient = fakeScraperClient,
+        userClient = fakeUserClient,
+        htmlFetcher = fakeHtmlFetcher
     )
     private val ingredientService = IngredientService(fakeIngredientClient, fakeRecipeClient)
 
@@ -42,6 +48,7 @@ class RecipeServiceTest {
         fakeRecipeClient.reset()
         fakeIngredientClient.reset()
         fakeScraperClient.reset()
+        fakeUserClient.reset()
     }
 
     // ─── Ingredient helpers ───────────────────────────────────────────────
@@ -486,7 +493,11 @@ class RecipeServiceTest {
         fun `import returns ImportFailed when HTML fetch fails`() {
             val failingFetcher = HtmlFetcher { throw RuntimeException("Connection refused") }
             val serviceWithFailingFetcher = RecipeService(
-                fakeRecipeClient, fakeIngredientClient, fakeScraperClient, failingFetcher
+                recipeClient = fakeRecipeClient,
+                ingredientClient = fakeIngredientClient,
+                recipeScraperClient = fakeScraperClient,
+                userClient = fakeUserClient,
+                htmlFetcher = failingFetcher
             )
 
             val result = serviceWithFailingFetcher.import(ImportRecipeParam(userId, "https://example.com/recipe"))

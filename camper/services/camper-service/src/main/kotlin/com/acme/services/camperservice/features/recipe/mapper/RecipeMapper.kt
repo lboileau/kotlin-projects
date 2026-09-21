@@ -2,9 +2,13 @@ package com.acme.services.camperservice.features.recipe.mapper
 
 import com.acme.clients.ingredientclient.model.Ingredient as ClientIngredient
 import com.acme.clients.recipeclient.model.Recipe as ClientRecipe
+import com.acme.clients.recipeclient.model.RecipeFavorite as ClientRecipeFavorite
+import com.acme.clients.recipeclient.model.RecipeFavoriteSummary as ClientRecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient as ClientRecipeIngredient
 import com.acme.services.camperservice.features.recipe.dto.IngredientResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
+import com.acme.services.camperservice.features.recipe.dto.RecipeFavoriteStatusResponse
+import com.acme.services.camperservice.features.recipe.dto.RecipeFavoriteUserResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeIngredientResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeResponse
 
@@ -19,7 +23,16 @@ object RecipeMapper {
         updatedAt = ingredient.updatedAt
     )
 
-    fun toRecipeResponse(recipe: ClientRecipe): RecipeResponse = RecipeResponse(
+    /**
+     * [favoriteCount] and [favoritedByMe] are deliberately required, with no defaults:
+     * a caller that forgot to read the favourite summary would otherwise silently
+     * return `0 / false` for a recipe that already has favourites.
+     */
+    fun toRecipeResponse(
+        recipe: ClientRecipe,
+        favoriteCount: Int,
+        favoritedByMe: Boolean
+    ): RecipeResponse = RecipeResponse(
         id = recipe.id,
         name = recipe.name,
         description = recipe.description,
@@ -30,6 +43,8 @@ object RecipeMapper {
         duplicateOfId = recipe.duplicateOfId,
         meal = recipe.meal,
         theme = recipe.theme,
+        favoriteCount = favoriteCount,
+        favoritedByMe = favoritedByMe,
         createdAt = recipe.createdAt,
         updatedAt = recipe.updatedAt
     )
@@ -55,10 +70,13 @@ object RecipeMapper {
         updatedAt = recipeIngredient.updatedAt
     )
 
+    /** [favoriteCount] and [favoritedByMe] are required for the same reason as in [toRecipeResponse]. */
     fun toRecipeDetailResponse(
         recipe: ClientRecipe,
         duplicateOf: RecipeResponse?,
-        ingredients: List<RecipeIngredientResponse>
+        ingredients: List<RecipeIngredientResponse>,
+        favoriteCount: Int,
+        favoritedByMe: Boolean
     ): RecipeDetailResponse = RecipeDetailResponse(
         id = recipe.id,
         name = recipe.name,
@@ -71,7 +89,25 @@ object RecipeMapper {
         ingredients = ingredients,
         meal = recipe.meal,
         theme = recipe.theme,
+        favoriteCount = favoriteCount,
+        favoritedByMe = favoritedByMe,
         createdAt = recipe.createdAt,
         updatedAt = recipe.updatedAt
+    )
+
+    fun toFavoriteStatusResponse(summary: ClientRecipeFavoriteSummary): RecipeFavoriteStatusResponse =
+        RecipeFavoriteStatusResponse(
+            recipeId = summary.recipeId,
+            favoriteCount = summary.favoriteCount,
+            favoritedByMe = summary.favoritedByMe
+        )
+
+    fun toFavoriteUserResponse(
+        favorite: ClientRecipeFavorite,
+        username: String
+    ): RecipeFavoriteUserResponse = RecipeFavoriteUserResponse(
+        userId = favorite.userId,
+        username = username,
+        favoritedAt = favorite.createdAt
     )
 }

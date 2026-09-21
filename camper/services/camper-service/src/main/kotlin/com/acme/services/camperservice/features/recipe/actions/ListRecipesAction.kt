@@ -26,6 +26,9 @@ internal class ListRecipesAction(
             .distinctBy { it.id }
             .sortedBy { it.name }
 
-        return Result.Success(visible.map { RecipeMapper.toRecipeResponse(it) })
+        // PLACEHOLDER (service-contracts PR): the real favourite counts come from a single
+        // batched recipeClient.getFavoriteSummaries(visible.map { it.id }, param.userId) read,
+        // wired in the service-implementation PR. Until then every row reports 0 / false.
+        return Result.Success(visible.map { RecipeMapper.toRecipeResponse(it, 0, false) })
     }
 }

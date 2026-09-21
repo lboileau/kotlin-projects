@@ -39,9 +39,12 @@ internal class GetRecipeAction(
         val ingredientMap = buildIngredientMap(ingredientIds)
             ?: return Result.Failure(RecipeError.Invalid("ingredients", "Failed to load ingredient details"))
 
+        // PLACEHOLDER (service-contracts PR): both the recipe and its nested duplicateOf get
+        // their real counts from one batched getFavoriteSummaries read over
+        // listOfNotNull(recipe.id, recipe.duplicateOfId), wired in the service-implementation PR.
         val duplicateOf = recipe.duplicateOfId?.let { dupId ->
             when (val result = recipeClient.getById(RecipeGetByIdParam(dupId))) {
-                is Result.Success -> RecipeMapper.toRecipeResponse(result.value)
+                is Result.Success -> RecipeMapper.toRecipeResponse(result.value, 0, false)
                 is Result.Failure -> null
             }
         }
@@ -54,7 +57,9 @@ internal class GetRecipeAction(
             )
         }
 
-        return Result.Success(RecipeMapper.toRecipeDetailResponse(recipe, duplicateOf, ingredientResponses))
+        return Result.Success(
+            RecipeMapper.toRecipeDetailResponse(recipe, duplicateOf, ingredientResponses, 0, false)
+        )
     }
 
     private fun buildIngredientMap(ids: Set<UUID>): Map<UUID, com.acme.services.camperservice.features.recipe.dto.IngredientResponse>? {

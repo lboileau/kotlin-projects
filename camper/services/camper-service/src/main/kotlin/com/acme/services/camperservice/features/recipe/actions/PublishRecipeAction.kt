@@ -47,7 +47,10 @@ internal class PublishRecipeAction(
             id = param.recipeId,
             status = "published"
         ))) {
-            is Result.Success -> Result.Success(RecipeMapper.toRecipeResponse(result.value))
+            // PLACEHOLDER (service-contracts PR): the real count comes from a
+            // getFavoriteSummaries read for param.recipeId after the update succeeds,
+            // wired in the service-implementation PR.
+            is Result.Success -> Result.Success(RecipeMapper.toRecipeResponse(result.value, 0, false))
             is Result.Failure -> Result.Failure(RecipeError.Invalid("recipe", result.error.message))
         }
     }

@@ -105,3 +105,18 @@ data class AddRecipeIngredientParam(
     val quantity: BigDecimal,
     val unit: String
 )
+
+data class FavoriteRecipeParam(
+    val recipeId: UUID,
+    val userId: UUID
+)
+
+data class UnfavoriteRecipeParam(
+    val recipeId: UUID,
+    val userId: UUID
+)
+
+data class ListRecipeFavoritesParam(
+    val recipeId: UUID,
+    val userId: UUID
+)
