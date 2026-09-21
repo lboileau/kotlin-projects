@@ -518,6 +518,24 @@ CREATE TABLE IF NOT EXISTS ladder_votes (
 CREATE INDEX IF NOT EXISTS idx_ladder_votes_ladder_round ON ladder_votes (ladder_id, round_number);
 ```
 
+### recipe_favorites
+
+```sql
+CREATE TABLE IF NOT EXISTS recipe_favorites (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipe_id  UUID        NOT NULL,
+    user_id    UUID        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT uq_recipe_favorites_recipe_user UNIQUE (recipe_id, user_id),
+    CONSTRAINT fk_recipe_favorites_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE,
+    CONSTRAINT fk_recipe_favorites_user   FOREIGN KEY (user_id)   REFERENCES users (id)   ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_recipe_favorites_user_id ON recipe_favorites (user_id);
+```
+
+No separate `idx_recipe_favorites_recipe_id` — `uq_recipe_favorites_recipe_user` already indexes `recipe_id`-leading lookups, which is how both reads (per-recipe list and the batched summary) hit the table.
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -562,6 +580,8 @@ CREATE INDEX IF NOT EXISTS idx_ladder_votes_ladder_round ON ladder_votes (ladder
 - `ladder_votes.ladder_id` → `activity_ladders.id` (FK, CASCADE on delete)
 - `ladder_votes.user_id` → `users.id` (FK, CASCADE on delete)
 - `ladder_votes.voted_for_activity_id` → `ladder_activities.id` (FK, CASCADE on delete)
+- `recipe_favorites.recipe_id` → `recipes.id` (FK, CASCADE on delete)
+- `recipe_favorites.user_id` → `users.id` (FK, CASCADE on delete — required so deleting a user does not fail on their favourites)
 
 ## Invariants
 
@@ -626,3 +646,6 @@ CREATE INDEX IF NOT EXISTS idx_ladder_votes_ladder_round ON ladder_votes (ladder
 - Votes are immutable once cast — no `updated_at` on `ladder_votes`.
 - Deleting a ladder cascades to its ladder_activities, ladder_participants, and ladder_votes.
 - Deleting a user cascades to ladder_participants and ladder_votes referencing them.
+- A user can favourite a given recipe at most once (enforced by `uq_recipe_favorites_recipe_user`).
+- `recipe_favorites` has no `updated_at` — rows are only inserted and deleted.
+- Deleting a recipe cascades to its recipe_favorites; deleting a user cascades to their recipe_favorites.
