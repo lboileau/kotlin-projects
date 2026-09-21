@@ -14,6 +14,10 @@ export interface RecipeResponse {
   duplicateOfId: string | null;
   meal: string | null;
   theme: string | null;
+  /** How many people have favourited this recipe. Computed server-side, never stored on the recipe. */
+  favoriteCount: number;
+  /** Whether the X-User-Id caller has favourited it. */
+  favoritedByMe: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -157,4 +161,33 @@ export function resolveDuplicate(recipeId: string, action: ResolveDuplicateActio
 /** POST /api/recipes/{id}/publish — 409 if already published, 422 while blocked (duplicate flag or pending lines). */
 export function publishRecipe(recipeId: string): Promise<RecipeResponse> {
   return request(`/api/recipes/${recipeId}/publish`, { method: 'POST' });
+}
+
+/** The totals a favourite/un-favourite answers with, for the calling user. */
+export interface RecipeFavoriteStatusResponse {
+  recipeId: string;
+  favoriteCount: number;
+  favoritedByMe: boolean;
+}
+
+export interface RecipeFavoriteUserResponse {
+  userId: string;
+  /** Their username, falling back to their email when they have none. */
+  username: string;
+  favoritedAt: string;
+}
+
+/** PUT /api/recipes/{id}/favorite — idempotent; 404 if the recipe isn't visible to you. */
+export function favoriteRecipe(recipeId: string): Promise<RecipeFavoriteStatusResponse> {
+  return request(`/api/recipes/${recipeId}/favorite`, { method: 'PUT' });
+}
+
+/** DELETE /api/recipes/{id}/favorite — idempotent; answers 200 with the new totals, not 204. */
+export function unfavoriteRecipe(recipeId: string): Promise<RecipeFavoriteStatusResponse> {
+  return request(`/api/recipes/${recipeId}/favorite`, { method: 'DELETE' });
+}
+
+/** GET /api/recipes/{id}/favorites — who favourited it, oldest first. */
+export function getRecipeFavorites(recipeId: string): Promise<RecipeFavoriteUserResponse[]> {
+  return request(`/api/recipes/${recipeId}/favorites`);
 }

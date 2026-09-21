@@ -21,6 +21,35 @@
   min-height: 44px;
 }
 
+/* The who-line under the title. `flex-basis: 100%` gives it a row of its
+   own inside the hero's wrapping meta row, which is what lets the names
+   ellipsis rather than wrap: a username falls back to an email address,
+   and two of those are far longer than a phone is wide. */
+.recipe-detail-page__favourite-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-basis: 100%;
+  min-width: 0;
+  min-height: 44px;
+  color: var(--accent-11);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+/* The same filled accent heart as the list's pill and the button. */
+.recipe-detail-page__favourite-heart {
+  flex: none;
+  color: var(--accent-9);
+}
+
+.recipe-detail-page__favourite-who {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .recipe-detail-page__wrap {
   overflow-wrap: anywhere;
 }

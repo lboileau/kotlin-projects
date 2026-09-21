@@ -1,0 +1,86 @@
+.favourite-button {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1.5px solid var(--gray-7);
+  border-radius: 999px;
+  background: var(--color-panel-solid);
+  color: var(--gray-11);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+@media (hover: hover) {
+  .favourite-button:hover {
+    border-color: var(--accent-8);
+    color: var(--accent-11);
+  }
+}
+
+/* Favourited: a solid disc with a soft ring around it, so it reads as "on"
+   and not just as a purple button. */
+.favourite-button--on,
+.favourite-button--on:hover {
+  border-color: var(--accent-9);
+  background: var(--accent-9);
+  color: var(--accent-contrast);
+  box-shadow: 0 0 0 4px var(--accent-4);
+}
+
+/* Offset, so it stays visible against the solid fill and its ring. */
+.favourite-button:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 6px;
+}
+
+.favourite-button__heart {
+  display: inline-flex;
+}
+
+/* The tap that favourites: the heart pops, and a ring bursts out and fades. */
+.favourite-button--pop .favourite-button__heart {
+  animation: favourite-button-pop 380ms cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+.favourite-button--pop::after {
+  content: '';
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  border: 2px solid var(--accent-9);
+  pointer-events: none;
+  animation: favourite-button-burst 480ms ease-out forwards;
+}
+
+@keyframes favourite-button-pop {
+  0% { transform: scale(0.55); }
+  55% { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+
+@keyframes favourite-button-burst {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .favourite-button,
+  .favourite-button--pop .favourite-button__heart,
+  .favourite-button--pop::after {
+    animation: none;
+    transition: none;
+  }
+  .favourite-button--pop::after {
+    display: none;
+  }
+}
