@@ -223,33 +223,41 @@ API service for camping trip planning — user registration, authentication, pla
   - `PUT /api/ingredients/{id}` — update ingredient
 
 ### Recipe (`features/recipe/`)
-- **Models:** `Recipe(id, name, description?, webLink?, baseServings, status, createdBy, duplicateOfId?, createdAt, updatedAt)`, `RecipeIngredient(id, recipeId, ingredientId?, originalText?, quantity, unit, status, matchedIngredientId?, suggestedIngredientName?, reviewFlags, createdAt, updatedAt)` (from recipe-client)
+- **Models:** `Recipe(id, name, description?, webLink?, baseServings, status, createdBy, duplicateOfId?, createdAt, updatedAt)`, `RecipeIngredient(id, recipeId, ingredientId?, originalText?, quantity, unit, status, matchedIngredientId?, suggestedIngredientName?, reviewFlags, createdAt, updatedAt)`, `RecipeFavorite(id, recipeId, userId, createdAt)` (from recipe-client)
 - **DTOs:**
   - Requests: `CreateRecipeRequest`, `ImportRecipeRequest(url)`, `UpdateRecipeRequest(name?, description?, baseServings?, meal?, theme?)`, `ResolveIngredientRequest(action, ingredientId?, newIngredient?)`, `ResolveDuplicateRequest(action)`
-  - Responses: `RecipeResponse`, `RecipeDetailResponse` (with `duplicateOf?` + `ingredients`), `RecipeIngredientResponse`
+  - Responses: `RecipeResponse`, `RecipeDetailResponse` (with `duplicateOf?` + `ingredients`, both include `favoriteCount`, `favoritedByMe`), `RecipeIngredientResponse`, `RecipeFavoriteStatusResponse(recipeId, favoriteCount, favoritedByMe)`, `RecipeFavoriteUserResponse(userId, username, favoritedAt)`
 - **Error:** `RecipeError` sealed class — `NotFound(id)`, `NotCreator(id, userId)`, `Invalid(field, reason)`, `DuplicateWebLink(url)`, `DuplicateIngredientName(name)`, `UnresolvedIngredients(id, count)`, `UnresolvedDuplicate(id)`, `ImportFailed(url, reason)`, `ScrapeFailed(reason)`, `IngredientNotFound(id)`, `AlreadyPublished(id)`
-- **Service params:** `CreateRecipeParam`, `ImportRecipeParam(userId, url)`, `GetRecipeParam(recipeId, userId)`, `ListRecipesParam(userId)`, `UpdateRecipeParam(recipeId, userId, name?, description?, baseServings?, meal?, theme?)`, `DeleteRecipeParam(recipeId, userId)`, `ResolveIngredientParam(recipeId, recipeIngredientId, userId, action, ingredientId?, newIngredient?)`, `ResolveDuplicateParam(recipeId, userId, action)`, `PublishRecipeParam(recipeId, userId)`
+- **Service params:** `CreateRecipeParam`, `ImportRecipeParam(userId, url)`, `GetRecipeParam(recipeId, userId)`, `ListRecipesParam(userId)`, `UpdateRecipeParam(recipeId, userId, name?, description?, baseServings?, meal?, theme?)`, `DeleteRecipeParam(recipeId, userId)`, `ResolveIngredientParam(recipeId, recipeIngredientId, userId, action, ingredientId?, newIngredient?)`, `ResolveDuplicateParam(recipeId, userId, action)`, `PublishRecipeParam(recipeId, userId)`, `FavoriteRecipeParam(recipeId, userId)`, `UnfavoriteRecipeParam(recipeId, userId)`, `ListRecipeFavoritesParam(recipeId, userId)`
+- **Visibility:** `RecipeVisibility` enforces published-or-owned rule on the three new endpoints (`favorite`, `unfavorite`, `listFavorites`). Deliberately NOT applied to `GET /api/recipes/{id}` — that endpoint historically returned any recipe by id. Both 404 (not found) and 404 (not visible) are indistinguishable to the caller.
+- **Mapper params:** `RecipeMapper.toRecipeResponse()` and `toRecipeDetailResponse()` require `favoriteCount` and `favoritedByMe` with no defaults. Callers (create, update, import, publish, resolve-duplicate endpoints) that return a `RecipeResponse` must read the favourite summaries for their recipe id first.
 - **Actions:**
   - `CreateRecipeAction`: validates name/servings, checks all ingredientIds exist, creates as `published`
   - `ImportRecipeAction`: validates URL not blank, checks not duplicate webLink, fetches HTML via `java.net.http.HttpClient`, loads all ingredients, calls `RecipeScraperClient`, detects similar recipes, creates as `draft`, adds ingredients with `pending_review`/`approved` status based on `reviewFlags`
   - `GetRecipeAction`: fetches recipe + ingredients, enriches with `IngredientResponse` map, resolves `duplicateOf`
-  - `ListRecipesAction`: fetches published recipes + caller's own drafts, deduplicates by ID (calls `recipeClient.getAll(status="published")` + `recipeClient.getAll(createdBy=userId)`)
+  - `ListRecipesAction`: fetches published recipes + caller's own drafts, deduplicates by ID. Reads favourite summaries for all result ids (one batched client call per list, regardless of length)
   - `UpdateRecipeAction`: delegates to `recipeClient.update`. Blank `description`, `meal`, or `theme` clears the field (NULL); absent field means unchanged. No ownership enforcement.
   - `DeleteRecipeAction`: delegates to `recipeClient.delete`. No ownership enforcement.
   - `ResolveIngredientAction`: handles `CONFIRM_MATCH` (use matchedIngredientId), `CREATE_NEW` (create ingredient then assign), `SELECT_EXISTING` (validate ingredient exists then assign); updates recipe_ingredient to `approved`. No ownership enforcement.
   - `ResolveDuplicateAction`: `NOT_DUPLICATE` clears `duplicate_of_id`; `USE_EXISTING` deletes the recipe (returns null → 204). No ownership enforcement.
   - `PublishRecipeAction`: checks not already published, checks no unresolved duplicate, checks all ingredients approved, updates status to `published`. No ownership enforcement.
-- **Service:** `RecipeService` facade (takes `RecipeClient`, `IngredientClient`, `RecipeScraperClient`)
+  - `FavoriteRecipeAction`: idempotent via `ON CONFLICT DO NOTHING` at DB layer. Visibility-checked. Returns `RecipeFavoriteStatusResponse` with current count and `favoritedByMe=true`.
+  - `UnfavoriteRecipeAction`: idempotent — deleting 0 rows is success. Visibility-checked. Returns `RecipeFavoriteStatusResponse` with current count and `favoritedByMe=false`.
+  - `ListRecipeFavoritesAction`: visibility-checked. Returns list of `RecipeFavoriteUserResponse` ordered by `createdAt, id`. Enriches `userId` → `username` via `UserClient.getById`, falling back to email if username is null. Empty list if recipe has no favourites or doesn't exist.
+- **Service:** `RecipeService` facade (takes `RecipeClient`, `IngredientClient`, `RecipeScraperClient`, `UserClient`)
 - **Routes:** (all require `X-User-Id` header)
   - `POST /api/recipes` — create recipe (201)
   - `POST /api/recipes/import` — import recipe from URL (201)
-  - `GET /api/recipes` — list recipes (published + caller's own drafts)
-  - `GET /api/recipes/{id}` — get recipe detail
+  - `GET /api/recipes` — list recipes (published + caller's own drafts); each recipe includes `favoriteCount` and `favoritedByMe`
+  - `GET /api/recipes/{id}` — get recipe detail; includes `favoriteCount` and `favoritedByMe`
   - `PUT /api/recipes/{id}` — update recipe (blank description/meal/theme clears the field)
   - `DELETE /api/recipes/{id}` — delete recipe (204)
   - `PUT /api/recipes/{id}/ingredients/{ingredientId}` — resolve pending ingredient
   - `PUT /api/recipes/{id}/resolve-duplicate` — resolve duplicate flag (204 if USE_EXISTING)
   - `POST /api/recipes/{id}/publish` — publish recipe
+  - `PUT /api/recipes/{id}/favorite` — favourite as caller, idempotent (200); returns `RecipeFavoriteStatusResponse`
+  - `DELETE /api/recipes/{id}/favorite` — un-favourite as caller, idempotent (200); returns `RecipeFavoriteStatusResponse`
+  - `GET /api/recipes/{id}/favorites` — who favourited (oldest first); returns `[RecipeFavoriteUserResponse]` with usernames falling back to emails
 
 ### Meal Plan (`features/mealplan/`)
 - **Access rule (private plans):** A meal plan can only be used by its **owner** (`meal_plans.created_by`) or a **member** — someone with access to its *backing trip plan* (`meal_plans.plan_id` → a `plans` row): that plan's `owner_id`, or a row in its `plan_members`. Anyone else gets `403 FORBIDDEN`; a missing plan is still `404`. A meal plan with no backing plan (`plan_id IS NULL`) is owner-only. Templates follow the same rule — `GET /api/meal-plans/templates` returns only the caller's own templates. Enforced by `MealPlanAuthorizer` (`features/mealplan/auth/MealPlanAuthorizer.kt`, modelled on `common/auth/PlanRoleAuthorizer`), which resolves `MealPlanRole` (OWNER/MEMBER) via a single `MealPlanClient.getAccess` call and is invoked at the top of every action below except `CreateMealPlanAction` and `GetTemplatesAction`/`ListMealPlansByCreatorAction` (which filter by `createdBy` instead) and `GetMealPlanByPlanIdAction` (only checked when a meal plan actually exists for the trip — no meal plan means nothing to protect). Members can do everything except: rename the plan (`PUT` with a non-null `name` from a member is `403`; `servings`/`scalingMode` are fine), delete the plan, and remove another member — those are owner-only (`MealPlanAuthorizer.authorizeOwner`). `AddRecipeToPlanAction` checks access *before* calling `MealPlanClient.addRecipeToPlanIfAbsent` (which holds a row lock inside a transaction and isn't restructured to also authorize).
@@ -401,7 +409,7 @@ API service for camping trip planning — user registration, authentication, pla
 - `RecipeClientConfig` — creates recipe client via factory function
 - `RecipeScraperClientConfig` — creates NoOp or Claude-backed scraper client based on `ANTHROPIC_API_KEY` env var
 - `IngredientServiceConfig` — wires IngredientService (takes IngredientClient)
-- `RecipeServiceConfig` — wires RecipeService (takes RecipeClient + IngredientClient + RecipeScraperClient)
+- `RecipeServiceConfig` — wires RecipeService (takes RecipeClient + IngredientClient + RecipeScraperClient + UserClient)
 - `GearPackClientConfig` — creates gear pack client via factory function
 - `GearPackServiceConfig` — wires GearPackService (takes GearPackClient + ItemClient + PlanRoleAuthorizer)
 - `MealPlanClientConfig` — creates meal plan client via factory function
