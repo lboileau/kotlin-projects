@@ -7,9 +7,13 @@ import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.common.failure
 import com.acme.clients.common.success
 import com.acme.clients.recipeclient.api.*
+import com.acme.clients.recipeclient.internal.validations.ValidateAddRecipeFavorite
 import com.acme.clients.recipeclient.internal.validations.ValidateAddRecipeIngredient
 import com.acme.clients.recipeclient.internal.validations.ValidateAddRecipeIngredients
 import com.acme.clients.recipeclient.internal.validations.ValidateCreateRecipe
+import com.acme.clients.recipeclient.internal.validations.ValidateGetRecipeFavoriteSummaries
+import com.acme.clients.recipeclient.internal.validations.ValidateGetRecipeFavorites
+import com.acme.clients.recipeclient.internal.validations.ValidateRemoveRecipeFavorite
 import com.acme.clients.recipeclient.internal.validations.ValidateUpdateRecipe
 import com.acme.clients.recipeclient.internal.validations.ValidateUpdateRecipeIngredient
 import com.acme.clients.recipeclient.model.Recipe
@@ -24,11 +28,22 @@ class FakeRecipeClient : RecipeClient {
     private val recipes = ConcurrentHashMap<UUID, Recipe>()
     private val ingredients = ConcurrentHashMap<UUID, RecipeIngredient>()
 
+    /**
+     * Keyed by `(recipeId, userId)` — the in-memory form of the
+     * `uq_recipe_favorites_recipe_user` unique constraint, which is what makes both
+     * favourite mutations idempotent for free.
+     */
+    private val favorites = ConcurrentHashMap<Pair<UUID, UUID>, RecipeFavorite>()
+
     private val validateCreate = ValidateCreateRecipe()
     private val validateUpdate = ValidateUpdateRecipe()
     private val validateAddIngredient = ValidateAddRecipeIngredient()
     private val validateAddIngredients = ValidateAddRecipeIngredients()
     private val validateUpdateIngredient = ValidateUpdateRecipeIngredient()
+    private val validateAddFavorite = ValidateAddRecipeFavorite()
+    private val validateRemoveFavorite = ValidateRemoveRecipeFavorite()
+    private val validateGetFavorites = ValidateGetRecipeFavorites()
+    private val validateGetFavoriteSummaries = ValidateGetRecipeFavoriteSummaries()
 
     override fun create(param: CreateRecipeParam): Result<Recipe, AppError> {
         val validation = validateCreate.execute(param)
@@ -107,6 +122,8 @@ class FakeRecipeClient : RecipeClient {
         if (!recipes.containsKey(param.id)) return failure(NotFoundError("Recipe", param.id.toString()))
         recipes.remove(param.id)
         ingredients.values.removeIf { it.recipeId == param.id }
+        // In-memory stand-in for fk_recipe_favorites_recipe ON DELETE CASCADE.
+        favorites.keys.removeIf { it.first == param.id }
         return success(Unit)
     }
 
@@ -195,24 +212,76 @@ class FakeRecipeClient : RecipeClient {
         return success(ingredients.values.filter { it.ingredientId == param.ingredientId }.sortedBy { it.createdAt })
     }
 
-    override fun addFavorite(param: AddRecipeFavoriteParam): Result<Unit, AppError> =
-        TODO("Implementation in client-impl PR")
+    override fun addFavorite(param: AddRecipeFavoriteParam): Result<Unit, AppError> {
+        val validation = validateAddFavorite.execute(param)
+        if (validation is Result.Failure) return validation
 
-    override fun removeFavorite(param: RemoveRecipeFavoriteParam): Result<Unit, AppError> =
-        TODO("Implementation in client-impl PR")
+        // putIfAbsent mirrors ON CONFLICT DO NOTHING: re-favouriting leaves the existing
+        // row — and therefore its createdAt — untouched, keeping list order stable.
+        favorites.putIfAbsent(
+            param.recipeId to param.userId,
+            RecipeFavorite(
+                id = UUID.randomUUID(),
+                recipeId = param.recipeId,
+                userId = param.userId,
+                createdAt = Instant.now()
+            )
+        )
+        return success(Unit)
+    }
 
-    override fun getFavorites(param: GetRecipeFavoritesParam): Result<List<RecipeFavorite>, AppError> =
-        TODO("Implementation in client-impl PR")
+    override fun removeFavorite(param: RemoveRecipeFavoriteParam): Result<Unit, AppError> {
+        val validation = validateRemoveFavorite.execute(param)
+        if (validation is Result.Failure) return validation
 
-    override fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError> =
-        TODO("Implementation in client-impl PR")
+        // Idempotent: success whether or not a row was there, matching RemoveRecipeFavorite.
+        favorites.remove(param.recipeId to param.userId)
+        return success(Unit)
+    }
+
+    override fun getFavorites(param: GetRecipeFavoritesParam): Result<List<RecipeFavorite>, AppError> {
+        val validation = validateGetFavorites.execute(param)
+        if (validation is Result.Failure) return validation
+
+        return success(
+            favorites.values
+                .filter { it.recipeId == param.recipeId }
+                .sortedWith(compareBy({ it.createdAt }, { it.id }))
+        )
+    }
+
+    override fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError> {
+        val validation = validateGetFavoriteSummaries.execute(param)
+        if (validation is Result.Failure) return validation
+
+        if (param.recipeIds.isEmpty()) return success(emptyList())
+
+        val wanted = param.recipeIds.toSet()
+        // Recipes with no favourites are ABSENT from the result, exactly like the SQL's
+        // GROUP BY — never zero-filled. Callers must default a missing id themselves.
+        val summaries = favorites.values
+            .filter { it.recipeId in wanted }
+            .groupBy { it.recipeId }
+            .map { (recipeId, rows) ->
+                RecipeFavoriteSummary(
+                    recipeId = recipeId,
+                    favoriteCount = rows.size,
+                    favoritedByMe = rows.any { it.userId == param.userId }
+                )
+            }
+        return success(summaries)
+    }
 
     fun reset() {
         recipes.clear()
         ingredients.clear()
+        favorites.clear()
     }
 
     fun seed(vararg entities: Recipe) = entities.forEach { recipes[it.id] = it }
 
     fun seedIngredients(vararg entities: RecipeIngredient) = entities.forEach { ingredients[it.id] = it }
+
+    fun seedFavorites(vararg entities: RecipeFavorite) =
+        entities.forEach { favorites[it.recipeId to it.userId] = it }
 }
