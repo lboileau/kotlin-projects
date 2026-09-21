@@ -154,10 +154,11 @@
   margin-right: 8px;
 }
 
-/* A fact in the row's secondary line, beside "Serves 2" — not a control.
-   Accent, not red: red means "take it away" in this app. */
-/* The favourite count, a pill on the title line. Soft when only other
-   people favourited the recipe, solid when you did. */
+/* The favourite count, a pill on the title line — a fact about the row, not
+   a control. Soft when only other people favourited the recipe, solid when
+   you did. Accent, not red: red means "take it away" in this app. The soft
+   pill is --accent-4, one step past the row's own hover/focus tint
+   (--accent-3), so its shape doesn't vanish when the row is hovered. */
 .recipes-page__row-favourites {
   flex: none;
   display: inline-flex;
@@ -166,7 +167,7 @@
   height: 22px;
   padding: 0 8px 0 7px;
   border-radius: 999px;
-  background: var(--accent-3);
+  background: var(--accent-4);
   color: var(--accent-11);
   font-size: 0.75rem;
   font-weight: 600;

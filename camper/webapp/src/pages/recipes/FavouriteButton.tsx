@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { HeartGlyph } from '../../components/HeartGlyph';
+import { prefersReducedMotion } from '../../lib/prefersReducedMotion';
 import './FavouriteButton.css';
 
 interface FavouriteButtonProps {
@@ -30,7 +31,9 @@ export function FavouriteButton({ favourited, onToggle }: FavouriteButtonProps) 
       aria-pressed={favourited}
       aria-label={favourited ? 'Remove from favourites' : 'Favourite'}
       onClick={() => {
-        setJustFavourited(!favourited);
+        // Not armed under reduced motion: with no animation there is no
+        // `animationend` to clear it again.
+        setJustFavourited(!favourited && !prefersReducedMotion());
         onToggle(!favourited);
       }}
     >
