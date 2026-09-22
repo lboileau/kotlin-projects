@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { MAX_PHOTOS, MAX_PHOTO_EDGE, fitWithin, splitDataUrl, takePhotosUpTo } from './importPhotos';
+import { MAX_PHOTO_EDGE, fitWithin, splitDataUrl } from './importPhotos';
 
 describe('fitWithin', () => {
   it('leaves an image that already fits alone', () => {
@@ -39,21 +39,5 @@ describe('splitDataUrl', () => {
     expect(splitDataUrl('data:image/jpeg;base64,')).toBeNull();
     expect(splitDataUrl('https://example.com/a.jpg')).toBeNull();
     expect(splitDataUrl('')).toBeNull();
-  });
-});
-
-describe('takePhotosUpTo', () => {
-  it('accepts everything while there is room', () => {
-    expect(takePhotosUpTo(0, ['a', 'b'])).toEqual({ accepted: ['a', 'b'], dropped: 0 });
-  });
-
-  it('fills the remaining slots in order and reports the rest as dropped', () => {
-    expect(takePhotosUpTo(1, ['a', 'b', 'c', 'd'])).toEqual({ accepted: ['a', 'b'], dropped: 2 });
-  });
-
-  it('accepts nothing when already full', () => {
-    expect(takePhotosUpTo(3, ['a'])).toEqual({ accepted: [], dropped: 1 });
-    expect(takePhotosUpTo(5, ['a'])).toEqual({ accepted: [], dropped: 1 });
-    expect(MAX_PHOTOS).toBe(3);
   });
 });

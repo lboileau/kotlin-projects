@@ -5,9 +5,6 @@
  * here so it can be tested.
  */
 
-/** Matches the server's `RecipeImage.MAX_IMAGES`. */
-export const MAX_PHOTOS = 3;
-
 /**
  * Longest edge the photo is sized down to before upload. 1568px is the largest
  * the Claude API uses without resizing on its side, and a JPEG at that size is
@@ -50,14 +47,4 @@ export function splitDataUrl(dataUrl: string): ImportImage | null {
   const [, mediaType, data] = match;
   if (!data) return null;
   return { mediaType: mediaType.toLowerCase(), data };
-}
-
-/**
- * Which of `candidates` still fit alongside `currentCount` photos under the
- * cap. Returns the ones that fit (in order) and how many were left out, so
- * the UI can say so. Candidates may be Files, prepared photos — anything.
- */
-export function takePhotosUpTo<T>(currentCount: number, candidates: readonly T[], max: number = MAX_PHOTOS): { accepted: T[]; dropped: number } {
-  const room = Math.max(0, max - currentCount);
-  return { accepted: candidates.slice(0, room), dropped: Math.max(0, candidates.length - room) };
 }

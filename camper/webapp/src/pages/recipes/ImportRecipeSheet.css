@@ -24,18 +24,13 @@
   pointer-events: none;
 }
 
-.import-recipe-sheet__photos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin: 4px 0;
-  padding: 0;
-  list-style: none;
-}
-
+/* The picked photo: a portrait thumbnail big enough to see it is the right page,
+   no bigger — the sheet has to leave room for the button and the error line. */
 .import-recipe-sheet__photo {
   position: relative;
-  aspect-ratio: 3 / 4;
+  width: 120px;
+  height: 160px;
+  margin: 4px 0;
   overflow: hidden;
   border-radius: var(--radius-3);
   background: var(--gray-3);
@@ -48,21 +43,24 @@
   object-fit: cover;
 }
 
-/* Reading order, since the prompt tells the model the photos are in it. */
-.import-recipe-sheet__photo-index {
-  position: absolute;
-  left: 6px;
-  bottom: 6px;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--accent-9);
-  color: var(--accent-contrast);
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 22px;
-  text-align: center;
+/* While importing: a 40px chip beside "Photo attached", so the dog and the status
+   line underneath don't push the sheet taller than the screen. */
+.import-recipe-sheet__photo--compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+}
+
+.import-recipe-sheet__photo--compact img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-2);
 }
 
 /* 44px target on a small thumbnail: the visible disc is smaller, the hit area isn't. */

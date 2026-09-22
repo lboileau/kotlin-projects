@@ -10,7 +10,6 @@ import { ApiError } from '../../api/http';
 import { toast } from '../../lib/toastStore';
 import { DogChef } from './DogChef';
 import { normalizeUrl } from '../../lib/normalizeUrl';
-import { MAX_PHOTOS, takePhotosUpTo } from '../../lib/importPhotos';
 import { preparePhoto, releasePhoto, type PreparedPhoto } from './preparePhoto';
 import { router } from '../../router';
 import type { RecipeResponse } from '../../api/recipes';
@@ -87,44 +86,38 @@ export function ImportRecipeSheet() {
   }
 
   const [url, setUrl] = useState('');
-  const [photos, setPhotos] = useState<PreparedPhoto[]>([]);
+  // One photo (the server takes up to three; the sheet offers one). Picking again replaces it.
+  const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
   const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [duplicate, setDuplicate] = useState<RecipeResponse | null>(null);
   const errorId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Thumbnails are object URLs; let them go when the sheet does.
-  const photosRef = useRef(photos);
-  photosRef.current = photos;
-  useEffect(() => () => photosRef.current.forEach(releasePhoto), []);
+  // The thumbnail is an object URL; let it go when the sheet does.
+  const photoRef = useRef(photo);
+  photoRef.current = photo;
+  useEffect(() => () => {
+    if (photoRef.current) releasePhoto(photoRef.current);
+  }, []);
 
   async function handlePick(event: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.target.files ?? []);
+    const file = event.target.files?.[0];
     // Reset so picking the same file again after removing it fires onChange.
     event.target.value = '';
-    if (files.length === 0) return;
-
-    const { accepted, dropped } = takePhotosUpTo(photos.length, files);
-    if (dropped > 0) {
-      toast.info(accepted.length === 0 ? `You already have ${MAX_PHOTOS} photos.` : `Up to ${MAX_PHOTOS} photos — only the first ${accepted.length} added.`);
-    }
-    if (accepted.length === 0) return;
+    if (!file) return;
 
     setError(null);
     setPreparing(true);
     try {
-      const prepared = await Promise.all(accepted.map(preparePhoto));
+      const prepared = await preparePhoto(file);
       if (!mountedRef.current) {
-        prepared.forEach(releasePhoto);
+        releasePhoto(prepared);
         return;
       }
-      setPhotos((current) => {
-        // Re-check the cap against the current list: a second pick could resolve
-        // while this one was still decoding.
-        const { accepted: kept, dropped: extra } = takePhotosUpTo(current.length, prepared);
-        prepared.slice(prepared.length - extra).forEach(releasePhoto);
-        return [...current, ...kept];
+      setPhoto((current) => {
+        if (current) releasePhoto(current);
+        return prepared;
       });
     } catch (err) {
       if (mountedRef.current) setError(err instanceof Error ? err.message : "Couldn't read that photo.");
@@ -133,9 +126,11 @@ export function ImportRecipeSheet() {
     }
   }
 
-  function removePhoto(photo: PreparedPhoto) {
-    releasePhoto(photo);
-    setPhotos((current) => current.filter((p) => p.id !== photo.id));
+  function removePhoto() {
+    setPhoto((current) => {
+      if (current) releasePhoto(current);
+      return null;
+    });
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -149,11 +144,11 @@ export function ImportRecipeSheet() {
       }
       input = { url: trimmed };
     } else {
-      if (photos.length === 0) {
+      if (!photo) {
         setError('Add a photo of the recipe.');
         return;
       }
-      input = { images: photos.map((p) => p.image) };
+      input = { images: [photo.image] };
     }
     setError(null);
     setDuplicate(null);
@@ -184,7 +179,6 @@ export function ImportRecipeSheet() {
   }
 
   const busy = importRecipe.isPending;
-  const canAddMore = photos.length < MAX_PHOTOS;
 
   return (
     <Sheet {...sheet.sheetProps} title="Import recipe">
@@ -226,12 +220,16 @@ export function ImportRecipeSheet() {
 
         {source === 'photos' && (
           <div className="import-recipe-sheet__field">
-            <Text size="2" weight="medium" id={`${errorId}-photos-label`}>
-              Photos of the recipe
-            </Text>
-            <Text size="2" color="gray">
-              Up to {MAX_PHOTOS} — the ingredient list must be readable. Several pages go in reading order.
-            </Text>
+            {!busy && (
+              <>
+                <Text size="2" weight="medium">
+                  Photo of the recipe
+                </Text>
+                <Text size="2" color="gray">
+                  The ingredient list must be readable.
+                </Text>
+              </>
+            )}
             {/* The real picker: hidden, opened by the button below. `accept` gives
                 the camera and the photo library on a phone; no `capture`, so the
                 library is still an option for a photo taken earlier. */}
@@ -240,44 +238,43 @@ export function ImportRecipeSheet() {
               className="import-recipe-sheet__file"
               type="file"
               accept="image/*"
-              multiple
               tabIndex={-1}
               aria-hidden="true"
-              disabled={busy || !canAddMore}
+              disabled={busy}
               onChange={handlePick}
             />
-            {photos.length > 0 && (
-              <ul className="import-recipe-sheet__photos" aria-labelledby={`${errorId}-photos-label`}>
-                {photos.map((photo, index) => (
-                  <li key={photo.id} className="import-recipe-sheet__photo">
-                    <img src={photo.previewUrl} alt={`Photo ${index + 1} of ${photos.length}`} />
-                    <span className="import-recipe-sheet__photo-index" aria-hidden="true">
-                      {index + 1}
-                    </span>
-                    <button
-                      type="button"
-                      className="import-recipe-sheet__photo-remove"
-                      aria-label={`Remove photo ${index + 1}`}
-                      disabled={busy}
-                      onClick={() => removePhoto(photo)}
-                    >
-                      <Cross2Icon />
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            {photo && (
+              // While the import runs the photo shrinks to a chip: the dog and its
+              // status line below need the room more than a second look at the page.
+              <div className={`import-recipe-sheet__photo${busy ? ' import-recipe-sheet__photo--compact' : ''}`}>
+                <img src={photo.previewUrl} alt="The recipe photo" />
+                {busy ? (
+                  <Text size="2" color="gray">
+                    Photo attached
+                  </Text>
+                ) : (
+                  <button
+                    type="button"
+                    className="import-recipe-sheet__photo-remove"
+                    aria-label="Remove photo"
+                    onClick={removePhoto}
+                  >
+                    <Cross2Icon />
+                  </button>
+                )}
+              </div>
             )}
-            {canAddMore && (
+            {!busy && (
               <Button
                 type="button"
                 size="3"
                 variant="soft"
                 loading={preparing}
-                disabled={busy || preparing}
+                disabled={preparing}
                 onClick={() => fileInputRef.current?.click()}
               >
-                {photos.length === 0 ? <CameraIcon /> : <ImageIcon />}
-                {photos.length === 0 ? 'Take or choose a photo' : 'Add another photo'}
+                {photo ? <ImageIcon /> : <CameraIcon />}
+                {photo ? 'Choose a different photo' : 'Take or choose a photo'}
               </Button>
             )}
           </div>
@@ -313,7 +310,7 @@ export function ImportRecipeSheet() {
           type="submit"
           size="3"
           loading={busy}
-          disabled={busy || preparing || (source === 'photos' && photos.length === 0)}
+          disabled={busy || preparing || (source === 'photos' && !photo)}
         >
           Import
         </Button>
