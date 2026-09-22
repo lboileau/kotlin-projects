@@ -89,7 +89,7 @@
    show through the pill's rounded corners or the gap below it. */
 .shopping-page__category-header {
   position: sticky;
-  top: var(--plan-header-height, 0px);
+  top: var(--page-top-height, 0px);
   z-index: 5;
   padding: 2px 0 6px;
   background: var(--color-background);

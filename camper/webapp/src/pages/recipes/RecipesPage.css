@@ -4,41 +4,22 @@
   min-height: 100%;
 }
 
+/* Both live inside the sticky header now (PageHeader `away` / children), so
+   they carry the page background themselves. The toggle is full width. */
+.recipes-page__toggle {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 16px 0;
+  background: var(--color-background);
+}
+
 .recipes-page__controls {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 16px;
+  padding: 10px 16px 12px;
+  background: var(--color-background);
   border-bottom: 1px solid var(--gray-5);
-}
-
-.recipes-page__chips {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 2px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.recipes-page__chip {
-  flex-shrink: 0;
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid var(--gray-5);
-  background: transparent;
-  color: var(--gray-11);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  cursor: pointer;
-  white-space: nowrap;
-  touch-action: manipulation;
-}
-
-.recipes-page__chip--active {
-  background: var(--accent-9);
-  border-color: var(--accent-9);
-  color: var(--accent-contrast);
 }
 
 /* The Show dropdown on the left, Import / New on the right. */

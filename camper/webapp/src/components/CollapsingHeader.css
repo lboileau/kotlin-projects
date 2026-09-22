@@ -1,0 +1,28 @@
+/* Collapse on scroll (CollapsingHeader.tsx): the away part slides up out of
+   the scroller's top edge; the pinned part follows it up to the top. The
+   header itself lets taps through to the list in the strip the slide leaves
+   behind at its bottom. */
+.collapsing-header {
+  pointer-events: none;
+}
+
+.collapsing-header > * {
+  pointer-events: auto;
+}
+
+/* The white status strip (`.page-header::before`) stays put over the sliding content. */
+.collapsing-header::before {
+  position: relative;
+  z-index: 1;
+}
+
+.collapsing-header .collapsing-header__slide {
+  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collapsing-header .collapsing-header__slide {
+    transition: none;
+  }
+}

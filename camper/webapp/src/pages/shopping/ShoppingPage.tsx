@@ -267,7 +267,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
   return (
     <div className="shopping-page">
       <PlanHeader
-        collapseOnScroll
+        collapseTopRow
         planName={list.mealPlanName}
         actions={
           <button

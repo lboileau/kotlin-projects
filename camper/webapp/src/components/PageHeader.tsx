@@ -2,6 +2,7 @@ import type { ComponentType, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronLeftIcon, Cross1Icon, PersonIcon } from '@radix-ui/react-icons';
 import { AREA_ICON } from './areaIcons';
+import { CollapsingHeader } from './CollapsingHeader';
 import { useBack } from './useBack';
 import { AREA_TITLE, areaForPath } from '../lib/areas';
 import { usePageTitle } from '../lib/usePageTitle';
@@ -68,6 +69,16 @@ interface PageHeaderProps {
   actions?: ReactNode;
   /** Set false to hide the account button (e.g. on the Account page itself). */
   showAccount?: boolean;
+  /**
+   * Tuck the bar and `away` out of sight on scroll down, back on scroll up,
+   * leaving the toolbar (back, the screen's actions) and `children` pinned
+   * (see CollapsingHeader). On by default for every screen.
+   */
+  collapseOnScroll?: boolean;
+  /** More that goes away with the bar on scroll (the Recipes/Ingredients toggle). */
+  away?: ReactNode;
+  /** What stays pinned under it (a search box and filters). */
+  children?: ReactNode;
 }
 
 /**
@@ -89,30 +100,43 @@ export function PageHeader({
   titleInHero = false,
   actions,
   showAccount = true,
+  collapseOnScroll = true,
+  away,
+  children,
 }: PageHeaderProps) {
   usePageTitle(title);
   const area = areaForPath(useLocation().pathname);
   const isRoot = backTo === undefined;
 
+  const toolbar = !isRoot && (
+    <div className="page-header__toolbar">
+      <div className="page-header__leading">
+        {/* A form closes back to wherever it was opened from, even another tab (a recipe edited from a plan). */}
+        <BackButton parentPath={backTo} task={task} acrossAreas={backAcrossAreas || task} />
+        {!titleInHero && <h1 className="page-header__toolbar-title">{title}</h1>}
+      </div>
+      {actions && <div className="page-header__trailing">{actions}</div>}
+    </div>
+  );
+
   return (
-    <header className="page-header">
-      <HeaderBar
-        title={isRoot || !area ? title : AREA_TITLE[area]}
-        heading={isRoot}
-        icon={isRoot ? icon : undefined}
-        showAccount={showAccount}
-      />
-      {!isRoot && (
-        <div className="page-header__toolbar">
-          <div className="page-header__leading">
-            {/* A form closes back to wherever it was opened from, even another tab (a recipe edited from a plan). */}
-            <BackButton parentPath={backTo} task={task} acrossAreas={backAcrossAreas || task} />
-            {!titleInHero && <h1 className="page-header__toolbar-title">{title}</h1>}
-          </div>
-          {actions && <div className="page-header__trailing">{actions}</div>}
-        </div>
-      )}
-    </header>
+    <CollapsingHeader
+      collapseOnScroll={collapseOnScroll}
+      away={
+        <>
+          <HeaderBar
+            title={isRoot || !area ? title : AREA_TITLE[area]}
+            heading={isRoot}
+            icon={isRoot ? icon : undefined}
+            showAccount={showAccount}
+          />
+          {away}
+        </>
+      }
+    >
+      {toolbar}
+      {children}
+    </CollapsingHeader>
   );
 }
 

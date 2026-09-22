@@ -57,38 +57,14 @@
   flex-shrink: 0;
 }
 
-/* Collapse on scroll (PlanHeader.tsx): the rows slide up behind the bar. The
-   bar sits above them; the header itself lets taps through to the list in
-   the strip the rows leave behind. */
-.plan-header--collapsible {
-  pointer-events: none;
+/* When the plan row goes away with the bar (shopping list), the rows are
+   split in two wrappers; their shared padding is split so the gap between
+   the plan row and the progress row stays what it was. */
+.plan-header__rows--away {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
-.plan-header--collapsible > * {
-  pointer-events: auto;
-}
-
-.plan-header--collapsible .page-header__bar {
-  position: relative;
-  z-index: 1;
-}
-
-.plan-header--collapsible .plan-header__rows {
-  transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: transform;
-}
-
-.plan-header--collapsible .plan-header__top {
-  transition: opacity 160ms ease;
-}
-
-.plan-header--collapsible .plan-header__top[inert] {
-  opacity: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .plan-header--collapsible .plan-header__rows,
-  .plan-header--collapsible .plan-header__top {
-    transition: none;
-  }
+.plan-header__rows--pinned {
+  padding-top: 10px;
 }

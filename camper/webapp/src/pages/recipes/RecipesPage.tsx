@@ -1,39 +1,51 @@
-import { useMemo } from 'react';
-import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Badge, Button, IconButton, Select, Text, TextField } from '@radix-ui/themes';
+import { useMemo } from "react";
+import { Outlet, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Badge,
+  Button,
+  IconButton,
+  Select,
+  Text,
+  TextField,
+} from "@radix-ui/themes";
 import {
   Cross2Icon,
   DownloadIcon,
   Link2Icon,
   MagnifyingGlassIcon,
   PlusIcon,
-} from '@radix-ui/react-icons';
-import { PageLoader } from '../../components/PageLoader';
-import { PageHeader } from '../../components/PageHeader';
-import { RowActionButton } from '../../components/RowActionButton';
-import { FavouriteCountPill } from '../../components/FavouriteCountPill';
-import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
-import { QueryErrorState } from '../../components/QueryErrorState';
-import { useAuth } from '../../auth/useAuth';
-import { useRecipes } from '../../queries/recipes';
-import { useAddRecipeToPlan, usePlans, useRemoveRecipeFromPlan } from '../../queries/plans';
-import { toast } from '../../lib/toastStore';
-import { MEALS, capitalize } from '../../lib/ingredientConstants';
-import { useSearchText } from '../../lib/useSearchText';
-import { matchesShowFilter, parseShowFilter } from '../../lib/recipeFavorites';
-import type { RecipeResponse } from '../../api/recipes';
-import './RecipesPage.css';
+} from "@radix-ui/react-icons";
+import { PageLoader } from "../../components/PageLoader";
+import { PageHeader } from "../../components/PageHeader";
+import { RowActionButton } from "../../components/RowActionButton";
+import { FavouriteCountPill } from "../../components/FavouriteCountPill";
+import { RecipesIngredientsToggle } from "../../components/RecipesIngredientsToggle";
+import { QueryErrorState } from "../../components/QueryErrorState";
+import { useAuth } from "../../auth/useAuth";
+import { useRecipes } from "../../queries/recipes";
+import {
+  useAddRecipeToPlan,
+  usePlans,
+  useRemoveRecipeFromPlan,
+} from "../../queries/plans";
+import { toast } from "../../lib/toastStore";
+import { MEALS, capitalize } from "../../lib/ingredientConstants";
+import { FilterChips } from "../../components/FilterChips";
+import { useSearchText } from "../../lib/useSearchText";
+import { matchesShowFilter, parseShowFilter } from "../../lib/recipeFavorites";
+import type { RecipeResponse } from "../../api/recipes";
+import "./RecipesPage.css";
 
 // Single choice, `All recipes` first and written as an absent `show` param.
 // Replaces the old Mine switch; it ANDs with the meal chips and the search
 // box. A dropdown rather than a second chip row: chips cost a whole row of
 // vertical space above the list, which the owner declined.
 const SHOW_OPTIONS = [
-  { value: 'all', label: 'All recipes' },
-  { value: 'mine', label: 'Mine' },
-  { value: 'favourites', label: 'Favourites' },
-  { value: 'my-favourites', label: 'My favourites' },
-  { value: 'new', label: 'New this week' },
+  { value: "all", label: "All recipes" },
+  { value: "mine", label: "Mine" },
+  { value: "favourites", label: "Favourites" },
+  { value: "my-favourites", label: "My favourites" },
+  { value: "new", label: "New this week" },
 ] as const;
 
 function updateParams(
@@ -43,7 +55,7 @@ function updateParams(
 ) {
   const next = new URLSearchParams(searchParams);
   for (const [key, value] of Object.entries(patch)) {
-    if (value === null || value === '') {
+    if (value === null || value === "") {
       next.delete(key);
     } else {
       next.set(key, value);
@@ -89,8 +101,9 @@ export function RecipesPage() {
             return;
           }
           toast.info(`Added to ${onlyPlan.name}`, {
-            label: 'Undo',
-            onClick: () => removeRecipe.mutate({ planId: onlyPlan.id, recipeId: recipe.id }),
+            label: "Undo",
+            onClick: () =>
+              removeRecipe.mutate({ planId: onlyPlan.id, recipeId: recipe.id }),
           });
         },
       },
@@ -98,18 +111,21 @@ export function RecipesPage() {
   }
 
   const [q, setQ] = useSearchText();
-  const meal = searchParams.get('meal') ?? 'all';
-  const show = parseShowFilter(searchParams.get('show'));
-  const hasFilters = q.trim().length > 0 || meal !== 'all' || show !== 'all';
+  const meal = searchParams.get("meal") ?? "all";
+  const show = parseShowFilter(searchParams.get("show"));
+  const hasFilters = q.trim().length > 0 || meal !== "all" || show !== "all";
 
-  const patch = (values: Record<string, string | null>) => updateParams(searchParams, setSearchParams, values);
+  const patch = (values: Record<string, string | null>) =>
+    updateParams(searchParams, setSearchParams, values);
   const clearFilters = () => {
-    setQ('');
+    setQ("");
     patch({ q: null, meal: null, show: null });
   };
 
   const mealsPresent = useMemo(() => {
-    const present = new Set((recipes ?? []).map((r) => r.meal).filter((m): m is string => Boolean(m)));
+    const present = new Set(
+      (recipes ?? []).map((r) => r.meal).filter((m): m is string => Boolean(m)),
+    );
     return MEALS.filter((m) => present.has(m));
   }, [recipes]);
 
@@ -120,103 +136,119 @@ export function RecipesPage() {
     // filter change brings it up to date.
     const now = Date.now();
     list = list.filter((r) => matchesShowFilter(r, show, user?.id, now));
-    if (meal !== 'all') list = list.filter((r) => r.meal === meal);
+    if (meal !== "all") list = list.filter((r) => r.meal === meal);
     const needle = q.trim().toLowerCase();
-    if (needle) list = list.filter((r) => r.name.toLowerCase().includes(needle));
-    return [...list].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    if (needle)
+      list = list.filter((r) => r.name.toLowerCase().includes(needle));
+    return [...list].sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+    );
   }, [recipes, show, meal, q, user]);
 
   return (
     <div className="recipes-page">
-      <PageHeader title="Recipes" />
-
-      <div className="recipes-page__controls">
-        <RecipesIngredientsToggle active="recipes" />
-
-        <TextField.Root
-          size="3"
-          placeholder="Search recipes"
-          aria-label="Search recipes"
-          type="search"
-          enterKeyHint="search"
-          autoCapitalize="off"
-          autoCorrect="off"
-          autoComplete="off"
-          value={q}
-          onChange={(event) => setQ(event.target.value)}
-        >
-          <TextField.Slot>
-            <MagnifyingGlassIcon />
-          </TextField.Slot>
-          {q && (
-            <TextField.Slot>
-              <IconButton size="2" variant="ghost" aria-label="Clear search" onClick={() => setQ('')}>
-                <Cross2Icon />
-              </IconButton>
-            </TextField.Slot>
-          )}
-        </TextField.Root>
-
-        <div className="recipes-page__chips" role="group" aria-label="Filter by meal">
-          <button
-            type="button"
-            className={`recipes-page__chip${meal === 'all' ? ' recipes-page__chip--active' : ''}`}
-            aria-pressed={meal === 'all'}
-            onClick={() => patch({ meal: null })}
+      {/* The bar and the Recipes/Ingredients toggle go away on scroll down;
+          the search box and the filters stay, since they are what a scrolling
+          user reaches for. */}
+      <PageHeader
+        title="Recipes"
+        away={
+          <div className="recipes-page__toggle">
+            <RecipesIngredientsToggle active="recipes" />
+          </div>
+        }
+      >
+        <div className="recipes-page__controls">
+          <TextField.Root
+            size="3"
+            placeholder="Search recipes"
+            aria-label="Search recipes"
+            type="search"
+            enterKeyHint="search"
+            autoCapitalize="off"
+            autoCorrect="off"
+            autoComplete="off"
+            value={q}
+            onChange={(event) => setQ(event.target.value)}
           >
-            All
-          </button>
-          {mealsPresent.map((m) => (
-            <button
-              key={m}
-              type="button"
-              className={`recipes-page__chip${meal === m ? ' recipes-page__chip--active' : ''}`}
-              aria-pressed={meal === m}
-              onClick={() => patch({ meal: meal === m ? null : m })}
-            >
-              {capitalize(m)}
-            </button>
-          ))}
-        </div>
+            <TextField.Slot>
+              <MagnifyingGlassIcon />
+            </TextField.Slot>
+            {q && (
+              <TextField.Slot>
+                <IconButton
+                  size="2"
+                  variant="ghost"
+                  aria-label="Clear search"
+                  onClick={() => setQ("")}
+                >
+                  <Cross2Icon />
+                </IconButton>
+              </TextField.Slot>
+            )}
+          </TextField.Root>
 
-        {/* The list's own actions sit on the list, not in the header: the
+          <FilterChips
+            label="Filter by meal"
+            options={mealsPresent.map((m) => ({ value: m, label: capitalize(m) }))}
+            value={meal === "all" ? null : meal}
+            onChange={(next) => patch({ meal: next })}
+          />
+
+          {/* The list's own actions sit on the list, not in the header: the
             header only says where you are. The Show dropdown is one of
             them, on the left of the same row — it is where the Mine switch
             used to be, and it costs no extra vertical space. */}
-        <div className="recipes-page__actions-row">
-          <Select.Root
-            size="3"
-            value={show}
-            onValueChange={(value) => patch({ show: value === 'all' ? null : value })}
-          >
-            <Select.Trigger variant="soft" aria-label="Show" className="recipes-page__show" />
-            {/* Plain Select.Content: this page is not inside a Sheet, so
+          <div className="recipes-page__actions-row">
+            <Select.Root
+              size="3"
+              value={show}
+              onValueChange={(value) =>
+                patch({ show: value === "all" ? null : value })
+              }
+            >
+              <Select.Trigger
+                variant="soft"
+                aria-label="Show"
+                className="recipes-page__show"
+              />
+              {/* Plain Select.Content: this page is not inside a Sheet, so
                 there is no scroll lock to portal into (see
                 components/SheetSelectContent). */}
-            <Select.Content>
-              {SHOW_OPTIONS.map(({ value, label }) => (
-                <Select.Item key={value} value={value}>
-                  {label}
-                </Select.Item>
-              ))}
-            </Select.Content>
-          </Select.Root>
+              <Select.Content>
+                {SHOW_OPTIONS.map(({ value, label }) => (
+                  <Select.Item key={value} value={value}>
+                    {label}
+                  </Select.Item>
+                ))}
+              </Select.Content>
+            </Select.Root>
 
-          <div className="recipes-page__actions">
-            <Button size="3" variant="soft" onClick={() => navigate('/recipes/import')}>
-              <DownloadIcon /> Import
-            </Button>
-            <Button size="3" onClick={() => navigate('/recipes/new')}>
-              <PlusIcon /> New
-            </Button>
+            <div className="recipes-page__actions">
+              <Button
+                size="3"
+                variant="soft"
+                onClick={() => navigate("/recipes/import")}
+              >
+                <DownloadIcon /> Import
+              </Button>
+              <Button size="3" onClick={() => navigate("/recipes/new")}>
+                <PlusIcon /> New
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="recipes-page__list">
         {isLoading && <PageLoader area="recipes" label="Loading recipes" />}
 
-        {isError && !hasData && <QueryErrorState message="Couldn't load recipes." onRetry={() => void refetch()} />}
+        {isError && !hasData && (
+          <QueryErrorState
+            message="Couldn't load recipes."
+            onRetry={() => void refetch()}
+          />
+        )}
 
         {!isLoading && (hasData || !isError) && filtered.length === 0 && (
           <div className="recipes-page__empty">
@@ -237,10 +269,14 @@ export function RecipesPage() {
                   No recipes yet.
                 </Text>
                 <div className="recipes-page__empty-actions">
-                  <Button size="2" onClick={() => navigate('/recipes/new')}>
+                  <Button size="2" onClick={() => navigate("/recipes/new")}>
                     <PlusIcon /> New recipe
                   </Button>
-                  <Button size="2" variant="soft" onClick={() => navigate('/recipes/import')}>
+                  <Button
+                    size="2"
+                    variant="soft"
+                    onClick={() => navigate("/recipes/import")}
+                  >
                     <DownloadIcon /> Import
                   </Button>
                 </div>
@@ -279,22 +315,35 @@ function RecipeRow({
     <div className="recipes-page__row">
       <button type="button" className="recipes-page__row-open" onClick={onOpen}>
         <div className="recipes-page__row-main">
-          <Text as="span" size="3" weight="medium" className="recipes-page__row-name">
+          <Text
+            as="span"
+            size="3"
+            weight="medium"
+            className="recipes-page__row-name"
+          >
             {recipe.name}
           </Text>
-          {recipe.status === 'draft' && (
+          {recipe.status === "draft" && (
             <Badge color="amber" variant="soft">
               Draft
             </Badge>
           )}
           {recipe.webLink && (
-            <span className="recipes-page__row-imported" role="img" aria-label="Imported from a link" title="Imported from a link">
+            <span
+              className="recipes-page__row-imported"
+              role="img"
+              aria-label="Imported from a link"
+              title="Imported from a link"
+            >
               <Link2Icon />
             </span>
           )}
           {/* On the title line (under it, it fought "Serves" and the tags
               for one line), last and right-justified so the counts align. */}
-          <FavouriteCountPill count={recipe.favoriteCount} favouritedByMe={recipe.favoritedByMe} />
+          <FavouriteCountPill
+            count={recipe.favoriteCount}
+            favouritedByMe={recipe.favoritedByMe}
+          />
         </div>
         <div className="recipes-page__row-meta">
           <Text as="span" size="2" color="gray">
