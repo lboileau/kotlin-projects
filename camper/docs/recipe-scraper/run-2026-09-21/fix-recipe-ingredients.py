@@ -89,7 +89,11 @@ def call(method, path, user_id, body=None):
 def apply(plan):
     print(f"applying against {API}")
     log = []
-    created = {}
+    # Resolve against the live catalogue, not the snapshot — a re-run after a partial failure must
+    # reuse ingredients the previous run created instead of trying to create them again (409).
+    status, live = call('GET', '/ingredients', plan[0]['userId'])
+    if status != 200: sys.exit(f"could not read live catalogue: {status} {live}")
+    created = {c['name'].strip().lower(): c['id'] for c in live}
     for p in plan:
         uid = p['userId']
         status, detail = call('GET', f"/recipes/{p['recipeId']}", uid)
