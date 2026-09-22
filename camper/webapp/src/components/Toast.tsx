@@ -40,7 +40,7 @@ function ToastItem({ entry }: { entry: ToastEntry }) {
 }
 
 /**
- * App-wide toast region, positioned above the tab bar. Rendered once at
+ * App-wide toast region, dropping down over the header bar. Rendered once at
  * the app root; call `toast.error(msg)` / `toast.info(msg)` from
  * `lib/toastStore` to show one, from anywhere (including outside React,
  * e.g. the query client's mutation cache).
