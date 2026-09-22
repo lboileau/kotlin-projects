@@ -131,8 +131,12 @@
   color: var(--accent-contrast);
 }
 
+/* One divider under the tab bar, shared by all three panels — the
+   Ingredients list used to draw its own top rule plus a rule under every
+   row, which made it the one tab with lines running through it. */
 .recipe-detail-page__tab {
   padding-top: 12px;
+  border-top: 1px solid var(--gray-4);
 }
 
 /* A small count after a tab's name, so "Instructions 8" says there is
@@ -276,7 +280,6 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--gray-4);
 }
 
 .recipe-detail-page__line {
@@ -286,7 +289,6 @@
   gap: 8px;
   min-height: 44px;
   padding: 10px 4px;
-  border-bottom: 1px solid var(--gray-4);
   touch-action: manipulation;
 }
 
