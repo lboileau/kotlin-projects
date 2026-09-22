@@ -92,9 +92,13 @@
   line-height: 1;
 }
 
-.shopping-row__quantity--more .shopping-row__number,
+.shopping-row__quantity-line--more .shopping-row__number,
 .shopping-row--checked .shopping-row__number {
   color: inherit;
+}
+
+.shopping-row__quantity-line {
+  display: block;
 }
 
 .shopping-row__quantity--link > span {
@@ -183,10 +187,15 @@
   gap: 6px;
 }
 
-/* Bought some, now needs more: amber, the app's "needs attention" colour. */
-.shopping-row__quantity--more {
+/* Bought some, now needs more: the "N more" line in amber, the app's
+   "needs attention" colour; the "have N" line under it stays in the row's
+   ordinary colours, so only what's still to buy is coloured. */
+.shopping-row__quantity-line--more {
   color: var(--amber-11);
-  font-weight: 500;
+}
+
+.shopping-row__quantity-line--have {
+  font-size: 0.875em;
 }
 
 /* A quick-added item lands in the last group, usually off screen: the row is

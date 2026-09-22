@@ -72,12 +72,17 @@ export function ShoppingRowItem({
   const rowRef = useRef<HTMLDivElement>(null);
   // Manual items have no quantity to have part of.
   const haveTo = row.source !== 'manual' && row.ingredientId && !disabled ? `have/${row.ingredientId}` : null;
-  // "1 clove more · have 2 clove" goes on two lines in the narrow column.
+  // "1 clove more · have 2 clove" is always two lines: what's still to buy in
+  // amber (the app's "needs attention" colour), what's at home in the row's
+  // ordinary colours underneath.
   const quantityLines = (moreNeeded ? stillNeededText : quantityText).split(' · ').filter(Boolean);
-  const quantityClass = `shopping-row__quantity${moreNeeded ? ' shopping-row__quantity--more' : ''}`;
+  const quantityClass = 'shopping-row__quantity';
   // The numbers in a heavier weight than the units — "1⅓ bunch" reads at a glance.
-  const quantityContent = quantityLines.map((line) => (
-    <span key={line}>
+  const quantityContent = quantityLines.map((line, index) => (
+    <span
+      key={line}
+      className={`shopping-row__quantity-line${moreNeeded ? (index === 0 ? ' shopping-row__quantity-line--more' : ' shopping-row__quantity-line--have') : ''}`}
+    >
       {splitQuantityRuns(line).map((run, i) =>
         run.isNumber ? (
           <b key={i} className={`shopping-row__number${run.isLoneFraction ? ' shopping-row__number--fraction' : ''}`}>
