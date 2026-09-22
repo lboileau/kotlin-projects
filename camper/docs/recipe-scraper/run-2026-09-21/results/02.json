@@ -35,8 +35,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "1 tablespoon olive oil",
-    "quantity" : 1,
+    "originalText" : "1 tablespoon olive oil; 1 tablespoon olive oil",
+    "quantity" : 2,
     "unit" : "tbsp",
     "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
@@ -99,16 +99,6 @@
     "quantity" : 1,
     "unit" : "tbsp",
     "matchedIngredientId" : "41547fda-43e4-4f67-ac29-e4a089fd382d",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tablespoon olive oil",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,

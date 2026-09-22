@@ -45,18 +45,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "15g / 1 tbsp  unsalted butter",
-    "quantity" : 15,
-    "unit" : "g",
-    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "30g / 2 tbsp  unsalted butter",
-    "quantity" : 30,
+    "originalText" : "15g / 1 tbsp  unsalted butter; 30g / 2 tbsp  unsalted butter",
+    "quantity" : 45,
     "unit" : "g",
     "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
     "suggestedIngredientName" : null,

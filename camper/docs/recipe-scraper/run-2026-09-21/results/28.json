@@ -15,8 +15,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "3  garlic cloves (, minced)",
-    "quantity" : 3,
+    "originalText" : "3  garlic cloves (, minced); 3  garlic cloves (, minced)",
+    "quantity" : 6,
     "unit" : "clove",
     "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
     "suggestedIngredientName" : null,
@@ -59,16 +59,6 @@
     "quantity" : 2,
     "unit" : "tbsp",
     "matchedIngredientId" : "5093fa92-5457-48cb-a17c-b1d946b03970",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "3  garlic cloves (, minced)",
-    "quantity" : 3,
-    "unit" : "clove",
-    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,

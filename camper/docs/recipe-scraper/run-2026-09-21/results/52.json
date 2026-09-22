@@ -25,18 +25,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "3 Tbsp fresh lime juice",
-    "quantity" : 3,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "LOW",
-    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
-  }, {
-    "originalText" : "1 tsp lime zest",
-    "quantity" : 1,
+    "originalText" : "3 Tbsp fresh lime juice; 1 tsp lime zest; 1 1/2 Tbsp  fresh lime juice",
+    "quantity" : 14.5,
     "unit" : "tsp",
     "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
     "suggestedIngredientName" : null,
@@ -145,6 +135,16 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
+    "originalText" : "Kosher salt, (to taste)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
     "originalText" : "1/2 tsp ground black pepper",
     "quantity" : 0.5,
     "unit" : "tsp",
@@ -214,25 +214,5 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "1 1/2 Tbsp  fresh lime juice",
-    "quantity" : 1.5,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "LOW",
-    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
-  }, {
-    "originalText" : "Kosher salt, (to taste)",
-    "quantity" : 1,
-    "unit" : "pinch",
-    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
   } ]
 }

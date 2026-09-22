@@ -115,28 +115,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "QUANTITY_ASSUMED" ]
   }, {
-    "originalText" : "*Can’t find radicchio? No problem, you could substitute with more arugula, kale (massage it in the dressing!), and/or add in some thinly sliced red cabbage for color.",
-    "quantity" : 1,
-    "unit" : "pieces",
-    "matchedIngredientId" : null,
-    "suggestedIngredientName" : "recipe note",
-    "suggestedCategory" : "other",
-    "suggestedUnit" : "pieces",
-    "confidence" : "LOW",
-    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
-  }, {
-    "originalText" : "**This salad would also be delicious with crumbled goat cheese or feta.",
-    "quantity" : 1,
-    "unit" : "pieces",
-    "matchedIngredientId" : null,
-    "suggestedIngredientName" : "recipe note",
-    "suggestedCategory" : "other",
-    "suggestedUnit" : "pieces",
-    "confidence" : "LOW",
-    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
-  }, {
-    "originalText" : "Pro tip:   ~ I love serving salads like these on a big platter so that the cheese and nuts on top don’t get lost in the bottom and everyone gets the perfect bite!",
-    "quantity" : 1,
+    "originalText" : "*Can’t find radicchio? No problem, you could substitute with more arugula, kale (massage it in the dressing!), and/or add in some thinly sliced red cabbage for color.; **This salad would also be delicious with crumbled goat cheese or feta.; Pro tip:   ~ I love serving salads like these on a big platter so that the cheese and nuts on top don’t get lost in the bottom and everyone gets the perfect bite!",
+    "quantity" : 3,
     "unit" : "pieces",
     "matchedIngredientId" : null,
     "suggestedIngredientName" : "recipe note",

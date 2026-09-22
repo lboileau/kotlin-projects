@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     api(project(":clients:client-common"))
+    implementation(project(":libs:meal-plan-calculator"))
 
     implementation("com.anthropic:anthropic-java:2.15.0")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")

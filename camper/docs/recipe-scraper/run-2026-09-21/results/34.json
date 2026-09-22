@@ -45,25 +45,15 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "¼ cup lemon juice",
-    "quantity" : 0.25,
-    "unit" : "cup",
+    "originalText" : "¼ cup lemon juice; 1 teaspoon lemon zest",
+    "quantity" : 13,
+    "unit" : "tsp",
     "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "LOW",
     "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "1 teaspoon lemon zest",
-    "quantity" : 1,
-    "unit" : "tsp",
-    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "¼ cup poppy seeds",
     "quantity" : 0.25,

@@ -47,9 +47,11 @@ internal data class ScrapedRecipeJson(
         theme = theme?.takeIf { it in ALLOWED_THEMES },
         // Sites put section headings ("*FOR MARINADE*") and notes ("Pro tip: ...") in their ingredient
         // lists; the model labels them and we drop them here rather than asking it to skip lines.
-        ingredients = ingredients
-            .filter { it.kind == LineKind.INGREDIENT && it.originalText.isNotBlank() }
-            .map { it.toDomain(catalogue) }
+        ingredients = ScrapedIngredientMerger.merge(
+            ingredients
+                .filter { it.kind == LineKind.INGREDIENT && it.originalText.isNotBlank() }
+                .map { it.toDomain(catalogue) }
+        )
     )
 }
 

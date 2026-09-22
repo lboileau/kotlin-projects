@@ -25,25 +25,15 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1/2 cup olive oil (plus)",
-    "quantity" : 0.5,
-    "unit" : "cup",
-    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "1 tablespoon olive oil",
-    "quantity" : 1,
+    "originalText" : "1/2 cup olive oil (plus); 1 tablespoon olive oil",
+    "quantity" : 9,
     "unit" : "tbsp",
     "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "HIGH",
-    "reviewFlags" : [ ]
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "6 cloves garlic, peeled, smashed and minced",
     "quantity" : 6,

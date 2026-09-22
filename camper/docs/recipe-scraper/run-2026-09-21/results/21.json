@@ -55,8 +55,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "1 teaspoon salt (to taste)",
-    "quantity" : 1,
+    "originalText" : "1 teaspoon salt (to taste); 1/2 teaspoon salt",
+    "quantity" : 1.5,
     "unit" : "tsp",
     "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
     "suggestedIngredientName" : null,
@@ -95,8 +95,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "1 tablespoon all-purpose flour",
-    "quantity" : 1,
+    "originalText" : "1 tablespoon all-purpose flour; 2 cups all-purpose flour",
+    "quantity" : 33,
     "unit" : "tbsp",
     "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
     "suggestedIngredientName" : null,
@@ -125,16 +125,6 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "2 cups all-purpose flour",
-    "quantity" : 2,
-    "unit" : "cup",
-    "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
     "originalText" : "2 large eggs",
     "quantity" : 2,
     "unit" : "whole",
@@ -154,16 +144,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "1/2 teaspoon salt",
-    "quantity" : 0.5,
-    "unit" : "tsp",
-    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
   }, {
     "originalText" : "2 tablespoons melted butter (for tossing spaetzle)",
     "quantity" : 2,

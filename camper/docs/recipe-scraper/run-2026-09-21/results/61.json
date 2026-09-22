@@ -15,8 +15,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "2 Tbsp avocado oil",
-    "quantity" : 2,
+    "originalText" : "2 Tbsp avocado oil; 3 Tbsp avocado oil",
+    "quantity" : 5,
     "unit" : "tbsp",
     "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
     "suggestedIngredientName" : null,
@@ -25,8 +25,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "½ tsp sea salt (to taste)",
-    "quantity" : 0.5,
+    "originalText" : "½ tsp sea salt (to taste); ½ tsp sea salt (to taste)",
+    "quantity" : 1,
     "unit" : "tsp",
     "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
     "suggestedIngredientName" : null,
@@ -85,16 +85,6 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "3 Tbsp avocado oil",
-    "quantity" : 3,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
     "originalText" : "2 Tbsp mayonnaise (optional)",
     "quantity" : 2,
     "unit" : "tbsp",
@@ -139,16 +129,6 @@
     "quantity" : 1,
     "unit" : "clove",
     "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "½ tsp sea salt (to taste)",
-    "quantity" : 0.5,
-    "unit" : "tsp",
-    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,

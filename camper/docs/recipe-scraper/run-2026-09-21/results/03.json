@@ -95,30 +95,20 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "½ cup water",
-    "quantity" : 0.5,
-    "unit" : "cup",
-    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tablespoon cornstarch",
-    "quantity" : 1,
+    "originalText" : "½ cup water; 2 Tablespoons water",
+    "quantity" : 1E+1,
     "unit" : "tbsp",
-    "matchedIngredientId" : "fa22f9a9-591c-489d-aeae-770078046cff",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "2 Tablespoons water",
-    "quantity" : 2,
+    "originalText" : "1 tablespoon cornstarch",
+    "quantity" : 1,
     "unit" : "tbsp",
-    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "matchedIngredientId" : "fa22f9a9-591c-489d-aeae-770078046cff",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,

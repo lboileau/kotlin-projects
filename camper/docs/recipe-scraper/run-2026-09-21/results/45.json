@@ -35,8 +35,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "2 cloves garlic (, crushed)",
-    "quantity" : 2,
+    "originalText" : "2 cloves garlic (, crushed); 1 clove garlic (, crushed)",
+    "quantity" : 3,
     "unit" : "clove",
     "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
     "suggestedIngredientName" : null,
@@ -55,8 +55,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "2 tsp cumin",
-    "quantity" : 2,
+    "originalText" : "2 tsp cumin; 1 tsp cumin",
+    "quantity" : 3,
     "unit" : "tsp",
     "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
     "suggestedIngredientName" : null,
@@ -144,26 +144,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 clove garlic (, crushed)",
-    "quantity" : 1,
-    "unit" : "clove",
-    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tsp cumin",
-    "quantity" : 1,
-    "unit" : "tsp",
-    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "1 tbsp lemon juice",
     "quantity" : 1,

@@ -15,8 +15,8 @@
     "confidence" : "LOW",
     "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "3 tablespoons plain yogurt ((curd or dahi))",
-    "quantity" : 3,
+    "originalText" : "3 tablespoons plain yogurt ((curd or dahi)); ¼ cup plain yogurt ((Indian curd))",
+    "quantity" : 7,
     "unit" : "tbsp",
     "matchedIngredientId" : "565d700d-dcf3-430c-b4a7-e3634e7de37d",
     "suggestedIngredientName" : null,
@@ -35,8 +35,8 @@
     "confidence" : "LOW",
     "reviewFlags" : [ "NEW_INGREDIENT" ]
   }, {
-    "originalText" : "½ to ¾ teaspoon salt ((adjust to tase))",
-    "quantity" : 0.75,
+    "originalText" : "½ to ¾ teaspoon salt ((adjust to tase)); ¾ teaspoon salt ((to stir in water))",
+    "quantity" : 1.5,
     "unit" : "tsp",
     "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
     "suggestedIngredientName" : null,
@@ -55,8 +55,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "½ to 1 teaspoon red chilli powder  ((or paprika) (use less spicy variety))",
-    "quantity" : 1,
+    "originalText" : "½ to 1 teaspoon red chilli powder  ((or paprika) (use less spicy variety)); ¼ to ½ teaspoon red chili powder  ((optional, for heat))",
+    "quantity" : 1.5,
     "unit" : "tsp",
     "matchedIngredientId" : "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
     "suggestedIngredientName" : null,
@@ -65,9 +65,9 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "½ to 1 tablespoon garam masala ((or biryani masala) (Refer notes))",
-    "quantity" : 1,
-    "unit" : "tbsp",
+    "originalText" : "½ to 1 tablespoon garam masala ((or biryani masala) (Refer notes)); 1 teaspoon garam masala ((or biryani masala))",
+    "quantity" : 4,
+    "unit" : "tsp",
     "matchedIngredientId" : "d61f21db-5a27-4de3-a45d-e6e1e17c9fd1",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
@@ -185,6 +185,16 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
+    "originalText" : "2 tablespoon fried onions ((optional))",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
     "originalText" : "¼ to ½ cup mint leaves (chopped fine (about 15 leaves))",
     "quantity" : 0.5,
     "unit" : "cup",
@@ -205,36 +215,6 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "¼ cup plain yogurt ((Indian curd))",
-    "quantity" : 0.25,
-    "unit" : "cup",
-    "matchedIngredientId" : "565d700d-dcf3-430c-b4a7-e3634e7de37d",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "LOW",
-    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
-  }, {
-    "originalText" : "¼ to ½ teaspoon red chili powder  ((optional, for heat))",
-    "quantity" : 0.5,
-    "unit" : "tsp",
-    "matchedIngredientId" : "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "1 teaspoon garam masala ((or biryani masala))",
-    "quantity" : 1,
-    "unit" : "tsp",
-    "matchedIngredientId" : "d61f21db-5a27-4de3-a45d-e6e1e17c9fd1",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
     "originalText" : "3 cups water ((3½ cups for pot) (refer notes, more if needed ))",
     "quantity" : 3,
     "unit" : "cup",
@@ -244,26 +224,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "¾ teaspoon salt ((to stir in water))",
-    "quantity" : 0.75,
-    "unit" : "tsp",
-    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "2 tablespoon fried onions ((optional))",
-    "quantity" : 2,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "LOW",
-    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "1 pinch saffron ((optional)(soaked in 2 tbsps hot milk))",
     "quantity" : 1,

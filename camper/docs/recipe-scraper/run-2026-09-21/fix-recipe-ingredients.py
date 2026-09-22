@@ -4,7 +4,7 @@
   python3 fix-recipe-ingredients.py plan               # dry run: print exactly what would change, call nothing
   python3 fix-recipe-ingredients.py apply              # add new lines first, then delete old ones; logs to fix.log.json
   python3 fix-recipe-ingredients.py rollback           # undo using fix.log.json + prod-backup/
-  add --include-moderate to also fix the 6 recipes with one or two bad lines
+  add --include-moderate to also fix Fried Rice and Adobo (see MODERATE)
 
   CAMPER_API=http://localhost:8081/api python3 fix-recipe-ingredients.py apply   # against a local DB seeded from prod
 
@@ -18,9 +18,12 @@ import json, os, sys, urllib.request, urllib.error
 BASE = os.path.dirname(os.path.abspath(__file__))
 API = os.environ.get('CAMPER_API', 'https://www.canoecamp.life/api').rstrip('/')
 WRONG = ['00','03','08','09','11','13','18','22','24','30','32','35','36','41','47','52','53','57','60','61','68','69']
-MODERATE = ['28','31','44','51','55','56']
+# Of the six 'moderate' recipes only these two have a real content error (Fried Rice: rice 2→4 cups;
+# Adobo: missing 1½ cups water + scallions). 44/51/55 were no-ops; 56 would collapse four named
+# vegetables into one generic '3 lb root vegetables' line, which is faithful but worse for shopping.
+MODERATE = ['28','31']
 CASES = WRONG + (MODERATE if '--include-moderate' in sys.argv else [])
-LOG = f'{BASE}/fix.log.json'
+LOG = os.environ.get('FIX_LOG', f'{BASE}/fix.log.json')
 
 recipes = json.load(open(f'{BASE}/recipes.json'))
 catalogue = json.load(open(f'{BASE}/ingredients.json'))
@@ -75,26 +78,40 @@ def show(plan):
     print(f"\nAPI: {API}")
 
 def call(method, path, user_id, body=None):
-    req = urllib.request.Request(API + path, method=method, data=json.dumps(body).encode() if body is not None else None,
-                                 headers={'X-User-Id': user_id, 'Content-Type': 'application/json'})
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            raw = resp.read()
-            return resp.status, (json.loads(raw) if raw else None)
-    except urllib.error.HTTPError as e:
-        return e.code, e.read().decode()[:300]
-    except urllib.error.URLError as e:
-        return 0, str(e)
+    """One API call; retries 5xx/connection errors (e.g. a redeploy mid-run) with backoff. 4xx is returned as-is."""
+    import time
+    for attempt in range(6):
+        req = urllib.request.Request(API + path, method=method, data=json.dumps(body).encode() if body is not None else None,
+                                     headers={'X-User-Id': user_id, 'Content-Type': 'application/json'})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                raw = resp.read()
+                return resp.status, (json.loads(raw) if raw else None)
+        except urllib.error.HTTPError as e:
+            if e.code < 500: return e.code, e.read().decode()[:300]
+            status, detail = e.code, e.read().decode()[:300]
+        except urllib.error.URLError as e:
+            status, detail = 0, str(e)
+        wait = 5 * (attempt + 1)
+        print(f"   {method} {path}: {status} — retrying in {wait}s")
+        time.sleep(wait)
+    return status, detail
 
 def apply(plan):
     print(f"applying against {API}")
-    log = []
+    # Resume: keep entries from a previous run and skip recipes it fully completed (all adds, all deletes).
+    log = json.load(open(LOG)) if os.path.exists(LOG) else []
+    by_case = {e['case']: e for e in log}
+    done = {c for c, e in by_case.items() if e.get('deleted') and len(e['added']) == len(next(p for p in plan if p['case'] == c)['adds'])}
+    if done: print(f"skipping {len(done)} already-completed recipes: {' '.join(sorted(done))}")
+    log = [e for e in log if e['case'] in done]
     # Resolve against the live catalogue, not the snapshot — a re-run after a partial failure must
     # reuse ingredients the previous run created instead of trying to create them again (409).
     status, live = call('GET', '/ingredients', plan[0]['userId'])
     if status != 200: sys.exit(f"could not read live catalogue: {status} {live}")
     created = {c['name'].strip().lower(): c['id'] for c in live}
     for p in plan:
+        if p['case'] in done: continue
         uid = p['userId']
         status, detail = call('GET', f"/recipes/{p['recipeId']}", uid)
         if status != 200: print(f"!! {p['name']}: GET failed {status} {detail}"); continue

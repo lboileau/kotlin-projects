@@ -15,8 +15,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "3 blood oranges",
-    "quantity" : 3,
+    "originalText" : "3 blood oranges; Juice of 1/2 blood orange",
+    "quantity" : 3.5,
     "unit" : "whole",
     "matchedIngredientId" : "79dc4119-cbd7-4067-a12e-540eed75b5b7",
     "suggestedIngredientName" : null,
@@ -59,16 +59,6 @@
     "quantity" : 1,
     "unit" : "tsp",
     "matchedIngredientId" : "dbc9ee6a-dfa6-41c4-a06e-0a6bb7feea88",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "Juice of 1/2 blood orange",
-    "quantity" : 0.5,
-    "unit" : "whole",
-    "matchedIngredientId" : "79dc4119-cbd7-4067-a12e-540eed75b5b7",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,

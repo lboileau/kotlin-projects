@@ -15,8 +15,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "2 tbsp fish sauce",
-    "quantity" : 2,
+    "originalText" : "2 tbsp fish sauce; 3 tbsp fish sauce",
+    "quantity" : 5,
     "unit" : "tbsp",
     "matchedIngredientId" : "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
     "suggestedIngredientName" : null,
@@ -35,8 +35,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1 garlic clove, finely grated",
-    "quantity" : 1,
+    "originalText" : "1 garlic clove, finely grated; 2 garlic cloves, finely chopped",
+    "quantity" : 3,
     "unit" : "clove",
     "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
     "suggestedIngredientName" : null,
@@ -45,15 +45,15 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1 tsp caster sugar",
-    "quantity" : 1,
+    "originalText" : "1 tsp caster sugar; 3 tbsp sugar",
+    "quantity" : 1E+1,
     "unit" : "tsp",
     "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "HIGH",
-    "reviewFlags" : [ ]
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "½ tsp ground black pepper",
     "quantity" : 0.5,
@@ -105,30 +105,10 @@
     "confidence" : "LOW",
     "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
   }, {
-    "originalText" : "3 tbsp fish sauce",
-    "quantity" : 3,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
     "originalText" : "2 tbsp white vinegar",
     "quantity" : 2,
     "unit" : "tbsp",
     "matchedIngredientId" : "d05bea1d-e272-4e6a-9184-1c3aa5a1786a",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "3 tbsp sugar",
-    "quantity" : 3,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
@@ -154,15 +134,5 @@
     "suggestedUnit" : null,
     "confidence" : "LOW",
     "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "2 garlic cloves, finely chopped",
-    "quantity" : 2,
-    "unit" : "clove",
-    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
   } ]
 }
