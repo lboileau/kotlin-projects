@@ -62,6 +62,24 @@ export function PlanHeader({ planName, actions, children, collapseOnScroll = fal
     return () => observer.disconnect();
   }, [collapseOnScroll]);
 
+  // Publishes the header's *visible* height as `--plan-header-height` on the
+  // page, so anything else that sticks (the shopping list's category bands)
+  // sits just under it. Collapsing is a transform, so the layout height never
+  // changes — the visible height is that minus the slide while collapsed.
+  useLayoutEffect(() => {
+    const header = headerRef.current;
+    if (!header) return;
+    const root = document.documentElement;
+    const publish = () => root.style.setProperty('--plan-header-height', `${header.offsetHeight - (collapsed ? slide : 0)}px`);
+    publish();
+    const observer = new ResizeObserver(publish);
+    observer.observe(header);
+    return () => {
+      observer.disconnect();
+      root.style.removeProperty('--plan-header-height');
+    };
+  }, [collapsed, slide]);
+
   return (
     <header ref={headerRef} className={`page-header${collapseOnScroll ? ' plan-header--collapsible' : ''}`}>
       <HeaderBar title={area ? AREA_TITLE[area] : 'Plan'} heading={false} />
