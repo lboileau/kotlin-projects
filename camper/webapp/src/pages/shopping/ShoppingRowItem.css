@@ -87,10 +87,16 @@
   outline-offset: -2px;
 }
 
-/* The focus ring goes around the whole row, not just the check-off label
-   (which stops before the quantity and the info button) — the owner found
-   the half-width ring odd. `:has()` reads the checkbox's focus from the row. */
-.shopping-row:has(.shopping-row__hit-area:focus-within) {
+/* Pressing a row tints it for the moment of the press, and a keyboard focus
+   draws a ring around the whole row — not just the check-off label, which
+   stops before the quantity and the info button. `:focus-visible` (not
+   `:focus-within`) so a tap doesn't leave the ring behind: the checkbox keeps
+   focus after a click, and the ring stayed lit until the next tap. */
+.shopping-row:has(.shopping-row__hit-area:active) {
+  background: var(--accent-2);
+}
+
+.shopping-row:has(.shopping-row__hit-area :focus-visible) {
   outline: 2px solid var(--accent-9);
   outline-offset: -2px;
 }
