@@ -205,7 +205,8 @@
   grid-template-columns: 28px minmax(0, 1fr);
   gap: 12px;
   align-items: start;
-  padding: 14px 0;
+  /* Right padding keeps a long line from running to the page edge. */
+  padding: 14px 16px 14px 0;
   border-top: 1px solid var(--gray-4);
 }
 
