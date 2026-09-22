@@ -1,0 +1,238 @@
+{
+  "name" : "Peruvian Chicken with Green Sauce (Aji Verde)",
+  "description" : "Peruvian Chicken with Aji Verde Sauce is made with a bright and well seasoned, marinated chicken that's cooked on a hot grill achieving richly charred grill marks. To finish it's covered with a vibrant and creamy, cilantro based green sauce. It's likely to be one of the tastiest chicken recipes you try this year!",
+  "baseServings" : 12,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "10 to 12  boneless skinless chicken thighs trimmed of excess fat ((about 3 to 3 1/2 lbs))",
+    "quantity" : 12,
+    "unit" : "whole",
+    "matchedIngredientId" : "5b4fa1d1-1b9f-49ce-93d5-57a52ac5180a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 cup  extra virgin olive oil",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 Tbsp fresh lime juice",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "1 tsp lime zest",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 Tbsp aji amarillo*",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "33192c49-f493-4455-9417-e2029ba52936",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tbsp soy sauce (or tamari)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 1/2 Tbsp minced garlic",
+    "quantity" : 1.5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tsp honey",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tsp sweet paprika",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7c9b542f-c79e-4974-95bf-a9cc5c969067",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tsp smoked paprika",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "95ee92ae-b483-4a49-9481-48b2b4c4771f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 Tbsp ground cumin",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 1/2 tsp dried oregano ((Mexican or typical Mediterranean Oregano))",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp ground coriander",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "37acfef9-1820-4841-9995-fced74e56346",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp kosher salt (or to taste)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 tsp ground black pepper",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 cup mayonnaise",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "0f1175db-fd14-4b2b-bd6a-685fbb37935b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/3 cup sour cream (or plain Greek yogurt)",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "ccfcee7d-a95c-4b26-a177-6ea70d457f19",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 cups (60g) cilantro",
+    "quantity" : 2,
+    "unit" : "cup",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/3 cup crumbled cotija cheese ((optional))",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "86e9a876-9cea-4b39-85f1-5fe4a5c840dc",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 to 2 jalapeños,** (seeds and ribs removed )",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "edd8aab0-c75f-4334-b263-9314ba637b8d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 green onions, (ends trimmed, remaining chopped 3 portions)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 1/2 Tbsp  fresh lime juice",
+    "quantity" : 1.5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "Kosher salt, (to taste)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

@@ -1,0 +1,118 @@
+{
+  "name" : "Easy Chicken Piccata",
+  "description" : "This easy chicken piccata recipe is a classic Italian American dish with a lemon butter caper sauce that's fast to make at home!",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "2 large chicken breasts",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "08be34b6-7724-4a95-a962-f586d2afc167",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Salt & pepper (to taste)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1/4 teaspoon garlic powder",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80e1c2f2-4d22-45da-811a-0d63ec4c4a73",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Flour (for dredging)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "4 tablespoons butter (divided)",
+    "quantity" : 4,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup chicken broth (or dry white wine)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon lemon juice + zest of 1 lemon",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon brined capers (drained)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "142b8098-47a7-42bf-9878-730477a5e460",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup heavy/whipping cream",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "ccea4d74-1b3c-4c1e-898a-adb51fd70007",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Garnish (optional) chopped parsley and/or freshly grated parmesan cheese",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

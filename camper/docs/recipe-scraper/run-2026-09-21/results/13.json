@@ -1,0 +1,138 @@
+{
+  "name" : "Ratatouille",
+  "description" : "Learn how to make the best French ratatouille with this foolproof recipe! The trick is to roast the vegetables, then add them to a simmering tomato sauce. Recipe yields 4 generous or 6 more modest servings.",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "vegan",
+  "ingredients" : [ {
+    "originalText" : "2 pounds ripe red tomatoes (6 medium or 4 large)",
+    "quantity" : 2,
+    "unit" : "lb",
+    "matchedIngredientId" : "3d074b95-d240-46b2-bb1e-85b3a016f919",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 medium eggplant (1 pound), diced into &frac12;-inch cubes",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "5f5cd9be-1bf2-4149-921e-4b18174ef2e9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 large red, orange, or yellow bell pepper (about 8 ounces), cut into &frac34;-inch squares",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 medium-to-large zucchini (about 8 ounces), diced into &frac12;-inch cubes",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "b66ba1a6-6aef-4b84-ae4f-46383230e2e6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 large yellow squash (about 8 ounces), diced into &frac12;-inch cubes",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "yellow squash",
+    "suggestedCategory" : "produce",
+    "suggestedUnit" : "whole",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "5 tablespoons + 1 teaspoon extra-virgin olive oil, divided",
+    "quantity" : 5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "&frac34; teaspoon fine sea salt, divided, more to taste",
+    "quantity" : 0.75,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 medium yellow onion, chopped",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4 cloves garlic, pressed or minced",
+    "quantity" : 4,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "&frac14; cup chopped fresh basil",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "f5d8ae9b-95a3-41c4-bde0-d20085ba9dde",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "&frac14; teaspoon red pepper flakes, more or less to taste",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "65cf3812-9d01-424a-a7a8-d39fb708fb45",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "&frac14; teaspoon dried oregano",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Freshly ground black pepper, to taste",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

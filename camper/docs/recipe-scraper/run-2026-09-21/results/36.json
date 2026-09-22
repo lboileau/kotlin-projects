@@ -1,0 +1,218 @@
+{
+  "name" : "Greek Chicken and Lemon Rice (30 Minutes, One-Pot)",
+  "description" : "Greek Chicken and Lemon Rice is a 30-minute one-pot dinner packed with so much flavor! This Mediterranean recipe features spinach, grape tomatoes, chickpeas (garbanzo beans), feta cheese, paprika, and oregano. It's healthy, gluten-free, protein-rich, fiber-rich, and can be easily made dairy-free.",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "1.5 lb skinless boneless chicken thighs",
+    "quantity" : 1.5,
+    "unit" : "lb",
+    "matchedIngredientId" : "5b4fa1d1-1b9f-49ce-93d5-57a52ac5180a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon dried oregano",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon paprika",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7c9b542f-c79e-4974-95bf-a9cc5c969067",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 teaspoon salt",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 teaspoon red pepper flakes",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "65cf3812-9d01-424a-a7a8-d39fb708fb45",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons olive oil",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "8 oz grape tomatoes (sliced in half)",
+    "quantity" : 8,
+    "unit" : "oz",
+    "matchedIngredientId" : "c5869414-8fbb-46f3-a1ca-753a3ea48023",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "5 cloves garlic (minced)",
+    "quantity" : 5,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon dried oregano",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 teaspoon salt",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "5 oz fresh spinach (chopped)",
+    "quantity" : 5,
+    "unit" : "oz",
+    "matchedIngredientId" : "e46b22f6-ad2b-40b5-8f62-a77b5a812fb2",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons freshly squeezed lemon juice",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 cups cooked jasmine rice",
+    "quantity" : 2,
+    "unit" : "cup",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "15 oz chickpeas (canned)",
+    "quantity" : 15,
+    "unit" : "oz",
+    "matchedIngredientId" : "a5b85b9d-5784-4209-bb92-0438a5350a47",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "6 oz feta cheese (diced into small cubes)",
+    "quantity" : 6,
+    "unit" : "oz",
+    "matchedIngredientId" : "1aa17704-3805-4327-905e-6bfbf4a20d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon extra virgin olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon freshly squeezed lemon juice",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 teaspoon dried oregano",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons chopped fresh oregano (optional)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "f0d8bf1c-77d3-48f4-967c-cda75b19d08c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "fresh oregano (for garnish)",
+    "quantity" : 1,
+    "unit" : "sprig",
+    "matchedIngredientId" : "f0d8bf1c-77d3-48f4-967c-cda75b19d08c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

@@ -1,0 +1,198 @@
+{
+  "name" : "Jerk Chicken with Rice and Peas",
+  "description" : "A simple, easy jerk chicken recipe packed full of Caribbean flavours, marinated and grilled or oven-baked, served with coconut rice and peas.",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "900g – 1kg chicken thighs with skin and bone",
+    "quantity" : 1,
+    "unit" : "kg",
+    "matchedIngredientId" : "5b4fa1d1-1b9f-49ce-93d5-57a52ac5180a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 large onion, chopped",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 bunch of spring onions, trimmed top and tail",
+    "quantity" : 1,
+    "unit" : "bunch",
+    "matchedIngredientId" : "6c79f815-321a-47b5-9b06-8020122b587a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 tsp ground clove",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "d368a2b2-dce6-4c61-aaea-94d248fe7c3f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 tsp ground nutmeg",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "23988c24-d7d0-4f4c-8e57-8cdd954e21c1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 tsp ground allspice",
+    "quantity" : 3,
+    "unit" : "tsp",
+    "matchedIngredientId" : "53e93064-6ca0-4f9f-94bf-4f83d3b2bbd8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp salt",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbs dark soy sauce",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "bdbcc4e3-5743-4bc2-9b3d-ff44ccd01239",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tbs dark brown sugar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp dried thyme",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "8ba3d938-d5f3-4b30-ad25-f17084c919b3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "10g fresh thyme",
+    "quantity" : 10,
+    "unit" : "g",
+    "matchedIngredientId" : "88de65ff-cc4b-4f55-8d79-d177b99dc592",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "60ml light olive oil",
+    "quantity" : 60,
+    "unit" : "ml",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Juice of 1 1/2 limes",
+    "quantity" : 1.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 or 2 scotch bonnet chillies, de-seeded",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "372a5150-ecfc-4959-8d0f-85a56ccf4649",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 medium onion",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "300g easy cook rice",
+    "quantity" : 300,
+    "unit" : "g",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tin of coconut milk (400ml)",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "ba2d19a6-3f48-4812-a4bd-1888448271ef",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tin red kidney beans (400g)",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "c6ed73ac-b7a8-4c4d-bebc-0dd5b53bb66e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Light olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

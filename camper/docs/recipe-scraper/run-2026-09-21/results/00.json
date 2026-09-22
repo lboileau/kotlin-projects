@@ -1,0 +1,198 @@
+{
+  "name" : "Ground Turkey Rice Bowls with Bang Bang Sauce",
+  "description" : "These quick and easy ground turkey rice bowls are topped with bang bang sauce that makes the most simple meal level up in a big way. Seasoned browned ground turkey with soy sauce, sriracha and seasoning and then tossed in spicy sauce, and then added to rice bowls with all the toppings--a delicious weeknight meal the whole family will love!",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "other",
+  "ingredients" : [ {
+    "originalText" : "1 lb ground turkey",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "f4fe2e66-3120-4ca4-b938-9bd69fef9326",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 Tbsp sesame oil (or favorite cooking oil)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2-3  garlic cloves (minced)",
+    "quantity" : 3,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tsp grated ginger",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bc3a57fa-61c4-4c90-b151-b980223b0e81",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ tsp smoked paprika",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "95ee92ae-b483-4a49-9481-48b2b4c4771f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ tsp onion powder",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bd7cd327-1eaf-4094-a77b-bb99b441b3d9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 Tbsp soy sauce (low sodium)",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1-2 Tbsp sriracha",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "1e8bfc5d-83c8-4694-877c-f7eda05562e2",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2-3 T chicken broth",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tsp honey",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ tsp black pepper",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ tsp sea salt (more or less to taste)",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tsp corn starch",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "fa22f9a9-591c-489d-aeae-770078046cff",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ c mayonnaise",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "0f1175db-fd14-4b2b-bd6a-685fbb37935b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 Tbsp sweet chili sauce",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "750479bc-7e65-45cd-8650-ba05fce2987b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½-1 Tbsp sriracha (more to kick up the spice)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "1e8bfc5d-83c8-4694-877c-f7eda05562e2",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp rice vinegar",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "612c3e41-a7e8-4293-9cc5-01f21a9360f1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tsp honey",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "rice, shredded carrots, sliced cucumbers, shelled edamame, pickled onions, avocado, shredded cabbage, sliced green onion, sesame seeds and more!",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "rice bowl toppings assortment",
+    "suggestedCategory" : "other",
+    "suggestedUnit" : "pieces",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  } ]
+}

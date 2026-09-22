@@ -1,0 +1,228 @@
+{
+  "name" : "Lamb Koftas with Yoghurt Dressing",
+  "description" : "RECIPE VIDEO ABOVE. The smell of Middle Eastern spices while this is cooking is totally intoxicating!! Try this Lamb Kofta recipe once, and you'll be addicted for life! Traditionally cooked over charcoal, brilliant on the BBQ, but I usually cook these midweek on the stove. **great recipe for gatherings, DIY spread, make ahead**",
+  "baseServings" : 8,
+  "meal" : "dinner",
+  "theme" : "other",
+  "ingredients" : [ {
+    "originalText" : "1 lb / 500 g   lamb mince ((ground lamb))",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "60d5c9ee-47cd-473f-b42c-e1cfd63273e8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2  onion (, grated)",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup breadcrumbs (, preferably panko)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "957fbd6d-b2fa-4be9-9185-19b7b44d69cf",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 cloves garlic (, crushed)",
+    "quantity" : 2,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tbsp chopped fresh coriander",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tsp cumin",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tsp coriander",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "37acfef9-1820-4841-9995-fced74e56346",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tsp paprika",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7c9b542f-c79e-4974-95bf-a9cc5c969067",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1.5 tsp ground cinnamon",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bf047d96-553c-4fb3-ab3f-b34523438542",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3/4 tsp cayenne pepper ((this is a bit spicy, reduce to taste or leave out))",
+    "quantity" : 0.75,
+    "unit" : "tsp",
+    "matchedIngredientId" : "097f66c4-511a-42d0-b386-fbe0740bed86",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp cooking / kosher salt",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2  black pepper",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 cup yogurt (, Greek or other thick plain)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "565d700d-dcf3-430c-b4a7-e3634e7de37d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp extra virgin olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 clove garlic (, crushed)",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp cumin",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tbsp lemon juice",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 tsp salt and pepper (, each)",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "8  skewers ((Note 1))",
+    "quantity" : 8,
+    "unit" : "whole",
+    "matchedIngredientId" : "d1fc5a2e-e215-4f30-9ccc-08b39a196721",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "8  flatbreads (small)",
+    "quantity" : 8,
+    "unit" : "whole",
+    "matchedIngredientId" : "758f43e1-f149-4493-a419-ffa7a77fb539",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Shredded Red Cabbage, Carrot and Mint Salad ((Note 3))",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "red cabbage, carrot and mint salad",
+    "suggestedCategory" : "produce",
+    "suggestedUnit" : "cup",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "OR shredded lettuce, tomato and onion slices ((Note 3))",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "lettuce, tomato and onion slices",
+    "suggestedCategory" : "produce",
+    "suggestedUnit" : "cup",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  } ]
+}

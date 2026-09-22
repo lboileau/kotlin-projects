@@ -1,0 +1,128 @@
+{
+  "name" : "Fried Rice",
+  "description" : "Learn how to make fried rice with this classic recipe. It only takes 15 minutes to make, it's easy to customize with your favorite add-ins, and it's SO flavorful and delicious!",
+  "baseServings" : 6,
+  "meal" : "dinner",
+  "theme" : "vegetarian",
+  "ingredients" : [ {
+    "originalText" : "3 tablespoons butter (divided)",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2  large eggs (whisked)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "aefa8256-566a-40be-87ca-a27953922817",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2  medium carrots (peeled and diced)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  small white onion (diced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup frozen peas",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "ae1fcc43-fb4d-4e09-9c6c-650ac51b4132",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 cloves garlic (minced)",
+    "quantity" : 3,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "salt and black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "4 cups cooked and chilled rice (I prefer short-grain white rice)",
+    "quantity" : 4,
+    "unit" : "cup",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3  green onions (thinly sliced)",
+    "quantity" : 3,
+    "unit" : "whole",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3-4 tablespoons soy sauce (or more to taste)",
+    "quantity" : 4,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 teaspoons oyster sauce (optional)",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "c5f41ff4-c2a1-49fe-a3c1-bf3c736ffb0d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 teaspoons toasted sesame oil",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

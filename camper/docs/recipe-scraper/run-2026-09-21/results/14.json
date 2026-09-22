@@ -1,0 +1,158 @@
+{
+  "name" : "Black Bean and Corn Salad",
+  "description" : "This black bean and corn salad is a delicious summer side dish or healthy lunch! It keeps well for up to 3 days in the fridge, but if you're making it in advance, wait to add the avocado until right before you eat. Otherwise, it will start to brown.",
+  "baseServings" : 6,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "¼ cup fresh lime juice",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3  tablespoons avocado oil",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  small garlic clove (grated)",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ teaspoon ground cumin",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¾ teaspoon  sea salt",
+    "quantity" : 0.75,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Freshly ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1½ cups cooked black beans (drained and rinsed)",
+    "quantity" : 1.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "85e6f093-a79f-4eec-a787-709b53136837",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Kernels from 2 ears fresh corn (left raw, about 1½ cups)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "3dbac9c9-1afd-4736-8b51-df3e65796e4b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  red bell pepper (stemmed, seeded, and diced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ cup chopped fresh cilantro (plus more cilantro leaves for garnish)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ to 1  jalapeño pepper (seeded and diced, or 1 serrano, sliced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "edd8aab0-c75f-4334-b263-9314ba637b8d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "⅓ cup diced red onion",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons Cotija cheese",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "86e9a876-9cea-4b39-85f1-5fe4a5c840dc",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  ripe but firm avocado (pitted and diced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "442e718a-fcac-4f06-9679-08196c007c6f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons toasted pepitas (optional)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "0a5ad84e-f3eb-4a0b-a68f-6317f759703b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

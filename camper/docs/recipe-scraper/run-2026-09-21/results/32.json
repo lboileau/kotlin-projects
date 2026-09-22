@@ -1,0 +1,128 @@
+{
+  "name" : "Frikadellen (German Hamburgers)",
+  "description" : "These are the BEST Frikadellen or Buletten as they’re also called are German style meat patties that are pan fried and often served on a bun. Frikadellen are American hamburger imposters, but they’re not like the American hamburger at all.Find this recipe in 'German Home Kitchen'!",
+  "baseServings" : 4,
+  "meal" : "lunch",
+  "theme" : "other",
+  "ingredients" : [ {
+    "originalText" : "500 grams mixed ground meat (half pork and half beef)",
+    "quantity" : 500,
+    "unit" : "g",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "mixed ground meat",
+    "suggestedCategory" : "meat",
+    "suggestedUnit" : "lb",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "1  yellow onion",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  hard roll (you can use whatever leftover bread you have!)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "546b8836-58eb-4dd0-924f-c3e04524a565",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  egg",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "aefa8256-566a-40be-87ca-a27953922817",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon sea salt",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon German mustard (or any other mustard of your choice)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "dbc9ee6a-dfa6-41c4-a06e-0a6bb7feea88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon dried marjoram",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "dried marjoram",
+    "suggestedCategory" : "spice",
+    "suggestedUnit" : "tsp",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "1 teaspoon paprika powder",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7c9b542f-c79e-4974-95bf-a9cc5c969067",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon chili powder",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 Tablespoons fresh parsley (chopped)",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3  garlic cloves (minced)",
+    "quantity" : 3,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "oil for frying (sunflower seed or avocado oil)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

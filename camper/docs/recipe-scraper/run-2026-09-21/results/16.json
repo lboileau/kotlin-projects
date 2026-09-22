@@ -1,0 +1,98 @@
+{
+  "name" : "Cheesy Baked Broccoli Bites",
+  "description" : "We could all do with finding ways to get more vegetables in to our diet and these little cheesy baked broccoli bites (broccoli tots) are a great way.",
+  "baseServings" : 4,
+  "meal" : "side",
+  "theme" : "vegetarian",
+  "ingredients" : [ {
+    "originalText" : "300 g Broccoli (chopped)",
+    "quantity" : 300,
+    "unit" : "g",
+    "matchedIngredientId" : "a48650e0-4ff2-43b6-83be-6f1dea2540f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 slices Whole wheat bread (blended into bread crumbs)",
+    "quantity" : 3,
+    "unit" : "slice",
+    "matchedIngredientId" : "546b8836-58eb-4dd0-924f-c3e04524a565",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "0.5  Onion (finely diced)",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "60 g Mature cheddar (grated)",
+    "quantity" : 60,
+    "unit" : "g",
+    "matchedIngredientId" : "67ebb953-1334-42d5-b125-a2cdcabd88be",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2  Eggs (whisked)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "aefa8256-566a-40be-87ca-a27953922817",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp Garlic powder",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80e1c2f2-4d22-45da-811a-0d63ec4c4a73",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp Dried oregano",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 pinch Fine sea salt",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 pinch Ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

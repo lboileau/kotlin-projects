@@ -1,0 +1,108 @@
+{
+  "name" : "Japchae (Sweet potato starch noodles stir fried with vegetables)",
+  "description" : "Japchae, sweet potato starch noodles stir fried with vegetables and meat, is one of Korea's best-loved dishes, and one of the most popular on my website as well. If anyone asks me to recommend a good potluck dish, I don't hesitate to recommend japchae because everyone loves it!",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "vegetarian",
+  "ingredients" : [ {
+    "originalText" : "2 to 3 green onions, cut crosswise into 2 inch long pieces",
+    "quantity" : 3,
+    "unit" : "whole",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 medium onion (1 cup), sliced thinly",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4 to 5 white mushrooms, sliced thinly",
+    "quantity" : 5,
+    "unit" : "whole",
+    "matchedIngredientId" : "58f55542-c196-4ef8-87ba-a554b063d728",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 medium carrot (¾ cup), cut into matchsticks",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ red bell pepper, cut into thin strips (optional)",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "kosher salt",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "vegetable oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "5093fa92-5457-48cb-a17c-b1d946b03970",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "4 ounces spinach, washed and drained",
+    "quantity" : 4,
+    "unit" : "oz",
+    "matchedIngredientId" : "e46b22f6-ad2b-40b5-8f62-a77b5a812fb2",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4 ounces of dangmyeon (sweet potato starch noodles)",
+    "quantity" : 4,
+    "unit" : "oz",
+    "matchedIngredientId" : "aa030199-d58e-44bc-90f4-6375b1b42a13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

@@ -1,0 +1,158 @@
+{
+  "name" : "Spicy Turkey Sausage & Kale Chili",
+  "description" : "Want a healthy turkey sausage recipe? This spicy turkey sausage and kale chili is the cozy weeknight dinner that's anything but boring. ",
+  "baseServings" : 6,
+  "meal" : "dinner",
+  "theme" : "soup",
+  "ingredients" : [ {
+    "originalText" : "1 tbsp. extra-virgin olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 lb. ground spicy turkey sausage",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "e6d03bf0-1db3-4b38-88a3-51f30c225d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 large yellow onion, finely chopped",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 red bell pepper, seeds and ribs removed, finely chopped",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 cloves garlic, finely chopped",
+    "quantity" : 2,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp. chili powder",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp. cayenne pepper",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "097f66c4-511a-42d0-b386-fbe0740bed86",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp. dried oregano",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Kosher salt",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "2 tbsp. tomato paste",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "eb63b90e-38d3-4425-aea7-986cd9fe6732",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 c. low-sodium chicken broth",
+    "quantity" : 3,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 (15-oz.) can cannellini beans, rinsed, drained",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "5bbc11ee-423f-4b37-8a9e-d931cec1323a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 (15-oz.) can diced tomatoes",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "e2f34c7c-a257-4cdb-9fb1-f5b5c1adc851",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 large  bunch Tuscan kale, stems and large center ribs removed, leaves torn into pieces",
+    "quantity" : 1,
+    "unit" : "bunch",
+    "matchedIngredientId" : "d05179f7-25b9-4ed8-b442-5d689d39e990",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Sour cream for topping (optional)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "ccfcee7d-a95c-4b26-a177-6ea70d457f19",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

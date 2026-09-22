@@ -1,0 +1,148 @@
+{
+  "name" : "French Lentil & Beet Salad",
+  "description" : "This lentil and beet salad calls for raw beets, however, you could also buy pre-roasted beets to help save on time and clean-up.",
+  "baseServings" : 4,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "1/2 cup Puy lentils, dry",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "8eda2954-015a-46a5-997b-21c9804db091",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup water",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 bay leaf",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4ad8fd66-2186-4254-9179-950324c6182b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4 medium beets (I used 2 red and 2 yellow)",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "e5458e23-68bc-4650-91b7-ef43e75932e9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/3 cup crumbled goat cheese",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "goat cheese",
+    "suggestedCategory" : "dairy",
+    "suggestedUnit" : "oz",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "1/4 cup red onion, thinly sliced",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 handful parsley, roughly chopped",
+    "quantity" : 1,
+    "unit" : "bunch",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 small handful chives, minced",
+    "quantity" : 1,
+    "unit" : "bunch",
+    "matchedIngredientId" : "98b220e8-9f7e-4d76-9663-b1680a189389",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons extra-virgin olive oil",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon red wine vinegar",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "cc9ff150-69b8-4dd9-b34d-e0ff28ee2497",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon Dijon mustard",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "91f8dbd6-2313-44fb-b6a4-9ae9f4ea2bfb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 clove garlic, crushed and minced",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 teaspoon sea salt",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 teaspoon black pepper",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

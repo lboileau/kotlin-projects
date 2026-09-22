@@ -1,0 +1,168 @@
+{
+  "name" : "Asian Slaw with Sesame Ginger Dressing",
+  "description" : "This Asian slaw side dish is a simple combination of shredded cabbage, carrots, and sliced apples tossed is a sweet and tangy sesame ginger dressing.",
+  "baseServings" : 8,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "4 cups shredded napa cabbage (or green cabbage, ¼-inch thick)",
+    "quantity" : 4,
+    "unit" : "cup",
+    "matchedIngredientId" : "fef42f82-285e-4ec0-bec4-50e33342d834",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 cups shredded red cabbage (¼-inch thick)",
+    "quantity" : 3,
+    "unit" : "cup",
+    "matchedIngredientId" : "08625e84-3f1a-4337-a269-f5e584a3aba9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup shredded carrots",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 cup thinly sliced fuji apples ( or red apples, ⅛-inch thick)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "0159e1ad-3355-405e-a264-1ff1f0427ddb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼  sliced green onions (cut on a bias)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ cup cilantro leaves",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon sesame seeds (black and white)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "f4ba5c00-4c15-43e7-aea2-138ff234b3a3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ cup rice vinegar (unsweetened)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "612c3e41-a7e8-4293-9cc5-01f21a9360f1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons honey",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons mayonnaise",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "0f1175db-fd14-4b2b-bd6a-685fbb37935b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon soy sauce",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon finely minced garlic",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon finely minced ginger",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bc3a57fa-61c4-4c90-b151-b980223b0e81",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ teaspoon black pepper",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon sesame oil (toasted)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2  cup olive oil",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

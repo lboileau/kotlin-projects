@@ -1,0 +1,68 @@
+{
+  "name" : "Old-Fashioned Rice Pudding",
+  "description" : "Old-Fashioned Rice Pudding is so creamy with the perfect texture and sweetness. Only a handful of ingredients and a little patience are needed to make this old time favorite dessert.",
+  "baseServings" : 4,
+  "meal" : "dessert",
+  "theme" : "other",
+  "ingredients" : [ {
+    "originalText" : "6 cups whole milk (divided)",
+    "quantity" : 6,
+    "unit" : "cup",
+    "matchedIngredientId" : "226319f9-fc48-49cd-8447-f4df294e6aa9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 cup sugar",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 teaspoon salt",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup long grain white rice (I use a heaping half cup)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 teaspoons vanilla extract",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "4bbd6332-5ba3-4966-93ca-496f4e5f38b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "ground cinnamon (optional)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "bf047d96-553c-4fb3-ab3f-b34523438542",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

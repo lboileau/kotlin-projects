@@ -1,0 +1,118 @@
+{
+  "name" : "Easy Vegetable Pasta Bake",
+  "description" : "This vegetable pasta bake recipe makes a great weeknight dinner, loaded with fresh vegetables, sauce, and cheese. My family loves this vegetable baked pasta so much, and I think yours will, too! The vegetables you use can be adapted based on seasonality. Check our article above for more suggestions.",
+  "baseServings" : 8,
+  "meal" : "dinner",
+  "theme" : "pasta",
+  "ingredients" : [ {
+    "originalText" : "1 pound dried pasta like rigatoni, penne, or ziti (450g)",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "2719215e-ae68-4fac-9f3a-30c7f56d0aec",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon extra virgin olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Half a medium onion, thinly sliced, about 6 ounces",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 small bell peppers, thinly sliced, about 8 ounces",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "8 ounces mushrooms, 1 ¼ cups sliced",
+    "quantity" : 8,
+    "unit" : "oz",
+    "matchedIngredientId" : "58f55542-c196-4ef8-87ba-a554b063d728",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ teaspoon fennel seeds or ground fennel, see notes",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "48f69e10-0afb-463b-af0e-270da8e58763",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 cups homemade pasta sauce, or use 1 (28-ounce) jar of store-bought sauce",
+    "quantity" : 3,
+    "unit" : "cup",
+    "matchedIngredientId" : "49ac776d-c1d8-4fd8-affc-30d246efd0b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Handful of fresh basil leaves, torn or coarsely chopped",
+    "quantity" : 1,
+    "unit" : "bunch",
+    "matchedIngredientId" : "f5d8ae9b-95a3-41c4-bde0-d20085ba9dde",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "6 tablespoons ricotta cheese (90g)",
+    "quantity" : 6,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "6237f8ab-6699-4d95-9f95-43e9704d611f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 cups shredded mozzarella cheese (226g)",
+    "quantity" : 2,
+    "unit" : "cup",
+    "matchedIngredientId" : "d3ac7081-e568-4acf-b027-4c44b1439cad",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Salt and fresh ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

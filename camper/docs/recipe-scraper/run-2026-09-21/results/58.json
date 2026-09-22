@@ -1,0 +1,118 @@
+{
+  "name" : "Sour Cream and Onion Chicken",
+  "description" : "This sour cream and onion chicken recipe is a fun take on the classic flavors! Tender chicken breasts are pan-fried and smothered in an easy, rich, and creamy sauce.",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "2  boneless skinless chicken breasts",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "08be34b6-7724-4a95-a962-f586d2afc167",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 teaspoon garlic powder",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80e1c2f2-4d22-45da-811a-0d63ec4c4a73",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Salt &amp; pepper (to taste)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1 tablespoon olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons butter (divided)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 medium onion (sliced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 clove garlic (minced)",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup chicken broth",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon Worcestershire sauce",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1af0f750-f754-4702-b1cf-cf53138ccd1c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup sour cream (full-fat)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "ccfcee7d-a95c-4b26-a177-6ea70d457f19",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Fresh chopped parsley (optional, to taste)",
+    "quantity" : 1,
+    "unit" : "sprig",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

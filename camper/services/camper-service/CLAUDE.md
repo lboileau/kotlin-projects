@@ -407,7 +407,7 @@ API service for camping trip planning — user registration, authentication, pla
 - `WebSocketConfig` — STOMP endpoint `/ws`, topic broker `/topic`, app prefix `/app`
 - `IngredientClientConfig` — creates ingredient client via factory function
 - `RecipeClientConfig` — creates recipe client via factory function
-- `RecipeScraperClientConfig` — creates NoOp or Claude-backed scraper client based on `ANTHROPIC_API_KEY` env var
+- `RecipeScraperClientConfig` — creates NoOp or Claude-backed scraper client based on `ANTHROPIC_API_KEY` env var. **Without the key, imports return a canned "Classic Guacamole" recipe** — check the startup log line before trusting an import locally. Optional `RECIPE_SCRAPER_MODEL` overrides the model (default `claude-sonnet-5`; `claude-haiku-4-5` is ~3× cheaper and was equally accurate on quantities in testing). See `clients/recipe-scraper-client/CLAUDE.md`.
 - `IngredientServiceConfig` — wires IngredientService (takes IngredientClient)
 - `RecipeServiceConfig` — wires RecipeService (takes RecipeClient + IngredientClient + RecipeScraperClient + UserClient)
 - `GearPackClientConfig` — creates gear pack client via factory function

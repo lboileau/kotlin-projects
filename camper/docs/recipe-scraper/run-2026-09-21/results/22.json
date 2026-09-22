@@ -1,0 +1,118 @@
+{
+  "name" : "Sweet Potato Soup Recipe",
+  "description" : "Sweet Potato Soup is comfort in a bowl. It’s creamy without using cream and an easy, cozy soup recipe you’ll enjoy in the cooler months.",
+  "baseServings" : 6,
+  "meal" : null,
+  "theme" : "soup",
+  "ingredients" : [ {
+    "originalText" : "8 oz bacon (about 6 strips) (chopped into 1/2-inch strips, *see notes for vegetarian soup)",
+    "quantity" : 8,
+    "unit" : "oz",
+    "matchedIngredientId" : "7a51ea42-c888-449d-bd8c-f1339c9071a4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  medium onion (diced (about 1 cup))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2  garlic cloves (minced)",
+    "quantity" : 2,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  large celery rib (diced (1 \"stick\" of celery))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "90a1dbc0-d3ad-4064-88b8-0981481d96dc",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 lbs sweet potatoes (3 medium) (peeled and chopped into 1-inch pieces)",
+    "quantity" : 2,
+    "unit" : "lb",
+    "matchedIngredientId" : "20530a8a-4695-47fb-9747-fee6f5a376a5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 sprigs fresh thyme 3 (or 1/2 tsp dried thyme)",
+    "quantity" : 3,
+    "unit" : "sprig",
+    "matchedIngredientId" : "88de65ff-cc4b-4f55-8d79-d177b99dc592",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4 cups reduced sodium chicken broth",
+    "quantity" : 4,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "14 oz canned coconut milk* ((shake well before opening), divided)",
+    "quantity" : 14,
+    "unit" : "oz",
+    "matchedIngredientId" : "ba2d19a6-3f48-4812-a4bd-1888448271ef",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 1/2 tsp fine sea salt (or more to taste)",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 tsp freshly ground black pepper (or to taste)",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 Tbsp parsley to garnish (optional)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

@@ -1,0 +1,168 @@
+{
+  "name" : "Pulled Pork",
+  "description" : "This easy pulled pork recipe cooked in the oven makes the BEST pulled-pork sandwiches. Plus, those burnt ends are to die for.",
+  "baseServings" : 6,
+  "meal" : "dinner",
+  "theme" : "pork",
+  "ingredients" : [ {
+    "originalText" : "4 lb. boneless pork butt",
+    "quantity" : 4,
+    "unit" : "lb",
+    "matchedIngredientId" : "944759fd-704b-4f0c-b816-e7ad25c3251b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 tbsp. packed dark brown sugar",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp. kosher salt",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tbsp. smoked paprika",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "95ee92ae-b483-4a49-9481-48b2b4c4771f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tsp. garlic powder",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80e1c2f2-4d22-45da-811a-0d63ec4c4a73",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp. ground cumin",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tsp. onion powder",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bd7cd327-1eaf-4094-a77b-bb99b441b3d9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Freshly ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "2 tbsp. vegetable oil",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "5093fa92-5457-48cb-a17c-b1d946b03970",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "12 oz. lager",
+    "quantity" : 12,
+    "unit" : "oz",
+    "matchedIngredientId" : "1d760d84-f68f-4395-9eee-f75950aba0c5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 1/2 c. ketchup",
+    "quantity" : 1.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "c63d4668-cdf1-4030-91a9-84e14e4acddd",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 c. Dijon mustard",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "91f8dbd6-2313-44fb-b6a4-9ae9f4ea2bfb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/3 c. apple cider vinegar",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "bd2e94bc-b6a1-4048-9f74-90d25c89e451",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 c. packed dark brown sugar",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tbsp. Worcestershire sauce",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "1af0f750-f754-4702-b1cf-cf53138ccd1c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Toasted buns, for serving",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : "92f27d6c-4455-4eb8-bd41-89467cf36d8c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "QUANTITY_ASSUMED" ]
+  } ]
+}

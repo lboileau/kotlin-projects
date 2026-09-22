@@ -1,0 +1,148 @@
+{
+  "name" : "Greek Salad",
+  "description" : "This easy Greek salad recipe is a flavorful, refreshing summer side dish! If you make it ahead for a gathering, save a few mint leaves to add right before serving.",
+  "baseServings" : 4,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "¼ cup extra-virgin olive oil",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons red wine vinegar",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "cc9ff150-69b8-4dd9-b34d-e0ff28ee2497",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  garlic clove (minced)",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ teaspoon dried oregano (more for sprinkling)",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "¼ teaspoon Dijon mustard",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "91f8dbd6-2313-44fb-b6a4-9ae9f4ea2bfb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "¼ teaspoon sea salt",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Freshly ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1  English cucumber (cut lengthwise, seeded, and sliced ¼-inch thick)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "f438a02a-3e0a-475c-a7aa-b2ac1c41d8c0",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  green bell pepper (chopped into 1-inch pieces)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 cups halved cherry tomatoes",
+    "quantity" : 2,
+    "unit" : "cup",
+    "matchedIngredientId" : "c5869414-8fbb-46f3-a1ca-753a3ea48023",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "5 ounces feta cheese (cut into ½ inch cubes*)",
+    "quantity" : 5,
+    "unit" : "oz",
+    "matchedIngredientId" : "1aa17704-3805-4327-905e-6bfbf4a20d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "⅓ cup thinly sliced red onion",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "⅓ cup pitted Kalamata olives",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "e3647597-3ccb-4278-9061-a43d44aa29bb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "⅓ cup fresh mint leaves",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "669c719a-6271-415e-b29b-a54fa797bf2d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

@@ -1,0 +1,118 @@
+{
+  "name" : "Gordon Ramsay Fennel Salad Recipe",
+  "description" : "A crisp, no-cook salad from Gordon Ramsay's Quick and Delicious built around shaved fennel, blood oranges, and torn radicchio. Ramsay recommends mixing radicchio varieties for colour, and across his other cookbooks he soaks sliced fennel in ice water to intensify the crunch.",
+  "baseServings" : 4,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "1 fennel bulb, trimmed and quartered",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "fe428455-ab62-40b4-8629-b30297d1378e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 blood oranges",
+    "quantity" : 3,
+    "unit" : "whole",
+    "matchedIngredientId" : "79dc4119-cbd7-4067-a12e-540eed75b5b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 head of radicchio (or a mix of varieties like Castelfranco, Trevisano, or Chioggia), core removed and leaves torn into bite-sized pieces",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c3dd6094-69a7-4eec-a21f-5b4bdbc3e7b5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 tbsp white balsamic vinegar",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "41547fda-43e4-4f67-ac29-e4a089fd382d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp honey",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tsp wholegrain mustard",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "dbc9ee6a-dfa6-41c4-a06e-0a6bb7feea88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Juice of 1/2 blood orange",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "79dc4119-cbd7-4067-a12e-540eed75b5b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Juice of 1/2 lemon",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tbsp chopped fresh dill",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "124c6dd7-3165-4118-ad96-aaac4b2b90cb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4 tbsp (60ml) extra virgin olive oil",
+    "quantity" : 4,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Sea salt and freshly ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

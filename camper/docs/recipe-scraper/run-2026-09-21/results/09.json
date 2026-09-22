@@ -1,0 +1,178 @@
+{
+  "name" : "Beef Stew Recipe",
+  "description" : "This easy beef stew recipe is a family favorite. Tender veggies and beef in a rich brown broth!",
+  "baseServings" : 8,
+  "meal" : "dinner",
+  "theme" : "beef",
+  "ingredients" : [ {
+    "originalText" : "2 pounds stewing beef (trimmed and cubed)",
+    "quantity" : 2,
+    "unit" : "lb",
+    "matchedIngredientId" : "346d64e2-7bf3-44a8-82f1-5112df705938",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 tablespoons all-purpose flour",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ teaspoon garlic powder",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80e1c2f2-4d22-45da-811a-0d63ec4c4a73",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ teaspoon salt",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ teaspoon black pepper",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons olive oil (more as needed)",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  onion (chopped)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "6 cups beef broth",
+    "quantity" : 6,
+    "unit" : "cup",
+    "matchedIngredientId" : "ee86f2c6-0bc4-47e1-ab82-001bdd087522",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ cup red wine (optional)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "af111a10-5520-4728-b9f0-c6ce98fd1ff0",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 pound potatoes (peeled and cubed)",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "217cfd5d-c02d-4483-b8cf-5536083bb909",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4  carrots (cut into 1 inch pieces)",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4 ribs celery (cut into 1 inch pieces)",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "90a1dbc0-d3ad-4064-88b8-0981481d96dc",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons tomato paste",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "eb63b90e-38d3-4425-aea7-986cd9fe6732",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon dried rosemary (or 1 sprig fresh)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2065499a-9c73-4a9a-9fea-dee35ddfcc2f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons cornstarch (or as needed)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "fa22f9a9-591c-489d-aeae-770078046cff",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons water (or as needed)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¾ cup peas",
+    "quantity" : 0.75,
+    "unit" : "cup",
+    "matchedIngredientId" : "ae1fcc43-fb4d-4e09-9c6c-650ac51b4132",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

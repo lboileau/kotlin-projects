@@ -1,0 +1,158 @@
+{
+  "name" : "The Best Chili Recipe",
+  "description" : "This is the best chili recipe! A big pot of ground beef chili loaded with beef and beans is the perfect game day food!&nbsp;",
+  "baseServings" : 8,
+  "meal" : "dinner",
+  "theme" : "beef",
+  "ingredients" : [ {
+    "originalText" : "2 pounds lean ground beef",
+    "quantity" : 2,
+    "unit" : "lb",
+    "matchedIngredientId" : "abd44ee4-7dea-4448-8b51-c5140689e216",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  onion (diced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  jalapeño (seeded and finely diced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "edd8aab0-c75f-4334-b263-9314ba637b8d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4 cloves garlic (minced)",
+    "quantity" : 4,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2½ tablespoons chili powder (divided, or to taste)",
+    "quantity" : 2.5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon cumin",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  green bell pepper (seeded and diced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 (14.5 ounce) can crushed tomatoes",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "08ac12a1-e5b9-4732-b6a8-8a0ec7a59f36",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 (19 ounce) can canned red kidney beans (drained and rinsed)",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "c6ed73ac-b7a8-4c4d-bebc-0dd5b53bb66e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 (14.5 ounce) can canned diced tomatoes (with juices)",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "e2f34c7c-a257-4cdb-9fb1-f5b5c1adc851",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1½ cups beef broth",
+    "quantity" : 1.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "ee86f2c6-0bc4-47e1-ab82-001bdd087522",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup beer",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "1d760d84-f68f-4395-9eee-f75950aba0c5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon tomato paste",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "eb63b90e-38d3-4425-aea7-986cd9fe6732",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon brown sugar (optional)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "salt and black pepper (to taste)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

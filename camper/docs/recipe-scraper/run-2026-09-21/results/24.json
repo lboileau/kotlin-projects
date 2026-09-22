@@ -1,0 +1,98 @@
+{
+  "name" : "Vietnamese Caramelized Fish Recipe (Cá Kho Tộ)",
+  "description" : "Tender fish in a peppery caramel sauce. This quick and easy stovetop braised fish recipe is easy enough for a busy weeknight and special enough to serve at a dinner party.",
+  "baseServings" : 6,
+  "meal" : "dinner",
+  "theme" : "fish",
+  "ingredients" : [ {
+    "originalText" : "1 tablespoon olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3/4 cup chopped shallots",
+    "quantity" : 0.75,
+    "unit" : "cup",
+    "matchedIngredientId" : "4923fa72-6d6e-4e97-87c3-80ddab70bb20",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 cup granulated sugar",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 cup Asian fish sauce",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 cup water",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 1/2 teaspoons fresh ground black pepper",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 pounds skinless halibut fillets cut into 6-8 pieces (see notes for substitutions)",
+    "quantity" : 2,
+    "unit" : "lb",
+    "matchedIngredientId" : "1c964685-bd4c-49c7-99f0-ded65f313ad3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "4 scallions, thinly sliced",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 bunch cilantro, chopped",
+    "quantity" : 0.5,
+    "unit" : "bunch",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

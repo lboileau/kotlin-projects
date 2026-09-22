@@ -1,0 +1,88 @@
+{
+  "name" : "Broccoli Salad",
+  "description" : "The best Broccoli Salad recipe is creamy, crunchy, and flavorful with bacon, craisins, almonds, and a simple dressing. It's an easy and quick side dish everyone loves!",
+  "baseServings" : 8,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "7-8 cups fresh broccoli florets ((about 500 grams/1lb))",
+    "quantity" : 8,
+    "unit" : "cup",
+    "matchedIngredientId" : "a48650e0-4ff2-43b6-83be-6f1dea2540f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 cup mayonnaise ((I often use half plain Greek yogurt))",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "0f1175db-fd14-4b2b-bd6a-685fbb37935b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tablespoons apple cider vinegar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "bd2e94bc-b6a1-4048-9f74-90d25c89e451",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 Tablespoons granulated sugar",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "8 slices bacon (, cooked and crumbled)",
+    "quantity" : 8,
+    "unit" : "slice",
+    "matchedIngredientId" : "7a51ea42-c888-449d-bd8c-f1339c9071a4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 cup red onion (, chopped)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 cup dried cranberries ((or raisins))",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "43640465-d692-4a64-8d83-38ba648de8f3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup almonds (, chopped (*see note below))",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "ca866502-2597-462d-b9b5-c61140f58d38",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

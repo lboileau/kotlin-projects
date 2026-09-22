@@ -1,0 +1,517 @@
+PROD content check (68 JSON-LD recipes):
+  stored lines: 862 | ingredient present in source: 790 | ingredient NOT in source (invented): 72
+  of those present: quantity+unit agree: 530 | disagree: 198
+  source ingredients with no stored line: 180
+
+recipes with zero content issues: 8 / 68
+
+## 00 20 Minute Ground Turkey Bang Bang Rice Bowls  (source 19 lines, prod 14)
+   INVENTED   1 tbsp olive oil
+   INVENTED   1 tsp lime
+   QTY        rice: prod 2 cup vs source '1 tsp rice vinegar'
+   QTY        sriracha: prod 1 tbsp vs source '1-2 Tbsp sriracha'
+   QTY        soy sauce: prod 1 tbsp vs source '3 Tbsp soy sauce (low sodium)'
+   QTY        garlic: prod 2 clove vs source '2-3  garlic cloves (minced)'
+   QTY        garlic powder: prod 1 tsp vs source '2-3  garlic cloves (minced)'
+   QTY        black pepper: prod 1 pinch vs source '½ tsp black pepper'
+   QTY        spring onion: prod 2 whole vs source '½ tsp onion powder'
+   MISSING    1 Tbsp sesame oil (or favorite cooking oil)
+   MISSING    2 tsp grated ginger
+   MISSING    ½ tsp smoked paprika
+   MISSING    2-3 T chicken broth
+   MISSING    2 tsp honey
+   MISSING    ½ tsp sea salt (more or less to taste)
+   MISSING    2 tsp corn starch
+   MISSING    ½-1 Tbsp sriracha (more to kick up the spice)
+   MISSING    2 tsp honey
+## 01 Asian Slaw with Sesame Ginger Dressing  (source 16 lines, prod 16)
+   QTY        red cabbage: prod 3 cup vs source '4 cups shredded napa cabbage (or green cabbage, ¼-'
+   QTY        spring onion: prod 0.25 cup vs source '¼  sliced green onions (cut on a bias)'
+   QTY        sesame oil: prod 1 tbsp vs source '1 teaspoon sesame seeds (black and white)'
+   MISSING    3 cups shredded red cabbage (¼-inch thick)
+   MISSING    1 tablespoon sesame oil (toasted)
+## 02 Asparagus, Corn, Tomato & Feta Salad  (source 11 lines, prod 10)
+   MISSING    u00be teaspoons freshly cracked black pepper
+   MISSING    1 tablespoon olive oil
+## 03 Authentic German Red Cabbage (Rotkohl)  (source 13 lines, prod 16)
+   INVENTED   3 pieces cloves
+   INVENTED   0.25 tsp ground clove
+   INVENTED   0.25 tsp ground nutmeg
+   INVENTED   0.25 tsp ground allspice
+   INVENTED   1 pieces cinnamon stick
+   QTY        apples: prod 2 pieces vs source '3  apples (Use tart apples like Granny Smith.)'
+   QTY        butter: prod 2 tbsp vs source '30 grams bacon grease (or butter or oil)'
+   QTY        red wine vinegar: prod 3 tbsp vs source '2 Tablespoons red wine vinegar'
+   QTY        bay leaf: prod 2 pieces vs source '1  bay leaf'
+   QTY        red wine: prod 0.5 cup vs source '2 Tablespoons red wine vinegar'
+   QTY        lingonberry jam: prod 1 tbsp vs source '2 Tablespoons lingonberry jam (or cranberry sauce)'
+   MISSING    4  whole cloves
+   MISSING    1 tablespoon cornstarch
+   MISSING    2 Tablespoons water
+## 04 Baby Meatballs for Baby Led Weaning (High Iron)  (source 8 lines, prod 6)
+   INVENTED   0.5 cup oats
+   MISSING    1/2 cup iron fortified baby oat or ancient grain cereal
+   MISSING    ½ tsp ground pepper
+   MISSING    ¼ tsp salt (optional for adults)
+## 06 Baked Pork Tenderloin with Apples  (source 10 lines, prod 9)
+   QTY        pork tenderloin: prod 3 lb vs source '2 pork tenderloins, about 1 ½ pounds each'
+   MISSING    1 ½ teaspoons fine sea salt, plus more as needed
+## 08 Beef and Zucchini "Lasagna"  (source 10 lines, prod 8)
+   QTY        zucchini: prod 800 g vs source '400 g Zucchini'
+   QTY        baby spinach: prod 115 g vs source '56 g Baby Spinach'
+   QTY        italian seasoning: prod 2 tsp vs source '1 tbsp Italian Seasoning'
+   QTY        crushed tomatoes: prod 750 ml vs source '370 mL Crushed Tomatoes'
+   QTY        garlic: prod 2 clove vs source '1 tbsp Garlic Puree'
+   QTY        mozzarella cheese: prod 1.5 cup vs source '¾ cup Mozzarella Cheese, shredded'
+   QTY        fresh basil: prod 15 g vs source '7 g Basil'
+   QTY        ground beef: prod 500 g vs source '250 g Ground Beef'
+   MISSING    1.5 tbsp Oil*
+   MISSING    ¼ tsp Salt and Pepper*
+## 09 Beef Stew  (source 17 lines, prod 14)
+   INVENTED   1 tsp worcestershire sauce
+   INVENTED   0.5 tsp dried thyme
+   INVENTED   1 pieces bay leaf
+   QTY        flour: prod 0.333 cup vs source '3 tablespoons all-purpose flour'
+   QTY        garlic: prod 3 clove vs source '½ teaspoon garlic powder'
+   QTY        beef broth: prod 3 cup vs source '6 cups beef broth'
+   QTY        tomato paste: prod 1 tbsp vs source '3 tablespoons tomato paste'
+   QTY        potatoes: prod 4 whole vs source '1 pound potatoes (peeled and cubed)'
+   QTY        carrot: prod 3 whole vs source '4  carrots (cut into 1 inch pieces)'
+   QTY        celery: prod 3 whole vs source '4 ribs celery (cut into 1 inch pieces)'
+   MISSING    ½ teaspoon salt
+   MISSING    ½ teaspoon black pepper
+   MISSING    ½ cup red wine (optional)
+   MISSING    1 teaspoon dried rosemary (or 1 sprig fresh)
+   MISSING    2 tablespoons cornstarch (or as needed)
+   MISSING    2 tablespoons water (or as needed)
+   MISSING    ¾ cup peas
+## 11 Best Fluffy Pancakes  (source 9 lines, prod 10)
+   INVENTED   1 cup maple syrop
+   QTY        butter: prod 0.5 cup vs source '1/4 cup butter'
+## 12 Best Pulled Pork  (source 16 lines, prod 16)
+   QTY        Ketchup: prod 1.5 cup vs source '1 1/2 c. ketchup'
+   QTY        dijon mustard: prod 0.5 cup vs source '1/2 c. Dijon mustard'
+   QTY        apple cider vinegar: prod 0.333 cup vs source '1/3 c. apple cider vinegar'
+   QTY        brown sugar: prod 0.25 cup vs source '3 tbsp. packed dark brown sugar'
+   MISSING    1/4 c. packed dark brown sugar
+## 13 Best Ratatouille Recipe  (source 13 lines, prod 15)
+   INVENTED   0.5 tsp dried thyme
+   INVENTED   1 tbsp red wine vinegar
+   INVENTED   1 tbsp parsley
+   QTY        zucchini: prod 2 pieces vs source '1 medium-to-large zucchini (about 8 ounces), diced'
+   QTY        bell pepper: prod 2 whole vs source '1 large red, orange, or yellow bell pepper (about '
+   QTY        tomato: prod 4 whole vs source '2 pounds ripe red tomatoes (6 medium or 4 large)'
+   QTY        olive oil: prod 0.25 cup vs source '5 tablespoons + 1 teaspoon extra-virgin olive oil,'
+   QTY        tomato paste: prod 2 tbsp vs source '2 pounds ripe red tomatoes (6 medium or 4 large)'
+   QTY        black pepper: prod 0.25 tsp vs source '1 large red, orange, or yellow bell pepper (about '
+   MISSING    1 large yellow squash (about 8 ounces), diced into &frac12;-inch cubes
+   MISSING    &frac14; teaspoon red pepper flakes, more or less to taste
+   MISSING    Freshly ground black pepper, to taste
+## 14 Black Bean and Corn Salad  (source 15 lines, prod 14)
+   INVENTED   1 pieces jalapenos
+   QTY        avocado: prod 1 whole vs source '3  tablespoons avocado oil'
+   MISSING    ½ to 1  jalapeño pepper (seeded and diced, or 1 serrano, sliced)
+   MISSING    1  ripe but firm avocado (pitted and diced)
+   MISSING    2 tablespoons toasted pepitas (optional)
+## 15 Broccoli Salad  (source 8 lines, prod 8)
+   QTY        broccoli: prod 7 cup vs source '7-8 cups fresh broccoli florets ((about 500 grams/'
+## 16 Cheesy Baked Broccoli Bites  (source 9 lines, prod 9)
+   INVENTED   3 slice breadcrumbs
+   MISSING    3 slices Whole wheat bread (blended into bread crumbs)
+## 18 Chicken Biryani  (source 27 lines, prod 26)
+   INVENTED   2 whole tomato
+   INVENTED   0.5 cup cilantro
+   INVENTED   3 tbsp olive oil
+   INVENTED   4 pieces cloves
+   QTY        rice: prod 300 g vs source '2 cups basmati rice ((aged rice only))'
+   QTY        chicken thighs: prod 500 g vs source '½ kg (1.1 lbs)  chicken ((skinless bone-in or bone'
+   QTY        greek yogurt: prod 0.75 cup vs source '3 tablespoons plain yogurt ((curd or dahi))'
+   QTY        onion: prod 2 whole vs source '1 large onion  (sliced thinly)'
+   QTY        green chili: prod 3 pieces vs source '1  green chili ((slit or chopped))'
+   QTY        ginger: prod 1 tbsp vs source '1¼ tablespoons ginger garlic paste ((1 inch ginger'
+   QTY        ghee: prod 1 tbsp vs source '2 tablespoon ghee (or Oil)'
+   QTY        cinnamon stick: prod 1 pieces vs source '½ kg (1.1 lbs)  chicken ((skinless bone-in or bone'
+   QTY        cumin seeds: prod 0.5 tsp vs source '¾ teaspoon shahi jeera ((caraway seeds) (substitut'
+   QTY        biryani masala: prod 0.75 tsp vs source '½ to 1 tablespoon garam masala ((or biryani masala'
+   QTY        chili powder: prod 1 tsp vs source '1  green chili ((slit or chopped))'
+   QTY        lemon: prod 2 tbsp vs source '1 tablespoon Lemon juice  ((optional))'
+   QTY        saffron: prod 0.25 tsp vs source '1 pinch saffron ((optional)(soaked in 2 tbsps hot '
+   QTY        milk: prod 2 tbsp vs source '1 pinch saffron ((optional)(soaked in 2 tbsps hot '
+   QTY        garlic: prod 1 tbsp vs source '1¼ tablespoons ginger garlic paste ((1 inch ginger'
+   MISSING    ½ to 1 teaspoon red chilli powder  ((or paprika) (use less spicy varie
+   MISSING    6  cloves ((lavang))
+   MISSING    1 inch cinnamon ((dalchini))
+   MISSING    ¼ cup plain yogurt ((Indian curd))
+   MISSING    ¼ to ½ teaspoon red chili powder  ((optional, for heat))
+   MISSING    1 teaspoon garam masala ((or biryani masala))
+   MISSING    3 cups water ((3½ cups for pot) (refer notes, more if needed ))
+   MISSING    ¾ teaspoon salt ((to stir in water))
+   MISSING    2 tablespoon fried onions ((optional))
+## 19 Chicken Breast in Creamy Mushroom Sauce  (source 13 lines, prod 13)
+   QTY        butter: prod 1 tbsp vs source '15g / 1 tbsp  unsalted butter'
+   QTY        butter: prod 2 tbsp vs source '15g / 1 tbsp  unsalted butter'
+   QTY        chicken broth: prod 0.5 cup vs source '1/4 cup dry white wine ((sub more chicken stock, N'
+   MISSING    30g / 2 tbsp  unsalted butter
+   MISSING    1/2 cup chicken or vegetable stock (, low sodium)
+## 20 Chicken Noodle Soup  (source 14 lines, prod 14)
+   QTY        salt: prod 1 tsp vs source '1-3 tsp salt  (divided, $0.02)'
+## 22 Creamy Sweet Potato Coconut Soup  (source 11 lines, prod 15)
+   INVENTED   1 tbsp olive oil
+   INVENTED   1 tsp ginger
+   INVENTED   1 tsp ground cumin
+   INVENTED   0.5 tsp cinnamon
+   INVENTED   1 tbsp lime
+   INVENTED   1 sprig cilantro
+   INVENTED   1 tbsp pumpkin seeds
+   QTY        garlic: prod 3 clove vs source '2  garlic cloves (minced)'
+   QTY        coconut milk: prod 1 can vs source '14 oz canned coconut milk* ((shake well before ope'
+   QTY        chicken broth: prod 2 cup vs source '4 cups reduced sodium chicken broth'
+   QTY        salt: prod 1 tsp vs source '1 1/2 tsp fine sea salt (or more to taste)'
+   MISSING    8 oz bacon (about 6 strips) (chopped into 1/2-inch strips, *see notes 
+   MISSING    1  large celery rib (diced (1 "stick" of celery))
+   MISSING    3 sprigs fresh thyme 3 (or 1/2 tsp dried thyme)
+   MISSING    2 Tbsp parsley to garnish (optional)
+## 23 Cucumber Edamame Salad with Sesame-Ginger Dressing  (source 13 lines, prod 13)
+   QTY        avocado: prod 1 whole vs source '3 Tbsp. avocado oil  ((sub extra-virgin olive oil)'
+   QTY        fresh basil: prod 2 tbsp vs source '2 to 3 Tbsp. thinly sliced fresh basil leaves'
+   MISSING    1 large avocado, cut into cubes
+## 24 Cá Kho Tộ: Vietnamese Caramelized Braised Fish  (source 9 lines, prod 13)
+   INVENTED   4 clove garlic
+   INVENTED   2 tbsp canola oil
+   INVENTED   2 tbsp soy sauce
+   INVENTED   2 whole spring onion
+   INVENTED   1 pieces thai chili
+   QTY        white fish: prod 1.5 lb vs source '1/4 cup Asian fish sauce'
+   QTY        sugar: prod 3 tbsp vs source '1/4 cup granulated sugar'
+   QTY        fish sauce: prod 3 tbsp vs source '1/4 cup Asian fish sauce'
+   QTY        water: prod 2 tbsp vs source '1/4 cup water'
+   QTY        shallot: prod 2 whole vs source '3/4 cup chopped shallots'
+   QTY        coconut water: prod 0.5 cup vs source '1/4 cup water'
+   QTY        cilantro: prod 1 sprig vs source '1/2 bunch cilantro, chopped'
+   MISSING    1 tablespoon olive oil
+   MISSING    2 pounds skinless halibut fillets cut into 6-8 pieces (see notes for s
+   MISSING    4 scallions, thinly sliced
+## 26 Easy Maple Roasted Carrots  (source 7 lines, prod 6)
+   INVENTED   1 tbsp parsley
+   MISSING    Pinch of cayenne pepper (optional)
+   MISSING    Chopped parlsey, to garnish (optional)
+## 27 Easy Vegetable Pasta Bake  (source 11 lines, prod 11)
+   QTY        pasta sauce: prod 3 cup vs source '1 pound dried pasta like rigatoni, penne, or ziti '
+   MISSING    3 cups homemade pasta sauce, or use 1 (28-ounce) jar of store-bought s
+## 28 Filipino Chicken Adobo (Flavour Kapow!)  (source 12 lines, prod 11)
+   INVENTED   1 tbsp black Peppercorns
+   QTY        spring onion: prod 2 bunch vs source '1  small brown onion (, diced)'
+   MISSING    3  garlic cloves (, minced)
+   MISSING    1 1/2 cups (375 ml)  water
+   MISSING    1 tbsp whole black pepper ((sub 2 tsp coarse cracked pepper))
+   MISSING    2  green onions/scallions (, sliced (garnish))
+## 29 Fish Stew with Ginger and Tomatoes  (source 12 lines, prod 12)
+   QTY        olive oil: prod 1.01 tbsp vs source '2 tablespoons olive oil'
+   QTY        kosher salt: prod 1 pinch vs source '1/2 teaspoon salt, or more to taste'
+   QTY        black pepper: prod 1 pinch vs source '1/4 teaspoon black pepper, or more to taste'
+   MISSING    1/4 teaspoon crushed red pepper
+## 30 French Lentil & Beet Salad  (source 14 lines, prod 10)
+   INVENTED   2 cup arugula
+   INVENTED   0.5 cup walnut
+   QTY        french lentil: prod 1 cup vs source '1/2 cup Puy lentils, dry'
+   QTY        beats: prod 3 pieces vs source '4 medium beets (I used 2 red and 2 yellow)'
+   QTY        feta cheese: prod 0.5 cup vs source '1/3 cup crumbled goat cheese'
+   QTY        red wine vinegar: prod 2 tbsp vs source '1 tablespoon red wine vinegar'
+   QTY        salt and pepper: prod 1 pinch vs source '1/2 teaspoon sea salt'
+   MISSING    1 cup water
+   MISSING    1 bay leaf
+   MISSING    1/4 cup red onion, thinly sliced
+   MISSING    1 handful parsley, roughly chopped
+   MISSING    1 small handful chives, minced
+   MISSING    1/4 teaspoon black pepper
+## 31 Fried Rice  (source 12 lines, prod 12)
+   INVENTED   3 whole scallions
+   QTY        rice: prod 2 cup vs source '4 cups cooked and chilled rice (I prefer short-gra'
+   QTY        soy sauce: prod 3.5 tbsp vs source '3-4 tablespoons soy sauce (or more to taste)'
+   MISSING    3  green onions (thinly sliced)
+## 32 Frikadellen (German Hamburgers)  (source 12 lines, prod 13)
+   INVENTED   0.5 cup breadcrumbs
+   INVENTED   3 tbsp milk
+   INVENTED   0.5 tsp black pepper
+   INVENTED   2 tbsp vegetable oil
+   QTY        ground beef: prod 1 lb vs source '500 grams mixed ground meat (half pork and half be'
+   QTY        ground pork: prod 1 lb vs source '500 grams mixed ground meat (half pork and half be'
+   QTY        garlic: prod 2 clove vs source '3  garlic cloves (minced)'
+   QTY        eggs: prod 2 whole vs source '1  egg'
+   QTY        paprika: prod 0.5 tsp vs source '1 teaspoon paprika powder'
+   QTY        parsley: prod 2 tbsp vs source '3 Tablespoons fresh parsley (chopped)'
+   MISSING    1  hard roll (you can use whatever leftover bread you have!)
+   MISSING    1 teaspoon dried marjoram
+   MISSING    1 teaspoon chili powder
+   MISSING    oil for frying (sunflower seed or avocado oil)
+## 33 Garlic Herb Roasted Potatoes Carrots and Zucchini  (source 8 lines, prod 7)
+   MISSING    Salt and freshly ground black pepper
+## 34 Gluten-free Lemon Poppy Seed Loaf  (source 9 lines, prod 9)
+   QTY        lemon: prod 1 tsp vs source '¼ cup lemon juice'
+   MISSING    1 teaspoon lemon zest
+## 35 Gordon Ramsay Fennel Salad Recipe  (source 11 lines, prod 12)
+   INVENTED   0.33 cup parmesan cheese
+   INVENTED   0.33 cup pine nuts
+   INVENTED   2 tbsp parsley
+   QTY        fennel: prod 2 whole vs source '1 fennel bulb, trimmed and quartered'
+   QTY        olive oil: prod 2 tbsp vs source '4 tbsp (60ml) extra virgin olive oil'
+   QTY        dijon mustard: prod 0.5 tsp vs source '1 tsp wholegrain mustard'
+   QTY        fennel: prod 2 tbsp vs source '1 fennel bulb, trimmed and quartered'
+   MISSING    3 blood oranges
+   MISSING    1 head of radicchio (or a mix of varieties like Castelfranco, Trevisan
+   MISSING    3 tbsp white balsamic vinegar
+   MISSING    Juice of 1/2 blood orange
+   MISSING    2 tbsp chopped fresh dill
+## 36 Greek Chicken and Lemon Rice (30 Minutes, One-Pot)  (source 21 lines, prod 17)
+   INVENTED   1 whole onion
+   QTY        chicken broth: prod 1.5 cup vs source '1.5 lb skinless boneless chicken thighs'
+   QTY        lemon: prod 1 whole vs source '3 tablespoons freshly squeezed lemon juice'
+   QTY        dried oregano: prod 2 tsp vs source '1 teaspoon dried oregano'
+   QTY        salt: prod 1 tsp vs source '1/4 teaspoon salt'
+   QTY        black pepper: prod 1 pinch vs source '1/4 teaspoon red pepper flakes'
+   QTY        fresh oregano: prod 2 tbsp vs source '1 teaspoon dried oregano'
+   MISSING    1 tablespoon olive oil
+   MISSING    1 teaspoon dried oregano
+   MISSING    1/4 teaspoon salt
+   MISSING    1 tablespoon extra virgin olive oil
+   MISSING    1 tablespoon freshly squeezed lemon juice
+   MISSING    1/4 teaspoon dried oregano
+   MISSING    2 tablespoons chopped fresh oregano (optional)
+   MISSING    fresh oregano (for garnish)
+## 37 Greek Chicken Burgers  (source 16 lines, prod 16)
+   QTY        onion: prod 1 whole vs source '¼ cup diced red onion'
+   QTY        tomato: prod 1 whole vs source '¼ cup sun-dried tomatoes (finely chopped)'
+   MISSING    sliced onion
+   MISSING    sliced tomato
+## 38 Greek Chicken Souvlaki Bowls with Roasted Veggies and Tzatziki Sauce  (source 15 lines, prod 20)
+   QTY        chicken breast: prod 1.25 lb vs source '1 - 1 ½ pounds boneless (skinless chicken tenders)'
+   QTY        olive oil: prod 2 tbsp vs source '3 tablespoons olive oil'
+   QTY        garlic: prod 1 tsp vs source '2 teaspoons minced garlic (or grated)'
+   QTY        black pepper: prod 0.5 tsp vs source '1 teaspoon salt AND 1/2 teaspoon black pepper'
+   QTY        bell pepper: prod 1.25 cup vs source '6 cups mixed veggies (I used diced eggplants, zucc'
+   QTY        zucchini: prod 1.25 cup vs source '6 cups mixed veggies (I used diced eggplants, zucc'
+   QTY        mushrooms: prod 1.25 cup vs source '6 cups mixed veggies (I used diced eggplants, zucc'
+   QTY        eggplant: prod 1.25 cup vs source '6 cups mixed veggies (I used diced eggplants, zucc'
+   MISSING    2 tablespoons olive oil
+   MISSING    1 teaspoon garlic (grated)
+   MISSING    1/2 teaspoon salt AND 1/2 teaspoon black pepper
+## 39 Greek Salad  (source 14 lines, prod 13)
+   MISSING    ¼ teaspoon sea salt
+## 40 Greek turkey meatballs with lemon herb rice  (source 16 lines, prod 16)
+   MISSING    1 tablespoon olive oil
+## 41 Japchae glass noodles stir fried  (source 10 lines, prod 14)
+   INVENTED   4 oz beef
+   INVENTED   2 clove garlic
+   INVENTED   1 tbsp sugar
+   INVENTED   2 tbsp soy sauce
+   INVENTED   1 tbsp sesame seeds
+   INVENTED   1 whole eggs
+   QTY        shiitake mushrooms: prod 2 whole vs source '4 to 5 white mushrooms, sliced thinly'
+   QTY        onion: prod 1 whole vs source '2 to 3 green onions, cut crosswise into 2 inch lon'
+   QTY        bell pepper: prod 1 whole vs source '½ red bell pepper, cut into thin strips (optional)'
+   MISSING    1 medium onion (1 cup), sliced thinly
+   MISSING    ground black pepper
+   MISSING    kosher salt
+   MISSING    vegetable oil
+## 44 Korean Beef Bulgogi Rice Bowls - the easy way  (source 23 lines, prod 23)
+   QTY        soy sauce: prod 2 tbsp vs source '2 1/2 tbsp soy sauce ( - all-purpose or light (Not'
+   QTY        brown sugar: prod 2 tsp vs source '1 tbsp brown sugar'
+   QTY        rice: prod 1 cup vs source '2 tsp rice vinegar ((or apple cider vinegar))'
+   QTY        baby spinach: prod 4 cup vs source '1 tbsp canola oil (, or any other plain flavoured '
+   QTY        spring onion: prod 1 whole vs source '1 tbsp onion (, finely grated  (~1/4 onion) (Note '
+   MISSING    2 tbsp soy sauce ( - all-purpose or light (Note 2))
+   MISSING    1 tbsp sesame oil
+   MISSING    2 tsp brown sugar
+   MISSING    white rice ((medium or short grain, if you can))
+   MISSING    4 large handfuls baby spinach ((or similar chopped leafy greens - cabb
+   MISSING    1  green onion (, finely sliced)
+## 45 Lamb Koftas with Yoghurt Dressing  (source 22 lines, prod 20)
+   QTY        ground lamb: prod 500 g vs source '1 lb / 500 g   lamb mince ((ground lamb))'
+   QTY        ground coriander: prod 2 tsp vs source '2 tbsp chopped fresh coriander'
+   QTY        black pepper: prod 0.5 tsp vs source '3/4 tsp cayenne pepper ((this is a bit spicy, redu'
+   QTY        garlic: prod 1 clove vs source '2 cloves garlic (, crushed)'
+   QTY        ground cumin: prod 1 tsp vs source '2 tsp cumin'
+   MISSING    2 tsp coriander
+   MISSING    1/2  black pepper
+   MISSING    1 clove garlic (, crushed)
+   MISSING    1 tsp cumin
+   MISSING    Shredded Red Cabbage, Carrot and Mint Salad ((Note 3))
+   MISSING    OR shredded lettuce, tomato and onion slices ((Note 3))
+## 47 Mayo Parmesan Chicken Bake  (source 6 lines, prod 7)
+   INVENTED   1 tsp parsley
+   QTY        parmesan cheese: prod 1 cup vs source '1/3 cup parmesan cheese (grated)'
+   QTY        garlic powder: prod 1 tsp vs source '1/2 tsp garlic powder'
+   QTY        black pepper: prod 1 tsp vs source '1/2 tsp lemon pepper'
+## 49 One Skillet Salmon with Lemon Orzo  (source 17 lines, prod 17)
+   QTY        garlic: prod 3 clove vs source '1 tsp garlic powder'
+   QTY        black pepper: prod 1 pinch vs source '1 tsp coarsely ground black pepper (divided)'
+   QTY        crushed red pepper flakes: prod 1 pinch vs source '1 tsp coarsely ground black pepper (divided)'
+   MISSING    3  garlic cloves (minced)
+   MISSING    freshly ground black pepper (for serving)
+   MISSING    chili flakes (for serving)
+## 50 One-Pot Chicken with Caramelized Lemon and Dates  (source 8 lines, prod 9)
+   QTY        chicken thighs: prod 4 lb vs source '1 3 ½ - 4 lb. chicken or 3 lbs. Bone-in, skin-on c'
+   QTY        medjool date: prod 8 pieces vs source '4–6 medjool dates , pitted'
+   MISSING    1–2 teaspoons crushed red pepper flakes
+## 51 Oven-Roasted Chicken Shawarma (NYTimes)  (source 15 lines, prod 14)
+   QTY        olive oil: prod 1 tbsp vs source '1/2 cup olive oil (plus)'
+   QTY        crushed red pepper flakes: prod 1 pinch vs source '2 teaspoons freshly ground black pepper'
+   MISSING    *FOR MARINADE*
+   MISSING    1 tablespoon olive oil
+   MISSING    Red pepper flakes, to taste
+## 52 Peruvian Chicken with Green Sauce (Aji Verde)  (source 23 lines, prod 22)
+   INVENTED   1.5 pieces jalapenos
+   QTY        chicken thighs: prod 3 lb vs source '10 to 12  boneless skinless chicken thighs trimmed'
+   QTY        lime: prod 1 tsp vs source '3 Tbsp fresh lime juice'
+   QTY        cilantro: prod 2 cup vs source '1 tsp ground coriander'
+   QTY        lime: prod 1.5 tbsp vs source '3 Tbsp fresh lime juice'
+   QTY        kosher salt: prod 1 pinch vs source '1 tsp kosher salt (or to taste)'
+   MISSING    1 tsp lime zest
+   MISSING    2 cups (60g) cilantro
+   MISSING    1/3 cup crumbled cotija cheese ((optional))
+   MISSING    1 to 2 jalapeños,** (seeds and ribs removed )
+   MISSING    1 1/2 Tbsp  fresh lime juice
+   MISSING    Kosher salt, (to taste)
+## 53 Radicchio Arugula Apple Salad with Parmesan  (source 14 lines, prod 8)
+   INVENTED   2 tbsp lemon
+   INVENTED   1 tsp honey
+   QTY        arugula: prod 2 cup vs source '3 cups   loosely packed arugula'
+   QTY        parmesan cheese: prod 0.5 cup vs source '1  cup  shaved parmesan**'
+   QTY        olive oil: prod 3 tbsp vs source '½ cup   olive oil'
+   QTY        dijon mustard: prod 1 tsp vs source '2 tbsp   dijon mustard'
+   MISSING    ½ cup   toasted walnuts, chopped
+   MISSING    3 tbsp   balsamic vinegar
+   MISSING    1   tbsp apple cider vinegar
+   MISSING    ½ tsp   kosher salt
+   MISSING    Black pepper
+   MISSING    *Can’t find radicchio? No problem, you could substitute with more arug
+   MISSING    **This salad would also be delicious with crumbled goat cheese or feta
+   MISSING    Pro tip:   ~ I love serving salads like these on a big platter so that
+## 54 Roasted Brussels Sprouts  (source 8 lines, prod 7)
+   MISSING    Pinch red pepper flakes
+## 55 Roasted Cauliflower with Tahini and Fresh Mint  (source 12 lines, prod 11)
+   QTY        crushed red pepper flakes: prod 2 pinch vs source '2 pinches dried red pepper flakes'
+   QTY        olive oil: prod 1 tsp vs source '2 tablespoons extra virgin olive oil'
+   QTY        kosher salt: prod 0.25 tsp vs source '½ teaspoon kosher salt'
+   QTY        black pepper: prod 1 pinch vs source '2 pinches dried red pepper flakes'
+   MISSING    1 teaspoon extra virgin olive oil
+   MISSING    ¼ teaspoon kosher salt
+   MISSING    freshly ground black pepper
+   MISSING    flaky finishing salt (such as Maldon)
+## 56 Roasted Root Vegetables  (source 6 lines, prod 9)
+   QTY        carrot: prod 1 lb vs source '3 pounds root vegetables, such as carrots, parsnip'
+   QTY        parsnip: prod 1 lb vs source '3 pounds root vegetables, such as carrots, parsnip'
+   QTY        beats: prod 1 lb vs source '3 pounds root vegetables, such as carrots, parsnip'
+   QTY        sweet potatoe: prod 1 lb vs source '3 pounds root vegetables, such as carrots, parsnip'
+## 57 Shrimp Cakes  (source 14 lines, prod 11)
+   INVENTED   2 tsp jalapenos
+   QTY        cilantro: prod 0.66 cup vs source '1 tablespoons coriander seeds'
+   MISSING    2 tablespoons sugar
+   MISSING    4 large garlic cloves, unpeeled
+   MISSING    2/3 cup chopped fresh cilantro
+   MISSING    2 tablespoons finely chopped pickled or fresh jalapeños, seeds discard
+   MISSING    2 tablespoons finely chopped red onion
+## 58 Sour Cream and Onion Chicken  (source 11 lines, prod 11)
+   QTY        garlic: prod 1 clove vs source '1/2 teaspoon garlic powder'
+   MISSING    1 clove garlic (minced)
+## 59 Spicy Turkey Sausage & Kale Chili  (source 15 lines, prod 15)
+   QTY        chicken broth: prod 3 cup vs source '3 c. low-sodium chicken broth'
+## 60 Sun-dried Tomato & Artichoke Pasta  (source 13 lines, prod 11)
+   INVENTED   1 tsp dried oregano
+   INVENTED   1 tbsp fresh basil
+   QTY        artichoke hearts: prod 1 can vs source '12 ounces canned artichoke hearts (strained and di'
+   QTY        sun-dried tomatoes: prod 0.5 cup vs source '2.5 ounces sun-dried tomatoes in oil (diced)'
+   QTY        garlic: prod 4 clove vs source '5 cloves garlic (minced)'
+   MISSING    1 medium shallot (diced)
+   MISSING    1/4 cup pitted green olives (sliced)
+   MISSING    1 Tablespoon capers
+   MISSING    1/2 teaspoon chili flakes
+   MISSING    fresh parsley
+## 61 Sweet Potato Black Bean Salad  (source 15 lines, prod 14)
+   QTY        sweet potatoe: prod 2 whole vs source '1 large (1.33 lb) sweet potato (chopped into chunk'
+   QTY        black beans: prod 1 can vs source '1 cup black beans'
+   QTY        red onion: prod 0.5 whole vs source '1  bunch green onion (chopped)'
+   QTY        cilantro: prod 0.25 cup vs source '⅓ cup packed fresh cilantro or parsley (chopped)'
+   QTY        avocado oil: prod 5 tbsp vs source '2 Tbsp avocado oil'
+   QTY        black pepper: prod 1 pinch vs source '1 cup red bell pepper (chopped)'
+   QTY        bell pepper: prod 1 whole vs source '1 cup red bell pepper (chopped)'
+   QTY        red onion: prod 0.5 cup vs source '1  bunch green onion (chopped)'
+   QTY        mayonnaise: prod 1 cup vs source '2 Tbsp mayonnaise (optional)'
+   MISSING    ½ tsp sea salt (to taste)
+   MISSING    1/2 cup red onion (finely chopped)
+   MISSING    3 Tbsp avocado oil
+   MISSING    ½ tsp sea salt (to taste)
+## 62 Tabouli Salad Recipe  (source 10 lines, prod 10)
+   INVENTED   4 pieces scallions
+   QTY        mint: prod 12 pieces vs source '12-15 fresh mint leaves, stems removed, washed, we'
+   QTY        lime: prod 3 tbsp vs source '3-4 tbsp lime juice (lemon juice, if you prefer)'
+   QTY        olive oil: prod 3 tbsp vs source '3-4 tbsp Early Harvest extra virgin olive oil'
+   MISSING    4 green onions, white and green parts, very finely chopped
+## 63 Thai Basil Beef (Pad Gra Prow)  (source 12 lines, prod 13)
+   INVENTED   2 tbsp olive oil
+   QTY        dark soy sauce: prod 1 tsp vs source '2 teaspoons soy sauce'
+   QTY        cornstarch: prod 2 tsp vs source '12 oz. beef ((340g, sliced thinly against the grai'
+   MISSING    2 tablespoons oil
+   MISSING    1 teaspoon dark soy sauce
+## 64 Thai Glass Noodle Salad (Yum Woon Sen)  (source 15 lines, prod 15)
+   QTY        shrimp: prod 6 pieces vs source '1 Tablespoon dried shrimp (optional, see note 2)'
+   QTY        thai chili: prod 2 pieces vs source '1-3  Thai chilies (to taste)'
+   QTY        fish sauce: prod 2 tbsp vs source '1 tsp fish sauce (for seasoning the pork)'
+   MISSING    6  medium or large shrimp (peeled and deveined)
+   MISSING    2 Tablespoons fish sauce
+## 65 The Best Chili Recipe  (source 15 lines, prod 15)
+   INVENTED   1 pieces jalapenos
+   QTY        crushed tomatoes: prod 14.5 oz vs source '1 (14.5 ounce) can crushed tomatoes'
+   QTY        red kidney beans: prod 19 oz vs source '1 (19 ounce) can canned red kidney beans (drained '
+   QTY        diced tomatoes: prod 14.5 oz vs source '1 (14.5 ounce) can crushed tomatoes'
+   QTY        tomato paste: prod 1 tbsp vs source '1 (14.5 ounce) can crushed tomatoes'
+   MISSING    1  jalapeño (seeded and finely diced)
+   MISSING    1 (14.5 ounce) can canned diced tomatoes (with juices)
+   MISSING    1 tablespoon tomato paste
+## 66 The Best Classic Shepherd's Pie  (source 22 lines, prod 22)
+   INVENTED   0.333 cup half and half
+   QTY        potatoes: prod 1.75 lb vs source '1 1/2 - 2 lb. russet potatoes (-about 2 large pota'
+   QTY        garlic powder: prod 0.5 tsp vs source '2  garlic cloves (-minced)'
+   QTY        black pepper: prod 0.25 tsp vs source '1/2 teaspoon ground black pepper'
+   MISSING    1/3 cup half &amp; half
+   MISSING    1/2 teaspoon garlic powder
+   MISSING    1/2 teaspoon salt
+   MISSING    1/4 teaspoon ground black pepper
+## 67 Turkish Red Cabbage Salad  (source 11 lines, prod 11)
+   QTY        carrot: prod 1.5 whole vs source '1-2  carrots (shredded or matchsticks)'
+   QTY        pomegranate molasses: prod 1.5 tbsp vs source '1-2 tablespoons pomegranate molasses'
+## 68 Tuscan Artichoke Tomato Salad  (source 13 lines, prod 11)
+   INVENTED   2 oz feta cheese
+   INVENTED   0.5 tsp dried oregano
+   QTY        cherry tomato: prod 1 cup vs source '10 ounces cherry tomatoes (cut in half)'
+   QTY        red onion: prod 0.25 cup vs source '1/2 medium red onion (thinly sliced)'
+   QTY        olive oil: prod 3 tbsp vs source '1/4 cup olive oil'
+   QTY        garlic: prod 1 clove vs source '1/2 teaspoon garlic powder (or 1 garlic clove fine'
+   QTY        salt and pepper: prod 1 pinch vs source '1/4-1/2 teaspoon salt (add more or less depending '
+   MISSING    1 15 ounce  can of cooked chickpeas (strained, rinsed, and dried (abou
+   MISSING    2 Tablespoons fresh chives (finely diced)
+   MISSING    1 Tablespoon capers
+   MISSING    1 teaspoon dried parsley
+   MISSING    1/4 teaspoon ground black pepper
+## 69 Vietnamese Lemongrass Chicken Rice Bowl  (source 17 lines, prod 17)
+   INVENTED   0.5 tsp turmeric
+   INVENTED   2 tbsp vegetable oil
+   INVENTED   2 pieces spring onion
+   INVENTED   1 pieces thai chili
+   INVENTED   3 tbsp soy sauce
+   INVENTED   1 tsp sesame oil
+   INVENTED   1 pieces thai chili
+   QTY        chicken thighs: prod 500 g vs source '4 chicken thigh or breast fillets'
+   QTY        garlic: prod 3 clove vs source '1 garlic clove, finely grated'
+   QTY        fish sauce: prod 2 tsp vs source '2 tbsp fish sauce'
+   QTY        sugar: prod 2 tsp vs source '1 tsp caster sugar'
+   QTY        sugar: prod 1 tbsp vs source '1 tsp caster sugar'
+   MISSING    ½ tsp ground black pepper
+   MISSING     
+   MISSING    Nuoc cham sauce:
+   MISSING    3 tbsp fish sauce
+   MISSING    2 tbsp white vinegar
+   MISSING    3 tbsp sugar
+   MISSING    2 tbsp lime juice
+   MISSING    1 long red chilli, finely chopped
+   MISSING    2 garlic cloves, finely chopped

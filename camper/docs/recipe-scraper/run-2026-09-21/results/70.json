@@ -1,0 +1,108 @@
+{
+  "name" : "Vinegar Coleslaw Recipe (No Mayo Coleslaw)",
+  "description" : "Vinegar based coleslaw is an excellent no mayo coleslaw recipe for those who love coleslaw but don&#x27;t love mayonnaise. It&#x27;s an easy combination of cabbage, carrots and onion mixed with an apple cider vinegar dressing.",
+  "baseServings" : 12,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "1  head of green cabbage (finely shredded)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "fef42f82-285e-4ec0-bec4-50e33342d834",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  large carrot (grated)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2  yellow or red onion (finely sliced)",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/3 cup apple cider vinegar",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "bd2e94bc-b6a1-4048-9f74-90d25c89e451",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 tbsp olive oil",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp honey ((or more, depending on sweetness))",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 tbsp Dijon mustard",
+    "quantity" : 0.5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "91f8dbd6-2313-44fb-b6a4-9ae9f4ea2bfb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tsp celery seed",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1bb12636-adb1-44c6-8119-6d0ec73c495d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 tsp salt",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 tsp black pepper",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

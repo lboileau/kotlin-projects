@@ -1,0 +1,178 @@
+{
+  "name" : "Chicken Paprikash with Spaetzle",
+  "description" : "Chicken Paprikash is one of the most beloved dishes in Hungarian cuisine, known for its rich, comforting sauce made with generous amounts of sweet paprika, onions, and tender chicken pieces.",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "3 to 4 lbs chicken pieces (such as thighs and drumsticks; bone-in, skin removed preferred)",
+    "quantity" : 4,
+    "unit" : "lb",
+    "matchedIngredientId" : "5b4fa1d1-1b9f-49ce-93d5-57a52ac5180a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "2 tablespoons vegetable oil or lard",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "5093fa92-5457-48cb-a17c-b1d946b03970",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 large onions, finely chopped",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 garlic cloves, minced",
+    "quantity" : 3,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 to 2 tablespoons sweet Hungarian paprika (plus extra for serving)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "7c9b542f-c79e-4974-95bf-a9cc5c969067",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon salt (to taste)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 teaspoon black pepper",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 cup chicken stock or water (as needed)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup sour cream",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "ccfcee7d-a95c-4b26-a177-6ea70d457f19",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon all-purpose flour",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 or 2 fresh tomatoes, peeled and diced, or 1/2 cup canned diced tomatoes (optional)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "3d074b95-d240-46b2-bb1e-85b3a016f919",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 green bell pepper, sliced (optional)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 cups all-purpose flour",
+    "quantity" : 2,
+    "unit" : "cup",
+    "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 large eggs",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "aefa8256-566a-40be-87ca-a27953922817",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ cup milk (plus extra for desired consistency)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "226319f9-fc48-49cd-8447-f4df294e6aa9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 teaspoon salt",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons melted butter (for tossing spaetzle)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

@@ -1,0 +1,402 @@
+
+## 00 20 Minute Ground Turkey Bang Bang Rice Bowls  (77c23bb0-6d8a-4b67-a2ab-750cab6d460b)
+   delete 14 lines: 1 lb ground turkey, 2 cup rice, 0.5 cup mayonnaise, 3 tbsp sweet chili sauce, 1 tbsp sriracha, 1 tbsp soy sauce, 2 clove garlic, 1 tsp garlic powder, 0.5 tsp onion powder, 1 pinch black pepper, 2 whole spring onion, 1 tbsp olive oil, 1 tsp lime, 1 pinch sesame seeds
+   add 18 lines:
+          1 lb     ground turkey                  ← 1 lb ground turkey
+          1 tbsp   sesame oil                     ← 1 Tbsp sesame oil (or favorite cooking oil)
+          3 clove  garlic                         ← 2-3  garlic cloves (minced)
+          2 tsp    ginger                         ← 2 tsp grated ginger
+        0.5 tsp    smoked paprika                 ← ½ tsp smoked paprika
+        0.5 tsp    onion powder                   ← ½ tsp onion powder
+          3 tbsp   soy sauce                      ← 3 Tbsp soy sauce (low sodium)
+          2 tbsp   sriracha                       ← 1-2 Tbsp sriracha
+          3 tbsp   chicken broth                  ← 2-3 T chicken broth
+          2 tsp    honey                          ← 2 tsp honey
+        0.5 tsp    black pepper                   ← ½ tsp black pepper
+        0.5 tsp    salt                           ← ½ tsp sea salt (more or less to taste)
+          2 tsp    cornstarch                     ← 2 tsp corn starch
+        0.5 cup    mayonnaise                     ← ½ c mayonnaise
+          3 tbsp   sweet chili sauce              ← 3 Tbsp sweet chili sauce
+          1 tbsp   sriracha                       ← ½-1 Tbsp sriracha (more to kick up the spice)
+          1 tsp    rice vinegar                   ← 1 tsp rice vinegar
+          2 tsp    honey                          ← 2 tsp honey
+     (skipping non-ingredient line: 'rice, shredded carrots, sliced cucumbers, shelled edamame, p')
+
+## 03 Authentic German Red Cabbage (Rotkohl)  (e805e712-f8cb-4968-8d33-95b9125d2dc3)
+   delete 16 lines: 1 whole red cabbage, 1 whole onion, 2 pieces apples, 2 tbsp butter, 3 tbsp red wine vinegar, 2 tbsp sugar, 1 tsp kosher salt, 2 pieces bay leaf, 3 pieces cloves, 0.5 cup red wine, 0.5 cup water, 0.25 tsp ground clove, 0.25 tsp ground nutmeg, 0.25 tsp ground allspice, 1 pieces cinnamon stick, 1 tbsp lingonberry jam
+   add 13 lines:
+          1 kg     red cabbage                    ← 1 kilogram red cabbage
+          1 whole  onion                          ← 1  yellow onion
+          3 whole  apples                         ← 3  apples (Use tart apples like Granny Smith.)
+         30 g      bacon grease                  [NEW]   ← 30 grams bacon grease (or butter or oil)
+          1 whole  bay leaf                       ← 1  bay leaf
+          4 whole  cloves                         ← 4  whole cloves
+          2 tbsp   red wine vinegar               ← 2 Tablespoons red wine vinegar
+          2 tbsp   lingonberry jam                ← 2 Tablespoons lingonberry jam (or cranberry sauce)
+          2 tbsp   brown sugar                    ← 2 Tablespoons brown sugar
+        0.5 cup    water                          ← ½ cup water
+          1 tbsp   cornstarch                     ← 1 tablespoon cornstarch
+          2 tbsp   water                          ← 2 Tablespoons water
+          1 pinch  salt and pepper                ← salt and pepper (to taste)
+
+## 08 Beef and Zucchini "Lasagna"  (2ac883a6-a44e-49bb-981a-8f0b1e125da1)
+   delete 8 lines: 800 g zucchini, 115 g baby spinach, 2 tsp italian seasoning, 750 ml crushed tomatoes, 2 clove garlic, 1.5 cup mozzarella cheese, 15 g fresh basil, 500 g ground beef
+   add 10 lines:
+        250 g      ground beef                    ← 250 g Ground Beef
+        400 g      zucchini                       ← 400 g Zucchini
+         56 g      baby spinach                   ← 56 g Baby Spinach
+          7 g      fresh basil                    ← 7 g Basil
+          1 tbsp   italian seasoning              ← 1 tbsp Italian Seasoning
+       0.75 cup    mozzarella cheese              ← ¾ cup Mozzarella Cheese, shredded
+        1.5 tbsp   olive oil                     [LOW]   ← 1.5 tbsp Oil*
+       0.25 tsp    salt and pepper                ← ¼ tsp Salt and Pepper*
+        370 ml     crushed tomatoes               ← 370 mL Crushed Tomatoes
+          1 tbsp   garlic                        [LOW]   ← 1 tbsp Garlic Puree
+
+## 09 Beef Stew  (2d9a11c3-8205-4d9d-8ca8-3feada20e7a1)
+   delete 14 lines: 2 lb beef stew meat, 0.333 cup flour, 0.5 tsp garlic powder, 3 tbsp olive oil, 1 whole onion, 3 clove garlic, 3 cup beef broth, 1 tbsp tomato paste, 1 tsp worcestershire sauce, 0.5 tsp dried thyme, 1 pieces bay leaf, 4 whole potatoes, 3 whole carrot, 3 whole celery
+   add 17 lines:
+          2 lb     beef stew meat                 ← 2 pounds stewing beef (trimmed and cubed)
+          3 tbsp   flour                          ← 3 tablespoons all-purpose flour
+        0.5 tsp    garlic powder                  ← ½ teaspoon garlic powder
+        0.5 tsp    salt                           ← ½ teaspoon salt
+        0.5 tsp    black pepper                   ← ½ teaspoon black pepper
+          3 tbsp   olive oil                      ← 3 tablespoons olive oil (more as needed)
+          1 whole  onion                          ← 1  onion (chopped)
+          6 cup    beef broth                     ← 6 cups beef broth
+        0.5 cup    red wine                       ← ½ cup red wine (optional)
+          1 lb     potatoes                       ← 1 pound potatoes (peeled and cubed)
+          4 whole  carrot                         ← 4  carrots (cut into 1 inch pieces)
+          4 whole  celery                         ← 4 ribs celery (cut into 1 inch pieces)
+          3 tbsp   tomato paste                   ← 3 tablespoons tomato paste
+          1 tsp    rosemary                       ← 1 teaspoon dried rosemary (or 1 sprig fresh)
+          2 tbsp   cornstarch                     ← 2 tablespoons cornstarch (or as needed)
+          2 tbsp   water                          ← 2 tablespoons water (or as needed)
+       0.75 cup    peas                           ← ¾ cup peas
+
+## 11 Best Fluffy Pancakes  (0e91b9e4-6cc6-4b0e-ad6b-c99e9d5be2f4)
+   delete 10 lines: 2 cup flour, 0.25 cup sugar, 4 tsp baking powder, 0.25 tsp baking soda, 0.5 tsp kosher salt, 1.75 cup milk, 0.5 cup butter, 2 tsp vanilla extract, 1 whole eggs, 1 cup maple syrop
+   add 9 lines:
+          2 cup    flour                          ← 2 cups all-purpose (or plain flour)
+       0.25 cup    sugar                          ← 1/4 cup granulated sugar (or sweetener)
+          4 tsp    baking powder                  ← 4 teaspoons baking powder
+       0.25 tsp    baking soda                    ← 1/4 teaspoon baking soda*
+        0.5 tsp    salt                           ← 1/2 teaspoon salt
+       1.75 cup    milk                           ← 1 3/4 cups milk
+       0.25 cup    butter                         ← 1/4 cup butter
+          2 tsp    vanilla extract                ← 2 teaspoons pure vanilla extract
+          1 whole  eggs                           ← 1 large egg
+
+## 13 Best Ratatouille Recipe  (2ac322d2-b350-42bb-9f8c-08ea482e691c)
+   delete 15 lines: 1 pieces eggplant, 2 pieces zucchini, 2 whole bell pepper, 4 whole tomato, 1 whole onion, 4 clove garlic, 0.25 cup olive oil, 2 tbsp tomato paste, 1 tsp dried oregano, 0.5 tsp dried thyme, 0.5 tsp kosher salt, 0.25 tsp black pepper, 0.25 cup fresh basil, 1 tbsp red wine vinegar, 1 tbsp parsley
+   add 13 lines:
+          2 lb     tomato                         ← 2 pounds ripe red tomatoes (6 medium or 4 large)
+          1 whole  eggplant                       ← 1 medium eggplant (1 pound), diced into &frac12;-inch cubes
+          1 whole  bell pepper                    ← 1 large red, orange, or yellow bell pepper (about 8 ounces),
+          1 whole  zucchini                       ← 1 medium-to-large zucchini (about 8 ounces), diced into &fra
+          1 whole  yellow squash                 [NEW]   ← 1 large yellow squash (about 8 ounces), diced into &frac12;-
+          5 tbsp   olive oil                      ← 5 tablespoons + 1 teaspoon extra-virgin olive oil, divided
+       0.75 tsp    salt                           ← &frac34; teaspoon fine sea salt, divided, more to taste
+          1 whole  onion                          ← 1 medium yellow onion, chopped
+          4 clove  garlic                         ← 4 cloves garlic, pressed or minced
+       0.25 cup    fresh basil                    ← &frac14; cup chopped fresh basil
+       0.25 tsp    crushed red pepper flakes      ← &frac14; teaspoon red pepper flakes, more or less to taste
+       0.25 tsp    dried oregano                  ← &frac14; teaspoon dried oregano
+          1 pinch  black pepper                   ← Freshly ground black pepper, to taste
+
+## 18 Chicken Biryani  (c182ae22-cee0-448b-9ace-4f26f67d1a1d)
+   delete 26 lines: 300 g rice, 500 g chicken thighs, 0.75 cup greek yogurt, 2 whole onion, 2 whole tomato, 3 pieces green chili, 1 tbsp ginger, 0.5 cup mint, 0.5 cup cilantro, 3 tbsp olive oil, 1 tbsp ghee, 1 pieces bay leaf, 4 pieces cardamom, 4 pieces cloves, 1 pieces cinnamon stick, 1 pieces star anise, 1 pieces mace, 0.5 tsp cumin seeds, 0.75 tsp biryani masala, 0.25 tsp turmeric, 1 tsp chili powder, 0.75 tsp kosher salt, 2 tbsp lemon, 0.25 tsp saffron, 2 tbsp milk, 1 tbsp garlic
+   add 27 lines:
+        0.5 kg     chicken thighs                [LOW]   ← ½ kg (1.1 lbs)  chicken ((skinless bone-in or boneless, larg
+          3 tbsp   greek yogurt                  [LOW]   ← 3 tablespoons plain yogurt ((curd or dahi))
+       1.25 tbsp   ginger garlic paste           [NEW]   ← 1¼ tablespoons ginger garlic paste ((1 inch ginger &amp; 4 g
+       0.75 tsp    salt                           ← ½ to ¾ teaspoon salt ((adjust to tase))
+       0.25 tsp    turmeric                       ← ¼ teaspoon turmeric
+          1 tsp    chili powder                   ← ½ to 1 teaspoon red chilli powder  ((or paprika) (use less s
+          1 tbsp   biryani masala                 ← ½ to 1 tablespoon garam masala ((or biryani masala) (Refer n
+          1 tbsp   lemon                         [LOW]   ← 1 tablespoon Lemon juice  ((optional))
+          1 whole  bay leaf                       ← 1  bay leaf  ((tej patta))
+          4 whole  cardamom                       ← 4  green cardamoms ((choti elaichi))
+          6 whole  cloves                         ← 6  cloves ((lavang))
+          1 whole  cinnamon stick                 ← 1 inch cinnamon ((dalchini))
+          1 whole  star anise                     ← 1  star anise ((chakri phool ))
+       0.75 tsp    cumin seeds                   [LOW]   ← ¾ teaspoon shahi jeera ((caraway seeds) (substitute with cum
+          1 whole  mace                           ← 1 strand mace  ((javitri, omit if you don&#39;t like))
+          2 cup    rice                           ← 2 cups basmati rice ((aged rice only))
+          2 tbsp   ghee                           ← 2 tablespoon ghee (or Oil)
+          1 whole  onion                          ← 1 large onion  (sliced thinly)
+        0.5 cup    mint                           ← ¼ to ½ cup mint leaves (chopped fine (about 15 leaves))
+          1 whole  green chili                    ← 1  green chili ((slit or chopped))
+       0.25 cup    greek yogurt                  [LOW]   ← ¼ cup plain yogurt ((Indian curd))
+        0.5 tsp    chili powder                   ← ¼ to ½ teaspoon red chili powder  ((optional, for heat))
+          1 tsp    biryani masala                 ← 1 teaspoon garam masala ((or biryani masala))
+          3 cup    water                          ← 3 cups water ((3½ cups for pot) (refer notes, more if needed
+       0.75 tsp    salt                           ← ¾ teaspoon salt ((to stir in water))
+          2 tbsp   onion                         [LOW]   ← 2 tablespoon fried onions ((optional))
+          1 pinch  saffron                        ← 1 pinch saffron ((optional)(soaked in 2 tbsps hot milk))
+
+## 22 Creamy Sweet Potato Coconut Soup  (21608567-29ce-4c85-ae0b-61c10f7ad592)
+   delete 15 lines: 2 lb sweet potatoe, 1 tbsp olive oil, 1 whole onion, 3 clove garlic, 1 tsp ginger, 1 can coconut milk, 2 cup chicken broth, 1 tsp ground cumin, 0.5 tsp cinnamon, 0.25 tsp cayenne pepper, 1 tsp salt, 0.25 tsp black pepper, 1 tbsp lime, 1 sprig cilantro, 1 tbsp pumpkin seeds
+   add 11 lines:
+          8 oz     Bacon                          ← 8 oz bacon (about 6 strips) (chopped into 1/2-inch strips, *
+          1 whole  onion                          ← 1  medium onion (diced (about 1 cup))
+          2 clove  garlic                         ← 2  garlic cloves (minced)
+          1 whole  celery                         ← 1  large celery rib (diced (1 "stick" of celery))
+          2 lb     sweet potatoe                  ← 2 lbs sweet potatoes (3 medium) (peeled and chopped into 1-i
+          3 sprig  thyme                          ← 3 sprigs fresh thyme 3 (or 1/2 tsp dried thyme)
+          4 cup    chicken broth                  ← 4 cups reduced sodium chicken broth
+         14 oz     coconut milk                   ← 14 oz canned coconut milk* ((shake well before opening), div
+        1.5 tsp    salt                           ← 1 1/2 tsp fine sea salt (or more to taste)
+       0.25 tsp    black pepper                   ← 1/4 tsp freshly ground black pepper (or to taste)
+          2 tbsp   parsley                        ← 2 Tbsp parsley to garnish (optional)
+
+## 24 Cá Kho Tộ: Vietnamese Caramelized Braised Fish  (60858858-64da-4aab-9a78-d79f3e15bdda)
+   delete 13 lines: 1.5 lb white fish, 3 tbsp sugar, 3 tbsp fish sauce, 2 tbsp water, 1.5 tsp black pepper, 4 clove garlic, 2 whole shallot, 2 tbsp canola oil, 0.5 cup coconut water, 2 tbsp soy sauce, 2 whole spring onion, 1 sprig cilantro, 1 pieces thai chili
+   add 9 lines:
+          1 tbsp   olive oil                      ← 1 tablespoon olive oil
+       0.75 cup    shallot                        ← 3/4 cup chopped shallots
+       0.25 cup    sugar                          ← 1/4 cup granulated sugar
+       0.25 cup    fish sauce                     ← 1/4 cup Asian fish sauce
+       0.25 cup    water                          ← 1/4 cup water
+        1.5 tsp    black pepper                   ← 1 1/2 teaspoons fresh ground black pepper
+          2 lb     white fish                    [LOW]   ← 2 pounds skinless halibut fillets cut into 6-8 pieces (see n
+          4 whole  scallions                      ← 4 scallions, thinly sliced
+        0.5 bunch  cilantro                       ← 1/2 bunch cilantro, chopped
+
+## 30 French Lentil & Beet Salad  (a1b05ca6-cd15-4b1d-9879-8a166d5812a8)
+   delete 10 lines: 1 cup french lentil, 3 pieces beats, 2 cup arugula, 0.5 cup walnut, 0.5 cup feta cheese, 3 tbsp olive oil, 2 tbsp red wine vinegar, 1 tsp dijon mustard, 1 clove garlic, 1 pinch salt and pepper
+   add 14 lines:
+        0.5 cup    french lentil                  ← 1/2 cup Puy lentils, dry
+          1 cup    water                          ← 1 cup water
+          1 whole  bay leaf                       ← 1 bay leaf
+          4 whole  beats                          ← 4 medium beets (I used 2 red and 2 yellow)
+       0.33 cup    goat cheese                   [NEW]   ← 1/3 cup crumbled goat cheese
+       0.25 cup    red onion                      ← 1/4 cup red onion, thinly sliced
+          1 bunch  parsley                        ← 1 handful parsley, roughly chopped
+          1 bunch  chives                         ← 1 small handful chives, minced
+          3 tbsp   olive oil                      ← 3 tablespoons extra-virgin olive oil
+          1 tbsp   red wine vinegar               ← 1 tablespoon red wine vinegar
+          1 tsp    dijon mustard                  ← 1 teaspoon Dijon mustard
+          1 clove  garlic                         ← 1 clove garlic, crushed and minced
+        0.5 tsp    salt                           ← 1/2 teaspoon sea salt
+       0.25 tsp    black pepper                   ← 1/4 teaspoon black pepper
+
+## 32 Frikadellen (German Hamburgers)  (a172dccc-99c5-4c3c-aec3-b5815028237c)
+   delete 13 lines: 1 lb ground beef, 1 lb ground pork, 1 whole onion, 2 clove garlic, 2 whole eggs, 0.5 cup breadcrumbs, 3 tbsp milk, 1 tsp dijon mustard, 1 tsp kosher salt, 0.5 tsp black pepper, 0.5 tsp paprika, 2 tbsp parsley, 2 tbsp vegetable oil
+   add 12 lines:
+        500 g      mixed ground meat             [NEW]   ← 500 grams mixed ground meat (half pork and half beef)
+          1 whole  onion                          ← 1  yellow onion
+          1 whole  Bread                          ← 1  hard roll (you can use whatever leftover bread you have!)
+          1 whole  eggs                           ← 1  egg
+          1 tsp    salt                           ← 1 teaspoon sea salt
+          1 tsp    mustard                        ← 1 teaspoon German mustard (or any other mustard of your choi
+          1 tsp    dried marjoram                [NEW]   ← 1 teaspoon dried marjoram
+          1 tsp    paprika                        ← 1 teaspoon paprika powder
+          1 tsp    chili powder                   ← 1 teaspoon chili powder
+          3 tbsp   parsley                        ← 3 Tablespoons fresh parsley (chopped)
+          3 clove  garlic                         ← 3  garlic cloves (minced)
+          1 tbsp   avocado oil                    ← oil for frying (sunflower seed or avocado oil)
+
+## 35 Gordon Ramsay Fennel Salad Recipe  (6dbd5f49-c54a-460e-8c4a-31bfb929e500)
+   delete 12 lines: 2 whole fennel, 2 tbsp olive oil, 1 whole lemon, 2 tbsp lemon, 1 tsp honey, 0.5 tsp dijon mustard, 0.5 tsp kosher salt, 1 pinch black pepper, 0.33 cup parmesan cheese, 0.33 cup pine nuts, 2 tbsp fennel, 2 tbsp parsley
+   add 11 lines:
+          1 whole  fennel                         ← 1 fennel bulb, trimmed and quartered
+          3 whole  oranges                        ← 3 blood oranges
+          1 whole  radicchio                      ← 1 head of radicchio (or a mix of varieties like Castelfranco
+          3 tbsp   balsamic vinegar               ← 3 tbsp white balsamic vinegar
+          1 tsp    honey                          ← 1 tsp honey
+          1 tsp    mustard                        ← 1 tsp wholegrain mustard
+        0.5 whole  oranges                        ← Juice of 1/2 blood orange
+        0.5 whole  lemon                          ← Juice of 1/2 lemon
+          2 tbsp   dill                           ← 2 tbsp chopped fresh dill
+          4 tbsp   olive oil                      ← 4 tbsp (60ml) extra virgin olive oil
+          1 pinch  salt and pepper                ← Sea salt and freshly ground black pepper
+
+## 36 Greek Chicken and Lemon Rice (30 Minutes, One-Pot)  (6d381502-3e39-4c84-b8be-54317db14419)
+   delete 17 lines: 1.5 lb chicken thighs, 2 cup rice, 6 oz feta cheese, 8 oz cherry tomato, 1.5 cup chicken broth, 1 whole lemon, 5 clove garlic, 2 tbsp olive oil, 1 whole onion, 2 tsp dried oregano, 1 tsp salt, 1 pinch black pepper, 0.25 tsp crushed red pepper flakes, 5 oz baby spinach, 15 oz chickpeas, 2 tbsp fresh oregano, 1 tsp paprika
+   add 21 lines:
+        1.5 lb     chicken thighs                 ← 1.5 lb skinless boneless chicken thighs
+          1 tsp    dried oregano                  ← 1 teaspoon dried oregano
+          1 tsp    paprika                        ← 1 teaspoon paprika
+       0.25 tsp    salt                           ← 1/4 teaspoon salt
+       0.25 tsp    crushed red pepper flakes      ← 1/4 teaspoon red pepper flakes
+          2 tbsp   olive oil                      ← 2 tablespoons olive oil
+          1 tbsp   olive oil                      ← 1 tablespoon olive oil
+          8 oz     cherry tomato                  ← 8 oz grape tomatoes (sliced in half)
+          5 clove  garlic                         ← 5 cloves garlic (minced)
+          1 tsp    dried oregano                  ← 1 teaspoon dried oregano
+       0.25 tsp    salt                           ← 1/4 teaspoon salt
+          5 oz     baby spinach                   ← 5 oz fresh spinach (chopped)
+          3 tbsp   lemon                         [LOW]   ← 3 tablespoons freshly squeezed lemon juice
+          2 cup    rice                           ← 2 cups cooked jasmine rice
+         15 oz     chickpeas                      ← 15 oz chickpeas (canned)
+          6 oz     feta cheese                    ← 6 oz feta cheese (diced into small cubes)
+          1 tbsp   olive oil                      ← 1 tablespoon extra virgin olive oil
+          1 tbsp   lemon                         [LOW]   ← 1 tablespoon freshly squeezed lemon juice
+       0.25 tsp    dried oregano                  ← 1/4 teaspoon dried oregano
+          2 tbsp   fresh oregano                  ← 2 tablespoons chopped fresh oregano (optional)
+          1 sprig  fresh oregano                  ← fresh oregano (for garnish)
+
+## 41 Japchae glass noodles stir fried  (1135e25b-85e8-4612-8297-f5ac28e6bf5f)
+   delete 14 lines: 4 oz beef, 2 whole shiitake mushrooms, 2 clove garlic, 1 tbsp sugar, 2 tbsp soy sauce, 1 tbsp sesame seeds, 1 whole eggs, 4 oz baby spinach, 4 oz glass noodle, 3 whole spring onion, 1 whole onion, 5 whole mushrooms, 1 whole carrot, 1 whole bell pepper
+   add 10 lines:
+          3 whole  scallions                      ← 2 to 3 green onions, cut crosswise into 2 inch long pieces
+          1 whole  onion                          ← 1 medium onion (1 cup), sliced thinly
+          5 whole  mushrooms                      ← 4 to 5 white mushrooms, sliced thinly
+          1 whole  carrot                         ← 1 medium carrot (¾ cup), cut into matchsticks
+        0.5 whole  bell pepper                    ← ½ red bell pepper, cut into thin strips (optional)
+          1 pinch  black pepper                   ← ground black pepper
+          1 pinch  kosher salt                    ← kosher salt
+          1 tbsp   vegetable oil                  ← vegetable oil
+          4 oz     baby spinach                   ← 4 ounces spinach, washed and drained
+          4 oz     glass noodle                   ← 4 ounces of dangmyeon (sweet potato starch noodles)
+
+## 47 Mayo Parmesan Chicken Bake  (ad2dc624-f9aa-4067-b659-fc18e5e62b48)
+   delete 7 lines: 6 pieces chicken breast, 1 cup mayonnaise, 1 cup parmesan cheese, 1 tsp garlic powder, 1 tsp salt, 1 tsp black pepper, 1 tsp parsley
+   add 6 lines:
+          6 whole  chicken breast                 ← 6  chicken breasts
+          1 cup    mayonnaise                     ← 1 cup mayonnaise (or 1 cup non-fat plain or vanilla yogurt)
+      0.333 cup    parmesan cheese                ← 1/3 cup parmesan cheese (grated)
+          1 tsp    salt                           ← 1 tsp salt
+        0.5 tsp    lemon pepper                  [NEW]   ← 1/2 tsp lemon pepper
+        0.5 tsp    garlic powder                  ← 1/2 tsp garlic powder
+
+## 52 Peruvian Chicken with Green Sauce (Aji Verde)  (8cadfabb-95a1-4dc5-bc70-325e9d16a21a)
+   delete 22 lines: 3 lb chicken thighs, 0.25 cup olive oil, 3 tbsp lime, 1 tsp lime, 2 tbsp aji amarillo paste, 2 tbsp soy sauce, 1.5 tbsp garlic, 2 tsp honey, 2 tsp paprika, 2 tsp smoked paprika, 1 tbsp ground cumin, 1.5 tsp dried oregano, 1 tsp coriander seeds, 1 tsp kosher salt, 0.5 tsp black pepper, 0.5 cup mayonnaise, 0.333 cup sour cream, 2 cup cilantro, 1.5 pieces jalapenos, 2 pieces spring onion, 1.5 tbsp lime, 1 pinch kosher salt
+   add 23 lines:
+         12 whole  chicken thighs                 ← 10 to 12  boneless skinless chicken thighs trimmed of excess
+       0.25 cup    olive oil                      ← 1/4 cup  extra virgin olive oil
+          3 tbsp   lime                          [LOW]   ← 3 Tbsp fresh lime juice
+          1 tsp    lime                          [LOW]   ← 1 tsp lime zest
+          2 tbsp   aji amarillo paste             ← 2 Tbsp aji amarillo*
+          2 tbsp   soy sauce                      ← 2 Tbsp soy sauce (or tamari)
+        1.5 tbsp   garlic                         ← 1 1/2 Tbsp minced garlic
+          2 tsp    honey                          ← 2 tsp honey
+          2 tsp    paprika                        ← 2 tsp sweet paprika
+          2 tsp    smoked paprika                 ← 2 tsp smoked paprika
+          1 tbsp   ground cumin                   ← 1 Tbsp ground cumin
+        1.5 tsp    dried oregano                  ← 1 1/2 tsp dried oregano ((Mexican or typical Mediterranean O
+          1 tsp    ground coriander               ← 1 tsp ground coriander
+          1 tsp    kosher salt                    ← 1 tsp kosher salt (or to taste)
+        0.5 tsp    black pepper                   ← 1/2 tsp ground black pepper
+        0.5 cup    mayonnaise                     ← 1/2 cup mayonnaise
+       0.33 cup    sour cream                     ← 1/3 cup sour cream (or plain Greek yogurt)
+          2 cup    cilantro                       ← 2 cups (60g) cilantro
+       0.33 cup    cotija cheese                  ← 1/3 cup crumbled cotija cheese ((optional))
+          2 whole  jalapenos                      ← 1 to 2 jalapeños,** (seeds and ribs removed )
+          2 whole  scallions                      ← 2 green onions, (ends trimmed, remaining chopped 3 portions)
+        1.5 tbsp   lime                          [LOW]   ← 1 1/2 Tbsp  fresh lime juice
+          1 pinch  kosher salt                    ← Kosher salt, (to taste)
+
+## 53 Radicchio Arugula Apple Salad with Parmesan  (7687c45f-decf-47f6-8d3e-f8852a25d60e)
+   delete 8 lines: 1 whole radicchio, 2 cup arugula, 1 pieces apples, 0.5 cup parmesan cheese, 3 tbsp olive oil, 2 tbsp lemon, 1 tsp dijon mustard, 1 tsp honey
+   add 11 lines:
+          1 whole  radicchio                      ← 1   small head radicchio, core removed, chopped ((about 4-5 
+          3 cup    arugula                        ← 3 cups   loosely packed arugula
+          2 whole  apples                         ← 1  large  or 2 small apples, cored, thinly sliced
+          1 cup    parmesan cheese                ← 1  cup  shaved parmesan**
+        0.5 cup    walnut                         ← ½ cup   toasted walnuts, chopped
+        0.5 cup    olive oil                      ← ½ cup   olive oil
+          3 tbsp   balsamic vinegar               ← 3 tbsp   balsamic vinegar
+          2 tbsp   dijon mustard                  ← 2 tbsp   dijon mustard
+          1 tbsp   apple cider vinegar            ← 1   tbsp apple cider vinegar
+        0.5 tsp    kosher salt                    ← ½ tsp   kosher salt
+          1 pinch  black pepper                   ← Black pepper
+     (skipping non-ingredient line: '*Can’t find radicchio? No problem, you could substitute with')
+     (skipping non-ingredient line: '**This salad would also be delicious with crumbled goat chee')
+     (skipping non-ingredient line: 'Pro tip:   ~ I love serving salads like these on a big platt')
+
+## 57 Shrimp Cakes  (c83b8c09-20c0-4e93-8c64-0ff61c16a328)
+   delete 11 lines: 0.25 cup cumin seeds, 3 tbsp black Peppercorns, 1 tbsp coriander seeds, 1.5 tsp kosher salt, 1 lb sweet potatoe, 4 tbsp olive oil, 8 oz shrimp, 0.66 cup cilantro, 0.66 cup breadcrumbs, 2 tsp jalapenos, 1 tbsp flour
+   add 14 lines:
+       0.25 cup    cumin seeds                    ← 1/4 cup cumin seeds
+          3 tbsp   black Peppercorns              ← 3 tablespoons whole black peppercorns
+          1 tbsp   coriander seeds                ← 1 tablespoons coriander seeds
+          2 tbsp   sugar                          ← 2 tablespoons sugar
+        1.5 tsp    salt                           ← 1 1/2 teaspoons sea salt
+          1 lb     sweet potatoe                  ← 1 pound sweet potatoes
+          4 tbsp   olive oil                      ← 4 tablespoons (or more) extra virgin olive oil
+          4 clove  garlic                         ← 4 large garlic cloves, unpeeled
+          8 oz     shrimp                         ← 8 ounces peeled, cooked shrimp, coarsely chopped
+       0.67 cup    cilantro                       ← 2/3 cup chopped fresh cilantro
+       0.67 cup    breadcrumbs                    ← 2/3 cup finely ground breadcrumbs
+          2 tbsp   jalapenos                      ← 2 tablespoons finely chopped pickled or fresh jalapeños, see
+          2 tbsp   red onion                      ← 2 tablespoons finely chopped red onion
+          1 cup    flour                          ← Flour for dusting (1/2 to 1 cup)
+
+## 60 Sun-dried Tomato & Artichoke Pasta  (98518b4b-d16c-4647-8f0b-df9869136115)
+   delete 11 lines: 8 oz pasta, 1 can artichoke hearts, 0.5 cup sun-dried tomatoes, 4 clove garlic, 2 tbsp olive oil, 0.5 cup water, 0.5 cup parmesan cheese, 1 tsp crushed red pepper flakes, 1 tsp dried oregano, 1 pinch salt and pepper, 1 tbsp fresh basil
+   add 13 lines:
+          8 oz     pasta                          ← 8 ounces dried bucatini pasta (cooked according to package i
+        0.5 cup    water                          ← 1/2 cup pasta water (reserved before straining pasta)
+          2 tbsp   olive oil                      ← 2 Tablespoons sun-dried tomato oil (or olive oil)
+         12 oz     artichoke hearts               ← 12 ounces canned artichoke hearts (strained and diced, about
+          1 whole  shallot                        ← 1 medium shallot (diced)
+        2.5 oz     sun-dried tomatoes             ← 2.5 ounces sun-dried tomatoes in oil (diced)
+       0.25 cup    green olives                   ← 1/4 cup pitted green olives (sliced)
+          1 tbsp   capers                         ← 1 Tablespoon capers
+          5 clove  garlic                         ← 5 cloves garlic (minced)
+        0.5 tsp    crushed red pepper flakes      ← 1/2 teaspoon chili flakes
+          1 pinch  salt and pepper                ← salt &amp; pepper to taste (add as desired)
+        0.5 cup    parmesan cheese               [LOW]   ← 1/2 cup vegan parmesan
+          1 sprig  parsley                        ← fresh parsley
+
+## 61 Sweet Potato Black Bean Salad  (3915a516-a7ab-41d0-8ca7-d5ed44c7bff2)
+   delete 14 lines: 2 whole sweet potatoe, 1 can black beans, 1 cup corn, 0.5 whole red onion, 0.25 cup cilantro, 5 tbsp avocado oil, 3 tbsp lime, 1 pinch black pepper, 1 whole bell pepper, 1 bunch spring onion, 0.5 cup red onion, 1 cup mayonnaise, 1 clove garlic, 1 tbsp maple syrop
+   add 15 lines:
+          1 whole  sweet potatoe                  ← 1 large (1.33 lb) sweet potato (chopped into chunks)
+          2 tbsp   avocado oil                    ← 2 Tbsp avocado oil
+        0.5 tsp    salt                           ← ½ tsp sea salt (to taste)
+          1 cup    corn                           ← 1 cup corn kernels
+          1 cup    black beans                    ← 1 cup black beans
+          1 cup    bell pepper                    ← 1 cup red bell pepper (chopped)
+          1 bunch  scallions                      ← 1  bunch green onion (chopped)
+        0.5 cup    red onion                      ← 1/2 cup red onion (finely chopped)
+          3 tbsp   avocado oil                    ← 3 Tbsp avocado oil
+          2 tbsp   mayonnaise                     ← 2 Tbsp mayonnaise (optional)
+          3 tbsp   lime                          [LOW]   ← 3 Tbsp fresh lime juice
+       0.33 cup    cilantro                       ← ⅓ cup packed fresh cilantro or parsley (chopped)
+          1 tbsp   maple syrop                    ← 1 Tbsp pure maple syrup
+          1 clove  garlic                         ← 1  small clove garlic (minced)
+        0.5 tsp    salt                           ← ½ tsp sea salt (to taste)
+
+## 68 Tuscan Artichoke Tomato Salad  (73f8f2e3-3dac-4561-b063-878f92852cf8)
+   delete 11 lines: 1 can artichoke hearts, 1 cup cherry tomato, 0.25 cup red onion, 0.25 cup kalamata olive, 2 oz feta cheese, 2 tbsp fresh basil, 3 tbsp olive oil, 2 tbsp red wine vinegar, 1 clove garlic, 0.5 tsp dried oregano, 1 pinch salt and pepper
+   add 13 lines:
+         10 oz     cherry tomato                  ← 10 ounces cherry tomatoes (cut in half)
+        0.5 whole  red onion                      ← 1/2 medium red onion (thinly sliced)
+          1 can    artichoke hearts               ← 1 12 ounce jar of marinated artichoke hearts (strained from 
+          1 can    chickpeas                      ← 1 15 ounce  can of cooked chickpeas (strained, rinsed, and d
+          2 tbsp   fresh basil                    ← 2  Tablespoons fresh basil (cut into thin strips)
+          2 tbsp   chives                         ← 2 Tablespoons fresh chives (finely diced)
+          1 tbsp   capers                         ← 1 Tablespoon capers
+       0.25 cup    olive oil                      ← 1/4 cup olive oil
+          2 tbsp   red wine vinegar               ← 2  Tablespoons red wine vinegar
+          1 tsp    parsley                        ← 1 teaspoon dried parsley
+        0.5 tsp    salt                           ← 1/4-1/2 teaspoon salt (add more or less depending on prefere
+        0.5 tsp    garlic powder                  ← 1/2 teaspoon garlic powder (or 1 garlic clove finely minced)
+       0.25 tsp    black pepper                   ← 1/4 teaspoon ground black pepper
+
+## 69 Vietnamese Lemongrass Chicken Rice Bowl  (708eae57-2779-4d6c-ad28-d870340f4d28)
+   delete 17 lines: 500 g chicken thighs, 2 pieces lemongrass, 3 clove garlic, 2 tsp fish sauce, 2 tsp sugar, 0.5 tsp turmeric, 2 tbsp vegetable oil, 2 cup rice, 1 whole cucumber, 2 pieces spring onion, 1 pieces thai chili, 1 sprig cilantro, 3 tbsp soy sauce, 2 tbsp rice vinegar, 1 tbsp sugar, 1 tsp sesame oil, 1 pieces thai chili
+   add 15 lines:
+          4 whole  chicken thighs                 ← 4 chicken thigh or breast fillets
+          2 tbsp   fish sauce                     ← 2 tbsp fish sauce
+          2 pieces lemongrass                     ← 2 lemongrass stalks, bruised and white part finely chopped
+          1 clove  garlic                         ← 1 garlic clove, finely grated
+          1 tsp    sugar                          ← 1 tsp caster sugar
+        0.5 tsp    black pepper                   ← ½ tsp ground black pepper
+          1 cup    rice                           ← steamed rice, to serve (click here to see my recipe for how 
+          1 pieces cucumber                       ← sliced cucumber, to serve
+          1 sprig  cilantro                       ← coriander sprigs, to serve (optional)
+          3 tbsp   fish sauce                     ← 3 tbsp fish sauce
+          2 tbsp   white vinegar                  ← 2 tbsp white vinegar
+          3 tbsp   sugar                          ← 3 tbsp sugar
+          2 tbsp   lime                          [LOW]   ← 2 tbsp lime juice
+          1 whole  thai chili                    [LOW]   ← 1 long red chilli, finely chopped
+          2 clove  garlic                         ← 2 garlic cloves, finely chopped
+     (skipping non-ingredient line: 'Nuoc cham sauce:')
+
+22 recipes, 298 lines deleted, 305 lines added
+7 new catalogue ingredients would be created: bacon grease (meat, g), dried marjoram (spice, tsp), ginger garlic paste (condiment, oz), goat cheese (dairy, oz), lemon pepper (spice, oz), mixed ground meat (meat, lb), yellow squash (produce, whole)
+18 LOW-confidence matches will be stored as approved (eyeball these): '1.5 tbsp Oil*'→olive oil; '1 tbsp Garlic Puree'→garlic; '½ kg (1.1 lbs)  chicken ((skin'→chicken thighs; '3 tablespoons plain yogurt ((c'→greek yogurt; '1 tablespoon Lemon juice  ((op'→lemon; '¾ teaspoon shahi jeera ((caraw'→cumin seeds; '¼ cup plain yogurt ((Indian cu'→greek yogurt; '2 tablespoon fried onions ((op'→onion; '2 pounds skinless halibut fill'→white fish; '3 tablespoons freshly squeezed'→lemon; '1 tablespoon freshly squeezed '→lemon; '3 Tbsp fresh lime juice'→lime; '1 tsp lime zest'→lime; '1 1/2 Tbsp  fresh lime juice'→lime; '1/2 cup vegan parmesan'→parmesan cheese; '3 Tbsp fresh lime juice'→lime; '2 tbsp lime juice'→lime; '1 long red chilli, finely chop'→thai chili

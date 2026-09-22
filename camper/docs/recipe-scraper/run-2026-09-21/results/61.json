@@ -1,0 +1,158 @@
+{
+  "name" : "Sweet Potato Black Bean Salad",
+  "description" : "Refreshing and hearty sweet potato salad with black beans, corn, and cilantro lime dressing pairs beautifully with just about any main dish. This healthy vegeatble side is versatile and customizable!",
+  "baseServings" : 6,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "1 large (1.33 lb) sweet potato (chopped into chunks)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "20530a8a-4695-47fb-9747-fee6f5a376a5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 Tbsp avocado oil",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ tsp sea salt (to taste)",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup corn kernels",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "3dbac9c9-1afd-4736-8b51-df3e65796e4b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup black beans",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "85e6f093-a79f-4eec-a787-709b53136837",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 cup red bell pepper (chopped)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  bunch green onion (chopped)",
+    "quantity" : 1,
+    "unit" : "bunch",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup red onion (finely chopped)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 Tbsp avocado oil",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tbsp mayonnaise (optional)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "0f1175db-fd14-4b2b-bd6a-685fbb37935b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 Tbsp fresh lime juice",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "⅓ cup packed fresh cilantro or parsley (chopped)",
+    "quantity" : 0.33,
+    "unit" : "cup",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 Tbsp pure maple syrup",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "e265dbd6-e8fc-442c-b4b4-13fafc600aa7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  small clove garlic (minced)",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ tsp sea salt (to taste)",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

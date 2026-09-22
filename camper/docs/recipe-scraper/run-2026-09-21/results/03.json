@@ -1,0 +1,138 @@
+{
+  "name" : "German Red Cabbage (Rotkohl)",
+  "description" : "This authentic German red cabbage recipe was always a staple at my Oma's house growing up in Germany.The sweet and sour notes in this traditional red cabbage recipe go so perfectly with a German roast (try my Sauerbraten or Glühweinbraten). A classic German meal is often not complete without some Rotkohl or Blaukraut (the naming depends on the region of Germany).You'll also want to pair it with some German potato dumplings (Kartoffelknödel), German bread dumplings (Semmelknödel), or the traditional German egg noodles called Spätzle.You’ll find this red cabbage recipe in 'German Home Kitchen' too!",
+  "baseServings" : 8,
+  "meal" : "side",
+  "theme" : "other",
+  "ingredients" : [ {
+    "originalText" : "1 kilogram red cabbage",
+    "quantity" : 1,
+    "unit" : "kg",
+    "matchedIngredientId" : "08625e84-3f1a-4337-a269-f5e584a3aba9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  yellow onion",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3  apples (Use tart apples like Granny Smith.)",
+    "quantity" : 3,
+    "unit" : "whole",
+    "matchedIngredientId" : "0159e1ad-3355-405e-a264-1ff1f0427ddb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "30 grams bacon grease (or butter or oil)",
+    "quantity" : 30,
+    "unit" : "g",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "bacon grease",
+    "suggestedCategory" : "meat",
+    "suggestedUnit" : "g",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "1  bay leaf",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4ad8fd66-2186-4254-9179-950324c6182b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4  whole cloves",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "b03e970c-dcd6-49be-b625-4d24f5bbf36d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 Tablespoons red wine vinegar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "cc9ff150-69b8-4dd9-b34d-e0ff28ee2497",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tablespoons lingonberry jam (or cranberry sauce)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "9779390b-5e35-4e50-8825-5a9e488d35bf",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tablespoons brown sugar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ cup water",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon cornstarch",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "fa22f9a9-591c-489d-aeae-770078046cff",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 Tablespoons water",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "salt and pepper (to taste)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

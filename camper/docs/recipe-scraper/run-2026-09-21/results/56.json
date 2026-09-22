@@ -1,0 +1,68 @@
+{
+  "name" : "Roasted Root Vegetables",
+  "description" : "A simple formula for roasting any mix of root vegetables — be it carrots, parsnips, sweet potatoes, beets, turnips, or rutabagas.",
+  "baseServings" : 8,
+  "meal" : "side",
+  "theme" : "vegetarian",
+  "ingredients" : [ {
+    "originalText" : "3 pounds root vegetables, such as carrots, parsnips, sweet potatoes, and beets, peeled (if desired) and cut into rough 1-inch chunks",
+    "quantity" : 3,
+    "unit" : "lb",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "root vegetables",
+    "suggestedCategory" : "produce",
+    "suggestedUnit" : "lb",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "1 small red onion, cut into 1-inch chunks",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup olive oil",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 1/2 teaspoons kosher salt",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 teaspoon freshly ground black pepper",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons coarsely chopped fresh rosemary leaves",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "2065499a-9c73-4a9a-9fea-dee35ddfcc2f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

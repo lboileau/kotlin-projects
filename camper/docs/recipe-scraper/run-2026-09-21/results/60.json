@@ -1,0 +1,138 @@
+{
+  "name" : "Vegan Sun-Dried Tomato &amp; Artichoke Pasta",
+  "description" : "This briny &amp; flavorful pasta combines sun-dried tomato, artichokes, and other pantry staples for a quick &amp; easy 30 minute dinner!",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "vegan",
+  "ingredients" : [ {
+    "originalText" : "8 ounces dried bucatini pasta (cooked according to package instructions)",
+    "quantity" : 8,
+    "unit" : "oz",
+    "matchedIngredientId" : "2719215e-ae68-4fac-9f3a-30c7f56d0aec",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup pasta water (reserved before straining pasta)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tablespoons sun-dried tomato oil (or olive oil)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "12 ounces canned artichoke hearts (strained and diced, about 1 1/2 cups )",
+    "quantity" : 12,
+    "unit" : "oz",
+    "matchedIngredientId" : "76b8df5e-8280-4b8b-a83e-8fbd399d4845",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 medium shallot (diced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4923fa72-6d6e-4e97-87c3-80ddab70bb20",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2.5 ounces sun-dried tomatoes in oil (diced)",
+    "quantity" : 2.5,
+    "unit" : "oz",
+    "matchedIngredientId" : "a557f93b-53ec-4b5c-aded-232fa74283ad",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4 cup pitted green olives (sliced)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "03695076-974a-417c-9c72-3ed1b39835d9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 Tablespoon capers",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "142b8098-47a7-42bf-9878-730477a5e460",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "5 cloves garlic (minced)",
+    "quantity" : 5,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 teaspoon chili flakes",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "65cf3812-9d01-424a-a7a8-d39fb708fb45",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "salt &amp; pepper to taste (add as desired)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1/2 cup vegan parmesan",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "f1ee4aaa-54c5-49e7-8350-e248ff7efbc7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "fresh parsley",
+    "quantity" : 1,
+    "unit" : "sprig",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

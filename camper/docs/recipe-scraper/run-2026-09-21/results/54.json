@@ -1,0 +1,88 @@
+{
+  "name" : "Roasted Brussels Sprouts",
+  "description" : "Learn how to cook Brussels sprouts with this easy recipe! Bright, fresh, and delicious, it's the perfect holiday side dish.",
+  "baseServings" : 4,
+  "meal" : "side",
+  "theme" : "vegetarian",
+  "ingredients" : [ {
+    "originalText" : "1 pound Brussels sprouts (trimmed)",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "8a7e1d7a-33f1-40a3-9017-fc77d4a3c05d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Extra-virgin olive oil (for drizzling)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "Sea salt and freshly ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1 tablespoon fresh lemon juice (plus 2 teaspoons zest)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon grated Parmesan cheese",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "f1ee4aaa-54c5-49e7-8350-e248ff7efbc7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon fresh thyme leaves",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "88de65ff-cc4b-4f55-8d79-d177b99dc592",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Fresh parsley leaves (for garnish)",
+    "quantity" : 1,
+    "unit" : "sprig",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "Pinch red pepper flakes",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "65cf3812-9d01-424a-a7a8-d39fb708fb45",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

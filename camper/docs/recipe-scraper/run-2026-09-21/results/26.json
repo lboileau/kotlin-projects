@@ -1,0 +1,78 @@
+{
+  "name" : "Easy Maple Roasted Carrots",
+  "description" : "Simple yet satisfying, these Maple Roasted Carrots are the delicious side dish everyone loves because they're so easy and taste delicious.",
+  "baseServings" : 4,
+  "meal" : "side",
+  "theme" : "vegan",
+  "ingredients" : [ {
+    "originalText" : "6  large carrots",
+    "quantity" : 6,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1½ tbsp olive oil, melted",
+    "quantity" : 1.5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ tbsp maple syrup",
+    "quantity" : 0.5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "e265dbd6-e8fc-442c-b4b4-13fafc600aa7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Sea salt",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "Pinch of cayenne pepper (optional)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "097f66c4-511a-42d0-b386-fbe0740bed86",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "5 sprigs fresh rosemary (optional)",
+    "quantity" : 5,
+    "unit" : "sprig",
+    "matchedIngredientId" : "2065499a-9c73-4a9a-9fea-dee35ddfcc2f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Chopped parlsey, to garnish (optional)",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

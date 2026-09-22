@@ -1,0 +1,138 @@
+{
+  "name" : "Tuscan Artichoke Tomato Salad",
+  "description" : "This easy artichoke tomato salad is filled with marinated artichoke hearts, chickpeas, red onion, fresh herbs, juicy ripe tomatoes, &amp; a Tuscan vinaigrette for the best summer salad!",
+  "baseServings" : 6,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "10 ounces cherry tomatoes (cut in half)",
+    "quantity" : 10,
+    "unit" : "oz",
+    "matchedIngredientId" : "c5869414-8fbb-46f3-a1ca-753a3ea48023",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 medium red onion (thinly sliced)",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 12 ounce jar of marinated artichoke hearts (strained from water/marinade )",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "76b8df5e-8280-4b8b-a83e-8fbd399d4845",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 15 ounce  can of cooked chickpeas (strained, rinsed, and dried (about 1 1/2 cups cooked chickpeas))",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "a5b85b9d-5784-4209-bb92-0438a5350a47",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2  Tablespoons fresh basil (cut into thin strips)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "f5d8ae9b-95a3-41c4-bde0-d20085ba9dde",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tablespoons fresh chives (finely diced)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "98b220e8-9f7e-4d76-9663-b1680a189389",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 Tablespoon capers",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "142b8098-47a7-42bf-9878-730477a5e460",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup olive oil",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2  Tablespoons red wine vinegar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "cc9ff150-69b8-4dd9-b34d-e0ff28ee2497",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon dried parsley",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/4-1/2 teaspoon salt (add more or less depending on preference)",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 teaspoon garlic powder (or 1 garlic clove finely minced)",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80e1c2f2-4d22-45da-811a-0d63ec4c4a73",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 teaspoon ground black pepper",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

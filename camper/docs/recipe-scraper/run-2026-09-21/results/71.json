@@ -1,0 +1,128 @@
+{
+  "name" : "White Bean and Kale Soup",
+  "description" : "Flavor-packed white bean and kale soup is the epitome of comfort food. It’s full of greens, legumes, and lots of vegetables. Plus, this hearty and filling recipe is ready in just 35 minutes, making it perfect for a busy weeknight.",
+  "baseServings" : 6,
+  "meal" : "dinner",
+  "theme" : "soup",
+  "ingredients" : [ {
+    "originalText" : "2 tablespoons olive oil",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 lb ground beef or turkey",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "abd44ee4-7dea-4448-8b51-c5140689e216",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  cup onion (finely chopped)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3/4 cup  celery (diced)",
+    "quantity" : 0.75,
+    "unit" : "cup",
+    "matchedIngredientId" : "90a1dbc0-d3ad-4064-88b8-0981481d96dc",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tbsp garlic (minced)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 cups butternut squash (finely diced)",
+    "quantity" : 2,
+    "unit" : "cup",
+    "matchedIngredientId" : "681b2934-5505-44fc-bdc3-f6516573a500",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "6 cups chicken broth",
+    "quantity" : 6,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp dried oregano",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Salt and pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1  (19 ounces) can white cannellini beans (drained, and rinsed)",
+    "quantity" : 1,
+    "unit" : "can",
+    "matchedIngredientId" : "5bbc11ee-423f-4b37-8a9e-d931cec1323a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup kale (stems removed and roughly chopped)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "d05179f7-25b9-4ed8-b442-5d689d39e990",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Freshly grated Parmesan cheese ()",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "f1ee4aaa-54c5-49e7-8350-e248ff7efbc7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

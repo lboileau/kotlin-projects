@@ -1,0 +1,118 @@
+{
+  "name" : "Asparagus, Corn, Tomato & Feta Salad",
+  "description" : "This Asparagus, Corn, Tomato & Feta Salad is not only beautiful, but also delicious. It's a great summer side dish and perfect to bring as a potluck. You can substitute the feta with your favorite cheese, like mozzarella or goat cheese.",
+  "baseServings" : 6,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "4 ears corn, husks removed",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "3dbac9c9-1afd-4736-8b51-df3e65796e4b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons butter",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 bunch asparagus",
+    "quantity" : 1,
+    "unit" : "bunch",
+    "matchedIngredientId" : "8d7dee0a-a993-4d24-a863-03595f630b5b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "u00bd cup feta, crumbled",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "1aa17704-3805-4327-905e-6bfbf4a20d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "10 basil leaves, torn",
+    "quantity" : 10,
+    "unit" : "pieces",
+    "matchedIngredientId" : "f5d8ae9b-95a3-41c4-bde0-d20085ba9dde",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 cup cherry tomatoes, halved",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "c5869414-8fbb-46f3-a1ca-753a3ea48023",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon kosher salt",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "u00be teaspoons freshly cracked black pepper",
+    "quantity" : 0.75,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon balsamic vinegar",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "41547fda-43e4-4f67-ac29-e4a089fd382d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}
