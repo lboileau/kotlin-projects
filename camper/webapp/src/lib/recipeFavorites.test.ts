@@ -26,6 +26,7 @@ function makeRecipe(overrides: Partial<FavouritableRecipe> = {}): FavouritableRe
     createdBy: ME,
     favoriteCount: 0,
     favoritedByMe: false,
+    createdAt: '2026-09-01T12:00:00Z',
     ...overrides,
   };
 }
@@ -37,6 +38,7 @@ describe('parseShowFilter', () => {
 
   it('reads each valid value', () => {
     expect(parseShowFilter('all')).toBe('all');
+    expect(parseShowFilter('new')).toBe('new');
     expect(parseShowFilter('mine')).toBe('mine');
     expect(parseShowFilter('favourites')).toBe('favourites');
     expect(parseShowFilter('my-favourites')).toBe('my-favourites');
@@ -99,6 +101,36 @@ describe('matchesShowFilter', () => {
     const favourited = makeRecipe({ favoriteCount: 2, favoritedByMe: true });
     expect(matchesShowFilter(favourited, 'all', undefined)).toBe(true);
     expect(matchesShowFilter(favourited, 'favourites', undefined)).toBe(true);
+  });
+
+  describe('new', () => {
+    const PLAN_CREATED = '2026-09-10T09:00:00Z';
+    const before = makeRecipe({ createdAt: '2026-09-09T23:59:59Z' });
+    const same = makeRecipe({ createdAt: PLAN_CREATED });
+    const after = makeRecipe({ createdAt: '2026-09-10T09:00:01Z' });
+
+    it('matches only recipes created strictly after the newest plan', () => {
+      expect(matchesShowFilter(before, 'new', ME, PLAN_CREATED)).toBe(false);
+      expect(matchesShowFilter(same, 'new', ME, PLAN_CREATED)).toBe(false);
+      expect(matchesShowFilter(after, 'new', ME, PLAN_CREATED)).toBe(true);
+    });
+
+    it('compares instants, not strings, so a different offset or precision still works', () => {
+      // 09:00Z written as 11:00 in +02:00 — the same instant.
+      expect(matchesShowFilter(same, 'new', ME, '2026-09-10T11:00:00+02:00')).toBe(false);
+      expect(matchesShowFilter(after, 'new', ME, '2026-09-10T09:00:00.000Z')).toBe(true);
+    });
+
+    it('with no plan yet, everything is new', () => {
+      for (const recipe of [before, same, after]) {
+        expect(matchesShowFilter(recipe, 'new', ME, null)).toBe(true);
+        expect(matchesShowFilter(recipe, 'new', ME, undefined)).toBe(true);
+      }
+    });
+
+    it('does not depend on who is signed in', () => {
+      expect(matchesShowFilter(after, 'new', undefined, PLAN_CREATED)).toBe(true);
+    });
   });
 
   it('treats an unknown filter as all', () => {

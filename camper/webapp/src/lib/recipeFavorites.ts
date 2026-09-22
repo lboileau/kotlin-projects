@@ -8,7 +8,7 @@
  */
 
 /** The recipe list's single-choice `Show` dropdown. `all` is the absent `?show=` param. */
-export type RecipeShowFilter = 'all' | 'mine' | 'favourites' | 'my-favourites';
+export type RecipeShowFilter = 'all' | 'mine' | 'favourites' | 'my-favourites' | 'new';
 
 /** Anything with the fields the filter and the cache edits need — not `RecipeResponse` itself, so tests can build tiny fixtures. */
 export interface FavouritableRecipe {
@@ -16,9 +16,11 @@ export interface FavouritableRecipe {
   createdBy: string;
   favoriteCount: number;
   favoritedByMe: boolean;
+  /** ISO-8601, as the API sends it. */
+  createdAt: string;
 }
 
-const SHOW_FILTERS: readonly RecipeShowFilter[] = ['all', 'mine', 'favourites', 'my-favourites'];
+const SHOW_FILTERS: readonly RecipeShowFilter[] = ['all', 'mine', 'favourites', 'my-favourites', 'new'];
 
 /**
  * Reads the `show` search param. Anything unrecognised — absent, the dead
@@ -36,13 +38,21 @@ export function parseShowFilter(raw: string | null): RecipeShowFilter {
  *   mine          — created by the signed-in user (no user: nothing)
  *   favourites    — anyone has favourited it (favoriteCount > 0)
  *   my-favourites — the signed-in user has favourited it (favoritedByMe)
+ *   new           — added since the user's newest plan was created
+ *                   (`newerThan`, that plan's createdAt; with no plan yet,
+ *                   everything is new)
  */
 export function matchesShowFilter(
   recipe: FavouritableRecipe,
   filter: RecipeShowFilter,
   userId: string | undefined,
+  newerThan?: string | null,
 ): boolean {
   switch (filter) {
+    case 'new':
+      // Both are ISO-8601 from the API, but Date.parse rather than a string
+      // compare, in case their precision or offset ever differ.
+      return !newerThan || Date.parse(recipe.createdAt) > Date.parse(newerThan);
     case 'mine':
       return Boolean(userId) && recipe.createdBy === userId;
     case 'favourites':

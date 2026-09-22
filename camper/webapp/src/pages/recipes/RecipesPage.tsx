@@ -33,6 +33,7 @@ const SHOW_OPTIONS = [
   { value: 'mine', label: 'Mine' },
   { value: 'favourites', label: 'Favourites' },
   { value: 'my-favourites', label: 'My favourites' },
+  { value: 'new', label: 'New since my last plan' },
 ] as const;
 
 function updateParams(
@@ -112,14 +113,22 @@ export function RecipesPage() {
     return MEALS.filter((m) => present.has(m));
   }, [recipes]);
 
+  // "New" means added since the user's newest plan was created. `plans` is
+  // sorted by updatedAt, so pick the latest createdAt here; null (no plan
+  // yet) makes every recipe new.
+  const newestPlanCreatedAt = useMemo(
+    () => (plans ?? []).reduce<string | null>((max, plan) => (max === null || plan.createdAt > max ? plan.createdAt : max), null),
+    [plans],
+  );
+
   const filtered = useMemo(() => {
     let list = recipes ?? [];
-    list = list.filter((r) => matchesShowFilter(r, show, user?.id));
+    list = list.filter((r) => matchesShowFilter(r, show, user?.id, newestPlanCreatedAt));
     if (meal !== 'all') list = list.filter((r) => r.meal === meal);
     const needle = q.trim().toLowerCase();
     if (needle) list = list.filter((r) => r.name.toLowerCase().includes(needle));
     return [...list].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-  }, [recipes, show, meal, q, user]);
+  }, [recipes, show, meal, q, user, newestPlanCreatedAt]);
 
   return (
     <div className="recipes-page">
