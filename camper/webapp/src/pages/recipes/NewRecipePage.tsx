@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@radix-ui/themes';
+import { Button, Text } from '@radix-ui/themes';
 import { PageHeader } from '../../components/PageHeader';
 import { useCreateRecipe } from '../../queries/recipes';
 import { enterMovesOn } from '../../lib/enterMovesOn';
@@ -9,11 +9,13 @@ import { parseQuantity } from '../../lib/parseQuantity';
 import { toast } from '../../lib/toastStore';
 import type { PendingLine } from './LinesEditor';
 import { RecipeFormFields } from './RecipeFormFields';
+import { useRecipeTab } from '../../components/useRecipeTab';
 import { validateRecipeForm, type RecipeFormValues } from './recipeForm';
 import { EMPTY_DRAFT, clearNewRecipeDraft, readNewRecipeDraft, writeNewRecipeDraft } from './newRecipeDraft';
 import './RecipeForm.css';
 
 export function NewRecipePage() {
+  const [tab, setTab] = useRecipeTab();
   const navigate = useNavigate();
   const createRecipe = useCreateRecipe();
 
@@ -119,6 +121,13 @@ export function NewRecipePage() {
           sourceEditable
           autoFocusName
           error={error}
+          tab={tab}
+          onTabChange={setTab}
+          photos={
+            <Text as="p" size="2" color="gray">
+              Save the recipe first, then add photos from its page.
+            </Text>
+          }
         />
       </form>
     </div>
