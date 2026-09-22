@@ -80,12 +80,22 @@
   gap: 20px;
 }
 
+/* A category is a band, not a row: a soft accent strip with a small-caps
+   label, so the eye finds "Produce" / "Dairy" while scanning down the list.
+   Plain medium-weight text was tried first and vanished among the rows. */
 .shopping-page__category-header {
-  padding: 4px 4px 6px;
+  margin-bottom: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-4);
+  background: var(--accent-3);
 }
 
 .shopping-page__category-title {
-  text-transform: capitalize;
+  color: var(--accent-11);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .shopping-page__rows {
