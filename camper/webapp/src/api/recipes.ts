@@ -109,8 +109,17 @@ export function getRecipes(): Promise<RecipeResponse[]> {
 }
 
 /** GET /api/recipes/{id} */
+/**
+ * Defaulted at the boundary, so a backend older than this webapp (a deploy
+ * mid-rollout, a stale local API) degrades to "no steps, no photos" instead
+ * of taking the recipe page down on `.length`.
+ */
+function withDetailDefaults(recipe: RecipeDetailResponse): RecipeDetailResponse {
+  return { ...recipe, steps: recipe.steps ?? [], photos: recipe.photos ?? [] };
+}
+
 export function getRecipe(recipeId: string): Promise<RecipeDetailResponse> {
-  return request(`/api/recipes/${recipeId}`);
+  return request<RecipeDetailResponse>(`/api/recipes/${recipeId}`).then(withDetailDefaults);
 }
 
 /** POST /api/recipes — not optimistic; waits for the server. */
@@ -171,7 +180,7 @@ function holdForTheDog<T>(sent: Promise<T>): Promise<T> {
  * SCRAPE_FAILED) when the page couldn't be fetched or read.
  */
 export function importRecipe(url: string): Promise<RecipeDetailResponse> {
-  return holdForTheDog(request<RecipeDetailResponse>('/api/recipes/import', { method: 'POST', body: { url } }));
+  return holdForTheDog(request<RecipeDetailResponse>('/api/recipes/import', { method: 'POST', body: { url } })).then(withDetailDefaults);
 }
 
 /**
@@ -183,7 +192,7 @@ export function importRecipe(url: string): Promise<RecipeDetailResponse> {
  * The draft has no webLink, so there is no 409 here.
  */
 export function importRecipeFromImages(images: ImportImage[]): Promise<RecipeDetailResponse> {
-  return holdForTheDog(request<RecipeDetailResponse>('/api/recipes/import-images', { method: 'POST', body: { images } }));
+  return holdForTheDog(request<RecipeDetailResponse>('/api/recipes/import-images', { method: 'POST', body: { images } })).then(withDetailDefaults);
 }
 
 /** PUT /api/recipes/{id}/steps — the whole list; an empty list clears it. 400 on a blank step. */
