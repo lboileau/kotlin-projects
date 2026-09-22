@@ -16,6 +16,13 @@ const MAX_RESULTS = 30;
 interface IngredientPickerProps {
   value: IngredientResponse | null;
   onSelect: (ingredient: IngredientResponse) => void;
+  /**
+   * Called when the typed text no longer names `value`, so the caller drops
+   * its selection. Without it, the field can read "Bone broth" while the
+   * selection is still the pre-filled "beef broth" — and a Save commits
+   * the selection, not the text.
+   */
+  onClear?: () => void;
   autoFocus?: boolean;
   initialQuery?: string;
   suggestedCategory?: string | null;
@@ -64,6 +71,7 @@ function rankIngredients(list: IngredientResponse[], rawQuery: string): Ingredie
 export function IngredientPicker({
   value,
   onSelect,
+  onClear,
   autoFocus = false,
   initialQuery,
   suggestedCategory,
@@ -246,9 +254,12 @@ export function IngredientPicker({
           }, 300);
         }}
         onChange={(event) => {
-          setQuery(event.target.value);
+          const next = event.target.value;
+          setQuery(next);
           setOpen(true);
           setActiveIndex(0);
+          // Typing away from the selected name un-selects it: text and selection never drift apart.
+          if (value && next.trim().toLowerCase() !== value.name.trim().toLowerCase()) onClear?.();
         }}
         onKeyDown={handleKeyDown}
         onBlur={() => {

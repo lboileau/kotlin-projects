@@ -69,7 +69,7 @@ function EditLineForm({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     if (!ingredient) {
-      setError('Choose an ingredient.');
+      setError('Pick an ingredient from the list, or create it.');
       return;
     }
     const parsedQuantity = parseQuantity(quantity);
@@ -108,8 +108,11 @@ function EditLineForm({
         <IngredientPicker
           value={ingredient}
           onSelect={setIngredient}
+          onClear={() => setIngredient(null)}
           initialQuery={initialQuery}
-          suggestedCategory={normalizeCategory(line.suggestedCategory)}
+          // Only an import's suggestion pre-fills the create panel's category; normalising
+          // a missing one would yield 'other' and defeat "category is required, no default".
+          suggestedCategory={line.suggestedCategory ? normalizeCategory(line.suggestedCategory) : null}
           suggestedUnit={normalizeUnit(line.suggestedUnit)}
           autoFocus
         />

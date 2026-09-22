@@ -49,7 +49,13 @@ export function AddLineSheet() {
   return (
     <Sheet {...sheet.sheetProps} title="Add ingredient">
       <form className="line-sheet__form" onSubmit={handleSubmit}>
-        <IngredientPicker value={ingredient} onSelect={handleSelect} autoFocus placeholder="Search ingredients" />
+        <IngredientPicker
+          value={ingredient}
+          onSelect={handleSelect}
+          onClear={() => setIngredient(null)}
+          autoFocus
+          placeholder="Search ingredients"
+        />
 
         <div className="line-sheet__fields">
           <Text as="label" size="2" weight="medium" className="line-sheet__field">
