@@ -8,7 +8,7 @@
  */
 
 /** The recipe list's single-choice `Show` dropdown. `all` is the absent `?show=` param. */
-export type RecipeShowFilter = 'all' | 'mine' | 'favourites' | 'my-favourites';
+export type RecipeShowFilter = 'all' | 'mine' | 'favourites' | 'my-favourites' | 'new';
 
 /** Anything with the fields the filter and the cache edits need — not `RecipeResponse` itself, so tests can build tiny fixtures. */
 export interface FavouritableRecipe {
@@ -16,9 +16,14 @@ export interface FavouritableRecipe {
   createdBy: string;
   favoriteCount: number;
   favoritedByMe: boolean;
+  /** ISO-8601, as the API sends it. */
+  createdAt: string;
 }
 
-const SHOW_FILTERS: readonly RecipeShowFilter[] = ['all', 'mine', 'favourites', 'my-favourites'];
+/** How far back "New this week" reaches. */
+export const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
+const SHOW_FILTERS: readonly RecipeShowFilter[] = ['all', 'mine', 'favourites', 'my-favourites', 'new'];
 
 /**
  * Reads the `show` search param. Anything unrecognised — absent, the dead
@@ -36,13 +41,18 @@ export function parseShowFilter(raw: string | null): RecipeShowFilter {
  *   mine          — created by the signed-in user (no user: nothing)
  *   favourites    — anyone has favourited it (favoriteCount > 0)
  *   my-favourites — the signed-in user has favourited it (favoritedByMe)
+ *   new           — added in the last seven days (`NEW_WINDOW_MS` before
+ *                   `now`, which tests pass explicitly)
  */
 export function matchesShowFilter(
   recipe: FavouritableRecipe,
   filter: RecipeShowFilter,
   userId: string | undefined,
+  now: number = Date.now(),
 ): boolean {
   switch (filter) {
+    case 'new':
+      return Date.parse(recipe.createdAt) >= now - NEW_WINDOW_MS;
     case 'mine':
       return Boolean(userId) && recipe.createdBy === userId;
     case 'favourites':

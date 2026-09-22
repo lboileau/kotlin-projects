@@ -33,6 +33,7 @@ const SHOW_OPTIONS = [
   { value: 'mine', label: 'Mine' },
   { value: 'favourites', label: 'Favourites' },
   { value: 'my-favourites', label: 'My favourites' },
+  { value: 'new', label: 'New this week' },
 ] as const;
 
 function updateParams(
@@ -114,7 +115,11 @@ export function RecipesPage() {
 
   const filtered = useMemo(() => {
     let list = recipes ?? [];
-    list = list.filter((r) => matchesShowFilter(r, show, user?.id));
+    // "New this week" is measured from when this list was last computed;
+    // it only drifts while the page sits untouched, and any refetch or
+    // filter change brings it up to date.
+    const now = Date.now();
+    list = list.filter((r) => matchesShowFilter(r, show, user?.id, now));
     if (meal !== 'all') list = list.filter((r) => r.meal === meal);
     const needle = q.trim().toLowerCase();
     if (needle) list = list.filter((r) => r.name.toLowerCase().includes(needle));

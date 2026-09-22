@@ -26,6 +26,7 @@ function makeRecipe(overrides: Partial<FavouritableRecipe> = {}): FavouritableRe
     createdBy: ME,
     favoriteCount: 0,
     favoritedByMe: false,
+    createdAt: '2026-09-01T12:00:00Z',
     ...overrides,
   };
 }
@@ -37,6 +38,7 @@ describe('parseShowFilter', () => {
 
   it('reads each valid value', () => {
     expect(parseShowFilter('all')).toBe('all');
+    expect(parseShowFilter('new')).toBe('new');
     expect(parseShowFilter('mine')).toBe('mine');
     expect(parseShowFilter('favourites')).toBe('favourites');
     expect(parseShowFilter('my-favourites')).toBe('my-favourites');
@@ -99,6 +101,31 @@ describe('matchesShowFilter', () => {
     const favourited = makeRecipe({ favoriteCount: 2, favoritedByMe: true });
     expect(matchesShowFilter(favourited, 'all', undefined)).toBe(true);
     expect(matchesShowFilter(favourited, 'favourites', undefined)).toBe(true);
+  });
+
+  describe('new', () => {
+    const NOW = Date.parse('2026-09-21T12:00:00Z');
+    const at = (iso: string) => makeRecipe({ createdAt: iso });
+
+    it('matches recipes created within the last seven days, inclusive of the boundary', () => {
+      expect(matchesShowFilter(at('2026-09-21T11:59:00Z'), 'new', ME, NOW)).toBe(true);
+      expect(matchesShowFilter(at('2026-09-14T12:00:00Z'), 'new', ME, NOW)).toBe(true);
+      expect(matchesShowFilter(at('2026-09-14T11:59:59Z'), 'new', ME, NOW)).toBe(false);
+      expect(matchesShowFilter(at('2026-08-01T00:00:00Z'), 'new', ME, NOW)).toBe(false);
+    });
+
+    it('compares instants, so an offset-written timestamp still counts', () => {
+      // 14:00 in +02:00 is 12:00Z — exactly at the boundary.
+      expect(matchesShowFilter(at('2026-09-14T14:00:00+02:00'), 'new', ME, NOW)).toBe(true);
+    });
+
+    it('does not depend on who is signed in', () => {
+      expect(matchesShowFilter(at('2026-09-20T00:00:00Z'), 'new', undefined, NOW)).toBe(true);
+    });
+
+    it('defaults to the current time', () => {
+      expect(matchesShowFilter(at(new Date().toISOString()), 'new', ME)).toBe(true);
+    });
   });
 
   it('treats an unknown filter as all', () => {
