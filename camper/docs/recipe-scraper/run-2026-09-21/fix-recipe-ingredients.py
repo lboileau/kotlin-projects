@@ -75,26 +75,40 @@ def show(plan):
     print(f"\nAPI: {API}")
 
 def call(method, path, user_id, body=None):
-    req = urllib.request.Request(API + path, method=method, data=json.dumps(body).encode() if body is not None else None,
-                                 headers={'X-User-Id': user_id, 'Content-Type': 'application/json'})
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            raw = resp.read()
-            return resp.status, (json.loads(raw) if raw else None)
-    except urllib.error.HTTPError as e:
-        return e.code, e.read().decode()[:300]
-    except urllib.error.URLError as e:
-        return 0, str(e)
+    """One API call; retries 5xx/connection errors (e.g. a redeploy mid-run) with backoff. 4xx is returned as-is."""
+    import time
+    for attempt in range(6):
+        req = urllib.request.Request(API + path, method=method, data=json.dumps(body).encode() if body is not None else None,
+                                     headers={'X-User-Id': user_id, 'Content-Type': 'application/json'})
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                raw = resp.read()
+                return resp.status, (json.loads(raw) if raw else None)
+        except urllib.error.HTTPError as e:
+            if e.code < 500: return e.code, e.read().decode()[:300]
+            status, detail = e.code, e.read().decode()[:300]
+        except urllib.error.URLError as e:
+            status, detail = 0, str(e)
+        wait = 5 * (attempt + 1)
+        print(f"   {method} {path}: {status} — retrying in {wait}s")
+        time.sleep(wait)
+    return status, detail
 
 def apply(plan):
     print(f"applying against {API}")
-    log = []
+    # Resume: keep entries from a previous run and skip recipes it fully completed (all adds, all deletes).
+    log = json.load(open(LOG)) if os.path.exists(LOG) else []
+    by_case = {e['case']: e for e in log}
+    done = {c for c, e in by_case.items() if e.get('deleted') and len(e['added']) == len(next(p for p in plan if p['case'] == c)['adds'])}
+    if done: print(f"skipping {len(done)} already-completed recipes: {' '.join(sorted(done))}")
+    log = [e for e in log if e['case'] in done]
     # Resolve against the live catalogue, not the snapshot — a re-run after a partial failure must
     # reuse ingredients the previous run created instead of trying to create them again (409).
     status, live = call('GET', '/ingredients', plan[0]['userId'])
     if status != 200: sys.exit(f"could not read live catalogue: {status} {live}")
     created = {c['name'].strip().lower(): c['id'] for c in live}
     for p in plan:
+        if p['case'] in done: continue
         uid = p['userId']
         status, detail = call('GET', f"/recipes/{p['recipeId']}", uid)
         if status != 200: print(f"!! {p['name']}: GET failed {status} {detail}"); continue
