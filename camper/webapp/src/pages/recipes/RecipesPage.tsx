@@ -11,7 +11,7 @@ import {
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { RowActionButton } from '../../components/RowActionButton';
-import { HeartGlyph } from '../../components/HeartGlyph';
+import { FavouriteCountPill } from '../../components/FavouriteCountPill';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { useAuth } from '../../auth/useAuth';
@@ -20,7 +20,7 @@ import { useAddRecipeToPlan, usePlans, useRemoveRecipeFromPlan } from '../../que
 import { toast } from '../../lib/toastStore';
 import { MEALS, capitalize } from '../../lib/ingredientConstants';
 import { useSearchText } from '../../lib/useSearchText';
-import { favouritesCountLabel, matchesShowFilter, parseShowFilter } from '../../lib/recipeFavorites';
+import { matchesShowFilter, parseShowFilter } from '../../lib/recipeFavorites';
 import type { RecipeResponse } from '../../api/recipes';
 import './RecipesPage.css';
 
@@ -282,24 +282,6 @@ function RecipeRow({
           <Text as="span" size="3" weight="medium" className="recipes-page__row-name">
             {recipe.name}
           </Text>
-          {/* On the title line, right after the name: under it, it fought
-              "Serves" and the tags for one line. Read-only, and only once
-              someone has favourited it — favouriting is done on the recipe
-              page. Solid when you are one of them, soft when it is only
-              other people, so your own stand out down the list.
-              `role="img"` with the spelt-out label reads as "3 favourites,
-              including you" instead of a stray number, and keeps it out of
-              the tab order: a fact about the row, not a control. */}
-          {recipe.favoriteCount > 0 && (
-            <span
-              className={`recipes-page__row-favourites${recipe.favoritedByMe ? ' recipes-page__row-favourites--mine' : ''}`}
-              role="img"
-              aria-label={favouritesCountLabel(recipe.favoriteCount, recipe.favoritedByMe)}
-            >
-              <HeartGlyph size={13} />
-              {recipe.favoriteCount}
-            </span>
-          )}
           {recipe.status === 'draft' && (
             <Badge color="amber" variant="soft">
               Draft
@@ -310,6 +292,9 @@ function RecipeRow({
               <Link2Icon />
             </span>
           )}
+          {/* On the title line (under it, it fought "Serves" and the tags
+              for one line), last and right-justified so the counts align. */}
+          <FavouriteCountPill count={recipe.favoriteCount} favouritedByMe={recipe.favoritedByMe} />
         </div>
         <div className="recipes-page__row-meta">
           <Text as="span" size="2" color="gray">
