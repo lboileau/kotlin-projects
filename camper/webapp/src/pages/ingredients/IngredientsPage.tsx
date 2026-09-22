@@ -6,6 +6,7 @@ import { PageLoader } from "../../components/PageLoader";
 import { PageHeader } from "../../components/PageHeader";
 import { RecipesIngredientsToggle } from "../../components/RecipesIngredientsToggle";
 import { FilterChips } from "../../components/FilterChips";
+import { CategoryBand } from "../../components/CategoryBand";
 import { SheetLink } from "../../components/SheetLink";
 import { QueryErrorState } from "../../components/QueryErrorState";
 import { useIngredients } from "../../queries/ingredients";
@@ -164,15 +165,7 @@ export function IngredientsPage() {
           (hasData || !isError) &&
           groups.map((group) => (
             <section key={group.category} className="ingredients-page__group">
-              <Text
-                as="p"
-                size="1"
-                weight="bold"
-                color="gray"
-                className="ingredients-page__group-header"
-              >
-                {capitalize(group.category)}
-              </Text>
+              <CategoryBand className="ingredients-page__group-header">{capitalize(group.category)}</CategoryBand>
               <ul className="ingredients-page__rows">
                 {group.items.map((ingredient) => (
                   <li key={ingredient.id}>

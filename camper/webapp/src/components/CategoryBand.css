@@ -1,0 +1,33 @@
+/* A category is a band, not a row: a soft accent pill with a small-caps
+   label, so the eye finds "Produce" / "Dairy" while scanning down the list.
+   Plain medium-weight text was tried first and vanished among the rows.
+   The band sticks just under the screen's pinned top (`--page-top-height`,
+   the header's visible height, published by CollapsingHeader) until the
+   next category pushes it away. */
+.category-band {
+  position: sticky;
+  top: var(--page-top-height, 0px);
+  z-index: 5;
+  padding: 2px 0 6px;
+  background: var(--color-background);
+  /* Follows the header's tuck-away with its easing (CollapsingHeader.css). */
+  transition: top 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .category-band {
+    transition: none;
+  }
+}
+
+.category-band__title {
+  display: block;
+  padding: 6px 12px;
+  border-radius: var(--radius-4);
+  background: var(--accent-3);
+  color: var(--accent-11);
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

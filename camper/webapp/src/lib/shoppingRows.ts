@@ -234,6 +234,26 @@ export function rowPurchasesForToggle(row: ShoppingRow, checked: boolean): RowPu
 }
 
 /**
+ * The whole list unbought — what the server's reset produces, for the
+ * optimistic write. Every entry goes back to nothing purchased and
+ * `not_purchased`; an entry that was only on the list because it had been
+ * bought (`no_longer_needed`: nothing required any more) drops off it,
+ * since with no purchase left the server won't list it either.
+ */
+export function clearAllPurchases(list: ShoppingListResponse): ShoppingListResponse {
+  const categories = list.categories
+    .map((category) => ({
+      ...category,
+      items: category.items
+        .filter((item) => item.quantityRequired > 0)
+        .map((item) => ({ ...item, quantityPurchased: 0, status: 'not_purchased' as const })),
+    }))
+    .filter((category) => category.items.length > 0);
+  const totalItems = categories.reduce((count, category) => count + category.items.length, 0);
+  return { ...list, categories, totalItems, fullyPurchasedCount: 0 };
+}
+
+/**
  * Sets the purchased quantity of a row's entries — a check-off
  * (`rowPurchasesForToggle`) or an amount typed into the "have" sheet —
  * re-deriving each status and adjusting `fullyPurchasedCount`.

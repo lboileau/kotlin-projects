@@ -13,6 +13,7 @@ import { shoppingKey } from './plans';
 import {
   applyRowPurchases,
   captureManualItem,
+  clearAllPurchases,
   insertTempManualItem,
   reinsertManualItem,
   removeManualItemFromList,
@@ -220,13 +221,27 @@ export function useRemoveManualShoppingItem(planId: string) {
   });
 }
 
-/** Not optimistic — gated behind a confirm dialog already, so waiting for the server is simplest and safest. */
+/**
+ * Optimistic: every row unticks the moment the confirm is tapped. There is
+ * no targeted rollback for a whole-list change — on a failure the list is
+ * refetched, which is the truth either way.
+ */
 export function useResetPurchases(planId: string) {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: shoppingKey(planId),
     mutationFn: () => resetPurchases(planId),
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: shoppingKey(planId) });
+      queryClient.setQueryData<ShoppingListResponse>(shoppingKey(planId), (current) =>
+        current ? clearAllPurchases(current) : current,
+      );
+    },
+    onError: () => {
+      toast.error("Couldn't reset the list.");
       void queryClient.invalidateQueries({ queryKey: shoppingKey(planId) });
     },
+    meta: { suppressErrorToast: true },
+    onSettled: () => invalidateIfLast(queryClient, planId),
   });
 }
