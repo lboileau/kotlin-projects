@@ -1,0 +1,89 @@
+.steps-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.steps-editor__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Grab handle (number + grip) | text | delete. Rows animate into the gap a
+   drag opens; the dragged row itself follows the pointer without easing. */
+.steps-editor__row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 6px;
+  border-radius: var(--radius-3);
+  background: var(--color-background);
+  transition: transform 120ms ease;
+}
+
+.steps-editor__row--dragging {
+  position: relative;
+  z-index: 1;
+  transition: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  background: var(--accent-2);
+}
+
+/* While something is being dragged, nothing else may catch the pointer:
+   the drag stays on the handle that captured it. */
+.steps-editor__list--dragging textarea,
+.steps-editor__list--dragging .row-action-button {
+  pointer-events: none;
+}
+
+/* The 44px grab target: the step's number over a grip. `touch-action: none`
+   is what lets a finger drag it instead of scrolling the page. */
+.steps-editor__handle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 44px;
+  min-height: 44px;
+  height: 100%;
+  padding: 4px 0;
+  border: none;
+  border-radius: var(--radius-3);
+  background: transparent;
+  color: var(--accent-11);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.steps-editor__handle:active,
+.steps-editor__row--dragging .steps-editor__handle {
+  cursor: grabbing;
+  background: var(--accent-3);
+}
+
+.steps-editor__handle:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+}
+
+.steps-editor__number {
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.steps-editor__text {
+  min-width: 0;
+}
+
+.steps-editor__add {
+  align-self: flex-start;
+}

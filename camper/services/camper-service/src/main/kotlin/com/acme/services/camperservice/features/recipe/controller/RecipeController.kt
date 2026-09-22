@@ -4,7 +4,9 @@ import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeRequest
+import com.acme.services.camperservice.features.recipe.dto.AddRecipePhotoRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportRecipeFromImagesRequest
+import com.acme.services.camperservice.features.recipe.dto.ReplaceRecipeStepsRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportRecipeRequest
 import com.acme.services.camperservice.features.recipe.dto.ResolveDuplicateRequest
 import com.acme.services.camperservice.features.recipe.dto.ResolveIngredientRequest
@@ -44,7 +46,8 @@ class RecipeController(
                     quantity = it.quantity,
                     unit = it.unit
                 )
-            }
+            },
+            steps = request.steps.orEmpty()
         )
         return recipeService.create(param).toResponseEntity(successStatus = 201) { it }
     }
@@ -67,7 +70,7 @@ class RecipeController(
         logger.info("POST /api/recipes/import-images ({} image(s))", request.images.size)
         val param = ImportRecipeFromImagesParam(
             userId = userId,
-            images = request.images.map { ImportImageParam(mediaType = it.mediaType, data = it.data) }
+            images = request.images.map { ImportImageParam(mediaType = it.mediaType, data = it.data, role = it.role) }
         )
         return recipeService.importFromImages(param).toResponseEntity(successStatus = 201) { it }
     }
@@ -223,5 +226,40 @@ class RecipeController(
         logger.info("GET /api/recipes/{}/favorites", id)
         return recipeService.listFavorites(ListRecipeFavoritesParam(recipeId = id, userId = userId))
             .toResponseEntity { it }
+    }
+
+    @PutMapping("/{id}/steps")
+    fun replaceSteps(
+        @RequestHeader("X-User-Id") userId: UUID,
+        @PathVariable id: UUID,
+        @RequestBody request: ReplaceRecipeStepsRequest
+    ): ResponseEntity<Any> {
+        logger.info("PUT /api/recipes/{}/steps ({} step(s))", id, request.steps.size)
+        return recipeService.replaceSteps(ReplaceRecipeStepsParam(recipeId = id, userId = userId, steps = request.steps))
+            .toResponseEntity { it }
+    }
+
+    @PostMapping("/{id}/photos")
+    fun addPhoto(
+        @RequestHeader("X-User-Id") userId: UUID,
+        @PathVariable id: UUID,
+        @RequestBody request: AddRecipePhotoRequest
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/recipes/{}/photos", id)
+        return recipeService.addPhoto(AddRecipePhotoParam(recipeId = id, userId = userId, mediaType = request.mediaType, data = request.data))
+            .toResponseEntity(successStatus = 201) { it }
+    }
+
+    @DeleteMapping("/{id}/photos/{photoId}")
+    fun removePhoto(
+        @RequestHeader("X-User-Id") userId: UUID,
+        @PathVariable id: UUID,
+        @PathVariable photoId: UUID
+    ): ResponseEntity<Any> {
+        logger.info("DELETE /api/recipes/{}/photos/{}", id, photoId)
+        return when (val result = recipeService.removePhoto(RemoveRecipePhotoParam(recipeId = id, photoId = photoId, userId = userId))) {
+            is Result.Success -> ResponseEntity.noContent().build()
+            is Result.Failure -> result.error.toResponseEntity()
+        }
     }
 }

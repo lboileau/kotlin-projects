@@ -10,6 +10,8 @@ export interface RecipeFormValues {
   meal: string;
   theme: string;
   lines: DraftLine[];
+  /** The method as typed — normalised (numbering stripped, blanks dropped) on save. */
+  steps: string[];
 }
 
 /**

@@ -1,0 +1,36 @@
+.recipe-photo-sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* The whole photo, page-width, tall photos capped so the remove button
+   stays within a screen; `height: auto` with the intrinsic width/height
+   attributes keeps the box from jumping while it loads. */
+.recipe-photo-sheet__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 70dvh;
+  object-fit: contain;
+  border-radius: var(--radius-3);
+  background: var(--gray-3);
+}
+
+.recipe-photo-sheet__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.recipe-photo-sheet__remove {
+  align-self: stretch;
+}
+
+.recipe-photo-sheet__confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}

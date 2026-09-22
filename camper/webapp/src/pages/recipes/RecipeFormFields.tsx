@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Callout, IconButton, Select, Text, TextArea, TextField } from '@radix-ui/themes';
 import { ExclamationTriangleIcon, ExternalLinkIcon, MinusIcon, PlusIcon } from '@radix-ui/react-icons';
 import { MEALS, THEMES, capitalize } from '../../lib/ingredientConstants';
+import { StepsEditor } from './StepsEditor';
 import { LinesEditor, type PendingLine } from './LinesEditor';
 import type { RecipeFormValues } from './recipeForm';
 
@@ -163,6 +164,13 @@ export function RecipeFormFields({
           onPendingChange={onPendingLineChange}
         />
         {children}
+      </div>
+
+      <div className="recipe-form-page__field">
+        <Text as="span" size="2" weight="medium">
+          Instructions
+        </Text>
+        <StepsEditor steps={values.steps} onChange={(next) => onChange({ steps: next })} />
       </div>
 
       {error && (

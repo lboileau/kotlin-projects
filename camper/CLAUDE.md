@@ -25,8 +25,9 @@ camper/
 │   ├── invitation-client/    # JDBI data access for invitations table
 │   ├── email-client/         # Email sending via Resend SDK (+ NoOp for local dev)
 │   ├── ingredient-client/    # JDBI data access for ingredients table
-│   ├── recipe-client/        # JDBI data access for recipes, recipe_ingredients & recipe_favorites tables
-│   ├── recipe-scraper-client/ # Recipe scraping via Claude API (+ NoOp stub)
+│   ├── recipe-client/        # JDBI data access for recipes, recipe_ingredients, recipe_favorites, recipe_steps & recipe_photos tables
+│   ├── recipe-scraper-client/ # Recipe scraping via Claude API from a page or photos (+ NoOp stub, + relay for local runs)
+│   ├── photo-storage-client/  # Recipe photo bytes: S3-compatible bucket (Railway) / local files / fake
 │   ├── gear-pack-client/     # JDBI data access for gear_packs & gear_pack_items tables
 │   ├── meal-plan-client/     # JDBI data access for meal_plans, meal_plan_days, meal_plan_recipes, shopping_list_purchases
 │   ├── log-book-client/      # JDBI data access for log_book_faqs & log_book_journal_entries tables
@@ -125,6 +126,8 @@ Hosted on [Railway](https://railway.com) — project **proactive-quietude**.
   - `RESEND_API_KEY` — Resend API key for invite emails (optional — NoOp client used without it)
   - `EMAIL_FROM` — sender address, must be a verified Resend domain (default: `Camper <noreply@example.com>`)
   - `APP_BASE_URL` — base URL for links in emails (default: `http://localhost:5173`, set to `https://camper-service-production.up.railway.app` in production)
+  - `AWS_S3_BUCKET_NAME`, `AWS_ENDPOINT_URL`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION` — the Railway Storage Bucket recipe photos live in (referenced from the bucket's own variables). Without `AWS_S3_BUCKET_NAME` the service stores photos as local files under `PHOTO_STORE_DIR` (default `./.photos`) — fine for dev, not for a container. Optional `AWS_S3_PATH_STYLE=true` for buckets needing path-style URLs
+  - `ANTHROPIC_API_KEY` — recipe imports (URL and photo) via Claude; without it a canned recipe is returned. `RECIPE_SCRAPER_RELAY_DIR` (dev only) makes imports wait for a hand-written answer instead — see `clients/recipe-scraper-client/CLAUDE.md`
 
 ### Deploying
 

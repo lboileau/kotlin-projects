@@ -51,6 +51,7 @@ class FakeRecipeScraperClient : RecipeScraperClient {
                 confidence = "HIGH",
                 reviewFlags = listOf("NEW_INGREDIENT")
             )
-        )
+        ),
+        steps = listOf("Mash the avocados.", "Season and serve.")
     )
 }

@@ -55,7 +55,9 @@ internal class RelayRecipeScraperClient(
         val caseDir = newCaseDir("photos")
         val files = param.images.mapIndexed { i, image ->
             val ext = image.mediaType.substringAfter('/').replace("jpeg", "jpg")
-            File(caseDir, "image-${i + 1}.$ext").also { it.writeBytes(Base64.getDecoder().decode(image.base64Data)) }.name
+            val name = "image-${i + 1}${image.role?.let { "-$it" } ?: ""}.$ext"
+            File(caseDir, name).also { it.writeBytes(Base64.getDecoder().decode(image.base64Data)) }
+            mapOf("file" to name, "role" to image.role, "label" to ScrapePromptBuilder.imageLabel(image, i, param.images.size))
         }
         writePrompt(caseDir, prompt, mapOf("source" to "photos", "images" to files))
         return await(caseDir, param.existingIngredients, allowEmpty = false)

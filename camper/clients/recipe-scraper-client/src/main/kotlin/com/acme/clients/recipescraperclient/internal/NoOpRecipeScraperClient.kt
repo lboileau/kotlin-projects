@@ -56,6 +56,11 @@ internal class NoOpRecipeScraperClient : RecipeScraperClient {
                 confidence = "LOW",
                 reviewFlags = listOf("NEW_INGREDIENT", "INGREDIENT_MATCH_UNCERTAIN")
             )
+        ),
+        steps = listOf(
+            "Halve the avocados, remove the stones and scoop the flesh into a bowl.",
+            "Mash roughly with a fork and stir in the onion.",
+            "Season with salt and lime juice to taste and serve."
         )
     )
 }

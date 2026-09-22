@@ -24,6 +24,27 @@
   pointer-events: none;
 }
 
+/* One named photo slot: heading, thumbnail, button. Two of them stack. */
+.import-recipe-sheet__slot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: var(--radius-4);
+  background: var(--accent-2);
+}
+
+.import-recipe-sheet__slot--compact {
+  padding: 0;
+  background: transparent;
+}
+
+.import-recipe-sheet__slot-head {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 /* The picked photo: a portrait thumbnail big enough to see it is the right page,
    no bigger — the sheet has to leave room for the button and the error line. */
 .import-recipe-sheet__photo {

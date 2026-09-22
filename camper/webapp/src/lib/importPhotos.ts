@@ -15,10 +15,14 @@ export const MAX_PHOTO_EDGE = 1568;
 /** What the server accepts as `mediaType`. Photos are re-encoded to JPEG, so this is only a guard. */
 export const PHOTO_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'] as const;
 
+/** Which part of the recipe an import photo shows. The server needs the ingredients one. */
+export type ImportPhotoRole = 'ingredients' | 'instructions';
+
 export interface ImportImage {
   mediaType: string;
   /** Raw base64, no `data:` prefix — what the API and the server both want. */
   data: string;
+  role?: ImportPhotoRole;
 }
 
 /**

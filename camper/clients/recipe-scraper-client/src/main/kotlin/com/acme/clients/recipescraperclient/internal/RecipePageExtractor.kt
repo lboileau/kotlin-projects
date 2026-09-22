@@ -43,11 +43,14 @@ internal object RecipePageExtractor {
     /** Some sites wrap the JSON in `// <![CDATA[ ... // ]]>` comment lines. */
     private val cdataLine = Regex("""^\s*//\s*(<!\[CDATA\[|]]>)\s*$""", RegexOption.MULTILINE)
 
-    /** Fields of the Recipe node worth keeping; everything else (images, ratings, video) is noise. */
+    /** Fields of the Recipe node worth keeping as-is; everything else (images, ratings, video) is noise. */
     private val recipeFields = listOf(
         "name", "description", "recipeYield", "recipeIngredient",
         "recipeCategory", "recipeCuisine", "keywords"
     )
+
+    /** The instructions field, kept too — but flattened, see [flattenInstructions]. */
+    private const val INSTRUCTIONS_FIELD = "recipeInstructions"
 
     private const val MAX_VISIBLE_TEXT_CHARS = 60_000
 
@@ -85,8 +88,34 @@ internal object RecipePageExtractor {
     private fun compact(recipe: JsonNode): ObjectNode {
         val out = mapper.createObjectNode()
         recipeFields.forEach { field -> recipe.get(field)?.let { out.set<JsonNode>(field, unescaped(it)) } }
+        recipe.get(INSTRUCTIONS_FIELD)?.let { node ->
+            val steps = flattenInstructions(node)
+            if (steps.isNotEmpty()) {
+                out.set<JsonNode>(INSTRUCTIONS_FIELD, mapper.createArrayNode().also { arr -> steps.forEach { arr.add(it) } })
+            }
+        }
         return out
     }
+
+    /**
+     * schema.org allows `recipeInstructions` to be a string, a list of strings, a list of
+     * `HowToStep` objects, or `HowToSection`s each holding steps in `itemListElement`. Only the
+     * step text is worth the tokens — names, urls and images per step are dropped, section
+     * headings too — and sites embed HTML in the text, so it goes through Jsoup.
+     */
+    fun flattenInstructions(node: JsonNode): List<String> = when {
+        node.isTextual -> listOf(cleanStep(node.asText()))
+        node.isArray -> node.flatMap { flattenInstructions(it) }
+        node.isObject -> {
+            val items = node.get("itemListElement")
+            if (items != null) flattenInstructions(items)
+            else (node.get("text") ?: node.get("name"))?.takeIf { it.isTextual }?.let { listOf(cleanStep(it.asText())) }.orEmpty()
+        }
+        else -> emptyList()
+    }.filter { it.isNotBlank() }
+
+    private fun cleanStep(raw: String): String =
+        Jsoup.parse(Parser.unescapeEntities(raw, false)).text().trim()
 
     /** JSON-LD strings often carry HTML entities (`&amp;`, `&frac12;`); decode them so originalText reads cleanly. */
     private fun unescaped(node: JsonNode): JsonNode = when {

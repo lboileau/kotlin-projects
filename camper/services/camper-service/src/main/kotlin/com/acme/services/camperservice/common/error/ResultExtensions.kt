@@ -275,6 +275,12 @@ fun RecipeError.toResponseEntity(): ResponseEntity<Any> = when (this) {
         .body(ApiResponse.ErrorBody("NOT_FOUND", message))
     is RecipeError.AlreadyPublished -> ResponseEntity.status(409)
         .body(ApiResponse.ErrorBody("CONFLICT", message))
+    is RecipeError.PhotoNotFound -> ResponseEntity.status(404)
+        .body(ApiResponse.ErrorBody("NOT_FOUND", message))
+    is RecipeError.PhotoLimit -> ResponseEntity.status(409)
+        .body(ApiResponse.ErrorBody("PHOTO_LIMIT", message))
+    is RecipeError.StorageFailed -> ResponseEntity.status(502)
+        .body(ApiResponse.ErrorBody("STORAGE_FAILED", message))
 }
 
 @JvmName("recipeResultToResponseEntity")

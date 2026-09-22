@@ -7,16 +7,12 @@ import com.acme.clients.recipeclient.api.AddRecipeIngredientParam
 import com.acme.clients.recipeclient.api.AddRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.CreateRecipeParam as ClientCreateRecipeParam
 import com.acme.clients.recipeclient.api.FindSimilarParam
-import com.acme.clients.recipeclient.api.GetByIdParam
-import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
-import com.acme.clients.recipeclient.api.GetRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.RecipeClient
+import com.acme.clients.recipeclient.api.ReplaceRecipeStepsParam
 import com.acme.clients.recipeclient.api.UpdateRecipeParam as ClientUpdateRecipeParam
 import com.acme.clients.recipescraperclient.api.ExistingIngredient
 import com.acme.clients.recipescraperclient.model.ScrapedRecipe
-import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
 import com.acme.services.camperservice.features.recipe.error.RecipeError
-import com.acme.services.camperservice.features.recipe.mapper.RecipeMapper
 import java.util.UUID
 
 /**
@@ -44,15 +40,15 @@ internal class ScrapedRecipeDrafter(
 
     /**
      * Creates the draft, flags a similar-named recipe as its possible duplicate, stores every line
-     * as `approved` (clean high-confidence match) or `pending_review` (anything flagged), and reads
-     * the whole thing back as the detail response.
+     * as `approved` (clean high-confidence match) or `pending_review` (anything flagged), writes
+     * the steps, and returns the new recipe's id. The caller reads the detail back through
+     * [GetRecipeAction] once it has attached whatever else (photos) belongs on the draft.
      */
     fun createDraft(
         scraped: ScrapedRecipe,
         webLink: String?,
-        userId: UUID,
-        catalogue: Catalogue
-    ): Result<RecipeDetailResponse, RecipeError> {
+        userId: UUID
+    ): Result<UUID, RecipeError> {
         // Check for similar existing recipes (duplicate detection)
         val similarRecipes = when (val result = recipeClient.findSimilarByName(FindSimilarParam(scraped.name))) {
             is Result.Success -> result.value
@@ -76,16 +72,8 @@ internal class ScrapedRecipeDrafter(
         }
 
         // Set duplicate_of_id if found
-        val finalRecipe = if (duplicateOfId != null) {
-            when (val result = recipeClient.update(ClientUpdateRecipeParam(
-                id = recipe.id,
-                duplicateOfId = duplicateOfId
-            ))) {
-                is Result.Success -> result.value
-                is Result.Failure -> recipe
-            }
-        } else {
-            recipe
+        if (duplicateOfId != null) {
+            recipeClient.update(ClientUpdateRecipeParam(id = recipe.id, duplicateOfId = duplicateOfId))
         }
 
         // Add recipe ingredients with review state
@@ -104,7 +92,6 @@ internal class ScrapedRecipeDrafter(
                 reviewFlags = ing.reviewFlags
             )
         }
-
         if (ingredientParams.isNotEmpty()) {
             when (val result = recipeClient.addIngredients(AddRecipeIngredientsParam(ingredientParams))) {
                 is Result.Failure -> return Result.Failure(RecipeError.Invalid("ingredients", result.error.message))
@@ -112,53 +99,18 @@ internal class ScrapedRecipeDrafter(
             }
         }
 
-        // Fetch full detail for response
-        val recipeIngredients = when (val result = recipeClient.getIngredients(GetRecipeIngredientsParam(recipe.id))) {
-            is Result.Success -> result.value
-            is Result.Failure -> return Result.Failure(RecipeError.Invalid("ingredients", result.error.message))
+        // Steps are stored as read — there is nothing to review in a method.
+        val steps = when (val validated = ReplaceRecipeStepsAction.validateSteps(scraped.steps)) {
+            is Result.Success -> validated.value
+            is Result.Failure -> scraped.steps.map { it.trim() }.filter { it.isNotEmpty() }.take(ReplaceRecipeStepsAction.MAX_STEPS)
         }
-
-        val ingredientMap = catalogue.all.associateBy({ it.id }, { RecipeMapper.toIngredientResponse(it) })
-
-        // The imported draft really is 0 / false, but its nested duplicateOf may already have
-        // favourites. One batched read covers both, keeping the same shape as GetRecipeAction.
-        val summaries = when (val result = recipeClient.getFavoriteSummaries(
-            GetRecipeFavoriteSummariesParam(
-                recipeIds = listOfNotNull(finalRecipe.id, finalRecipe.duplicateOfId),
-                userId = userId
-            )
-        )) {
-            is Result.Success -> result.value.associateBy { it.recipeId }
-            is Result.Failure -> return Result.Failure(RecipeError.Invalid("favorites", result.error.message))
-        }
-
-        val duplicateOf = finalRecipe.duplicateOfId?.let { dupId ->
-            when (val result = recipeClient.getById(GetByIdParam(dupId))) {
-                is Result.Success -> RecipeMapper.toRecipeResponse(
-                    result.value,
-                    summaries[dupId]?.favoriteCount ?: 0,
-                    summaries[dupId]?.favoritedByMe ?: false
-                )
-                is Result.Failure -> null
+        if (steps.isNotEmpty()) {
+            when (val result = recipeClient.replaceSteps(ReplaceRecipeStepsParam(recipe.id, steps.map { it.take(ReplaceRecipeStepsAction.MAX_STEP_CHARS) }))) {
+                is Result.Failure -> return Result.Failure(RecipeError.Invalid("steps", result.error.message))
+                is Result.Success -> {}
             }
         }
 
-        val ingredientResponses = recipeIngredients.map { ri ->
-            RecipeMapper.toRecipeIngredientResponse(
-                recipeIngredient = ri,
-                ingredient = ri.ingredientId?.let { ingredientMap[it] },
-                matchedIngredient = ri.matchedIngredientId?.let { ingredientMap[it] }
-            )
-        }
-
-        return Result.Success(
-            RecipeMapper.toRecipeDetailResponse(
-                finalRecipe,
-                duplicateOf,
-                ingredientResponses,
-                summaries[finalRecipe.id]?.favoriteCount ?: 0,
-                summaries[finalRecipe.id]?.favoritedByMe ?: false
-            )
-        )
+        return Result.Success(recipe.id)
     }
 }

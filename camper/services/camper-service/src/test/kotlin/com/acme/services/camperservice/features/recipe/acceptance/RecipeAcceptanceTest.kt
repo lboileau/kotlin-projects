@@ -5,7 +5,11 @@ import com.acme.services.camperservice.features.recipe.acceptance.fixture.Recipe
 import com.acme.services.camperservice.features.recipe.dto.CreateIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeRequest
+import com.acme.services.camperservice.features.recipe.dto.AddRecipePhotoRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportImageRequest
+import com.acme.services.camperservice.features.recipe.dto.RecipePhotoResponse
+import com.acme.services.camperservice.features.recipe.dto.RecipeStepsResponse
+import com.acme.services.camperservice.features.recipe.dto.ReplaceRecipeStepsRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportRecipeFromImagesRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportRecipeRequest
 import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
@@ -348,7 +352,7 @@ class RecipeAcceptanceTest {
             val response = restTemplate.exchange(
                 "/api/recipes/import-images",
                 HttpMethod.POST,
-                entityWithUser(ImportRecipeFromImagesRequest(listOf(photo(), photo("image/png"))), userId),
+                entityWithUser(ImportRecipeFromImagesRequest(listOf(photo().copy(role = "ingredients"), photo("image/png").copy(role = "instructions"))), userId),
                 RecipeDetailResponse::class.java
             )
 
@@ -406,6 +410,118 @@ class RecipeAcceptanceTest {
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
             assertThat(response.body!!["message"].toString()).contains("images[0].mediaType")
+        }
+    }
+
+    @Nested
+    inner class StepsAndPhotos {
+
+        /** A real 1×1 PNG so the server reads dimensions. */
+        private val tinyPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+
+        private fun getDetail(recipeId: UUID) = restTemplate.exchange(
+            "/api/recipes/$recipeId", HttpMethod.GET, entityWithUser(null, userId), RecipeDetailResponse::class.java
+        ).body!!
+
+        @Test
+        fun `POST creates a recipe with steps, GET returns them, PUT steps replaces them`() {
+            val create = restTemplate.exchange(
+                "/api/recipes", HttpMethod.POST,
+                entityWithUser(CreateRecipeRequest(name = "Toast", description = null, webLink = null, baseServings = 1, ingredients = emptyList(), steps = listOf("Slice.", "Toast.")), userId),
+                RecipeResponse::class.java
+            )
+            assertThat(create.statusCode).isEqualTo(HttpStatus.CREATED)
+            val id = create.body!!.id
+            assertThat(getDetail(id).steps).containsExactly("Slice.", "Toast.")
+
+            val put = restTemplate.exchange(
+                "/api/recipes/$id/steps", HttpMethod.PUT,
+                entityWithUser(ReplaceRecipeStepsRequest(listOf("Only one.")), userId),
+                RecipeStepsResponse::class.java
+            )
+            assertThat(put.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(put.body!!.steps).containsExactly("Only one.")
+            assertThat(getDetail(id).steps).containsExactly("Only one.")
+        }
+
+        @Test
+        fun `PUT steps returns 400 for a blank step and 404 for an unknown recipe`() {
+            val id = fixture.insertRecipe(name = "Toast", createdBy = userId)
+            val blank = restTemplate.exchange("/api/recipes/$id/steps", HttpMethod.PUT, entityWithUser(ReplaceRecipeStepsRequest(listOf(" ")), userId), Map::class.java)
+            val missing = restTemplate.exchange("/api/recipes/${UUID.randomUUID()}/steps", HttpMethod.PUT, entityWithUser(ReplaceRecipeStepsRequest(listOf("x")), userId), Map::class.java)
+            assertThat(blank.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+            assertThat(missing.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+
+        @Test
+        fun `POST photo stores it, GET lists it with a url, the photo-store route serves it without a user header, DELETE removes it`() {
+            val id = fixture.insertRecipe(name = "Toast", createdBy = userId)
+
+            val added = restTemplate.exchange(
+                "/api/recipes/$id/photos", HttpMethod.POST,
+                entityWithUser(AddRecipePhotoRequest("image/png", tinyPng), userId), RecipePhotoResponse::class.java
+            )
+            assertThat(added.statusCode).isEqualTo(HttpStatus.CREATED)
+            val photo = added.body!!
+            assertThat(photo.width).isEqualTo(1)
+            assertThat(photo.source).isEqualTo("upload")
+            assertThat(photo.url).startsWith("fake://recipes/$id/")
+
+            val detail = getDetail(id)
+            assertThat(detail.photos.map { it.id }).containsExactly(photo.id)
+
+            // The store route takes the key and needs no X-User-Id — an <img> can't send one.
+            val key = photo.url.removePrefix("fake://")
+            val served = restTemplate.getForEntity("/api/photo-store/$key", ByteArray::class.java)
+            assertThat(served.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(served.headers.contentType.toString()).isEqualTo("image/png")
+            assertThat(served.headers.cacheControl).contains("immutable")
+            assertThat(served.body).isEqualTo(java.util.Base64.getDecoder().decode(tinyPng))
+
+            val removed = restTemplate.exchange("/api/recipes/$id/photos/${photo.id}", HttpMethod.DELETE, entityWithUser(null, userId), Void::class.java)
+            assertThat(removed.statusCode).isEqualTo(HttpStatus.NO_CONTENT)
+            assertThat(getDetail(id).photos).isEmpty()
+            assertThat(restTemplate.getForEntity("/api/photo-store/$key", ByteArray::class.java).statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+
+        @Test
+        fun `POST photo returns 400 for a bad media type and 404 for an unknown recipe, DELETE unknown photo is 404`() {
+            val id = fixture.insertRecipe(name = "Toast", createdBy = userId)
+            val bad = restTemplate.exchange("/api/recipes/$id/photos", HttpMethod.POST, entityWithUser(AddRecipePhotoRequest("application/pdf", tinyPng), userId), Map::class.java)
+            val missing = restTemplate.exchange("/api/recipes/${UUID.randomUUID()}/photos", HttpMethod.POST, entityWithUser(AddRecipePhotoRequest("image/png", tinyPng), userId), Map::class.java)
+            val gone = restTemplate.exchange("/api/recipes/$id/photos/${UUID.randomUUID()}", HttpMethod.DELETE, entityWithUser(null, userId), Map::class.java)
+            assertThat(bad.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+            assertThat(missing.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+            assertThat(gone.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+        }
+
+        @Test
+        fun `import from ingredients and instructions photos attaches both with their roles and stores the steps`() {
+            val response = restTemplate.exchange(
+                "/api/recipes/import-images", HttpMethod.POST,
+                entityWithUser(ImportRecipeFromImagesRequest(listOf(
+                    ImportImageRequest("image/png", tinyPng, role = "ingredients"),
+                    ImportImageRequest("image/png", tinyPng, role = "instructions")
+                )), userId),
+                RecipeDetailResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            val draft = response.body!!
+            assertThat(draft.steps).isNotEmpty()  // the stub scraper's canned steps
+            assertThat(draft.photos.map { it.role }).containsExactly("ingredients", "instructions")
+            assertThat(draft.photos.map { it.source }).containsOnly("import")
+            assertThat(getDetail(draft.id).photos).hasSize(2)
+        }
+
+        @Test
+        fun `import rejects two photos without roles`() {
+            val response = restTemplate.exchange(
+                "/api/recipes/import-images", HttpMethod.POST,
+                entityWithUser(ImportRecipeFromImagesRequest(listOf(ImportImageRequest("image/png", tinyPng), ImportImageRequest("image/png", tinyPng))), userId),
+                Map::class.java
+            )
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
         }
     }
 

@@ -93,6 +93,6 @@ class RecipeFixture(private val jdbcTemplate: JdbcTemplate) {
     }
 
     fun truncateAll() {
-        jdbcTemplate.execute("TRUNCATE TABLE recipe_favorites, recipe_ingredients, recipes, ingredients, users CASCADE")
+        jdbcTemplate.execute("TRUNCATE TABLE recipe_photos, recipe_steps, recipe_favorites, recipe_ingredients, recipes, ingredients, users CASCADE")
     }
 }

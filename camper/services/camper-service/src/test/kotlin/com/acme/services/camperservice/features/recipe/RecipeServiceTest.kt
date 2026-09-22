@@ -4,6 +4,7 @@ import com.acme.clients.common.Result
 import com.acme.clients.common.error.AppError
 import com.acme.clients.ingredientclient.fake.FakeIngredientClient
 import com.acme.clients.ingredientclient.model.Ingredient
+import com.acme.clients.photostorageclient.fake.FakePhotoStorageClient
 import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
 import com.acme.clients.recipeclient.api.GetRecipeFavoritesParam
 import com.acme.clients.recipeclient.api.RecipeClient
@@ -18,7 +19,7 @@ import com.acme.clients.recipescraperclient.model.ScrapedRecipe
 import com.acme.clients.userclient.fake.FakeUserClient
 import com.acme.clients.userclient.model.User
 import com.acme.services.camperservice.features.recipe.actions.HtmlFetcher
-import com.acme.services.camperservice.features.recipe.actions.ImportRecipeFromImagesAction
+import com.acme.services.camperservice.features.recipe.actions.RecipePhotoStore
 import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.recipe.params.*
 import com.acme.services.camperservice.features.recipe.service.IngredientService
@@ -38,6 +39,7 @@ class RecipeServiceTest {
     private val fakeIngredientClient = FakeIngredientClient()
     private val fakeScraperClient = FakeRecipeScraperClient()
     private val fakeUserClient = FakeUserClient()
+    private val fakePhotoStorage = FakePhotoStorageClient()
     private val fakeHtmlFetcher = HtmlFetcher { "<html>fake</html>" }
 
     private val recipeService = RecipeService(
@@ -45,6 +47,7 @@ class RecipeServiceTest {
         ingredientClient = fakeIngredientClient,
         recipeScraperClient = fakeScraperClient,
         userClient = fakeUserClient,
+        photoStorageClient = fakePhotoStorage,
         htmlFetcher = fakeHtmlFetcher
     )
     private val ingredientService = IngredientService(fakeIngredientClient, fakeRecipeClient)
@@ -58,6 +61,7 @@ class RecipeServiceTest {
         fakeIngredientClient.reset()
         fakeScraperClient.reset()
         fakeUserClient.reset()
+        fakePhotoStorage.reset()
     }
 
     // ─── Ingredient helpers ───────────────────────────────────────────────
@@ -543,6 +547,7 @@ class RecipeServiceTest {
                 ingredientClient = fakeIngredientClient,
                 recipeScraperClient = fakeScraperClient,
                 userClient = fakeUserClient,
+                photoStorageClient = fakePhotoStorage,
                 htmlFetcher = failingFetcher
             )
 
@@ -641,9 +646,10 @@ class RecipeServiceTest {
         @Test
         fun `import from images passes every photo and the catalogue to the scraper in order`() {
             seedIngredient("avocado", "produce", "whole")
-            val png = ImportImageParam("image/png", Base64.getEncoder().encodeToString(ByteArray(8) { 2 }))
+            val png = ImportImageParam("image/png", Base64.getEncoder().encodeToString(ByteArray(8) { 2 }), role = "instructions")
+            val jpegIngredients = jpeg.copy(role = "ingredients")
 
-            recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg, png)))
+            recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpegIngredients, png)))
 
             val sent = fakeScraperClient.lastImagesParam
             assertThat(sent).isNotNull
@@ -726,7 +732,7 @@ class RecipeServiceTest {
 
         @Test
         fun `import from images rejects a photo over the size limit before decoding it`() {
-            val tooBig = "A".repeat(ImportRecipeFromImagesAction.MAX_IMAGE_BYTES / 3 * 4 + 8)
+            val tooBig = "A".repeat(RecipePhotoStore.MAX_IMAGE_BYTES / 3 * 4 + 8)
 
             val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg.copy(data = tooBig))))
 
@@ -740,6 +746,280 @@ class RecipeServiceTest {
             recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg.copy(mediaType = " IMAGE/JPEG "))))
 
             assertThat(fakeScraperClient.lastImagesParam!!.images.single().mediaType).isEqualTo("image/jpeg")
+        }
+    }
+
+    // ─── Steps & photos ───────────────────────────────────────────────────
+
+    /** A real 1×1 PNG, so ImageIO can read its dimensions. */
+    private val tinyPng = Base64.getEncoder().encodeToString(
+        Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==")
+    )
+
+    private fun detail(recipeId: UUID) = (recipeService.get(GetRecipeParam(recipeId, userId)) as Result.Success).value
+
+    @Nested
+    inner class Steps {
+
+        @Test
+        fun `a recipe created without steps has none, and get returns an empty list`() {
+            val recipe = createRecipe("Toast")
+            assertThat(detail(recipe.id).steps).isEmpty()
+        }
+
+        @Test
+        fun `create stores steps in order, trimmed`() {
+            val result = recipeService.create(CreateRecipeParam(
+                userId = userId, name = "Toast", description = null, webLink = null, baseServings = 1,
+                ingredients = emptyList(), steps = listOf(" Slice the bread. ", "Toast it.")
+            ))
+
+            val id = (result as Result.Success).value.id
+            assertThat(detail(id).steps).containsExactly("Slice the bread.", "Toast it.")
+        }
+
+        @Test
+        fun `create rejects a blank step and creates nothing`() {
+            val result = recipeService.create(CreateRecipeParam(
+                userId = userId, name = "Toast", description = null, webLink = null, baseServings = 1,
+                ingredients = emptyList(), steps = listOf("Slice.", "  ")
+            ))
+
+            val error = (result as Result.Failure).error as RecipeError.Invalid
+            assertThat(error.field).isEqualTo("steps[1]")
+            assertThat((recipeService.list(ListRecipesParam(userId)) as Result.Success).value).isEmpty()
+        }
+
+        @Test
+        fun `replaceSteps replaces the whole list and an empty list clears it`() {
+            val recipe = createRecipe("Toast")
+            recipeService.replaceSteps(ReplaceRecipeStepsParam(recipe.id, userId, listOf("One", "Two", "Three")))
+
+            val replaced = recipeService.replaceSteps(ReplaceRecipeStepsParam(recipe.id, userId, listOf("Only")))
+            assertThat((replaced as Result.Success).value.steps).containsExactly("Only")
+            assertThat(detail(recipe.id).steps).containsExactly("Only")
+
+            recipeService.replaceSteps(ReplaceRecipeStepsParam(recipe.id, userId, emptyList()))
+            assertThat(detail(recipe.id).steps).isEmpty()
+        }
+
+        @Test
+        fun `replaceSteps validates before touching the recipe`() {
+            val recipe = createRecipe("Toast")
+            recipeService.replaceSteps(ReplaceRecipeStepsParam(recipe.id, userId, listOf("Keep")))
+
+            val blank = recipeService.replaceSteps(ReplaceRecipeStepsParam(recipe.id, userId, listOf("", "x")))
+            val tooLong = recipeService.replaceSteps(ReplaceRecipeStepsParam(recipe.id, userId, listOf("y".repeat(2001))))
+            val tooMany = recipeService.replaceSteps(ReplaceRecipeStepsParam(recipe.id, userId, List(101) { "s" }))
+
+            assertThat((blank as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
+            assertThat((tooLong as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
+            assertThat((tooMany as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
+            assertThat(detail(recipe.id).steps).containsExactly("Keep")
+        }
+
+        @Test
+        fun `replaceSteps on an unknown recipe is NotFound`() {
+            val result = recipeService.replaceSteps(ReplaceRecipeStepsParam(UUID.randomUUID(), userId, listOf("x")))
+            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotFound::class.java)
+        }
+
+        @Test
+        fun `a url import stores the scraper's steps on the draft`() {
+            val imported = (recipeService.import(ImportRecipeParam(userId, "https://example.com/guac")) as Result.Success).value
+
+            assertThat(imported.steps).containsExactly("Mash the avocados.", "Season and serve.")
+            assertThat(detail(imported.id).steps).containsExactly("Mash the avocados.", "Season and serve.")
+        }
+    }
+
+    @Nested
+    inner class Photos {
+
+        @Test
+        fun `addPhoto stores the object under the recipe, records dimensions, and get returns it with a url`() {
+            val recipe = createRecipe("Toast")
+
+            val result = recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng))
+
+            val photo = (result as Result.Success).value
+            assertThat(photo.mediaType).isEqualTo("image/png")
+            assertThat(photo.width).isEqualTo(1)
+            assertThat(photo.height).isEqualTo(1)
+            assertThat(photo.source).isEqualTo("upload")
+            assertThat(photo.role).isNull()
+            assertThat(photo.position).isEqualTo(0)
+            assertThat(photo.url).isEqualTo("fake://recipes/${recipe.id}/${photo.id}.png")
+            assertThat(fakePhotoStorage.keys()).containsExactly("recipes/${recipe.id}/${photo.id}.png")
+
+            val got = detail(recipe.id)
+            assertThat(got.photos).hasSize(1)
+            assertThat(got.photos[0].id).isEqualTo(photo.id)
+            assertThat(got.photos[0].url).isEqualTo(photo.url)
+        }
+
+        @Test
+        fun `photos keep the order they were added`() {
+            val recipe = createRecipe("Toast")
+            val a = (recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng)) as Result.Success).value
+            val b = (recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng)) as Result.Success).value
+
+            assertThat(detail(recipe.id).photos.map { it.id }).containsExactly(a.id, b.id)
+            assertThat(b.position).isEqualTo(1)
+        }
+
+        @Test
+        fun `addPhoto rejects a bad image before storing anything`() {
+            val recipe = createRecipe("Toast")
+
+            listOf("image/heic" to tinyPng, "image/png" to "data:image/png;base64,AAAA", "image/png" to "not base64!!").forEach { (type, data) ->
+                val result = recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, type, data))
+                assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
+            }
+            assertThat(fakePhotoStorage.keys()).isEmpty()
+            assertThat(detail(recipe.id).photos).isEmpty()
+        }
+
+        @Test
+        fun `addPhoto on an unknown recipe is NotFound`() {
+            val result = recipeService.addPhoto(AddRecipePhotoParam(UUID.randomUUID(), userId, "image/png", tinyPng))
+            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotFound::class.java)
+            assertThat(fakePhotoStorage.keys()).isEmpty()
+        }
+
+        @Test
+        fun `addPhoto stops at the per-recipe limit`() {
+            val recipe = createRecipe("Toast")
+            repeat(RecipePhotoStore.MAX_PHOTOS_PER_RECIPE) {
+                assertThat(recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng)).isSuccess).isTrue()
+            }
+
+            val result = recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng))
+
+            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.PhotoLimit::class.java)
+            assertThat(fakePhotoStorage.keys()).hasSize(RecipePhotoStore.MAX_PHOTOS_PER_RECIPE)
+        }
+
+        @Test
+        fun `a storage failure on addPhoto is StorageFailed and leaves no row`() {
+            val recipe = createRecipe("Toast")
+            fakePhotoStorage.nextPutResult = Result.Failure(object : AppError { override val message = "bucket down" })
+
+            val result = recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng))
+
+            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.StorageFailed::class.java)
+            assertThat(detail(recipe.id).photos).isEmpty()
+        }
+
+        @Test
+        fun `removePhoto deletes the object then the row`() {
+            val recipe = createRecipe("Toast")
+            val photo = (recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng)) as Result.Success).value
+
+            val result = recipeService.removePhoto(RemoveRecipePhotoParam(recipe.id, photo.id, userId))
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(fakePhotoStorage.keys()).isEmpty()
+            assertThat(detail(recipe.id).photos).isEmpty()
+        }
+
+        @Test
+        fun `removePhoto is PhotoNotFound for an unknown id or another recipe's photo`() {
+            val recipe = createRecipe("Toast")
+            val other = createRecipe("Other")
+            val photo = (recipeService.addPhoto(AddRecipePhotoParam(other.id, userId, "image/png", tinyPng)) as Result.Success).value
+
+            val unknown = recipeService.removePhoto(RemoveRecipePhotoParam(recipe.id, UUID.randomUUID(), userId))
+            val wrongRecipe = recipeService.removePhoto(RemoveRecipePhotoParam(recipe.id, photo.id, userId))
+
+            assertThat((unknown as Result.Failure).error).isInstanceOf(RecipeError.PhotoNotFound::class.java)
+            assertThat((wrongRecipe as Result.Failure).error).isInstanceOf(RecipeError.PhotoNotFound::class.java)
+            assertThat(fakePhotoStorage.keys()).hasSize(1)
+        }
+
+        @Test
+        fun `deleting a recipe removes its objects from storage`() {
+            val recipe = createRecipe("Toast")
+            recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng))
+            recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng))
+            val keeper = createRecipe("Keeper")
+            val kept = (recipeService.addPhoto(AddRecipePhotoParam(keeper.id, userId, "image/png", tinyPng)) as Result.Success).value
+
+            assertThat(recipeService.delete(DeleteRecipeParam(recipe.id, userId)).isSuccess).isTrue()
+
+            assertThat(fakePhotoStorage.keys()).containsExactly("recipes/${keeper.id}/${kept.id}.png")
+        }
+
+        @Test
+        fun `getStoredPhoto serves an object by key and misses cleanly`() {
+            val recipe = createRecipe("Toast")
+            val photo = (recipeService.addPhoto(AddRecipePhotoParam(recipe.id, userId, "image/png", tinyPng)) as Result.Success).value
+
+            val hit = recipeService.getStoredPhoto(GetStoredPhotoParam("recipes/${recipe.id}/${photo.id}.png"))
+            val miss = recipeService.getStoredPhoto(GetStoredPhotoParam("recipes/nothing/here.png"))
+
+            assertThat((hit as Result.Success).value.mediaType).isEqualTo("image/png")
+            assertThat(hit.value.bytes).isEqualTo(Base64.getDecoder().decode(tinyPng))
+            assertThat((miss as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
+        }
+    }
+
+    @Nested
+    inner class ImportFromImagesWithRoles {
+
+        private fun photo(role: String?) = ImportImageParam("image/png", tinyPng, role)
+
+        @Test
+        fun `ingredients plus instructions photos are sent with their roles and attached to the draft in order`() {
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(photo("ingredients"), photo("instructions"))))
+
+            val draft = (result as Result.Success).value
+            val sent = fakeScraperClient.lastImagesParam!!
+            assertThat(sent.images.map { it.role }).containsExactly("ingredients", "instructions")
+            assertThat(draft.steps).containsExactly("Mash the avocados.", "Season and serve.")
+            assertThat(draft.photos.map { it.role }).containsExactly("ingredients", "instructions")
+            assertThat(draft.photos.map { it.source }).containsOnly("import")
+            assertThat(draft.photos.map { it.position }).containsExactly(0, 1)
+            assertThat(fakePhotoStorage.keys()).hasSize(2)
+        }
+
+        @Test
+        fun `a single photo may carry no role`() {
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(photo(null))))
+
+            val draft = (result as Result.Success).value
+            assertThat(fakeScraperClient.lastImagesParam!!.images.single().role).isNull()
+            assertThat(draft.photos).hasSize(1)
+            assertThat(draft.photos[0].role).isNull()
+        }
+
+        @Test
+        fun `role rules - unknown role, two of one role, a missing ingredients photo, an unlabelled second photo`() {
+            val cases = listOf(
+                listOf(photo("cover")),
+                listOf(photo("ingredients"), photo("ingredients")),
+                listOf(photo("instructions")),
+                listOf(photo("ingredients"), photo(null)),
+                listOf(photo("ingredients"), photo("instructions"), photo("instructions"))
+            )
+            cases.forEach { images ->
+                val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, images))
+                assertThat((result as Result.Failure).error).`as`(images.map { it.role }.toString()).isInstanceOf(RecipeError.Invalid::class.java)
+            }
+            assertThat(fakeScraperClient.lastImagesParam).isNull()
+            assertThat(fakePhotoStorage.keys()).isEmpty()
+        }
+
+        @Test
+        fun `a storage failure while attaching a source photo does not fail the import`() {
+            fakePhotoStorage.nextPutResult = Result.Failure(object : AppError { override val message = "bucket down" })
+
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(photo("ingredients"), photo("instructions"))))
+
+            val draft = (result as Result.Success).value
+            assertThat(draft.name).isEqualTo("Classic Guacamole")
+            // The first put failed and was skipped; the second went through.
+            assertThat(draft.photos.map { it.role }).containsExactly("instructions")
         }
     }
 
@@ -1324,6 +1604,7 @@ class RecipeServiceTest {
                 ingredientClient = fakeIngredientClient,
                 recipeScraperClient = fakeScraperClient,
                 userClient = fakeUserClient,
+                photoStorageClient = fakePhotoStorage,
                 htmlFetcher = fakeHtmlFetcher
             )
             createRecipe("R1")
@@ -1345,6 +1626,7 @@ class RecipeServiceTest {
                 ingredientClient = fakeIngredientClient,
                 recipeScraperClient = fakeScraperClient,
                 userClient = fakeUserClient,
+                photoStorageClient = fakePhotoStorage,
                 htmlFetcher = fakeHtmlFetcher
             )
 

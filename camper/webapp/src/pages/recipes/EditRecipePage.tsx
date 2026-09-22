@@ -6,6 +6,7 @@ import { PageHeader } from '../../components/PageHeader';
 import { useBack } from '../../components/useBack';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { useRecipe, useSaveRecipeEdits, type RecipeEdits } from '../../queries/recipes';
+import { normaliseSteps, stepsChanged } from '../../lib/recipeSteps';
 import { parseQuantity } from '../../lib/parseQuantity';
 import { enterMovesOn } from '../../lib/enterMovesOn';
 import { toast } from '../../lib/toastStore';
@@ -115,6 +116,7 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
     meal: recipe.meal ?? '',
     theme: recipe.theme ?? '',
     lines: editableLines,
+    steps: recipe.steps,
   });
   const [pendingLine, setPendingLine] = useState<PendingLine | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +160,8 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
       addedLines: result.lines
         .filter((line) => !line.lineId)
         .map((line) => ({ ingredientId: line.ingredient.id, quantity: parseQuantity(line.quantity) ?? 0, unit: line.unit })),
+      // One PUT replaces the whole list, and only when it changed.
+      steps: stepsChanged(recipe.steps, values.steps) ? normaliseSteps(values.steps) : undefined,
     };
 
     try {

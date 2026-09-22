@@ -1,6 +1,7 @@
 package com.acme.services.camperservice.config
 
 import com.acme.clients.ingredientclient.api.IngredientClient
+import com.acme.clients.photostorageclient.api.PhotoStorageClient
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.clients.recipescraperclient.api.RecipeScraperClient
 import com.acme.clients.userclient.api.UserClient
@@ -15,6 +16,7 @@ class RecipeServiceConfig {
         recipeClient: RecipeClient,
         ingredientClient: IngredientClient,
         recipeScraperClient: RecipeScraperClient,
-        userClient: UserClient
-    ): RecipeService = RecipeService(recipeClient, ingredientClient, recipeScraperClient, userClient)
+        userClient: UserClient,
+        photoStorageClient: PhotoStorageClient
+    ): RecipeService = RecipeService(recipeClient, ingredientClient, recipeScraperClient, userClient, photoStorageClient)
 }

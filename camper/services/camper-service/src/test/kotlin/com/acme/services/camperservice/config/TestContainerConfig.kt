@@ -14,6 +14,8 @@ import com.acme.clients.planclient.api.PlanClient
 import com.acme.clients.planclient.createPlanClient
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.clients.recipeclient.createRecipeClient
+import com.acme.clients.photostorageclient.api.PhotoStorageClient
+import com.acme.clients.photostorageclient.fake.FakePhotoStorageClient
 import com.acme.clients.recipescraperclient.api.RecipeScraperClient
 import com.acme.clients.recipescraperclient.createNoOpRecipeScraperClient
 import com.acme.clients.userclient.api.UserClient
@@ -84,4 +86,9 @@ class TestContainerConfig {
     @Bean
     @Primary
     fun recipeScraperClient(): RecipeScraperClient = createNoOpRecipeScraperClient()
+
+    /** In-memory, so acceptance tests can upload photos and check the object went away on delete. */
+    @Bean
+    @Primary
+    fun photoStorageClient(): PhotoStorageClient = FakePhotoStorageClient()
 }

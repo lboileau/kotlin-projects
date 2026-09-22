@@ -1,10 +1,16 @@
 package com.acme.services.camperservice.features.recipe.service
 
 import com.acme.clients.ingredientclient.api.IngredientClient
+import com.acme.clients.photostorageclient.api.PhotoStorageClient
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.clients.recipescraperclient.api.RecipeScraperClient
 import com.acme.clients.userclient.api.UserClient
 import com.acme.services.camperservice.features.recipe.actions.AddRecipeIngredientAction
+import com.acme.services.camperservice.features.recipe.actions.AddRecipePhotoAction
+import com.acme.services.camperservice.features.recipe.actions.GetStoredPhotoAction
+import com.acme.services.camperservice.features.recipe.actions.RecipePhotoStore
+import com.acme.services.camperservice.features.recipe.actions.RemoveRecipePhotoAction
+import com.acme.services.camperservice.features.recipe.actions.ReplaceRecipeStepsAction
 import com.acme.services.camperservice.features.recipe.actions.CreateRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.DeleteRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.FavoriteRecipeAction
@@ -22,6 +28,10 @@ import com.acme.services.camperservice.features.recipe.actions.UnfavoriteRecipeA
 import com.acme.services.camperservice.features.recipe.actions.UpdateRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.defaultHtmlFetcher
 import com.acme.services.camperservice.features.recipe.params.AddRecipeIngredientParam
+import com.acme.services.camperservice.features.recipe.params.AddRecipePhotoParam
+import com.acme.services.camperservice.features.recipe.params.GetStoredPhotoParam
+import com.acme.services.camperservice.features.recipe.params.RemoveRecipePhotoParam
+import com.acme.services.camperservice.features.recipe.params.ReplaceRecipeStepsParam
 import com.acme.services.camperservice.features.recipe.params.CreateRecipeParam
 import com.acme.services.camperservice.features.recipe.params.DeleteRecipeParam
 import com.acme.services.camperservice.features.recipe.params.FavoriteRecipeParam
@@ -42,16 +52,22 @@ class RecipeService(
     ingredientClient: IngredientClient,
     recipeScraperClient: RecipeScraperClient,
     userClient: UserClient,
+    photoStorageClient: PhotoStorageClient,
     htmlFetcher: HtmlFetcher = defaultHtmlFetcher()
 ) {
+    private val photoStore = RecipePhotoStore(recipeClient, photoStorageClient)
     private val addRecipeIngredient = AddRecipeIngredientAction(recipeClient, ingredientClient)
     private val createRecipe = CreateRecipeAction(recipeClient, ingredientClient)
-    private val importRecipe = ImportRecipeAction(recipeClient, ingredientClient, recipeScraperClient, htmlFetcher)
-    private val importRecipeFromImages = ImportRecipeFromImagesAction(recipeClient, ingredientClient, recipeScraperClient)
-    private val getRecipe = GetRecipeAction(recipeClient, ingredientClient)
+    private val importRecipe = ImportRecipeAction(recipeClient, ingredientClient, recipeScraperClient, photoStore, htmlFetcher)
+    private val importRecipeFromImages = ImportRecipeFromImagesAction(recipeClient, ingredientClient, recipeScraperClient, photoStore)
+    private val getRecipe = GetRecipeAction(recipeClient, ingredientClient, photoStore)
     private val listRecipes = ListRecipesAction(recipeClient)
     private val updateRecipe = UpdateRecipeAction(recipeClient)
-    private val deleteRecipe = DeleteRecipeAction(recipeClient)
+    private val deleteRecipe = DeleteRecipeAction(recipeClient, photoStore)
+    private val replaceRecipeSteps = ReplaceRecipeStepsAction(recipeClient)
+    private val addRecipePhoto = AddRecipePhotoAction(recipeClient, photoStore)
+    private val removeRecipePhoto = RemoveRecipePhotoAction(recipeClient, photoStore)
+    private val getStoredPhoto = GetStoredPhotoAction(photoStorageClient)
     private val resolveIngredient = ResolveIngredientAction(recipeClient, ingredientClient)
     private val resolveDuplicate = ResolveDuplicateAction(recipeClient)
     private val publishRecipe = PublishRecipeAction(recipeClient)
@@ -75,4 +91,8 @@ class RecipeService(
     fun favorite(param: FavoriteRecipeParam) = favoriteRecipe.execute(param)
     fun unfavorite(param: UnfavoriteRecipeParam) = unfavoriteRecipe.execute(param)
     fun listFavorites(param: ListRecipeFavoritesParam) = listRecipeFavorites.execute(param)
+    fun replaceSteps(param: ReplaceRecipeStepsParam) = replaceRecipeSteps.execute(param)
+    fun addPhoto(param: AddRecipePhotoParam) = addRecipePhoto.execute(param)
+    fun removePhoto(param: RemoveRecipePhotoParam) = removeRecipePhoto.execute(param)
+    fun getStoredPhoto(param: GetStoredPhotoParam) = getStoredPhoto.execute(param)
 }

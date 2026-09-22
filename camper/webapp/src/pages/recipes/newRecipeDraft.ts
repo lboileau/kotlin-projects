@@ -21,10 +21,13 @@ export const EMPTY_DRAFT: NewRecipeDraft = {
   meal: '',
   theme: '',
   lines: [],
+  steps: [],
 };
 
 function hasContent(draft: NewRecipeDraft): boolean {
-  return Boolean(draft.name.trim() || draft.description.trim() || draft.webLink.trim() || draft.lines.length > 0);
+  return Boolean(
+    draft.name.trim() || draft.description.trim() || draft.webLink.trim() || draft.lines.length > 0 || draft.steps.some((s) => s.trim()),
+  );
 }
 
 export function readNewRecipeDraft(): NewRecipeDraft | null {
@@ -32,6 +35,7 @@ export function readNewRecipeDraft(): NewRecipeDraft | null {
     const raw = sessionStorage.getItem(KEY);
     if (!raw) return null;
     const parsed = { ...EMPTY_DRAFT, ...(JSON.parse(raw) as Partial<NewRecipeDraft>) };
+    if (!Array.isArray(parsed.steps)) parsed.steps = [];
     return Array.isArray(parsed.lines) && hasContent(parsed) ? parsed : null;
   } catch {
     return null;

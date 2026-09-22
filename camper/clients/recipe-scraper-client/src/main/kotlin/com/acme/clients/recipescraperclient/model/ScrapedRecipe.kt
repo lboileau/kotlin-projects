@@ -9,7 +9,9 @@ data class ScrapedRecipe(
     val baseServings: Int,
     val meal: String? = null,
     val theme: String? = null,
-    val ingredients: List<ScrapedIngredient>
+    val ingredients: List<ScrapedIngredient>,
+    /** The method as ordered step texts; empty when the source had none. */
+    val steps: List<String> = emptyList()
 )
 
 data class ScrapedIngredient(

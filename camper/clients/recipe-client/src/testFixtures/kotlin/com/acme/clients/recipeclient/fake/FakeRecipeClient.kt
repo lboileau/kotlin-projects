@@ -8,18 +8,22 @@ import com.acme.clients.common.failure
 import com.acme.clients.common.success
 import com.acme.clients.recipeclient.api.*
 import com.acme.clients.recipeclient.internal.validations.ValidateAddRecipeFavorite
+import com.acme.clients.recipeclient.internal.validations.ValidateAddRecipePhoto
 import com.acme.clients.recipeclient.internal.validations.ValidateAddRecipeIngredient
 import com.acme.clients.recipeclient.internal.validations.ValidateAddRecipeIngredients
 import com.acme.clients.recipeclient.internal.validations.ValidateCreateRecipe
 import com.acme.clients.recipeclient.internal.validations.ValidateGetRecipeFavoriteSummaries
 import com.acme.clients.recipeclient.internal.validations.ValidateGetRecipeFavorites
 import com.acme.clients.recipeclient.internal.validations.ValidateRemoveRecipeFavorite
+import com.acme.clients.recipeclient.internal.validations.ValidateReplaceRecipeSteps
 import com.acme.clients.recipeclient.internal.validations.ValidateUpdateRecipe
 import com.acme.clients.recipeclient.internal.validations.ValidateUpdateRecipeIngredient
 import com.acme.clients.recipeclient.model.Recipe
 import com.acme.clients.recipeclient.model.RecipeFavorite
 import com.acme.clients.recipeclient.model.RecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient
+import com.acme.clients.recipeclient.model.RecipePhoto
+import com.acme.clients.recipeclient.model.RecipeStep
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -34,6 +38,8 @@ class FakeRecipeClient : RecipeClient {
      * favourite mutations idempotent for free.
      */
     private val favorites = ConcurrentHashMap<Pair<UUID, UUID>, RecipeFavorite>()
+    private val steps = ConcurrentHashMap<UUID, RecipeStep>()
+    private val photos = ConcurrentHashMap<UUID, RecipePhoto>()
 
     private val validateCreate = ValidateCreateRecipe()
     private val validateUpdate = ValidateUpdateRecipe()
@@ -44,6 +50,8 @@ class FakeRecipeClient : RecipeClient {
     private val validateRemoveFavorite = ValidateRemoveRecipeFavorite()
     private val validateGetFavorites = ValidateGetRecipeFavorites()
     private val validateGetFavoriteSummaries = ValidateGetRecipeFavoriteSummaries()
+    private val validateReplaceSteps = ValidateReplaceRecipeSteps()
+    private val validateAddPhoto = ValidateAddRecipePhoto()
 
     override fun create(param: CreateRecipeParam): Result<Recipe, AppError> {
         val validation = validateCreate.execute(param)
@@ -124,6 +132,8 @@ class FakeRecipeClient : RecipeClient {
         ingredients.values.removeIf { it.recipeId == param.id }
         // In-memory stand-in for fk_recipe_favorites_recipe ON DELETE CASCADE.
         favorites.keys.removeIf { it.first == param.id }
+        steps.values.removeIf { it.recipeId == param.id }
+        photos.values.removeIf { it.recipeId == param.id }
         return success(Unit)
     }
 
@@ -272,10 +282,54 @@ class FakeRecipeClient : RecipeClient {
         return success(summaries)
     }
 
+    override fun getSteps(param: GetRecipeStepsParam): Result<List<RecipeStep>, AppError> =
+        success(steps.values.filter { it.recipeId == param.recipeId }.sortedBy { it.position })
+
+    override fun replaceSteps(param: ReplaceRecipeStepsParam): Result<List<RecipeStep>, AppError> {
+        val validation = validateReplaceSteps.execute(param)
+        if (validation is Result.Failure) return validation
+
+        steps.values.removeIf { it.recipeId == param.recipeId }
+        val now = Instant.now()
+        val created = param.texts.mapIndexed { position, text ->
+            RecipeStep(id = UUID.randomUUID(), recipeId = param.recipeId, position = position, text = text.trim(), createdAt = now)
+        }
+        created.forEach { steps[it.id] = it }
+        return success(created)
+    }
+
+    override fun getPhotos(param: GetRecipePhotosParam): Result<List<RecipePhoto>, AppError> =
+        success(photos.values.filter { it.recipeId == param.recipeId }.sortedBy { it.position })
+
+    override fun getPhotoById(param: GetRecipePhotoByIdParam): Result<RecipePhoto, AppError> =
+        photos[param.id]?.let { success(it) } ?: failure(NotFoundError("RecipePhoto", param.id.toString()))
+
+    override fun addPhoto(param: AddRecipePhotoParam): Result<RecipePhoto, AppError> {
+        val validation = validateAddPhoto.execute(param)
+        if (validation is Result.Failure) return validation
+
+        if (photos.values.any { it.storageKey == param.storageKey }) {
+            return failure(ConflictError("RecipePhoto", "storage key already used: ${param.storageKey}"))
+        }
+        val position = (photos.values.filter { it.recipeId == param.recipeId }.maxOfOrNull { it.position } ?: -1) + 1
+        val photo = RecipePhoto(
+            id = param.id, recipeId = param.recipeId, position = position, storageKey = param.storageKey,
+            mediaType = param.mediaType, byteSize = param.byteSize, width = param.width, height = param.height,
+            source = param.source, role = param.role, createdBy = param.createdBy, createdAt = Instant.now()
+        )
+        photos[photo.id] = photo
+        return success(photo)
+    }
+
+    override fun removePhoto(param: RemoveRecipePhotoParam): Result<Unit, AppError> =
+        if (photos.remove(param.id) != null) success(Unit) else failure(NotFoundError("RecipePhoto", param.id.toString()))
+
     fun reset() {
         recipes.clear()
         ingredients.clear()
         favorites.clear()
+        steps.clear()
+        photos.clear()
     }
 
     fun seed(vararg entities: Recipe) = entities.forEach { recipes[it.id] = it }

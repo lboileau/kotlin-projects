@@ -9,7 +9,8 @@ import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.recipe.params.DeleteRecipeParam
 
 internal class DeleteRecipeAction(
-    private val recipeClient: RecipeClient
+    private val recipeClient: RecipeClient,
+    private val photoStore: RecipePhotoStore
 ) {
     fun execute(param: DeleteRecipeParam): Result<Unit, RecipeError> {
         when (val result = recipeClient.getById(GetByIdParam(param.recipeId))) {
@@ -18,6 +19,12 @@ internal class DeleteRecipeAction(
                 is NotFoundError -> return Result.Failure(RecipeError.NotFound(param.recipeId))
                 else -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))
             }
+        }
+
+        // The photo rows cascade with the recipe; their objects don't, so they go first.
+        when (val result = photoStore.removeAllObjects(param.recipeId)) {
+            is Result.Failure -> return result
+            is Result.Success -> {}
         }
 
         return when (val result = recipeClient.delete(ClientDeleteRecipeParam(param.recipeId))) {

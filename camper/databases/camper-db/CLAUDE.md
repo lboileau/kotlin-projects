@@ -536,6 +536,55 @@ CREATE INDEX IF NOT EXISTS idx_recipe_favorites_user_id ON recipe_favorites (use
 
 No separate `idx_recipe_favorites_recipe_id` — `uq_recipe_favorites_recipe_user` already indexes `recipe_id`-leading lookups, which is how both reads (per-recipe list and the batched summary) hit the table.
 
+### recipe_steps
+
+```sql
+CREATE TABLE IF NOT EXISTS recipe_steps (
+    id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipe_id  UUID        NOT NULL,
+    position   INT         NOT NULL,
+    text       TEXT        NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_recipe_steps_position CHECK (position >= 0),
+    CONSTRAINT ck_recipe_steps_text CHECK (length(btrim(text)) > 0),
+    CONSTRAINT uq_recipe_steps_recipe_position UNIQUE (recipe_id, position),
+    CONSTRAINT fk_recipe_steps_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE
+);
+```
+
+A recipe's instructions, one row per step. Always written as a whole list (delete + insert in one transaction), never edited per row and never reviewed — so no `updated_at`, and the unique `(recipe_id, position)` doubles as the read index.
+
+### recipe_photos
+
+```sql
+CREATE TABLE IF NOT EXISTS recipe_photos (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    recipe_id   UUID        NOT NULL,
+    position    INT         NOT NULL,
+    storage_key TEXT        NOT NULL,
+    media_type  VARCHAR(50) NOT NULL,
+    byte_size   INT         NOT NULL,
+    width       INT,
+    height      INT,
+    source      VARCHAR(20) NOT NULL,
+    role        VARCHAR(20),
+    created_by  UUID        NOT NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+
+    CONSTRAINT ck_recipe_photos_position CHECK (position >= 0),
+    CONSTRAINT ck_recipe_photos_byte_size CHECK (byte_size > 0),
+    CONSTRAINT ck_recipe_photos_source CHECK (source IN ('upload', 'import')),
+    CONSTRAINT ck_recipe_photos_role CHECK (role IS NULL OR role IN ('ingredients', 'instructions')),
+    CONSTRAINT uq_recipe_photos_recipe_position UNIQUE (recipe_id, position),
+    CONSTRAINT uq_recipe_photos_storage_key UNIQUE (storage_key),
+    CONSTRAINT fk_recipe_photos_recipe FOREIGN KEY (recipe_id) REFERENCES recipes (id) ON DELETE CASCADE,
+    CONSTRAINT fk_recipe_photos_created_by FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE RESTRICT
+);
+```
+
+Metadata only. The bytes are an object in the photo bucket (`photo-storage-client`) at `storage_key` = `recipes/{recipe_id}/{id}.{ext}`; the service deletes the object before the row, and the `ON DELETE CASCADE` from `recipes` only removes rows (a recipe delete removes the objects first in `DeleteRecipeAction`). `source` is how the photo got here (`upload` by a person, `import` = the photo an import was read from) and `role` which part of the recipe an import photo showed. `width`/`height` are null when the server couldn't decode the format.
+
 ## Relationships
 
 - `plans.owner_id` → `users.id` (FK)
@@ -582,6 +631,9 @@ No separate `idx_recipe_favorites_recipe_id` — `uq_recipe_favorites_recipe_use
 - `ladder_votes.voted_for_activity_id` → `ladder_activities.id` (FK, CASCADE on delete)
 - `recipe_favorites.recipe_id` → `recipes.id` (FK, CASCADE on delete)
 - `recipe_favorites.user_id` → `users.id` (FK, CASCADE on delete — required so deleting a user does not fail on their favourites)
+- `recipe_steps.recipe_id` → `recipes.id` (FK, CASCADE on delete)
+- `recipe_photos.recipe_id` → `recipes.id` (FK, CASCADE on delete — rows only; objects are deleted by the service first)
+- `recipe_photos.created_by` → `users.id` (FK, RESTRICT on delete)
 
 ## Invariants
 
@@ -649,3 +701,5 @@ No separate `idx_recipe_favorites_recipe_id` — `uq_recipe_favorites_recipe_use
 - A user can favourite a given recipe at most once (enforced by `uq_recipe_favorites_recipe_user`).
 - `recipe_favorites` has no `updated_at` — rows are only inserted and deleted.
 - Deleting a recipe cascades to its recipe_favorites; deleting a user cascades to their recipe_favorites.
+- Recipe step `position` is unique per recipe and >= 0; `text` is non-blank (enforced by `uq_recipe_steps_recipe_position`, `ck_recipe_steps_position`, `ck_recipe_steps_text`). `recipe_steps` has no `updated_at` — the list is replaced whole.
+- Recipe photo `position` is unique per recipe; `storage_key` is unique globally; `source` is 'upload' or 'import'; `role` is null or 'ingredients'/'instructions'; `byte_size` > 0. Deleting a recipe cascades to its recipe_steps and recipe_photos rows. Deleting a user is restricted if they added any photos.

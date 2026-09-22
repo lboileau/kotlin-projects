@@ -60,12 +60,12 @@ internal class AnthropicRecipeScraperClient(
         logger.info("Scraping recipe from {}", source)
         return guarded(source = source, sourceNoun = "photos") {
             val prompt = ScrapePromptBuilder.buildForImages(param)
-            // Images first, then the instructions: the documented placement for image prompts. With
-            // several, each gets a short label before it (also per the docs) so "in reading order"
-            // has something to refer to.
+            // Images first, then the instructions: the documented placement for image prompts. Each
+            // image is preceded by a short label (also per the docs) naming what it shows, which is
+            // what the user message refers to.
             val userContent = buildList {
                 param.images.forEachIndexed { i, image ->
-                    if (param.images.size > 1) add(textBlock("Photo ${i + 1}:"))
+                    ScrapePromptBuilder.imageLabel(image, i, param.images.size)?.let { add(textBlock(it)) }
                     add(imageBlock(image))
                 }
                 add(textBlock(prompt.userMessage))

@@ -1,32 +1,20 @@
+/* Toasts drop down from the top and sit over the static header bar — the
+   same column width as the app, starting under the white status strip
+   (`.page-header::before`, 6px + the safe-area inset) and as tall as the bar
+   — so a message appears where the eye already is and covers nothing the
+   user is working on. They used to sit above the tab bar at the bottom and
+   moved to the top only while a sheet was open; the owner disliked both.
+   Being at the top also puts them above every sheet by construction. */
 .toast-region {
   position: fixed;
+  top: calc(6px + env(safe-area-inset-top));
   left: 50%;
   transform: translateX(-50%);
-  /* Above the tab bar, and above the page's docked BottomBar when it has one
-     (BottomBar.tsx publishes its height), so a toast never covers a button. */
-  bottom: calc(76px + var(--bottom-bar-height, 0px) + env(safe-area-inset-bottom));
-  width: min(calc(100% - 32px), 640px);
+  width: min(100%, 640px);
   display: flex;
   flex-direction: column;
-  gap: 8px;
   z-index: 1000;
   pointer-events: none;
-}
-
-/* A toast can fire while a sheet is open (e.g. adding an ingredient) —
-   the bottom-anchored position above is right for the normal case (just
-   above the tab bar), but a sheet is *also* bottom-anchored (see
-   `.sheet-content`, `bottom: 0`) and stays flush with the viewport's
-   bottom edge even when short, so the toast would otherwise land right
-   over the sheet's own content instead of above it. Moving it to the
-   top of the screen instead whenever any sheet is open sits above every
-   sheet by construction, regardless of that sheet's actual height —
-   no need to measure it. Reading the sheet's own `data-state` via
-   `:has()`, rather than tracking "a sheet is open" as separate JS state,
-   means this can't drift out of sync with what's actually on screen. */
-body:has(.sheet-content[data-state='open']) .toast-region {
-  top: calc(16px + env(safe-area-inset-top));
-  bottom: auto;
 }
 
 /* The two aria-live wrapper divs stay real DOM nodes (for reliable
@@ -34,6 +22,17 @@ body:has(.sheet-content[data-state='open']) .toast-region {
    layout — their toast children become direct flex items instead. */
 .toast-region__live-group {
   display: contents;
+}
+
+@keyframes toast-drop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .toast-region__item {
@@ -61,6 +60,18 @@ body:has(.sheet-content[data-state='open']) .toast-region {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  /* The header bar's box: its height (44px content + 10px padding each
+     side), its side gutters, square corners so it reads as the bar itself. */
+  min-height: 64px;
+  padding: 10px 16px;
+  border-radius: 0;
+  animation: toast-drop 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-region__item {
+    animation: none;
+  }
 }
 
 .toast-region__text {

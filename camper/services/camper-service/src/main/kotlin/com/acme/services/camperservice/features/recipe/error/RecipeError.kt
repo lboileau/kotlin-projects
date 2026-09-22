@@ -15,4 +15,7 @@ sealed class RecipeError(override val message: String) : AppError {
     data class ScrapeFailed(val reason: String) : RecipeError("Scrape failed: $reason")
     data class IngredientNotFound(val ingredientId: UUID) : RecipeError("Ingredient not found: $ingredientId")
     data class AlreadyPublished(val recipeId: UUID) : RecipeError("Recipe $recipeId is already published")
+    data class PhotoNotFound(val photoId: UUID) : RecipeError("Photo not found: $photoId")
+    data class PhotoLimit(val recipeId: UUID, val max: Int) : RecipeError("Recipe $recipeId already has the maximum of $max photos")
+    data class StorageFailed(val reason: String) : RecipeError("Photo storage failed: $reason")
 }

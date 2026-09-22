@@ -103,4 +103,44 @@ class RecipePageExtractorTest {
 
         assertEquals(60_000, content.text.length)
     }
+
+    @Test
+    fun `keeps recipeInstructions flattened to step texts - HowToSection, HowToStep, strings and HTML`() {
+        val html = """
+            <html><head><script type="application/ld+json">
+            {"@type":"Recipe","name":"Curry","recipeIngredient":["1 onion"],
+             "recipeInstructions":[
+               {"@type":"HowToSection","name":"Prep","itemListElement":[
+                 {"@type":"HowToStep","name":"Chop","text":"Chop the <b>onion</b> finely.","url":"#s1","image":"s1.jpg"},
+                 {"@type":"HowToStep","text":"Heat the oil &amp; fry it."}
+               ]},
+               "Simmer for 20 minutes.",
+               {"@type":"HowToStep","name":"Serve with rice."}
+             ]}
+            </script></head><body></body></html>
+        """.trimIndent()
+
+        val content = RecipePageExtractor.extract(html)
+
+        assertTrue(content is RecipePageContent.JsonLd)
+        assertTrue(
+            content.text.contains("\"recipeInstructions\":[\"Chop the onion finely.\",\"Heat the oil & fry it.\",\"Simmer for 20 minutes.\",\"Serve with rice.\"]"),
+            content.text
+        )
+        assertFalse(content.text.contains("HowToSection"), "section objects are flattened away")
+        assertFalse(content.text.contains("s1.jpg"), "per-step images and urls are dropped")
+    }
+
+    @Test
+    fun `a single-string recipeInstructions is kept as one entry and an empty one is omitted`() {
+        val one = RecipePageExtractor.extract(
+            """<html><head><script type="application/ld+json">{"@type":"Recipe","recipeIngredient":["x"],"recipeInstructions":"Mix it all."}</script></head><body></body></html>"""
+        )
+        assertTrue(one.text.contains("\"recipeInstructions\":[\"Mix it all.\"]"), one.text)
+
+        val none = RecipePageExtractor.extract(
+            """<html><head><script type="application/ld+json">{"@type":"Recipe","recipeIngredient":["x"],"recipeInstructions":[]}</script></head><body></body></html>"""
+        )
+        assertFalse(none.text.contains("recipeInstructions"), none.text)
+    }
 }
