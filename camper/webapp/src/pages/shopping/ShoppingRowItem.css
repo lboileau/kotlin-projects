@@ -2,7 +2,9 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 6px 4px;
+  /* Tight rows: a 44px tap target and 2px above and below, so a shop's
+     worth of list fits on one screen. */
+  padding: 2px 4px;
   /* The same corner as the plan and recipe rows. */
   border-radius: var(--radius-4);
 }
@@ -25,8 +27,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 48px;
-  padding: 4px 4px;
+  min-height: 44px;
+  padding: 0 4px;
   cursor: pointer;
   touch-action: manipulation;
 }
@@ -67,7 +69,7 @@
 /* The quantity opens the "have" sheet. A dotted underline is the only hint
    (it is a rare action); the target is the whole height of the row. */
 .shopping-row__quantity--link {
-  min-height: 48px;
+  min-height: 44px;
   padding-left: 12px;
   text-decoration: none;
   touch-action: manipulation;
@@ -145,7 +147,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: 48px;
-  padding: 6px 8px 6px 16px;
+  padding: 2px 8px 2px 16px;
 }
 
 .shopping-row--no-longer-needed .shopping-row__name,

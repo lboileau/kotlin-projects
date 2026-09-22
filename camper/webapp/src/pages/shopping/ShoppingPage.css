@@ -85,7 +85,6 @@
 .shopping-page__rows {
   display: flex;
   flex-direction: column;
-  gap: 2px;
 }
 
 .shopping-page__empty {
