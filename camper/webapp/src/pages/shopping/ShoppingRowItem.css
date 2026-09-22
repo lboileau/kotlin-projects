@@ -56,8 +56,13 @@
   align-items: flex-end;
   justify-content: center;
   text-align: right;
-  font-size: 0.8125rem;
-  color: var(--gray-10);
+  /* Read at arm's length in a shop: the row's own size, a proper gray,
+     tabular figures so "1⅓" and "0.17" line up down the column. 13px
+     light gray was the first version and the owner found it hard to read. */
+  font-size: 0.9375rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--gray-11);
 }
 
 /* The Clear row keeps its quantity inline after the name. */
