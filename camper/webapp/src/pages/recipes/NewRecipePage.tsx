@@ -4,6 +4,7 @@ import { Button } from '@radix-ui/themes';
 import { PageHeader } from '../../components/PageHeader';
 import { useCreateRecipe } from '../../queries/recipes';
 import { enterMovesOn } from '../../lib/enterMovesOn';
+import { normaliseSteps } from '../../lib/recipeSteps';
 import { parseQuantity } from '../../lib/parseQuantity';
 import { toast } from '../../lib/toastStore';
 import type { PendingLine } from './LinesEditor';
@@ -90,6 +91,7 @@ export function NewRecipePage() {
         quantity: parseQuantity(line.quantity) ?? 0,
         unit: line.unit,
       })),
+      steps: normaliseSteps(values.steps),
     });
     savedRef.current = true;
     clearNewRecipeDraft();

@@ -10,3 +10,4 @@ export { AddLineSheet } from './AddLineSheet';
 export { EditLineSheet } from './EditLineSheet';
 export { AddToPlanSheet } from './AddToPlanSheet';
 export { FavouritedBySheet } from './FavouritedBySheet';
+export { RecipePhotoSheet } from './RecipePhotoSheet';

@@ -1,0 +1,46 @@
+.steps-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.steps-editor__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Number | text | actions. The actions are a vertical stack of three quiet
+   44px buttons beside the textarea, so the row is as tall as the taller of
+   the two; on a phone the textarea gets everything else. */
+.steps-editor__row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 8px;
+}
+
+.steps-editor__number {
+  padding-top: 10px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-11);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.steps-editor__text {
+  min-width: 0;
+}
+
+.steps-editor__actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.steps-editor__add {
+  align-self: flex-start;
+}

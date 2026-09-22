@@ -36,6 +36,7 @@ const AddLineSheet = lazy(() => import('./pages/recipes').then((m) => ({ default
 const EditLineSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.EditLineSheet })));
 const AddToPlanSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.AddToPlanSheet })));
 const FavouritedBySheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.FavouritedBySheet })));
+const RecipePhotoSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.RecipePhotoSheet })));
 
 const IngredientsPage = lazy(() => import('./pages/ingredients').then((m) => ({ default: m.IngredientsPage })));
 const NewIngredientSheet = lazy(() =>
@@ -122,6 +123,7 @@ export const router = createBrowserRouter([
               { path: 'lines/new', element: <AddLineSheet /> },
               { path: 'lines/:lineId', element: <EditLineSheet /> },
               { path: 'add-to-plan', element: <AddToPlanSheet /> },
+              { path: 'photos/:photoId', element: <RecipePhotoSheet /> },
               // Tapping the who-line under the recipe's title: who favourited it.
               { path: 'favourites', element: <FavouritedBySheet /> },
             ],

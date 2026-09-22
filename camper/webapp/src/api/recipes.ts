@@ -42,9 +42,29 @@ export interface RecipeIngredientResponse {
   updatedAt: string;
 }
 
+export type RecipePhotoSource = 'upload' | 'import';
+
+/** A photo on a recipe. `url` loads in an `<img>` with no headers and is good for at least an hour. */
+export interface RecipePhotoResponse {
+  id: string;
+  url: string;
+  mediaType: string;
+  width: number | null;
+  height: number | null;
+  byteSize: number;
+  source: RecipePhotoSource;
+  role: 'ingredients' | 'instructions' | null;
+  position: number;
+  createdAt: string;
+}
+
 export interface RecipeDetailResponse extends RecipeResponse {
   duplicateOf: RecipeResponse | null;
   ingredients: RecipeIngredientResponse[];
+  /** The method, in order; empty when the recipe has none. */
+  steps: string[];
+  /** In display order; empty when the recipe has none. */
+  photos: RecipePhotoResponse[];
 }
 
 export interface CreateRecipeIngredientRequest {
@@ -61,6 +81,8 @@ export interface CreateRecipeRequest {
   meal?: string;
   theme?: string;
   ingredients: CreateRecipeIngredientRequest[];
+  /** The method as ordered step texts; omitted or empty means none. */
+  steps?: string[];
 }
 
 export interface UpdateRecipeRequest {
@@ -162,6 +184,25 @@ export function importRecipe(url: string): Promise<RecipeDetailResponse> {
  */
 export function importRecipeFromImages(images: ImportImage[]): Promise<RecipeDetailResponse> {
   return holdForTheDog(request<RecipeDetailResponse>('/api/recipes/import-images', { method: 'POST', body: { images } }));
+}
+
+/** PUT /api/recipes/{id}/steps — the whole list; an empty list clears it. 400 on a blank step. */
+export function replaceRecipeSteps(recipeId: string, steps: string[]): Promise<{ steps: string[] }> {
+  return request(`/api/recipes/${recipeId}/steps`, { method: 'PUT', body: { steps } });
+}
+
+/**
+ * POST /api/recipes/{id}/photos — one photo, same base64 shape as an import
+ * image. 409 (code PHOTO_LIMIT) at the per-recipe cap, 502 (STORAGE_FAILED)
+ * when the store is down.
+ */
+export function addRecipePhoto(recipeId: string, image: ImportImage): Promise<RecipePhotoResponse> {
+  return request(`/api/recipes/${recipeId}/photos`, { method: 'POST', body: { mediaType: image.mediaType, data: image.data } });
+}
+
+/** DELETE /api/recipes/{id}/photos/{photoId} — 204; 404 once it is gone. */
+export function removeRecipePhoto(recipeId: string, photoId: string): Promise<void> {
+  return request(`/api/recipes/${recipeId}/photos/${photoId}`, { method: 'DELETE' });
 }
 
 export type ResolveDuplicateAction = 'NOT_DUPLICATE' | 'USE_EXISTING';

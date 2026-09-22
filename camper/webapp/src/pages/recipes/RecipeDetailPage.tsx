@@ -1,6 +1,8 @@
-import { Outlet, useNavigate, useParams } from 'react-router-dom';
-import { AlertDialog, Badge, Button, Callout, Heading, IconButton, Text } from '@radix-ui/themes';
+import { useRef, useState, type ChangeEvent } from 'react';
+import { Link, Outlet, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { AlertDialog, Badge, Button, Callout, IconButton, Tabs, Text } from '@radix-ui/themes';
 import {
+  CameraIcon,
   ExclamationTriangleIcon,
   ExternalLinkIcon,
   Pencil2Icon,
@@ -16,19 +18,22 @@ import { QueryErrorState } from '../../components/QueryErrorState';
 import { BottomBar } from '../../components/BottomBar';
 import { useAuth } from '../../auth/useAuth';
 import {
+  useAddRecipePhoto,
   useDeleteRecipe,
   usePublishRecipe,
   useRecipe,
   useRecipeFavorites,
   useToggleFavorite,
 } from '../../queries/recipes';
+import { parseRecipeTab, type RecipeTab } from '../../lib/recipeSteps';
+import { preparePhoto, releasePhoto } from './preparePhoto';
 import { capitalize } from '../../lib/ingredientConstants';
 import { formatFavouritedBy } from '../../lib/recipeFavorites';
 import { formatQuantity } from '../../lib/formatQuantity';
 import { toast } from '../../lib/toastStore';
 import { ApiError } from '../../api/http';
 import { RecipeReview } from './RecipeReview';
-import type { RecipeIngredientResponse } from '../../api/recipes';
+import type { RecipeDetailResponse, RecipeIngredientResponse } from '../../api/recipes';
 import './RecipeDetailPage.css';
 
 export function RecipeDetailPage() {
@@ -46,6 +51,21 @@ export function RecipeDetailPage() {
   const favouriteCount = recipe?.favoriteCount ?? 0;
   const { data: favouritedBy } = useRecipeFavorites(recipeId, { enabled: favouriteCount > 0 });
   const favouritedBySummary = formatFavouritedBy(favouriteCount, favouritedBy, user?.id);
+
+  // Which tab is showing lives in the URL (every screen state has one),
+  // written with `replace` so Back leaves the page rather than cycling tabs.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = parseRecipeTab(searchParams.get('tab'));
+  function setTab(next: RecipeTab) {
+    setSearchParams(
+      (params) => {
+        if (next === 'ingredients') params.delete('tab');
+        else params.set('tab', next);
+        return params;
+      },
+      { replace: true },
+    );
+  }
 
   const isOwner = Boolean(recipe && user && recipe.createdBy === user.id);
   const isDraft = recipe?.status === 'draft';
@@ -261,23 +281,67 @@ export function RecipeDetailPage() {
           </Callout.Root>
         )}
 
-        <div className="recipe-detail-page__section-header">
-          <Heading size="3">Ingredients</Heading>
-        </div>
+        <Tabs.Root value={tab} onValueChange={(next) => setTab(parseRecipeTab(next))} className="recipe-detail-page__tabs">
+          <Tabs.List size="2">
+            <Tabs.Trigger value="ingredients">Ingredients</Tabs.Trigger>
+            <Tabs.Trigger value="instructions">
+              Instructions
+              {recipe.steps.length > 0 && <span className="recipe-detail-page__tab-count">{recipe.steps.length}</span>}
+            </Tabs.Trigger>
+            <Tabs.Trigger value="photos">
+              Photos
+              {recipe.photos.length > 0 && <span className="recipe-detail-page__tab-count">{recipe.photos.length}</span>}
+            </Tabs.Trigger>
+          </Tabs.List>
 
-        {isDraft && isOwner ? (
-          <RecipeReview recipe={recipe} />
-        ) : recipe.ingredients.length === 0 ? (
-          <Text as="p" size="2" color="gray">
-            No ingredients yet.
-          </Text>
-        ) : (
-          <ul className="recipe-detail-page__lines">
-            {recipe.ingredients.map((line) => (
-              <IngredientLineRow key={line.id} line={line} recipeId={recipe.id} clickable={false} />
-            ))}
-          </ul>
-        )}
+          <Tabs.Content value="ingredients" className="recipe-detail-page__tab">
+            {isDraft && isOwner ? (
+              <RecipeReview recipe={recipe} />
+            ) : recipe.ingredients.length === 0 ? (
+              <Text as="p" size="2" color="gray">
+                No ingredients yet.
+              </Text>
+            ) : (
+              <ul className="recipe-detail-page__lines">
+                {recipe.ingredients.map((line) => (
+                  <IngredientLineRow key={line.id} line={line} recipeId={recipe.id} clickable={false} />
+                ))}
+              </ul>
+            )}
+          </Tabs.Content>
+
+          <Tabs.Content value="instructions" className="recipe-detail-page__tab">
+            {recipe.steps.length === 0 ? (
+              <div className="recipe-detail-page__empty">
+                <Text as="p" size="2" color="gray">
+                  No instructions yet.
+                </Text>
+                {mayEdit && (
+                  <Button variant="soft" size="2" asChild>
+                    <Link to={`/recipes/${recipe.id}/edit`}>Add instructions</Link>
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <ol className="recipe-detail-page__steps">
+                {recipe.steps.map((step, index) => (
+                  <li key={index} className="recipe-detail-page__step">
+                    <span className="recipe-detail-page__step-number" aria-hidden="true">
+                      {index + 1}
+                    </span>
+                    <Text as="p" size="3" className="recipe-detail-page__wrap">
+                      {step}
+                    </Text>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </Tabs.Content>
+
+          <Tabs.Content value="photos" className="recipe-detail-page__tab">
+            <PhotosTab recipe={recipe} mayEdit={mayEdit} />
+          </Tabs.Content>
+        </Tabs.Root>
       </div>
 
       <BottomBar>
@@ -310,6 +374,83 @@ export function RecipeDetailPage() {
       </BottomBar>
 
       <Outlet />
+    </div>
+  );
+}
+
+const MAX_PHOTOS_PER_RECIPE = 6;
+
+/**
+ * The Photos tab: a grid of the recipe's photos, each opening the viewer
+ * sheet, plus "Add photo". Adding uploads at once through the same downscale
+ * pipeline the import uses — it is a create, like the rapid ingredient add,
+ * not part of the edit form — and the recipe refetches to show it.
+ */
+function PhotosTab({ recipe, mayEdit }: { recipe: RecipeDetailResponse; mayEdit: boolean }) {
+  const addPhoto = useAddRecipePhoto(recipe.id);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preparing, setPreparing] = useState(false);
+  const busy = preparing || addPhoto.isPending;
+  const full = recipe.photos.length >= MAX_PHOTOS_PER_RECIPE;
+
+  async function handlePick(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setPreparing(true);
+    try {
+      const prepared = await preparePhoto(file);
+      try {
+        await addPhoto.mutateAsync(prepared.image);
+        toast.info('Photo added.');
+      } finally {
+        releasePhoto(prepared);
+      }
+    } catch (err) {
+      if (err instanceof ApiError) return; // the global mutation toast said what failed
+      toast.error(err instanceof Error ? err.message : "Couldn't read that photo.");
+    } finally {
+      setPreparing(false);
+    }
+  }
+
+  return (
+    <div className="recipe-detail-page__photos">
+      {recipe.photos.length === 0 ? (
+        <Text as="p" size="2" color="gray">
+          No photos yet.
+        </Text>
+      ) : (
+        <ul className="recipe-detail-page__photo-grid">
+          {recipe.photos.map((photo, index) => (
+            <li key={photo.id}>
+              <SheetLink to={`/recipes/${recipe.id}/photos/${photo.id}`} className="recipe-detail-page__photo">
+                <img src={photo.url} alt={`Photo ${index + 1} of ${recipe.photos.length}`} loading="lazy" />
+                {photo.source === 'import' && (
+                  <span className="recipe-detail-page__photo-badge">{photo.role ?? 'import'}</span>
+                )}
+              </SheetLink>
+            </li>
+          ))}
+        </ul>
+      )}
+      {mayEdit && (
+        <>
+          <input
+            ref={fileInputRef}
+            className="recipe-detail-page__file"
+            type="file"
+            accept="image/*"
+            tabIndex={-1}
+            aria-hidden="true"
+            disabled={busy || full}
+            onChange={handlePick}
+          />
+          <Button variant="soft" size="3" loading={busy} disabled={busy || full} onClick={() => fileInputRef.current?.click()}>
+            <CameraIcon /> {full ? `Up to ${MAX_PHOTOS_PER_RECIPE} photos` : 'Add photo'}
+          </Button>
+        </>
+      )}
     </div>
   );
 }

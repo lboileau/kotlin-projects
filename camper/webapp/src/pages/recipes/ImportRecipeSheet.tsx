@@ -11,6 +11,7 @@ import { toast } from '../../lib/toastStore';
 import { DogChef } from './DogChef';
 import { normalizeUrl } from '../../lib/normalizeUrl';
 import { preparePhoto, releasePhoto, type PreparedPhoto } from './preparePhoto';
+import type { ImportPhotoRole } from '../../lib/importPhotos';
 import { router } from '../../router';
 import type { RecipeResponse } from '../../api/recipes';
 import './ImportRecipeSheet.css';
@@ -86,50 +87,45 @@ export function ImportRecipeSheet() {
   }
 
   const [url, setUrl] = useState('');
-  // One photo (the server takes up to three; the sheet offers one). Picking again replaces it.
-  const [photo, setPhoto] = useState<PreparedPhoto | null>(null);
-  const [preparing, setPreparing] = useState(false);
+  // Two named photos: the ingredient list (required) and the method (optional).
+  // Picking a slot again replaces it. The server takes at most one per role.
+  const [photos, setPhotos] = useState<Record<ImportPhotoRole, PreparedPhoto | null>>({ ingredients: null, instructions: null });
+  const [preparing, setPreparing] = useState<ImportPhotoRole | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [duplicate, setDuplicate] = useState<RecipeResponse | null>(null);
   const errorId = useId();
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // The thumbnail is an object URL; let it go when the sheet does.
-  const photoRef = useRef(photo);
-  photoRef.current = photo;
+  // Thumbnails are object URLs; let them go when the sheet does.
+  const photosRef = useRef(photos);
+  photosRef.current = photos;
   useEffect(() => () => {
-    if (photoRef.current) releasePhoto(photoRef.current);
+    Object.values(photosRef.current).forEach((photo) => photo && releasePhoto(photo));
   }, []);
 
-  async function handlePick(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    // Reset so picking the same file again after removing it fires onChange.
-    event.target.value = '';
-    if (!file) return;
-
+  async function handlePick(role: ImportPhotoRole, file: File) {
     setError(null);
-    setPreparing(true);
+    setPreparing(role);
     try {
       const prepared = await preparePhoto(file);
       if (!mountedRef.current) {
         releasePhoto(prepared);
         return;
       }
-      setPhoto((current) => {
-        if (current) releasePhoto(current);
-        return prepared;
+      setPhotos((current) => {
+        if (current[role]) releasePhoto(current[role]!);
+        return { ...current, [role]: prepared };
       });
     } catch (err) {
       if (mountedRef.current) setError(err instanceof Error ? err.message : "Couldn't read that photo.");
     } finally {
-      if (mountedRef.current) setPreparing(false);
+      if (mountedRef.current) setPreparing(null);
     }
   }
 
-  function removePhoto() {
-    setPhoto((current) => {
-      if (current) releasePhoto(current);
-      return null;
+  function removePhoto(role: ImportPhotoRole) {
+    setPhotos((current) => {
+      if (current[role]) releasePhoto(current[role]!);
+      return { ...current, [role]: null };
     });
   }
 
@@ -144,11 +140,16 @@ export function ImportRecipeSheet() {
       }
       input = { url: trimmed };
     } else {
-      if (!photo) {
-        setError('Add a photo of the recipe.');
+      if (!photos.ingredients) {
+        setError('Add a photo of the ingredient list.');
         return;
       }
-      input = { images: [photo.image] };
+      input = {
+        images: [
+          { ...photos.ingredients.image, role: 'ingredients' },
+          ...(photos.instructions ? [{ ...photos.instructions.image, role: 'instructions' as const }] : []),
+        ],
+      };
     }
     setError(null);
     setDuplicate(null);
@@ -221,62 +222,30 @@ export function ImportRecipeSheet() {
         {source === 'photos' && (
           <div className="import-recipe-sheet__field">
             {!busy && (
-              <>
-                <Text size="2" weight="medium">
-                  Photo of the recipe
-                </Text>
-                <Text size="2" color="gray">
-                  The ingredient list must be readable.
-                </Text>
-              </>
+              <Text size="2" color="gray">
+                Two photos read best: one of the ingredient list, one of the method. Get each list fully in frame and in focus.
+              </Text>
             )}
-            {/* The real picker: hidden, opened by the button below. `accept` gives
-                the camera and the photo library on a phone; no `capture`, so the
-                library is still an option for a photo taken earlier. */}
-            <input
-              ref={fileInputRef}
-              className="import-recipe-sheet__file"
-              type="file"
-              accept="image/*"
-              tabIndex={-1}
-              aria-hidden="true"
-              disabled={busy}
-              onChange={handlePick}
+            <PhotoSlot
+              role="ingredients"
+              label="Ingredient list"
+              help="Required. Every ingredient with its amount, top to bottom."
+              photo={photos.ingredients}
+              preparing={preparing === 'ingredients'}
+              busy={busy}
+              onPick={(file) => handlePick('ingredients', file)}
+              onRemove={() => removePhoto('ingredients')}
             />
-            {photo && (
-              // While the import runs the photo shrinks to a chip: the dog and its
-              // status line below need the room more than a second look at the page.
-              <div className={`import-recipe-sheet__photo${busy ? ' import-recipe-sheet__photo--compact' : ''}`}>
-                <img src={photo.previewUrl} alt="The recipe photo" />
-                {busy ? (
-                  <Text size="2" color="gray">
-                    Photo attached
-                  </Text>
-                ) : (
-                  <button
-                    type="button"
-                    className="import-recipe-sheet__photo-remove"
-                    aria-label="Remove photo"
-                    onClick={removePhoto}
-                  >
-                    <Cross2Icon />
-                  </button>
-                )}
-              </div>
-            )}
-            {!busy && (
-              <Button
-                type="button"
-                size="3"
-                variant="soft"
-                loading={preparing}
-                disabled={preparing}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                {photo ? <ImageIcon /> : <CameraIcon />}
-                {photo ? 'Choose a different photo' : 'Take or choose a photo'}
-              </Button>
-            )}
+            <PhotoSlot
+              role="instructions"
+              label="Instructions"
+              help="Optional. The method or steps. Skip it if the card has none."
+              photo={photos.instructions}
+              preparing={preparing === 'instructions'}
+              busy={busy}
+              onPick={(file) => handlePick('instructions', file)}
+              onRemove={() => removePhoto('instructions')}
+            />
           </div>
         )}
 
@@ -310,11 +279,86 @@ export function ImportRecipeSheet() {
           type="submit"
           size="3"
           loading={busy}
-          disabled={busy || preparing || (source === 'photos' && !photo)}
+          disabled={busy || preparing !== null || (source === 'photos' && !photos.ingredients)}
         >
           Import
         </Button>
       </form>
     </Sheet>
+  );
+}
+
+interface PhotoSlotProps {
+  role: ImportPhotoRole;
+  label: string;
+  help: string;
+  photo: PreparedPhoto | null;
+  preparing: boolean;
+  busy: boolean;
+  onPick: (file: File) => void;
+  onRemove: () => void;
+}
+
+/**
+ * One named photo: its own picker (camera *and* library on a phone — `accept`
+ * without `capture`), a thumbnail with a remove button, and a chip while the
+ * import runs so the dog below fits on the screen.
+ */
+function PhotoSlot({ role, label, help, photo, preparing, busy, onPick, onRemove }: PhotoSlotProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const labelId = useId();
+
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Reset so picking the same file again after removing it fires onChange.
+    event.target.value = '';
+    if (file) onPick(file);
+  }
+
+  if (busy && !photo) return null;
+
+  return (
+    <div className={`import-recipe-sheet__slot${busy ? ' import-recipe-sheet__slot--compact' : ''}`} role="group" aria-labelledby={labelId}>
+      {!busy && (
+        <div className="import-recipe-sheet__slot-head">
+          <Text size="2" weight="medium" id={labelId}>
+            {label}
+          </Text>
+          <Text size="1" color="gray">
+            {help}
+          </Text>
+        </div>
+      )}
+      <input
+        ref={fileInputRef}
+        className="import-recipe-sheet__file"
+        type="file"
+        accept="image/*"
+        tabIndex={-1}
+        aria-hidden="true"
+        disabled={busy}
+        onChange={handleChange}
+      />
+      {photo && (
+        <div className={`import-recipe-sheet__photo${busy ? ' import-recipe-sheet__photo--compact' : ''}`}>
+          <img src={photo.previewUrl} alt={`${label} photo`} />
+          {busy ? (
+            <Text size="2" color="gray">
+              {label} photo attached
+            </Text>
+          ) : (
+            <button type="button" className="import-recipe-sheet__photo-remove" aria-label={`Remove ${label.toLowerCase()} photo`} onClick={onRemove}>
+              <Cross2Icon />
+            </button>
+          )}
+        </div>
+      )}
+      {!busy && (
+        <Button type="button" size="3" variant="soft" loading={preparing} disabled={preparing} onClick={() => fileInputRef.current?.click()}>
+          {photo ? <ImageIcon /> : <CameraIcon />}
+          {photo ? 'Choose a different photo' : role === 'ingredients' ? 'Take or choose the ingredients photo' : 'Take or choose the instructions photo'}
+        </Button>
+      )}
+    </div>
   );
 }

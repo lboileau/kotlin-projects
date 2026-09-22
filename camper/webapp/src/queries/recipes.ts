@@ -10,6 +10,9 @@ import {
   importRecipe,
   importRecipeFromImages,
   publishRecipe,
+  replaceRecipeSteps,
+  addRecipePhoto,
+  removeRecipePhoto,
   removeRecipeIngredient,
   resolveDuplicate,
   resolveRecipeIngredient,
@@ -94,6 +97,8 @@ export interface RecipeEdits {
   removedLineIds: string[];
   changedLines: { lineId: string; ingredientId: string; quantity: number; unit: string }[];
   addedLines: CreateRecipeIngredientRequest[];
+  /** The whole steps list, only when it changed — one PUT replaces it. */
+  steps?: string[];
 }
 
 /**
@@ -107,17 +112,43 @@ export interface RecipeEdits {
 export function useSaveRecipeEdits(recipeId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ fields, removedLineIds, changedLines, addedLines }: RecipeEdits) => {
+    mutationFn: async ({ fields, removedLineIds, changedLines, addedLines, steps }: RecipeEdits) => {
       if (fields) await updateRecipe(recipeId, fields);
       for (const lineId of removedLineIds) await removeRecipeIngredient(recipeId, lineId);
       for (const { lineId, ...line } of changedLines) {
         await resolveRecipeIngredient(recipeId, lineId, { action: 'SELECT_EXISTING', ...line });
       }
       for (const line of addedLines) await addRecipeIngredient(recipeId, line);
+      if (steps) await replaceRecipeSteps(recipeId, steps);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: recipeKey(recipeId) });
       queryClient.invalidateQueries({ queryKey: recipesKey });
+    },
+  });
+}
+
+/**
+ * Adding a photo is immediate (a create, like the rapid ingredient add), not
+ * part of the edit form: the URL only exists once the server has it, so there
+ * is nothing to show optimistically. The detail is refetched on settle.
+ */
+export function useAddRecipePhoto(recipeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (image: ImportImage) => addRecipePhoto(recipeId, image),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: recipeKey(recipeId) });
+    },
+  });
+}
+
+export function useRemoveRecipePhoto(recipeId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (photoId: string) => removeRecipePhoto(recipeId, photoId),
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: recipeKey(recipeId) });
     },
   });
 }
