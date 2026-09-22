@@ -35,6 +35,8 @@
   cursor: pointer;
 }
 
+/* The name takes the room and ellipsises first; the Added/Draft badge and
+   the favourite pill (last, right-justified) never shrink. */
 .add-recipe-to-plan-sheet__row-name {
   min-width: 0;
   flex: 1;

@@ -5,6 +5,7 @@ import { CheckIcon, MagnifyingGlassIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { QueryErrorState } from '../../components/QueryErrorState';
+import { FavouriteCountPill } from '../../components/FavouriteCountPill';
 import { ApiError } from '../../api/http';
 import { useAuth } from '../../auth/useAuth';
 import { useRecipes } from '../../queries/recipes';
@@ -134,6 +135,10 @@ export function AddRecipeToPlanSheet() {
                   ) : (
                     recipe.status === 'draft' && <Badge variant="soft">Draft</Badge>
                   )}
+                  {/* Same read-only pill as the Recipes list, last on the row so
+                      the counts align: it helps pick, but favouriting still
+                      lives on the recipe page. */}
+                  <FavouriteCountPill count={recipe.favoriteCount} favouritedByMe={recipe.favoritedByMe} />
                 </button>
               );
             })}
