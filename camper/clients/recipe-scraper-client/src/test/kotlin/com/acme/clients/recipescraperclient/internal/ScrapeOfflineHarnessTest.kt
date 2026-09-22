@@ -1,6 +1,8 @@
 package com.acme.clients.recipescraperclient.internal
 
 import com.acme.clients.recipescraperclient.api.ExistingIngredient
+import com.acme.clients.recipescraperclient.api.RecipeImage
+import com.acme.clients.recipescraperclient.api.ScrapeRecipeImagesParam
 import com.acme.clients.recipescraperclient.api.ScrapeRecipeParam
 import com.acme.clients.recipescraperclient.model.ScrapedRecipe
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -12,6 +14,7 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
+import java.util.Base64
 import java.util.UUID
 
 /**
@@ -21,6 +24,10 @@ import java.util.UUID
  *   -Pscrape.dir=<dir> -Pscrape.offline=prompt
  *     For each URL in <dir>/urls.txt: fetch the page as the service does, run the extractor, and write
  *     <dir>/offline/<n>/{system.txt,user.txt,schema.json,meta.json,page.html}. No API call.
+ *   -Pscrape.dir=<dir> -Pscrape.offline=prompt-images
+ *     Treat the image files in <dir>/images/ (sorted by name, at most RecipeImage.MAX_IMAGES) as one recipe's
+ *     photos and write <dir>/offline/images/{system.txt,user.txt,schema.json,meta.json}. The photos are not
+ *     copied; open them yourself alongside user.txt. No API call.
  *   -Pscrape.dir=<dir> -Pscrape.offline=parse
  *     For each <dir>/offline/<n>/response.json present: parse it through the real mapping against
  *     <dir>/ingredients.json and write <dir>/offline/<n>/result.txt.
@@ -42,6 +49,7 @@ class ScrapeOfflineHarnessTest {
 
         when (mode) {
             "prompt" -> writePrompts(File(dir, "urls.txt").readLines().map { it.trim() }.filter { it.isNotEmpty() }, catalogue, out)
+            "prompt-images" -> writeImagesPrompt(File(dir, "images"), catalogue, out)
             "parse" -> parseResponses(catalogue, out)
             else -> error("unknown scrape.offline mode: $mode")
         }
@@ -63,18 +71,38 @@ class ScrapeOfflineHarnessTest {
                 File(caseDir, "page.html").writeText(html)
                 meta["htmlChars"] = html.length
 
-                val prompt = ScrapePromptBuilder.build(ScrapeRecipeParam(html, url, catalogue))
-                meta["extracted"] = prompt.content::class.simpleName
-                meta["extractedChars"] = prompt.content.text.length
-                File(caseDir, "system.txt").writeText(prompt.system)
-                File(caseDir, "user.txt").writeText(prompt.userMessage)
-                File(caseDir, "schema.json").writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(prompt.schema))
+                val page = ScrapePromptBuilder.buildForPage(ScrapeRecipeParam(html, url, catalogue))
+                meta["extracted"] = page.content::class.simpleName
+                meta["extractedChars"] = page.content.text.length
+                File(caseDir, "system.txt").writeText(page.prompt.system)
+                File(caseDir, "user.txt").writeText(page.prompt.userMessage)
+                File(caseDir, "schema.json").writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(page.prompt.schema))
             } catch (e: Exception) {
                 meta["error"] = e.message ?: e::class.simpleName
             }
             File(caseDir, "meta.json").writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(meta))
             println("${caseDir.name} ${meta["extracted"] ?: "ERROR"} ${meta["extractedChars"] ?: meta["error"]} $url")
         }
+    }
+
+    private fun writeImagesPrompt(imagesDir: File, catalogue: List<ExistingIngredient>, out: File) {
+        val mediaTypes = mapOf("jpg" to "image/jpeg", "jpeg" to "image/jpeg", "png" to "image/png", "gif" to "image/gif", "webp" to "image/webp")
+        val files = imagesDir.listFiles { f -> f.isFile && f.extension.lowercase() in mediaTypes }
+            ?.sortedBy { it.name }?.take(RecipeImage.MAX_IMAGES).orEmpty()
+        check(files.isNotEmpty()) { "no image files in $imagesDir" }
+
+        val images = files.map { RecipeImage(mediaTypes.getValue(it.extension.lowercase()), Base64.getEncoder().encodeToString(it.readBytes())) }
+        val prompt = ScrapePromptBuilder.buildForImages(ScrapeRecipeImagesParam(images, catalogue))
+
+        val caseDir = File(out, "images").apply { mkdirs() }
+        File(caseDir, "system.txt").writeText(prompt.system)
+        File(caseDir, "user.txt").writeText(prompt.userMessage)
+        File(caseDir, "schema.json").writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(prompt.schema))
+        val meta = linkedMapOf<String, Any?>(
+            "images" to files.map { mapOf("file" to it.name, "mediaType" to mediaTypes.getValue(it.extension.lowercase()), "bytes" to it.length()) }
+        )
+        File(caseDir, "meta.json").writeText(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(meta))
+        println("${caseDir.name} ${files.size} photo(s): ${files.joinToString { it.name }}")
     }
 
     private fun parseResponses(catalogue: List<ExistingIngredient>, out: File) {

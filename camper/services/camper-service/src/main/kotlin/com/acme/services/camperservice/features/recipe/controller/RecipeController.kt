@@ -4,6 +4,7 @@ import com.acme.clients.common.Result
 import com.acme.services.camperservice.common.error.toResponseEntity
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeRequest
+import com.acme.services.camperservice.features.recipe.dto.ImportRecipeFromImagesRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportRecipeRequest
 import com.acme.services.camperservice.features.recipe.dto.ResolveDuplicateRequest
 import com.acme.services.camperservice.features.recipe.dto.ResolveIngredientRequest
@@ -56,6 +57,19 @@ class RecipeController(
         logger.info("POST /api/recipes/import")
         return recipeService.import(ImportRecipeParam(userId = userId, url = request.url))
             .toResponseEntity(successStatus = 201) { it }
+    }
+
+    @PostMapping("/import-images")
+    fun importFromImages(
+        @RequestHeader("X-User-Id") userId: UUID,
+        @RequestBody request: ImportRecipeFromImagesRequest
+    ): ResponseEntity<Any> {
+        logger.info("POST /api/recipes/import-images ({} image(s))", request.images.size)
+        val param = ImportRecipeFromImagesParam(
+            userId = userId,
+            images = request.images.map { ImportImageParam(mediaType = it.mediaType, data = it.data) }
+        )
+        return recipeService.importFromImages(param).toResponseEntity(successStatus = 201) { it }
     }
 
     @GetMapping

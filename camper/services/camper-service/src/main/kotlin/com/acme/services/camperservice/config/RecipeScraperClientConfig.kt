@@ -3,10 +3,12 @@ package com.acme.services.camperservice.config
 import com.acme.clients.recipescraperclient.api.RecipeScraperClient
 import com.acme.clients.recipescraperclient.createNoOpRecipeScraperClient
 import com.acme.clients.recipescraperclient.createRecipeScraperClient
+import com.acme.clients.recipescraperclient.createRelayRecipeScraperClient
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.io.File
 
 @Configuration
 class RecipeScraperClientConfig {
@@ -15,6 +17,12 @@ class RecipeScraperClientConfig {
     @Bean
     @ConditionalOnMissingBean
     fun recipeScraperClient(): RecipeScraperClient {
+        // Dev only: a folder someone (or an agent) answers scrapes in by hand — the real flow, no key.
+        val relayDir = System.getProperty("RECIPE_SCRAPER_RELAY_DIR") ?: System.getenv("RECIPE_SCRAPER_RELAY_DIR")
+        if (!relayDir.isNullOrBlank()) {
+            logger.warn("RECIPE_SCRAPER_RELAY_DIR set: imports will WAIT for a response.json under {}", relayDir)
+            return createRelayRecipeScraperClient(File(relayDir))
+        }
         val apiKey = System.getProperty("ANTHROPIC_API_KEY") ?: System.getenv("ANTHROPIC_API_KEY")
         if (apiKey.isNullOrBlank()) {
             logger.info("ANTHROPIC_API_KEY not set, using NoOpRecipeScraperClient")

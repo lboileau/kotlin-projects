@@ -18,6 +18,7 @@ import com.acme.clients.recipescraperclient.model.ScrapedRecipe
 import com.acme.clients.userclient.fake.FakeUserClient
 import com.acme.clients.userclient.model.User
 import com.acme.services.camperservice.features.recipe.actions.HtmlFetcher
+import com.acme.services.camperservice.features.recipe.actions.ImportRecipeFromImagesAction
 import com.acme.services.camperservice.features.recipe.error.RecipeError
 import com.acme.services.camperservice.features.recipe.params.*
 import com.acme.services.camperservice.features.recipe.service.IngredientService
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
+import java.util.Base64
 import java.util.UUID
 
 class RecipeServiceTest {
@@ -613,6 +615,131 @@ class RecipeServiceTest {
             val detail = (result as Result.Success).value
             assertThat(detail.ingredients[0].status).isEqualTo("approved")
             assertThat(detail.ingredients[0].ingredient?.id).isEqualTo(avocado.id)
+        }
+    }
+
+    @Nested
+    inner class ImportRecipeFromImages {
+
+        private val jpeg = ImportImageParam("image/jpeg", Base64.getEncoder().encodeToString(ByteArray(64) { 1 }))
+
+        @Test
+        fun `import from images creates a draft with no web link and pending_review ingredients`() {
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg)))
+
+            assertThat(result.isSuccess).isTrue()
+            val detail = (result as Result.Success).value
+            assertThat(detail.status).isEqualTo("draft")
+            assertThat(detail.name).isEqualTo("Classic Guacamole")
+            assertThat(detail.webLink).isNull()
+            assertThat(detail.createdBy).isEqualTo(userId)
+            assertThat(detail.ingredients).hasSize(1)
+            assertThat(detail.ingredients[0].status).isEqualTo("pending_review")
+            assertThat(detail.ingredients[0].reviewFlags).contains("NEW_INGREDIENT")
+        }
+
+        @Test
+        fun `import from images passes every photo and the catalogue to the scraper in order`() {
+            seedIngredient("avocado", "produce", "whole")
+            val png = ImportImageParam("image/png", Base64.getEncoder().encodeToString(ByteArray(8) { 2 }))
+
+            recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg, png)))
+
+            val sent = fakeScraperClient.lastImagesParam
+            assertThat(sent).isNotNull
+            assertThat(sent!!.images.map { it.mediaType }).containsExactly("image/jpeg", "image/png")
+            assertThat(sent.images.map { it.base64Data }).containsExactly(jpeg.data, png.data)
+            assertThat(sent.existingIngredients).hasSize(1)
+            assertThat(sent.existingIngredients.first().name).isEqualTo("avocado")
+            assertThat(fakeScraperClient.lastParam).isNull()
+        }
+
+        @Test
+        fun `import from images can be repeated - there is no web link to collide on`() {
+            val first = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg)))
+            val second = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg)))
+
+            assertThat(first.isSuccess).isTrue()
+            assertThat(second.isSuccess).isTrue()
+            assertThat((first as Result.Success).value.id).isNotEqualTo((second as Result.Success).value.id)
+        }
+
+        @Test
+        fun `import from images sets duplicate_of_id when a similar recipe exists`() {
+            fakeRecipeClient.seed(Recipe(
+                id = UUID.randomUUID(), name = "Classic Guacamole", description = null, webLink = null,
+                baseServings = 4, status = "published", createdBy = otherUserId, duplicateOfId = null,
+                createdAt = Instant.now(), updatedAt = Instant.now()
+            ))
+
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg)))
+
+            assertThat((result as Result.Success).value.duplicateOf).isNotNull()
+        }
+
+        @Test
+        fun `import from images returns ScrapeFailed when the scraper fails`() {
+            fakeScraperClient.nextResult = Result.Failure(object : AppError { override val message = "Couldn't read a recipe from the photo" })
+
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg)))
+
+            assertThat(result.isFailure).isTrue()
+            val error = (result as Result.Failure).error
+            assertThat(error).isInstanceOf(RecipeError.ScrapeFailed::class.java)
+            assertThat(error.message).contains("Couldn't read a recipe from the photo")
+        }
+
+        @Test
+        fun `import from images rejects no photos`() {
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, emptyList()))
+
+            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
+            assertThat(fakeScraperClient.lastImagesParam).isNull()
+        }
+
+        @Test
+        fun `import from images rejects more than three photos`() {
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, List(4) { jpeg }))
+
+            assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.Invalid::class.java)
+            assertThat(fakeScraperClient.lastImagesParam).isNull()
+        }
+
+        @Test
+        fun `import from images rejects an unsupported media type`() {
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg.copy(mediaType = "image/heic"))))
+
+            val error = (result as Result.Failure).error as RecipeError.Invalid
+            assertThat(error.field).isEqualTo("images[0].mediaType")
+            assertThat(fakeScraperClient.lastImagesParam).isNull()
+        }
+
+        @Test
+        fun `import from images rejects a data URL, blank data and bad base64`() {
+            listOf("data:image/jpeg;base64,AAAA", "   ", "not base64!!").forEach { data ->
+                val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg.copy(data = data))))
+                val error = (result as Result.Failure).error as RecipeError.Invalid
+                assertThat(error.field).isEqualTo("images[0].data")
+            }
+            assertThat(fakeScraperClient.lastImagesParam).isNull()
+        }
+
+        @Test
+        fun `import from images rejects a photo over the size limit before decoding it`() {
+            val tooBig = "A".repeat(ImportRecipeFromImagesAction.MAX_IMAGE_BYTES / 3 * 4 + 8)
+
+            val result = recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg.copy(data = tooBig))))
+
+            val error = (result as Result.Failure).error as RecipeError.Invalid
+            assertThat(error.reason).contains("larger than 5 MB")
+            assertThat(fakeScraperClient.lastImagesParam).isNull()
+        }
+
+        @Test
+        fun `import from images normalises the media type before sending`() {
+            recipeService.importFromImages(ImportRecipeFromImagesParam(userId, listOf(jpeg.copy(mediaType = " IMAGE/JPEG "))))
+
+            assertThat(fakeScraperClient.lastImagesParam!!.images.single().mediaType).isEqualTo("image/jpeg")
         }
     }
 

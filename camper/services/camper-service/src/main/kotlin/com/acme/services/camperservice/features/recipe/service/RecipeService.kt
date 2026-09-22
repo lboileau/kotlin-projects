@@ -11,6 +11,7 @@ import com.acme.services.camperservice.features.recipe.actions.FavoriteRecipeAct
 import com.acme.services.camperservice.features.recipe.actions.GetRecipeAction
 import com.acme.services.camperservice.features.recipe.actions.HtmlFetcher
 import com.acme.services.camperservice.features.recipe.actions.ImportRecipeAction
+import com.acme.services.camperservice.features.recipe.actions.ImportRecipeFromImagesAction
 import com.acme.services.camperservice.features.recipe.actions.ListRecipeFavoritesAction
 import com.acme.services.camperservice.features.recipe.actions.ListRecipesAction
 import com.acme.services.camperservice.features.recipe.actions.PublishRecipeAction
@@ -25,6 +26,7 @@ import com.acme.services.camperservice.features.recipe.params.CreateRecipeParam
 import com.acme.services.camperservice.features.recipe.params.DeleteRecipeParam
 import com.acme.services.camperservice.features.recipe.params.FavoriteRecipeParam
 import com.acme.services.camperservice.features.recipe.params.GetRecipeParam
+import com.acme.services.camperservice.features.recipe.params.ImportRecipeFromImagesParam
 import com.acme.services.camperservice.features.recipe.params.ImportRecipeParam
 import com.acme.services.camperservice.features.recipe.params.ListRecipeFavoritesParam
 import com.acme.services.camperservice.features.recipe.params.ListRecipesParam
@@ -45,6 +47,7 @@ class RecipeService(
     private val addRecipeIngredient = AddRecipeIngredientAction(recipeClient, ingredientClient)
     private val createRecipe = CreateRecipeAction(recipeClient, ingredientClient)
     private val importRecipe = ImportRecipeAction(recipeClient, ingredientClient, recipeScraperClient, htmlFetcher)
+    private val importRecipeFromImages = ImportRecipeFromImagesAction(recipeClient, ingredientClient, recipeScraperClient)
     private val getRecipe = GetRecipeAction(recipeClient, ingredientClient)
     private val listRecipes = ListRecipesAction(recipeClient)
     private val updateRecipe = UpdateRecipeAction(recipeClient)
@@ -59,6 +62,7 @@ class RecipeService(
 
     fun create(param: CreateRecipeParam) = createRecipe.execute(param)
     fun import(param: ImportRecipeParam) = importRecipe.execute(param)
+    fun importFromImages(param: ImportRecipeFromImagesParam) = importRecipeFromImages.execute(param)
     fun get(param: GetRecipeParam) = getRecipe.execute(param)
     fun list(param: ListRecipesParam) = listRecipes.execute(param)
     fun update(param: UpdateRecipeParam) = updateRecipe.execute(param)

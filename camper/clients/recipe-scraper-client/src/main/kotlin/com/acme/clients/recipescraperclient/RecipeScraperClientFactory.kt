@@ -3,7 +3,10 @@ package com.acme.clients.recipescraperclient
 import com.acme.clients.recipescraperclient.api.RecipeScraperClient
 import com.acme.clients.recipescraperclient.internal.AnthropicRecipeScraperClient
 import com.acme.clients.recipescraperclient.internal.NoOpRecipeScraperClient
+import com.acme.clients.recipescraperclient.internal.RelayRecipeScraperClient
 import com.anthropic.client.okhttp.AnthropicOkHttpClient
+import java.io.File
+import java.time.Duration
 
 /**
  * Env vars:
@@ -26,3 +29,10 @@ fun createRecipeScraperClient(): RecipeScraperClient {
 }
 
 fun createNoOpRecipeScraperClient(): RecipeScraperClient = NoOpRecipeScraperClient()
+
+/**
+ * Local development only: writes each scrape's prompt (and photos) under [dir] and waits for a
+ * hand- or agent-written `response.json` there. See [RelayRecipeScraperClient].
+ */
+fun createRelayRecipeScraperClient(dir: File, timeout: Duration = Duration.ofMinutes(4)): RecipeScraperClient =
+    RelayRecipeScraperClient(dir, timeout)

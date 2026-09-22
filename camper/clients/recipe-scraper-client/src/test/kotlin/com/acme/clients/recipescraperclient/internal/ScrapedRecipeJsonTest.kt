@@ -105,4 +105,18 @@ class ScrapedRecipeJsonTest {
         assertNull(recipe.meal)
         assertEquals("soup", recipe.theme)
     }
+
+    @Test
+    fun `a blank name becomes a placeholder rather than an empty draft title`() {
+        // A photo of a meal-kit card with the title out of frame: Sonnet 5 returned "" for the name
+        // and a full ingredient list. That is a draft to rename, not an unreadable photo.
+        val recipe = ScrapedRecipeJson(
+            name = "  ", description = null, baseServings = 4, meal = null, theme = null,
+            ingredients = listOf(line(ref = 0, confidence = "HIGH"))
+        ).toDomain(catalogue)
+
+        assertEquals(UNTITLED_NAME, recipe.name)
+        assertEquals(1, recipe.ingredients.size)
+        assertEquals("Pasta", ScrapedRecipeJson("Pasta ", null, 4, null, null, emptyList()).toDomain(catalogue).name)
+    }
 }

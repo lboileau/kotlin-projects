@@ -20,6 +20,7 @@ internal val ALLOWED_THEMES = listOf(
 )
 
 private const val DEFAULT_SERVINGS = 4
+internal const val UNTITLED_NAME = "Untitled recipe"
 
 /**
  * The model's structured response. The model refers to catalogue ingredients by their position
@@ -40,7 +41,9 @@ internal data class ScrapedRecipeJson(
      * it read (quantity, unit, match + confidence); whether that needs review is decided here.
      */
     fun toDomain(catalogue: List<ExistingIngredient>) = ScrapedRecipe(
-        name = name,
+        // A photo of an ingredient list can have no title in frame; the model is told to invent one,
+        // but when it leaves the name blank the draft still needs one — the user renames it in review.
+        name = name.trim().ifEmpty { UNTITLED_NAME },
         description = description,
         baseServings = if (baseServings > 0) baseServings else DEFAULT_SERVINGS,
         meal = meal?.takeIf { it in ALLOWED_MEALS },

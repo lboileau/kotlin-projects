@@ -5,6 +5,8 @@ import com.acme.services.camperservice.features.recipe.acceptance.fixture.Recipe
 import com.acme.services.camperservice.features.recipe.dto.CreateIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeIngredientRequest
 import com.acme.services.camperservice.features.recipe.dto.CreateRecipeRequest
+import com.acme.services.camperservice.features.recipe.dto.ImportImageRequest
+import com.acme.services.camperservice.features.recipe.dto.ImportRecipeFromImagesRequest
 import com.acme.services.camperservice.features.recipe.dto.ImportRecipeRequest
 import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeFavoriteStatusResponse
@@ -331,6 +333,79 @@ class RecipeAcceptanceTest {
             )
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.CONFLICT)
+        }
+    }
+
+    @Nested
+    inner class ImportRecipeFromImages {
+
+        private fun photo(mediaType: String = "image/jpeg") =
+            ImportImageRequest(mediaType, java.util.Base64.getEncoder().encodeToString(ByteArray(32) { 7 }))
+
+        @Test
+        fun `POST creates a draft with no web link from the stub scraper`() {
+            // TestContainerConfig wires the NoOp scraper, so any photo yields the canned guacamole.
+            val response = restTemplate.exchange(
+                "/api/recipes/import-images",
+                HttpMethod.POST,
+                entityWithUser(ImportRecipeFromImagesRequest(listOf(photo(), photo("image/png"))), userId),
+                RecipeDetailResponse::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            val detail = response.body!!
+            assertThat(detail.status).isEqualTo("draft")
+            assertThat(detail.name).isEqualTo("Classic Guacamole")
+            assertThat(detail.webLink).isNull()
+            assertThat(detail.createdBy).isEqualTo(userId)
+            assertThat(detail.ingredients).hasSize(2)
+            assertThat(detail.ingredients.map { it.status }).containsOnly("pending_review")
+        }
+
+        @Test
+        fun `POST twice creates two drafts - photos have no web link to collide on`() {
+            repeat(2) {
+                val response = restTemplate.exchange(
+                    "/api/recipes/import-images", HttpMethod.POST,
+                    entityWithUser(ImportRecipeFromImagesRequest(listOf(photo())), userId),
+                    RecipeDetailResponse::class.java
+                )
+                assertThat(response.statusCode).isEqualTo(HttpStatus.CREATED)
+            }
+        }
+
+        @Test
+        fun `POST returns 400 with no photos`() {
+            val response = restTemplate.exchange(
+                "/api/recipes/import-images", HttpMethod.POST,
+                entityWithUser(ImportRecipeFromImagesRequest(emptyList()), userId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `POST returns 400 with four photos`() {
+            val response = restTemplate.exchange(
+                "/api/recipes/import-images", HttpMethod.POST,
+                entityWithUser(ImportRecipeFromImagesRequest(List(4) { photo() }), userId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+        }
+
+        @Test
+        fun `POST returns 400 for an unsupported media type`() {
+            val response = restTemplate.exchange(
+                "/api/recipes/import-images", HttpMethod.POST,
+                entityWithUser(ImportRecipeFromImagesRequest(listOf(photo("application/pdf"))), userId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.BAD_REQUEST)
+            assertThat(response.body!!["message"].toString()).contains("images[0].mediaType")
         }
     }
 

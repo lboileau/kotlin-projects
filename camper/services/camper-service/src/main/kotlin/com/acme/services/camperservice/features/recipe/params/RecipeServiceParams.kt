@@ -48,6 +48,17 @@ data class ImportRecipeParam(
     val url: String
 )
 
+data class ImportRecipeFromImagesParam(
+    val userId: UUID,
+    val images: List<ImportImageParam>
+)
+
+/** One photo: its media type and the bytes as raw base64 (no `data:` prefix). */
+data class ImportImageParam(
+    val mediaType: String,
+    val data: String
+)
+
 data class GetRecipeParam(
     val recipeId: UUID,
     val userId: UUID

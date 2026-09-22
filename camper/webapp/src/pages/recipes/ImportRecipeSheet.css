@@ -4,10 +4,102 @@
   gap: 16px;
 }
 
+.import-recipe-sheet__source {
+  min-height: 44px;
+}
+
 .import-recipe-sheet__field {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* The real file input stays in the DOM (the button clicks it) but out of sight
+   and out of the tab order; `display: none` breaks the click on some browsers. */
+.import-recipe-sheet__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The picked photo: a portrait thumbnail big enough to see it is the right page,
+   no bigger — the sheet has to leave room for the button and the error line. */
+.import-recipe-sheet__photo {
+  position: relative;
+  width: 120px;
+  height: 160px;
+  margin: 4px 0;
+  overflow: hidden;
+  border-radius: var(--radius-3);
+  background: var(--gray-3);
+}
+
+.import-recipe-sheet__photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* While importing: a 40px chip beside "Photo attached", so the dog and the status
+   line underneath don't push the sheet taller than the screen. */
+.import-recipe-sheet__photo--compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+}
+
+.import-recipe-sheet__photo--compact img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-2);
+}
+
+/* 44px target on a small thumbnail: the visible disc is smaller, the hit area isn't. */
+.import-recipe-sheet__photo-remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--gray-contrast);
+  cursor: pointer;
+}
+
+.import-recipe-sheet__photo-remove::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--gray-12);
+  opacity: 0.75;
+}
+
+.import-recipe-sheet__photo-remove svg {
+  position: relative;
+}
+
+.import-recipe-sheet__photo-remove:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+  border-radius: var(--radius-3);
 }
 
 .import-recipe-sheet__reading {

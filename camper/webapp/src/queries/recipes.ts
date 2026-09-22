@@ -8,6 +8,7 @@ import {
   getRecipeFavorites,
   getRecipes,
   importRecipe,
+  importRecipeFromImages,
   publishRecipe,
   removeRecipeIngredient,
   resolveDuplicate,
@@ -24,6 +25,7 @@ import {
   type ResolveRecipeIngredientRequest,
   type UpdateRecipeRequest,
 } from '../api/recipes';
+import type { ImportImage } from '../lib/importPhotos';
 import { applyFavoriteToDetail, applyFavoriteToList, applyFavoriteToPeople } from '../lib/recipeFavorites';
 import { useAuth } from '../auth/useAuth';
 
@@ -178,14 +180,18 @@ export function useResolveRecipeIngredient(recipeId: string) {
   });
 }
 
+/** Where an import comes from: a link to a recipe page, or photos of one. */
+export type ImportRecipeInput = { url: string } | { images: ImportImage[] };
+
 /**
  * Importing waits for the server (10-60s scrape + LLM call). The caller
  * shows its own inline error per code, so the global toast is suppressed.
+ * One mutation for both sources so the sheet has one pending state.
  */
 export function useImportRecipe() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (url: string) => importRecipe(url),
+    mutationFn: (input: ImportRecipeInput) => ('url' in input ? importRecipe(input.url) : importRecipeFromImages(input.images)),
     meta: { suppressErrorToast: true },
     onSuccess: (created) => {
       queryClient.setQueryData(recipeKey(created.id), created);
