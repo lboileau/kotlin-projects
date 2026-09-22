@@ -282,7 +282,7 @@ export function RecipeDetailPage() {
         )}
 
         <Tabs.Root value={tab} onValueChange={(next) => setTab(parseRecipeTab(next))} className="recipe-detail-page__tabs">
-          <Tabs.List size="2">
+          <Tabs.List size="2" className="recipe-detail-page__tabs-list">
             <Tabs.Trigger value="ingredients">Ingredients</Tabs.Trigger>
             <Tabs.Trigger value="instructions">
               Instructions

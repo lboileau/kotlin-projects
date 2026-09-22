@@ -68,12 +68,77 @@
   margin-top: 4px;
 }
 
+/* The three tabs as a segmented pill row — full width, 44px segments on a
+   soft accent track, the active one solid accent: the same "solid = selected"
+   the filter chips and the favourite pill use. Plain Radix tabs (text with
+   an underline) were built first and the owner found them hard to see and
+   to hit. Styled over Radix's own classes so the Tabs semantics and the
+   ?tab= URL behaviour are untouched. */
+.recipe-detail-page__tabs-list {
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--accent-3);
+  /* Replaces Radix's default underline track. */
+  box-shadow: none;
+}
+
+.recipe-detail-page__tabs-list .rt-TabsTrigger {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 44px;
+  padding: 0 4px;
+  border-radius: 999px;
+  color: var(--accent-11);
+  font-weight: var(--font-weight-medium);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+/* Radix's own active-tab underline; the solid pill says which tab is active instead. */
+.recipe-detail-page__tabs-list .rt-TabsTrigger::before {
+  content: none;
+}
+
+/* The inner span's own hover/focus background (sized to the text, not the
+   pill) would otherwise show through as a mismatched box behind the label. */
+.recipe-detail-page__tabs-list .rt-TabsTrigger:hover .rt-TabsTriggerInner,
+.recipe-detail-page__tabs-list .rt-TabsTrigger:focus-visible:hover .rt-TabsTriggerInner {
+  background-color: transparent;
+}
+
+.recipe-detail-page__tabs-list .rt-TabsTrigger:hover:not([data-state='active']) {
+  background: var(--accent-4);
+}
+
+.recipe-detail-page__tabs-list .rt-TabsTrigger[data-state='active'] {
+  background: var(--accent-9);
+  color: var(--accent-contrast);
+}
+
+.recipe-detail-page__tabs-list .rt-TabsTrigger:focus-visible {
+  outline: 2px solid var(--focus-8);
+  outline-offset: 2px;
+}
+
+.recipe-detail-page__tabs-list .rt-TabsTrigger:focus-visible .rt-TabsTriggerInner {
+  outline: none;
+}
+
+/* On the solid active pill the badge becomes a translucent overlay so it
+   doesn't wash out against accent-9. */
+.recipe-detail-page__tabs-list .rt-TabsTrigger[data-state='active'] .recipe-detail-page__tab-count {
+  background: var(--accent-a5);
+  color: var(--accent-contrast);
+}
+
 .recipe-detail-page__tab {
   padding-top: 12px;
 }
 
 /* A small count after a tab's name, so "Instructions 8" says there is
-   something there before you tap. */
+   something there before you tap. On the active (light purple) segment it
+   swaps to a solid accent dot, since the default accent-4 badge would
+   nearly vanish on the same-toned pill behind it. */
 .recipe-detail-page__tab-count {
   margin-left: 6px;
   padding: 0 6px;
@@ -84,6 +149,32 @@
   font-weight: 600;
   line-height: 18px;
   font-variant-numeric: tabular-nums;
+}
+
+.recipe-detail-page__tabs-list .rt-TabsTrigger[data-state='active'] .recipe-detail-page__tab-count {
+  background: var(--accent-9);
+  color: var(--accent-contrast);
+}
+
+/* At 360px the three pills are ~100px each: "Instructions" plus its count
+   badge doesn't fit at the normal tab size. The label drops a size and the
+   count collapses to a dot — the real count stays in the text (and so in
+   the accessible name), just visually hidden at this width. */
+@media (max-width: 380px) {
+  .recipe-detail-page__tabs-list .rt-TabsTrigger {
+    font-size: var(--font-size-1);
+    padding: 0 2px;
+  }
+
+  .recipe-detail-page__tab-count {
+    width: 6px;
+    height: 6px;
+    margin-left: 4px;
+    padding: 0;
+    font-size: 0;
+    line-height: 0;
+    overflow: hidden;
+  }
 }
 
 .recipe-detail-page__empty {
