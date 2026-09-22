@@ -6,6 +6,8 @@ import com.acme.clients.recipeclient.model.Recipe
 import com.acme.clients.recipeclient.model.RecipeFavorite
 import com.acme.clients.recipeclient.model.RecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient
+import com.acme.clients.recipeclient.model.RecipePhoto
+import com.acme.clients.recipeclient.model.RecipeStep
 
 /**
  * Client interface for Recipe and RecipeIngredient entity operations.
@@ -79,4 +81,25 @@ interface RecipeClient {
      * must default it to `favoriteCount = 0, favoritedByMe = false`.
      */
     fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError>
+
+    /** A recipe's steps in order. Empty when it has none. */
+    fun getSteps(param: GetRecipeStepsParam): Result<List<RecipeStep>, AppError>
+
+    /**
+     * Replace a recipe's steps with the given texts, in one transaction (delete, then insert).
+     * Steps are never edited individually — the list is the unit. An empty list clears them.
+     */
+    fun replaceSteps(param: ReplaceRecipeStepsParam): Result<List<RecipeStep>, AppError>
+
+    /** A recipe's photos in display order. Empty when it has none. */
+    fun getPhotos(param: GetRecipePhotosParam): Result<List<RecipePhoto>, AppError>
+
+    /** One photo's metadata. NotFound when there is no such photo. */
+    fun getPhotoById(param: GetRecipePhotoByIdParam): Result<RecipePhoto, AppError>
+
+    /** Record a photo whose object is already stored; it takes the next position for the recipe. */
+    fun addPhoto(param: AddRecipePhotoParam): Result<RecipePhoto, AppError>
+
+    /** Remove a photo's row. NotFound when there is no such photo. */
+    fun removePhoto(param: RemoveRecipePhotoParam): Result<Unit, AppError>
 }

@@ -112,3 +112,38 @@ data class GetRecipeFavoritesParam(val recipeId: UUID)
  * touching the database (an empty `IN ()` is a SQL syntax error).
  */
 data class GetRecipeFavoriteSummariesParam(val recipeIds: List<UUID>, val userId: UUID)
+
+/** Parameter for reading a recipe's steps in order. */
+data class GetRecipeStepsParam(val recipeId: UUID)
+
+/**
+ * Parameter for replacing a recipe's steps with [texts], in order. An empty list clears them.
+ * Every text must be non-blank; positions are assigned from list order.
+ */
+data class ReplaceRecipeStepsParam(val recipeId: UUID, val texts: List<String>)
+
+/** Parameter for listing a recipe's photos in display order. */
+data class GetRecipePhotosParam(val recipeId: UUID)
+
+/** Parameter for reading one photo's metadata by its id. */
+data class GetRecipePhotoByIdParam(val id: UUID)
+
+/**
+ * Parameter for recording a photo whose bytes are already at [storageKey]. The id is chosen by
+ * the caller so the storage key can embed it before the row exists. Position is the next free one.
+ */
+data class AddRecipePhotoParam(
+    val id: UUID,
+    val recipeId: UUID,
+    val storageKey: String,
+    val mediaType: String,
+    val byteSize: Int,
+    val width: Int?,
+    val height: Int?,
+    val source: String,
+    val role: String?,
+    val createdBy: UUID
+)
+
+/** Parameter for removing a photo's row. The caller deletes the object first. */
+data class RemoveRecipePhotoParam(val id: UUID)

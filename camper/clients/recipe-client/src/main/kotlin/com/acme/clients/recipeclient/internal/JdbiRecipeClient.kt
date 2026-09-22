@@ -8,6 +8,8 @@ import com.acme.clients.recipeclient.model.Recipe
 import com.acme.clients.recipeclient.model.RecipeFavorite
 import com.acme.clients.recipeclient.model.RecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient
+import com.acme.clients.recipeclient.model.RecipePhoto
+import com.acme.clients.recipeclient.model.RecipeStep
 import org.jdbi.v3.core.Jdbi
 
 internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
@@ -29,6 +31,12 @@ internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
     private val removeRecipeFavorite = RemoveRecipeFavorite(jdbi)
     private val getRecipeFavorites = GetRecipeFavorites(jdbi)
     private val getRecipeFavoriteSummaries = GetRecipeFavoriteSummaries(jdbi)
+    private val getRecipeSteps = GetRecipeSteps(jdbi)
+    private val replaceRecipeSteps = ReplaceRecipeSteps(jdbi)
+    private val getRecipePhotos = GetRecipePhotos(jdbi)
+    private val getRecipePhotoById = GetRecipePhotoById(jdbi)
+    private val addRecipePhoto = AddRecipePhoto(jdbi)
+    private val removeRecipePhoto = RemoveRecipePhoto(jdbi)
 
     override fun create(param: CreateRecipeParam): Result<Recipe, AppError> = createRecipe.execute(param)
     override fun getById(param: GetByIdParam): Result<Recipe, AppError> = getRecipeById.execute(param)
@@ -48,4 +56,11 @@ internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
     override fun removeFavorite(param: RemoveRecipeFavoriteParam): Result<Unit, AppError> = removeRecipeFavorite.execute(param)
     override fun getFavorites(param: GetRecipeFavoritesParam): Result<List<RecipeFavorite>, AppError> = getRecipeFavorites.execute(param)
     override fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError> = getRecipeFavoriteSummaries.execute(param)
+
+    override fun getSteps(param: GetRecipeStepsParam): Result<List<RecipeStep>, AppError> = getRecipeSteps.execute(param)
+    override fun replaceSteps(param: ReplaceRecipeStepsParam): Result<List<RecipeStep>, AppError> = replaceRecipeSteps.execute(param)
+    override fun getPhotos(param: GetRecipePhotosParam): Result<List<RecipePhoto>, AppError> = getRecipePhotos.execute(param)
+    override fun getPhotoById(param: GetRecipePhotoByIdParam): Result<RecipePhoto, AppError> = getRecipePhotoById.execute(param)
+    override fun addPhoto(param: AddRecipePhotoParam): Result<RecipePhoto, AppError> = addRecipePhoto.execute(param)
+    override fun removePhoto(param: RemoveRecipePhotoParam): Result<Unit, AppError> = removeRecipePhoto.execute(param)
 }
