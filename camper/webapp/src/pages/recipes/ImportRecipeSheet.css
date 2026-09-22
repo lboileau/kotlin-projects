@@ -24,74 +24,140 @@
   pointer-events: none;
 }
 
-/* One named photo slot: heading, thumbnail, button. Two of them stack. */
+/* The two photo slots side by side, each a portrait card in the shape the
+   photo will take. While importing they collapse into a column of chips. */
+.import-recipe-sheet__slots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.import-recipe-sheet__slots--compact {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
 .import-recipe-sheet__slot {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Empty: a dashed box with a + and the words inside; the whole box is the
+   picker. Filled: the photo, edge to edge, still tappable to pick again. */
+.import-recipe-sheet__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   padding: 12px;
+  border: 2px dashed var(--accent-7);
   border-radius: var(--radius-4);
   background: var(--accent-2);
-}
-
-.import-recipe-sheet__slot--compact {
-  padding: 0;
-  background: transparent;
-}
-
-.import-recipe-sheet__slot-head {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-/* The picked photo: a portrait thumbnail big enough to see it is the right page,
-   no bigger — the sheet has to leave room for the button and the error line. */
-.import-recipe-sheet__photo {
-  position: relative;
-  width: 120px;
-  height: 160px;
-  margin: 4px 0;
+  color: var(--accent-11);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
   overflow: hidden;
-  border-radius: var(--radius-3);
+  touch-action: manipulation;
+}
+
+.import-recipe-sheet__card:hover:not(:disabled) {
+  background: var(--accent-3);
+}
+
+.import-recipe-sheet__card:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: 2px;
+}
+
+.import-recipe-sheet__card--filled {
+  padding: 0;
+  border-style: solid;
+  border-color: var(--accent-6);
   background: var(--gray-3);
 }
 
-.import-recipe-sheet__photo img {
+.import-recipe-sheet__card--filled img {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* While importing: a 40px chip beside "Photo attached", so the dog and the status
-   line underneath don't push the sheet taller than the screen. */
+.import-recipe-sheet__card-plus {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--accent-4);
+}
+
+.import-recipe-sheet__card-label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--gray-12);
+}
+
+.import-recipe-sheet__card-help {
+  font-size: 0.75rem;
+  line-height: 1.3;
+  color: var(--gray-11);
+}
+
+/* A translucent wash while the picked file is being sized down. */
+.import-recipe-sheet__card-busy {
+  position: absolute;
+  inset: 0;
+  background: var(--color-panel-translucent);
+}
+
+/* The label over the bottom of a filled card, so both cards stay the same height. */
+.import-recipe-sheet__card-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 6px 8px;
+  background: var(--black-a8);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* While importing: each picked photo becomes a 40px chip beside "… photo
+   attached", so the dog and the status line underneath don't push the sheet
+   taller than the screen. */
 .import-recipe-sheet__photo--compact {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: auto;
-  height: auto;
-  margin: 0;
-  overflow: visible;
-  border-radius: 0;
-  background: transparent;
 }
 
 .import-recipe-sheet__photo--compact img {
+  display: block;
   width: 40px;
   height: 40px;
   border-radius: var(--radius-2);
+  object-fit: cover;
 }
 
-/* 44px target on a small thumbnail: the visible disc is smaller, the hit area isn't. */
+/* 44px target on a small thumbnail: the visible disc is 26px in the corner,
+   the hit area isn't. The icon is pinned onto the disc, not centred in the
+   44px box, so the two line up. */
 .import-recipe-sheet__photo-remove {
   position: absolute;
   top: 0;
   right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 44px;
   height: 44px;
   padding: 0;
@@ -114,7 +180,13 @@
 }
 
 .import-recipe-sheet__photo-remove svg {
-  position: relative;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  padding: 6px;
+  box-sizing: border-box;
 }
 
 .import-recipe-sheet__photo-remove:focus-visible {
