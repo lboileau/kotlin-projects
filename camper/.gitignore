@@ -23,3 +23,6 @@ build/
 
 # Local recipe-import relay folder (RECIPE_SCRAPER_RELAY_DIR)
 .relay/
+
+# Local photo store (no bucket configured)
+.photos/

@@ -282,6 +282,27 @@ VALUES
 ON CONFLICT (recipe_id, user_id) DO NOTHING;
 
 -- ============================================================
+-- Recipe steps (instructions)
+-- ============================================================
+-- Camp Guacamole and Trail Tacos have steps; Campfire Chili has none, so the
+-- Instructions tab's empty state shows locally too. No seeded photos: the
+-- bytes would have to live in the photo store, which the seed can't reach.
+
+INSERT INTO recipe_steps (id, recipe_id, position, text, created_at)
+VALUES
+    -- Camp Guacamole
+    ('aa170000-0001-4000-8000-000000000000', 'aa140000-0001-4000-8000-000000000000', 0, 'Halve the avocados, remove the stones and scoop the flesh into a bowl.', now()),
+    ('aa170000-0002-4000-8000-000000000000', 'aa140000-0001-4000-8000-000000000000', 1, 'Mash roughly with a fork, leaving some chunks.', now()),
+    ('aa170000-0003-4000-8000-000000000000', 'aa140000-0001-4000-8000-000000000000', 2, 'Stir in the onion, tomato, lime juice and salt. Taste and add more lime or salt as needed.', now()),
+    ('aa170000-0004-4000-8000-000000000000', 'aa140000-0001-4000-8000-000000000000', 3, 'Serve straight away with tortilla chips.', now()),
+    -- Trail Tacos
+    ('aa170000-0005-4000-8000-000000000000', 'aa140000-0002-4000-8000-000000000000', 0, 'Brown the ground beef in a skillet over the fire, breaking it up as it cooks.', now()),
+    ('aa170000-0006-4000-8000-000000000000', 'aa140000-0002-4000-8000-000000000000', 1, 'Drain off the fat, then stir in the taco seasoning and a splash of water. Simmer for 5 minutes.', now()),
+    ('aa170000-0007-4000-8000-000000000000', 'aa140000-0002-4000-8000-000000000000', 2, 'Warm the tortillas on the grate for a few seconds each side.', now()),
+    ('aa170000-0008-4000-8000-000000000000', 'aa140000-0002-4000-8000-000000000000', 3, 'Fill the tortillas with beef and top with cheese, lettuce and salsa.', now())
+ON CONFLICT (recipe_id, position) DO NOTHING;
+
+-- ============================================================
 -- Meal plans
 -- ============================================================
 
