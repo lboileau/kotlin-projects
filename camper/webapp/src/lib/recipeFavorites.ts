@@ -20,6 +20,9 @@ export interface FavouritableRecipe {
   createdAt: string;
 }
 
+/** How far back "New this week" reaches. */
+export const NEW_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
 const SHOW_FILTERS: readonly RecipeShowFilter[] = ['all', 'mine', 'favourites', 'my-favourites', 'new'];
 
 /**
@@ -38,21 +41,18 @@ export function parseShowFilter(raw: string | null): RecipeShowFilter {
  *   mine          — created by the signed-in user (no user: nothing)
  *   favourites    — anyone has favourited it (favoriteCount > 0)
  *   my-favourites — the signed-in user has favourited it (favoritedByMe)
- *   new           — added since the user's newest plan was created
- *                   (`newerThan`, that plan's createdAt; with no plan yet,
- *                   everything is new)
+ *   new           — added in the last seven days (`NEW_WINDOW_MS` before
+ *                   `now`, which tests pass explicitly)
  */
 export function matchesShowFilter(
   recipe: FavouritableRecipe,
   filter: RecipeShowFilter,
   userId: string | undefined,
-  newerThan?: string | null,
+  now: number = Date.now(),
 ): boolean {
   switch (filter) {
     case 'new':
-      // Both are ISO-8601 from the API, but Date.parse rather than a string
-      // compare, in case their precision or offset ever differ.
-      return !newerThan || Date.parse(recipe.createdAt) > Date.parse(newerThan);
+      return Date.parse(recipe.createdAt) >= now - NEW_WINDOW_MS;
     case 'mine':
       return Boolean(userId) && recipe.createdBy === userId;
     case 'favourites':

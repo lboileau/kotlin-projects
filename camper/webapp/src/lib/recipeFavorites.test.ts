@@ -104,32 +104,27 @@ describe('matchesShowFilter', () => {
   });
 
   describe('new', () => {
-    const PLAN_CREATED = '2026-09-10T09:00:00Z';
-    const before = makeRecipe({ createdAt: '2026-09-09T23:59:59Z' });
-    const same = makeRecipe({ createdAt: PLAN_CREATED });
-    const after = makeRecipe({ createdAt: '2026-09-10T09:00:01Z' });
+    const NOW = Date.parse('2026-09-21T12:00:00Z');
+    const at = (iso: string) => makeRecipe({ createdAt: iso });
 
-    it('matches only recipes created strictly after the newest plan', () => {
-      expect(matchesShowFilter(before, 'new', ME, PLAN_CREATED)).toBe(false);
-      expect(matchesShowFilter(same, 'new', ME, PLAN_CREATED)).toBe(false);
-      expect(matchesShowFilter(after, 'new', ME, PLAN_CREATED)).toBe(true);
+    it('matches recipes created within the last seven days, inclusive of the boundary', () => {
+      expect(matchesShowFilter(at('2026-09-21T11:59:00Z'), 'new', ME, NOW)).toBe(true);
+      expect(matchesShowFilter(at('2026-09-14T12:00:00Z'), 'new', ME, NOW)).toBe(true);
+      expect(matchesShowFilter(at('2026-09-14T11:59:59Z'), 'new', ME, NOW)).toBe(false);
+      expect(matchesShowFilter(at('2026-08-01T00:00:00Z'), 'new', ME, NOW)).toBe(false);
     });
 
-    it('compares instants, not strings, so a different offset or precision still works', () => {
-      // 09:00Z written as 11:00 in +02:00 — the same instant.
-      expect(matchesShowFilter(same, 'new', ME, '2026-09-10T11:00:00+02:00')).toBe(false);
-      expect(matchesShowFilter(after, 'new', ME, '2026-09-10T09:00:00.000Z')).toBe(true);
-    });
-
-    it('with no plan yet, everything is new', () => {
-      for (const recipe of [before, same, after]) {
-        expect(matchesShowFilter(recipe, 'new', ME, null)).toBe(true);
-        expect(matchesShowFilter(recipe, 'new', ME, undefined)).toBe(true);
-      }
+    it('compares instants, so an offset-written timestamp still counts', () => {
+      // 14:00 in +02:00 is 12:00Z — exactly at the boundary.
+      expect(matchesShowFilter(at('2026-09-14T14:00:00+02:00'), 'new', ME, NOW)).toBe(true);
     });
 
     it('does not depend on who is signed in', () => {
-      expect(matchesShowFilter(after, 'new', undefined, PLAN_CREATED)).toBe(true);
+      expect(matchesShowFilter(at('2026-09-20T00:00:00Z'), 'new', undefined, NOW)).toBe(true);
+    });
+
+    it('defaults to the current time', () => {
+      expect(matchesShowFilter(at(new Date().toISOString()), 'new', ME)).toBe(true);
     });
   });
 
