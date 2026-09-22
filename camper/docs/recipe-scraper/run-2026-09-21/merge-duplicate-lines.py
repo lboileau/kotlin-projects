@@ -87,21 +87,39 @@ def show(plan):
             print(f"   {parts}  →  {m['quantity']:g} {m['unit']} {m['name']}")
     print(f"\n{len(plan)} recipes, {sum(len(m['originals']) for p in plan for m in p['merges'])} lines → {sum(len(p['merges']) for p in plan)}   ({API})")
 
-def apply(plan):
-    log = []
+def finish_interrupted(log):
+    """A merge is recorded as soon as its merged line is added. If a previous run died before deleting
+    the originals, delete them now — otherwise a fresh plan would sum merged line + originals again."""
+    for e in log:
+        for m in e['merges']:
+            pending = [o['id'] for o in m['originals'] if o['id'] not in m['deleted']]
+            if not pending: continue
+            s, detail = call('GET', f"/recipes/{e['recipeId']}", UID)
+            live = {l['id'] for l in detail['ingredients']} if s == 200 else set()
+            if m['addedId'] not in live: continue   # merged line never landed; nothing to finish
+            for oid in pending:
+                if oid in live and call('DELETE', f"/recipes/{e['recipeId']}/ingredients/{oid}", e['userId'])[0] == 204:
+                    m['deleted'].append(oid); print(f"   finished interrupted merge in {e['name']}: deleted {oid}")
+
+def apply():
+    log = json.load(open(LOG)) if os.path.exists(LOG) else []
+    finish_interrupted(log)
+    plan = build_plan()
+    by_recipe = {e['recipeId']: e for e in log}
     for p in plan:
-        entry = dict(recipeId=p['recipeId'], name=p['name'], userId=p['userId'], merges=[])
+        entry = by_recipe.setdefault(p['recipeId'], dict(recipeId=p['recipeId'], name=p['name'], userId=p['userId'], merges=[]))
+        if entry not in log: log.append(entry)
         for m in p['merges']:
             s, body = call('POST', f"/recipes/{p['recipeId']}/ingredients", p['userId'], dict(ingredientId=m['ingredientId'], quantity=m['quantity'], unit=m['unit']))
             if s != 201: print(f"!! {p['name']}: add {m['name']} failed {s} {body}"); break
             rec = dict(m, addedId=body['id'], deleted=[])
+            entry['merges'].append(rec); json.dump(log, open(LOG, 'w'), indent=1)   # record before deleting
             for o in m['originals']:
                 s, body = call('DELETE', f"/recipes/{p['recipeId']}/ingredients/{o['id']}", p['userId'])
                 if s != 204: print(f"!! {p['name']}: delete {o['id']} failed {s} {body}"); break
-                rec['deleted'].append(o['id'])
-            entry['merges'].append(rec)
-        log.append(entry); json.dump(log, open(LOG, 'w'), indent=1)
+                rec['deleted'].append(o['id']); json.dump(log, open(LOG, 'w'), indent=1)
         print(f"ok {p['name']}: {sum(len(m['originals']) for m in p['merges'])} lines → {len(p['merges'])}")
+    if not plan: print("nothing to merge")
 
 def verify():
     log = json.load(open(LOG)); bad = 0
@@ -129,7 +147,7 @@ def rollback():
 if __name__ == '__main__':
     mode = sys.argv[1] if len(sys.argv) > 1 else 'plan'
     if mode == 'plan': show(build_plan())
-    elif mode == 'apply': apply(build_plan())
+    elif mode == 'apply': apply()
     elif mode == 'verify': verify()
     elif mode == 'rollback': rollback()
     else: sys.exit(__doc__)
