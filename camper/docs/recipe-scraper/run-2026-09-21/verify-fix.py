@@ -14,7 +14,7 @@ def junk(l):
     t = l['originalText'].strip()
     return l['matchedIngredientId'] is None and (not t or t.endswith(':') or t.startswith('*') or t.startswith('OR ') or 'tip' in t.lower() or 'and more' in t.lower())
 
-log = json.load(open(f'{BASE}/fix.log.json'))
+log = json.load(open(os.environ.get('FIX_LOG', f'{BASE}/fix.log.json')))
 cat = {c['id']: c['name'] for c in get('/ingredients')}
 bad = 0
 for e in log:

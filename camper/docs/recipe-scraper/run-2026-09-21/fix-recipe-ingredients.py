@@ -4,7 +4,7 @@
   python3 fix-recipe-ingredients.py plan               # dry run: print exactly what would change, call nothing
   python3 fix-recipe-ingredients.py apply              # add new lines first, then delete old ones; logs to fix.log.json
   python3 fix-recipe-ingredients.py rollback           # undo using fix.log.json + prod-backup/
-  add --include-moderate to also fix the 6 recipes with one or two bad lines
+  add --include-moderate to also fix Fried Rice and Adobo (see MODERATE)
 
   CAMPER_API=http://localhost:8081/api python3 fix-recipe-ingredients.py apply   # against a local DB seeded from prod
 
@@ -18,9 +18,12 @@ import json, os, sys, urllib.request, urllib.error
 BASE = os.path.dirname(os.path.abspath(__file__))
 API = os.environ.get('CAMPER_API', 'https://www.canoecamp.life/api').rstrip('/')
 WRONG = ['00','03','08','09','11','13','18','22','24','30','32','35','36','41','47','52','53','57','60','61','68','69']
-MODERATE = ['28','31','44','51','55','56']
+# Of the six 'moderate' recipes only these two have a real content error (Fried Rice: rice 2→4 cups;
+# Adobo: missing 1½ cups water + scallions). 44/51/55 were no-ops; 56 would collapse four named
+# vegetables into one generic '3 lb root vegetables' line, which is faithful but worse for shopping.
+MODERATE = ['28','31']
 CASES = WRONG + (MODERATE if '--include-moderate' in sys.argv else [])
-LOG = f'{BASE}/fix.log.json'
+LOG = os.environ.get('FIX_LOG', f'{BASE}/fix.log.json')
 
 recipes = json.load(open(f'{BASE}/recipes.json'))
 catalogue = json.load(open(f'{BASE}/ingredients.json'))

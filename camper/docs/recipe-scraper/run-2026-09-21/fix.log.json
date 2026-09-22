@@ -838,5 +838,72 @@
   "createdIngredients": [
    "65c3aba6-5f83-4006-95ea-22412f561ab3"
   ]
+ },
+ {
+  "case": "28",
+  "recipeId": "3cf24b85-1614-4ba5-8a8e-c68f6dc59e2c",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "added": [
+   "21d73b83-9b92-4ab4-8d99-df7f2ccab8ac",
+   "d365b7e9-729a-4650-a6bf-1b9676393318",
+   "13d39e87-04a4-4964-8a69-a6b190c4df43",
+   "a98fa821-c258-4f3d-8d3a-1388ea9260ad",
+   "ab339bec-a4d1-44a5-a4de-66a388c56bec",
+   "d1287a87-224e-4a99-9123-ceddf9f0b380",
+   "f148557a-4a79-44ad-b8b8-8df6b3c3841e",
+   "462f5862-48c0-4664-a515-c8254dbb992e",
+   "74599cd4-4ad0-4f68-8965-2df2f7b1ac9e",
+   "7b9a82f0-c780-46da-8871-d572cb35ac3b",
+   "23d4f33f-a4ce-474e-89af-6dcb957efe1a",
+   "8740482b-482f-4d14-a303-d440eafed8ae"
+  ],
+  "deleted": [
+   "4b4a2fdf-5fc2-48dc-8073-eac0c6632082",
+   "8584f55c-cca8-4e88-86dd-0a221378fa5b",
+   "c27bab21-a838-481f-8741-d473dc553bd5",
+   "44fb5a17-ebb5-4f4d-a419-adf9f68f2e33",
+   "a8abd147-100b-4501-9d53-3e74cb62fd0a",
+   "00520809-7bef-474b-8090-a32ed54ccc53",
+   "091008cf-d09f-4313-b8b0-eb142193b5de",
+   "7cbf0361-7be5-4a2b-91bf-6aed0ac95443",
+   "8c6cdab4-ca8c-4573-b9b2-e7c3d284ac07",
+   "7307cdfb-9d1a-4471-97fe-55167064b8af",
+   "586a5cdb-207e-4c6b-98b5-04ddc0b19864"
+  ],
+  "createdIngredients": []
+ },
+ {
+  "case": "31",
+  "recipeId": "2d6f4ab8-c2fe-436e-bc13-08749539d4e1",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "added": [
+   "5d23dcb8-8059-494c-8ab7-85918f80fde0",
+   "784e5530-a08c-4553-bfcc-6cdab1bc30d6",
+   "061b7d76-692e-4a36-97db-45715ee1a053",
+   "0838a1d9-fdf0-405d-a53a-5b1b1fd3ccd7",
+   "731927de-25fb-4466-af2e-a8d3db0f90c8",
+   "98c7fa76-f094-4165-b11f-2d174ff6dca1",
+   "9909fbe8-c4c3-4e16-9828-9b8bab2e7f09",
+   "ca863144-56fe-4e2e-b8e9-9b6b04efa1ae",
+   "74d3cf45-4965-41c0-bc04-1db435e1d875",
+   "c3430c06-6032-4d03-a9d2-654821274375",
+   "fde78f5a-a99f-4765-bdc1-12b5c0e9d8df",
+   "aecefd37-4574-4a35-b96b-f2df9626f7a8"
+  ],
+  "deleted": [
+   "387354b3-8006-44ea-bd4d-4f57d9247767",
+   "066c6c9d-1a2b-43eb-82f8-7c6f0e238a24",
+   "a4921b6c-0f3a-4e6c-bda6-9004b2b841ee",
+   "d1ce9e2d-3dfc-4df5-80d0-3827592d6937",
+   "ff0bc557-5d2b-43f9-838a-1edf758d225e",
+   "b8132a2f-aa65-42b4-a358-729b81871659",
+   "db71c998-29eb-426a-8f22-3d4dd5c05202",
+   "9b5e9e32-a594-4799-864c-9941e3136833",
+   "3262e91e-1664-411a-9d38-4f0528fd623a",
+   "cfb4337a-1e40-47de-9e09-cd80e8163494",
+   "4c4e0d88-2c8b-4994-99af-a60726daea72",
+   "22c09adf-10d5-4b9c-8811-8be2d0a03532"
+  ],
+  "createdIngredients": []
  }
 ]
