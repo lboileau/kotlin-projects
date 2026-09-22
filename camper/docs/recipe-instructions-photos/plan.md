@@ -55,7 +55,7 @@ The factory reads all five explicitly (system property, then env — the same or
 
 **Local development without a bucket:** when `AWS_S3_BUCKET_NAME` is unset, a **filesystem store** writes under `camper/.photos/` (gitignored) and `url` points at the API's own proxy route (below), so the whole feature works locally with nothing extra running. (Same idea as the scraper's NoOp/relay clients.)
 
-**Proxy route** `GET /api/recipes/{id}/photos/{photoId}/content` streams the object through the API with `Cache-Control: private, max-age=31536000, immutable` (a photo id's content never changes). It is what the local store's URLs point at; in production the presigned URL is used instead, and the route stays as a fallback. It does **not** require `X-User-Id` (an `<img>` can't send it) — the same trust-by-unguessable-UUID that `GET /api/recipes/{id}` already relies on.
+**Proxy route** `GET /api/photo-store/{key}` (built as a key-based route rather than the per-photo path first planned, so the storage client can hand out URLs without knowing recipe routes) streams the object through the API with `Cache-Control: private, max-age=31536000, immutable` (a photo id's content never changes). It is what the local store's URLs point at; in production the presigned URL is used instead, and the route stays as a fallback. It does **not** require `X-User-Id` (an `<img>` can't send it) — the same trust-by-unguessable-UUID that `GET /api/recipes/{id}` already relies on.
 
 ## API Surface
 
@@ -72,7 +72,7 @@ The factory reads all five explicitly (system property, then env — the same or
 | `PUT /api/recipes/{id}/steps` | 200 | body `{ steps: string[] }`, replace-all; returns `{ steps }`. Blank entries rejected (400), ≤ 100 steps, each ≤ 2000 chars |
 | `POST /api/recipes/{id}/photos` | 201 | body `{ mediaType, data }` (raw base64, same shape and validator as import) → `RecipePhotoResponse`; 409 `PHOTO_LIMIT` at 6 |
 | `DELETE /api/recipes/{id}/photos/{photoId}` | 204 | deletes the object then the row; idempotent |
-| `GET /api/recipes/{id}/photos/{photoId}/content` | 200 | bytes; **no `X-User-Id`**; immutable cache headers |
+| `GET /api/photo-store/{key}` | 200 | bytes; **no `X-User-Id`**; immutable cache headers |
 | `POST /api/recipes/import-images` | 201 | `images[]` entries gain `role: "ingredients" \| "instructions"`; 1–2 images; exactly one `ingredients` photo required |
 
 `RecipePhotoResponse`: `{ id, url, mediaType, width, height, byteSize, source, role, position, createdAt }`.
@@ -160,12 +160,14 @@ Cost: two photos ≈ 4.7k image tokens + text ≈ 10k in / 1.5–2k out ≈ **$0
 ## Frontend
 
 - **Recipe page** (`RecipeDetailPage`): Radix `Tabs` under the hero — **Ingredients · Instructions · Photos** — with the active tab in `?tab=` (replace-navigated, default `ingredients`), so every state has a URL and Back leaves the page rather than cycling tabs. The draft-review UI stays inside the Ingredients tab. Instructions: an `<ol>` of steps; empty state with an "Add instructions" link to the edit page when `mayEdit`. Photos: a 3-column grid of `<img src={photo.url}>` (lazy), tapping opens a full-height `Sheet` at `/recipes/:id/photos/:photoId` with the image and a "Remove photo" button; an "Add photo" button on the tab uploads immediately through the existing `preparePhoto` pipeline (a create, like the rapid ingredient add — not part of the form), with a toast on success. `import` photos show a small "From import" badge.
-- **New/Edit forms**: `RecipeFormValues` gains `steps: string[]`; a `StepsEditor` (one `TextArea` per step, add, remove, move up/down — no drag). New sends `steps` in the create request; Edit diffs and, if changed, one `PUT …/steps` inside `useSaveRecipeEdits`. `newRecipeDraft` persists `steps`.
+- **New/Edit forms**: `RecipeFormValues` gains `steps: string[]`; a `StepsEditor` (one `TextArea` per step, add, remove, **drag to reorder** on a grab handle — up/down buttons were built first and replaced at the owner's request). New sends `steps` in the create request; Edit diffs and, if changed, one `PUT …/steps` inside `useSaveRecipeEdits`. `newRecipeDraft` persists `steps`.
 - **Import sheet**: the two named slots above; the verbose helper copy is deliberate.
 - **Types**: `RecipeDetailResponse` gains `steps`, `photos`; `api/recipes.ts` gains `replaceRecipeSteps`, `addRecipePhoto`, `removeRecipePhoto`; hooks `useAddRecipePhoto`/`useRemoveRecipePhoto` invalidate `recipeKey(id)` (no optimistic update — the URL only exists after upload).
 - **Pure/tested**: `lib/recipeSteps.ts` (`normaliseSteps`: trim, drop blanks, strip leading "1." / "Step 1:" labels; `stepsChanged`), extending `lib/importPhotos.ts` for the two-slot selection.
 
 ## PR Stack
+
+Built as **one PR** at the owner's request (2026-09-22), with one commit per layer in the order below.
 
 | # | Branch | Title | Description |
 |---|---|---|---|
