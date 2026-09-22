@@ -1,0 +1,1124 @@
+[
+ {
+  "recipeId": "77c23bb0-6d8a-4b67-a2ab-750cab6d460b",
+  "name": "20 Minute Ground Turkey Bang Bang Rice Bowls",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "1e8bfc5d-83c8-4694-877c-f7eda05562e2",
+    "name": "sriracha",
+    "quantity": 3.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "b3e93357-5f44-4488-a599-30d46f3bf372",
+      "quantity": 2,
+      "unit": "tbsp"
+     },
+     {
+      "id": "a3f7948c-5fdc-4337-ae2b-647e27a926ef",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "c1ab828f-4572-44d6-9b7d-17b59103a98c",
+    "deleted": [
+     "b3e93357-5f44-4488-a599-30d46f3bf372",
+     "a3f7948c-5fdc-4337-ae2b-647e27a926ef"
+    ]
+   },
+   {
+    "ingredientId": "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "name": "honey",
+    "quantity": 4.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "dbaa2c2d-b147-46f0-a49f-1a6a296a0fad",
+      "quantity": 2,
+      "unit": "tsp"
+     },
+     {
+      "id": "b3cf0731-fde7-4ada-af8e-6bf4d3c31261",
+      "quantity": 2,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "b748995f-8557-4930-b8ea-e0ab1dd13b3e",
+    "deleted": [
+     "dbaa2c2d-b147-46f0-a49f-1a6a296a0fad",
+     "b3cf0731-fde7-4ada-af8e-6bf4d3c31261"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "340a934d-9ff7-4417-9d6d-458e6f8548e5",
+  "name": "Asparagus, Corn, Tomato & Feta Salad",
+  "userId": "c77e3b05-bb53-452a-9084-482f531e22d7",
+  "merges": [
+   {
+    "ingredientId": "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "name": "olive oil",
+    "quantity": 2.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "7ee65cf1-0a03-43c3-9984-bcfd755105fd",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "6197588a-6034-4b4f-acba-052d6c1c23dc",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "2c2b95a2-8111-4806-bbab-af8fae8f0b5d",
+    "deleted": [
+     "7ee65cf1-0a03-43c3-9984-bcfd755105fd",
+     "6197588a-6034-4b4f-acba-052d6c1c23dc"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "e805e712-f8cb-4968-8d33-95b9125d2dc3",
+  "name": "Authentic German Red Cabbage (Rotkohl)",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "name": "water",
+    "quantity": 10.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "a7cee8fd-7589-402e-94fb-5fe29f7d32e4",
+      "quantity": 0.5,
+      "unit": "cup"
+     },
+     {
+      "id": "45f63829-dc9c-44f1-a714-660f2162f99c",
+      "quantity": 2,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "124dc59d-5f58-4640-9b18-422bcf6ec9c6",
+    "deleted": [
+     "a7cee8fd-7589-402e-94fb-5fe29f7d32e4",
+     "45f63829-dc9c-44f1-a714-660f2162f99c"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "eb4ce376-d409-4b76-802f-1803b72ed59b",
+  "name": "Best Pulled Pork",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "name": "brown sugar",
+    "quantity": 7.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "cc93bf98-7af9-487a-9e65-b1b712c85e2f",
+      "quantity": 3,
+      "unit": "tbsp"
+     },
+     {
+      "id": "36b6e640-6767-48f9-b148-68b535a8ee71",
+      "quantity": 0.25,
+      "unit": "cup"
+     }
+    ],
+    "addedId": "19435168-4516-497f-8fe6-675ec1c1f9cf",
+    "deleted": [
+     "cc93bf98-7af9-487a-9e65-b1b712c85e2f",
+     "36b6e640-6767-48f9-b148-68b535a8ee71"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "c182ae22-cee0-448b-9ace-4f26f67d1a1d",
+  "name": "Chicken Biryani",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "565d700d-dcf3-430c-b4a7-e3634e7de37d",
+    "name": "greek yogurt",
+    "quantity": 7.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "52e771d8-f2d0-4e8f-8cb3-5f50d46884d1",
+      "quantity": 3,
+      "unit": "tbsp"
+     },
+     {
+      "id": "d229d7df-bb72-422a-a890-507cb7080ac5",
+      "quantity": 0.25,
+      "unit": "cup"
+     }
+    ],
+    "addedId": "3cd6a94b-9c81-4410-a837-488479ec580e",
+    "deleted": [
+     "52e771d8-f2d0-4e8f-8cb3-5f50d46884d1",
+     "d229d7df-bb72-422a-a890-507cb7080ac5"
+    ]
+   },
+   {
+    "ingredientId": "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "name": "salt",
+    "quantity": 1.5,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "ddaa105d-0d55-417d-9be1-988a72566a1d",
+      "quantity": 0.75,
+      "unit": "tsp"
+     },
+     {
+      "id": "4f518180-2431-4f02-8908-18643625d498",
+      "quantity": 0.75,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "e908245a-dc65-455c-9db7-7c4692135f04",
+    "deleted": [
+     "ddaa105d-0d55-417d-9be1-988a72566a1d",
+     "4f518180-2431-4f02-8908-18643625d498"
+    ]
+   },
+   {
+    "ingredientId": "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
+    "name": "chili powder",
+    "quantity": 1.5,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "0c64cc39-9f20-4108-b877-62e4dcf53f83",
+      "quantity": 1,
+      "unit": "tsp"
+     },
+     {
+      "id": "5c2b17ed-8590-414d-a654-6eaa2d4941fa",
+      "quantity": 0.5,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "b77d6bc1-8e8d-4e01-8d43-8a3e47b173a1",
+    "deleted": [
+     "0c64cc39-9f20-4108-b877-62e4dcf53f83",
+     "5c2b17ed-8590-414d-a654-6eaa2d4941fa"
+    ]
+   },
+   {
+    "ingredientId": "d61f21db-5a27-4de3-a45d-e6e1e17c9fd1",
+    "name": "biryani masala",
+    "quantity": 4.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "573c64b3-dd2f-472a-b942-78bb22fa794a",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "df70580f-77b7-437c-b9b7-28a0cd8abdc9",
+      "quantity": 1,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "81acbd47-1048-4951-95ef-5528359e4d05",
+    "deleted": [
+     "573c64b3-dd2f-472a-b942-78bb22fa794a",
+     "df70580f-77b7-437c-b9b7-28a0cd8abdc9"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "28339f7a-5c85-4b46-a36a-efdacdd557be",
+  "name": "Chicken Breast in Creamy Mushroom Sauce",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "69225995-0284-4797-b4ff-821f94e89892",
+    "name": "butter",
+    "quantity": 3.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "5d004f76-3667-400d-bc91-8806e79247f5",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "c48f350d-514f-4aa0-9b69-a5110cff692c",
+      "quantity": 2,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "9faf147c-f353-4543-a851-ce2f978a66f3",
+    "deleted": [
+     "5d004f76-3667-400d-bc91-8806e79247f5",
+     "c48f350d-514f-4aa0-9b69-a5110cff692c"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "724d5f11-490a-46ed-acaf-3e8966f2e983",
+  "name": "Chicken Paprikash with Spaetzle",
+  "userId": "c77e3b05-bb53-452a-9084-482f531e22d7",
+  "merges": [
+   {
+    "ingredientId": "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "name": "salt",
+    "quantity": 1.5,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "efd37361-5067-40ac-acf1-e4179a66a147",
+      "quantity": 1,
+      "unit": "tsp"
+     },
+     {
+      "id": "8ddcf2af-968b-4b6a-b0c7-8b8d97f531c6",
+      "quantity": 0.5,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "825e62db-3d39-47d7-9864-4c4c0041c096",
+    "deleted": [
+     "efd37361-5067-40ac-acf1-e4179a66a147",
+     "8ddcf2af-968b-4b6a-b0c7-8b8d97f531c6"
+    ]
+   },
+   {
+    "ingredientId": "b014009f-cf89-448e-aa64-238a94aef3c8",
+    "name": "flour",
+    "quantity": 33.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "f57ed60f-40ad-4369-ad5d-a7f73710c8fe",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "0b99b244-f2b1-4a2b-9fa6-daaceac63deb",
+      "quantity": 2,
+      "unit": "cup"
+     }
+    ],
+    "addedId": "7da1b3ba-df2c-42ca-9db0-905cdd436411",
+    "deleted": [
+     "f57ed60f-40ad-4369-ad5d-a7f73710c8fe",
+     "0b99b244-f2b1-4a2b-9fa6-daaceac63deb"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "3cf24b85-1614-4ba5-8a8e-c68f6dc59e2c",
+  "name": "Filipino Chicken Adobo (Flavour Kapow!)",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "9729a63d-237e-46f2-8d90-86209154dd18",
+    "name": "garlic",
+    "quantity": 6.0,
+    "unit": "clove",
+    "originals": [
+     {
+      "id": "d365b7e9-729a-4650-a6bf-1b9676393318",
+      "quantity": 3,
+      "unit": "clove"
+     },
+     {
+      "id": "f148557a-4a79-44ad-b8b8-8df6b3c3841e",
+      "quantity": 3,
+      "unit": "clove"
+     }
+    ],
+    "addedId": "c429bf06-9101-4207-8884-f480f272a0c0",
+    "deleted": [
+     "d365b7e9-729a-4650-a6bf-1b9676393318",
+     "f148557a-4a79-44ad-b8b8-8df6b3c3841e"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "059b8491-5628-44f5-9306-0c61f676e6fa",
+  "name": "Gluten-free Lemon Poppy Seed Loaf",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "name": "lemon",
+    "quantity": 13.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "d1d458b3-c4b3-40f0-ad35-35eb7cb6a480",
+      "quantity": 0.25,
+      "unit": "cup"
+     },
+     {
+      "id": "dc45568d-0c8d-4d68-86a7-0922412ad701",
+      "quantity": 1,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "b4b7dfcb-e6f6-4af5-af5b-f1103b3c1f6f",
+    "deleted": [
+     "d1d458b3-c4b3-40f0-ad35-35eb7cb6a480",
+     "dc45568d-0c8d-4d68-86a7-0922412ad701"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "6dbd5f49-c54a-460e-8c4a-31bfb929e500",
+  "name": "Gordon Ramsay Fennel Salad Recipe",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "79dc4119-cbd7-4067-a12e-540eed75b5b7",
+    "name": "oranges",
+    "quantity": 3.5,
+    "unit": "whole",
+    "originals": [
+     {
+      "id": "aa51793c-358a-4077-98e5-ad9cdd972d84",
+      "quantity": 3,
+      "unit": "whole"
+     },
+     {
+      "id": "963b1880-3ac8-498d-b34c-03f5bd0acdeb",
+      "quantity": 0.5,
+      "unit": "whole"
+     }
+    ],
+    "addedId": "60e894e7-5e9a-4c6b-b4a1-dfded52a8500",
+    "deleted": [
+     "aa51793c-358a-4077-98e5-ad9cdd972d84",
+     "963b1880-3ac8-498d-b34c-03f5bd0acdeb"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "6d381502-3e39-4c84-b8be-54317db14419",
+  "name": "Greek Chicken and Lemon Rice (30 Minutes, One-Pot)",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "name": "dried oregano",
+    "quantity": 2.25,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "28c3c521-154f-4294-bf70-cf0ec645fb5c",
+      "quantity": 1,
+      "unit": "tsp"
+     },
+     {
+      "id": "54aa6f29-4dc8-4c14-86ed-33488bc5c7b7",
+      "quantity": 1,
+      "unit": "tsp"
+     },
+     {
+      "id": "a92d71fd-d68e-4eae-95dc-386b41befeb8",
+      "quantity": 0.25,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "1e331dc3-8785-4a05-82ba-d4d0c507666e",
+    "deleted": [
+     "28c3c521-154f-4294-bf70-cf0ec645fb5c",
+     "54aa6f29-4dc8-4c14-86ed-33488bc5c7b7",
+     "a92d71fd-d68e-4eae-95dc-386b41befeb8"
+    ]
+   },
+   {
+    "ingredientId": "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "name": "salt",
+    "quantity": 0.5,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "da3ed83c-fabd-4f88-8f68-a94c3e6beb15",
+      "quantity": 0.25,
+      "unit": "tsp"
+     },
+     {
+      "id": "9691070b-30bf-4b61-888f-79d7ab7d8111",
+      "quantity": 0.25,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "ab5921c2-e86f-4e2e-85d4-ef60d05939ec",
+    "deleted": [
+     "da3ed83c-fabd-4f88-8f68-a94c3e6beb15",
+     "9691070b-30bf-4b61-888f-79d7ab7d8111"
+    ]
+   },
+   {
+    "ingredientId": "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "name": "olive oil",
+    "quantity": 4.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "8e1b2cc5-f569-46bb-af7a-f1d6d41e1048",
+      "quantity": 2,
+      "unit": "tbsp"
+     },
+     {
+      "id": "fc8553d6-8bdc-468f-93bb-bd6053979a90",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "ac3a8e1c-8217-4811-b543-5188510e9c51",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "969ada2d-a22b-4da1-b55d-11eb56430503",
+    "deleted": [
+     "8e1b2cc5-f569-46bb-af7a-f1d6d41e1048",
+     "fc8553d6-8bdc-468f-93bb-bd6053979a90",
+     "ac3a8e1c-8217-4811-b543-5188510e9c51"
+    ]
+   },
+   {
+    "ingredientId": "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "name": "lemon",
+    "quantity": 4.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "0ee4f67f-7f0e-4a79-9e40-233517adac4b",
+      "quantity": 3,
+      "unit": "tbsp"
+     },
+     {
+      "id": "078c3c5d-5b8d-426d-9aa5-b26c98839307",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "728551ce-e6b1-481c-9e63-0844a8e4ccc6",
+    "deleted": [
+     "0ee4f67f-7f0e-4a79-9e40-233517adac4b",
+     "078c3c5d-5b8d-426d-9aa5-b26c98839307"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "ced67abe-13b6-43d7-8620-12ebf3906c19",
+  "name": "Greek Chicken Souvlaki Bowls with Roasted Veggies and Tzatziki Sauce",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "name": "olive oil",
+    "quantity": 5.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "58e3fad1-d5a8-4e1d-982e-bcb75260d783",
+      "quantity": 3,
+      "unit": "tbsp"
+     },
+     {
+      "id": "9931a2ea-7f55-4459-957a-13bbc5d51b90",
+      "quantity": 2,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "d2d84d1f-b4d1-48c5-b473-94f5242f454d",
+    "deleted": [
+     "58e3fad1-d5a8-4e1d-982e-bcb75260d783",
+     "9931a2ea-7f55-4459-957a-13bbc5d51b90"
+    ]
+   },
+   {
+    "ingredientId": "9729a63d-237e-46f2-8d90-86209154dd18",
+    "name": "garlic",
+    "quantity": 3.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "e62054f8-aaf5-4889-841b-2b0568536380",
+      "quantity": 2,
+      "unit": "tsp"
+     },
+     {
+      "id": "95ad0871-e8e3-41e6-a297-0e2969758565",
+      "quantity": 1,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "53ba396d-e3fd-4972-9563-539b748bdd98",
+    "deleted": [
+     "e62054f8-aaf5-4889-841b-2b0568536380",
+     "95ad0871-e8e3-41e6-a297-0e2969758565"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "daf8db68-e9f3-419b-a8c2-2a356456c56a",
+  "name": "Greek turkey meatballs with lemon herb rice",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "name": "olive oil",
+    "quantity": 2.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "8afa2d67-bc21-4c3b-8d37-595c54617c98",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "993a9b14-14fc-4249-9822-ffe4360a2f4a",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "18be5dc1-f9dc-467a-89f5-b32b70b5c8a5",
+    "deleted": [
+     "8afa2d67-bc21-4c3b-8d37-595c54617c98",
+     "993a9b14-14fc-4249-9822-ffe4360a2f4a"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "5315a0da-5ef5-4492-9dc9-e2b7f8e8fe64",
+  "name": "Jerk Chicken with Rice and Peas",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "name": "onion",
+    "quantity": 1.5,
+    "unit": "whole",
+    "originals": [
+     {
+      "id": "ab638de2-e20d-4e93-abe1-e090889352e6",
+      "quantity": 0.5,
+      "unit": "whole"
+     },
+     {
+      "id": "a2fa4817-8c1d-4262-9d8f-30273ac8d2e6",
+      "quantity": 1,
+      "unit": "whole"
+     }
+    ],
+    "addedId": "cf59f3b2-5adc-4b0a-8d7b-35599ed66ac9",
+    "deleted": [
+     "ab638de2-e20d-4e93-abe1-e090889352e6",
+     "a2fa4817-8c1d-4262-9d8f-30273ac8d2e6"
+    ]
+   },
+   {
+    "ingredientId": "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "name": "olive oil",
+    "quantity": 74.79,
+    "unit": "ml",
+    "originals": [
+     {
+      "id": "7e918f23-8b25-4099-bd01-0ade00723fab",
+      "quantity": 60,
+      "unit": "ml"
+     },
+     {
+      "id": "42b07c72-89f8-42ea-a34d-6327cf803d74",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "e7c0d40c-a4b9-49b1-9fd9-756840597738",
+    "deleted": [
+     "7e918f23-8b25-4099-bd01-0ade00723fab",
+     "42b07c72-89f8-42ea-a34d-6327cf803d74"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "7b190ebd-7324-4d28-ac05-f2571ad6281c",
+  "name": "Korean Beef Bulgogi Rice Bowls - the easy way",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "name": "soy sauce",
+    "quantity": 4.5,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "7224b1ac-b4eb-4294-9edc-6671cf5ecebe",
+      "quantity": 2.5,
+      "unit": "tbsp"
+     },
+     {
+      "id": "1520849c-bc9c-43aa-a7ee-e7dd0cc44dc3",
+      "quantity": 2,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "fcb11f6d-8110-4644-a8ca-e46c003a5d47",
+    "deleted": [
+     "7224b1ac-b4eb-4294-9edc-6671cf5ecebe",
+     "1520849c-bc9c-43aa-a7ee-e7dd0cc44dc3"
+    ]
+   },
+   {
+    "ingredientId": "42341609-2935-4b29-87d7-30cd747907b7",
+    "name": "sesame oil",
+    "quantity": 2.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "65e9d317-5659-4070-8cdd-bd9f32aaf690",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "36450297-ca9e-4535-abc1-02815ae810d2",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "13e2f654-8389-4d2c-b5b5-6f5a854dcdb2",
+    "deleted": [
+     "65e9d317-5659-4070-8cdd-bd9f32aaf690",
+     "36450297-ca9e-4535-abc1-02815ae810d2"
+    ]
+   },
+   {
+    "ingredientId": "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "name": "brown sugar",
+    "quantity": 5.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "b96306f3-8beb-4af9-8a4c-bad2ec0ae0dd",
+      "quantity": 1,
+      "unit": "tbsp"
+     },
+     {
+      "id": "07a69237-06c0-48e1-b9e9-fb14d61da266",
+      "quantity": 2,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "d82dcd12-a3f4-48a9-8dc9-a47d82d6c782",
+    "deleted": [
+     "b96306f3-8beb-4af9-8a4c-bad2ec0ae0dd",
+     "07a69237-06c0-48e1-b9e9-fb14d61da266"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "136c42f9-6600-440e-af31-99e6e3edd0ed",
+  "name": "Lamb Koftas with Yoghurt Dressing",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "9729a63d-237e-46f2-8d90-86209154dd18",
+    "name": "garlic",
+    "quantity": 3.0,
+    "unit": "clove",
+    "originals": [
+     {
+      "id": "f0d6d6a8-262a-4beb-8a75-e07e93b84117",
+      "quantity": 2,
+      "unit": "clove"
+     },
+     {
+      "id": "565ae5a2-1b20-4d1a-ba65-24d7e41f9e2d",
+      "quantity": 1,
+      "unit": "clove"
+     }
+    ],
+    "addedId": "c4dce301-65a9-475a-b453-2406758eee1e",
+    "deleted": [
+     "f0d6d6a8-262a-4beb-8a75-e07e93b84117",
+     "565ae5a2-1b20-4d1a-ba65-24d7e41f9e2d"
+    ]
+   },
+   {
+    "ingredientId": "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "name": "ground cumin",
+    "quantity": 3.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "709cd015-64ed-4dfb-9102-8836fe281f63",
+      "quantity": 2,
+      "unit": "tsp"
+     },
+     {
+      "id": "cd04b169-6b5e-486f-b222-19b143cde818",
+      "quantity": 1,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "467c3b8a-4513-4064-aee5-5ece79544b71",
+    "deleted": [
+     "709cd015-64ed-4dfb-9102-8836fe281f63",
+     "cd04b169-6b5e-486f-b222-19b143cde818"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "97702058-89c8-4c36-8d78-267dbb6fc7bf",
+  "name": "Oven-Roasted Chicken Shawarma (NYTimes)",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "name": "olive oil",
+    "quantity": 9.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "f1e9bbde-0bd6-4989-b9ae-37c33111530f",
+      "quantity": 0.5,
+      "unit": "cup"
+     },
+     {
+      "id": "b400d90b-07f5-4a9b-8b9b-0df5bc1b7431",
+      "quantity": 1,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "dc32dcec-f5d3-4835-a0d6-4806d7d00bce",
+    "deleted": [
+     "f1e9bbde-0bd6-4989-b9ae-37c33111530f",
+     "b400d90b-07f5-4a9b-8b9b-0df5bc1b7431"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "8cadfabb-95a1-4dc5-bc70-325e9d16a21a",
+  "name": "Peruvian Chicken with Green Sauce (Aji Verde)",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "02089084-6ac0-4af5-abca-175addab4e65",
+    "name": "lime",
+    "quantity": 14.5,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "a4543180-a935-4cf4-9eae-e280dddef110",
+      "quantity": 3,
+      "unit": "tbsp"
+     },
+     {
+      "id": "707af4dd-f695-4ae0-b30c-1fd3120e3049",
+      "quantity": 1,
+      "unit": "tsp"
+     },
+     {
+      "id": "0a59b4ce-85b2-4b67-a611-fea5267eae3b",
+      "quantity": 1.5,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "6faac0d1-105b-4b0e-b492-a285ca7b8896",
+    "deleted": [
+     "a4543180-a935-4cf4-9eae-e280dddef110",
+     "707af4dd-f695-4ae0-b30c-1fd3120e3049",
+     "0a59b4ce-85b2-4b67-a611-fea5267eae3b"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "aa85809b-6952-4b3c-802f-51b28232c4a3",
+  "name": "Roasted Cauliflower with Tahini and Fresh Mint",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "name": "olive oil",
+    "quantity": 7.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "93324a21-622c-4975-be22-4682d9f441c9",
+      "quantity": 2,
+      "unit": "tbsp"
+     },
+     {
+      "id": "7a86f473-6f57-4d59-a4d9-fd804bda48e8",
+      "quantity": 1,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "509a8c2e-e5ee-478a-8d7c-af8bc785c3fd",
+    "deleted": [
+     "93324a21-622c-4975-be22-4682d9f441c9",
+     "7a86f473-6f57-4d59-a4d9-fd804bda48e8"
+    ]
+   },
+   {
+    "ingredientId": "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "name": "kosher salt",
+    "quantity": 0.75,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "91514e05-2c31-4a23-b7d1-a89e1b358f16",
+      "quantity": 0.5,
+      "unit": "tsp"
+     },
+     {
+      "id": "b0a18584-ce4f-4659-a922-b3c727227062",
+      "quantity": 0.25,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "d3575d3e-0f5a-45f0-a4c0-85532392ac50",
+    "deleted": [
+     "91514e05-2c31-4a23-b7d1-a89e1b358f16",
+     "b0a18584-ce4f-4659-a922-b3c727227062"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "3915a516-a7ab-41d0-8ca7-d5ed44c7bff2",
+  "name": "Sweet Potato Black Bean Salad",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
+    "name": "avocado oil",
+    "quantity": 5.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "9ea468a9-7296-40fd-b6ce-bb622a91af21",
+      "quantity": 2,
+      "unit": "tbsp"
+     },
+     {
+      "id": "4999e118-2c3f-49cf-b7c7-c81936856d34",
+      "quantity": 3,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "42c434be-d85c-4f55-b465-26ced67dbefa",
+    "deleted": [
+     "9ea468a9-7296-40fd-b6ce-bb622a91af21",
+     "4999e118-2c3f-49cf-b7c7-c81936856d34"
+    ]
+   },
+   {
+    "ingredientId": "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "name": "salt",
+    "quantity": 1.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "91ca9001-64da-4256-83ba-094fd7707c44",
+      "quantity": 0.5,
+      "unit": "tsp"
+     },
+     {
+      "id": "bcfbbb15-9d6f-4ab8-bfdf-365a1e1eb0a6",
+      "quantity": 0.5,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "53ebe4a1-582f-4748-9efa-319495d2fcf5",
+    "deleted": [
+     "91ca9001-64da-4256-83ba-094fd7707c44",
+     "bcfbbb15-9d6f-4ab8-bfdf-365a1e1eb0a6"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "d6c4b575-9287-4c42-82f4-93954b877d72",
+  "name": "Thai Glass Noodle Salad (Yum Woon Sen)",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
+    "name": "fish sauce",
+    "quantity": 7.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "519a3ef1-cf1c-4b3c-8eb5-8ead1a793856",
+      "quantity": 1,
+      "unit": "tsp"
+     },
+     {
+      "id": "21235f46-4eca-4fca-914c-ea5edaa0c6e1",
+      "quantity": 2,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "214e14bd-796b-457f-a923-33b197e70adc",
+    "deleted": [
+     "519a3ef1-cf1c-4b3c-8eb5-8ead1a793856",
+     "21235f46-4eca-4fca-914c-ea5edaa0c6e1"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "52a1600a-7b27-4a09-b490-e100076f87e2",
+  "name": "The Best Classic Shepherd's Pie",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "name": "salt",
+    "quantity": 1.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "2ff7f8f1-12a2-4354-a4fc-a6dd840d1869",
+      "quantity": 0.5,
+      "unit": "tsp"
+     },
+     {
+      "id": "c8fccec6-be8f-4f1a-81f4-6c99883bc680",
+      "quantity": 0.5,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "158808d0-732a-4623-84e0-44317c740446",
+    "deleted": [
+     "2ff7f8f1-12a2-4354-a4fc-a6dd840d1869",
+     "c8fccec6-be8f-4f1a-81f4-6c99883bc680"
+    ]
+   },
+   {
+    "ingredientId": "1fecae31-1706-44c6-8502-12c1c397605f",
+    "name": "black pepper",
+    "quantity": 0.75,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "289304ec-dba5-4b6c-a553-a1451442fa40",
+      "quantity": 0.5,
+      "unit": "tsp"
+     },
+     {
+      "id": "08beb6c3-562c-42f6-93e1-5c989028c360",
+      "quantity": 0.25,
+      "unit": "tsp"
+     }
+    ],
+    "addedId": "1de2adae-db56-4663-8788-0880698b1d37",
+    "deleted": [
+     "289304ec-dba5-4b6c-a553-a1451442fa40",
+     "08beb6c3-562c-42f6-93e1-5c989028c360"
+    ]
+   }
+  ]
+ },
+ {
+  "recipeId": "708eae57-2779-4d6c-ad28-d870340f4d28",
+  "name": "Vietnamese Lemongrass Chicken Rice Bowl",
+  "userId": "bbb1a187-f92e-434a-bba1-f3e65a37d85a",
+  "merges": [
+   {
+    "ingredientId": "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
+    "name": "fish sauce",
+    "quantity": 5.0,
+    "unit": "tbsp",
+    "originals": [
+     {
+      "id": "6b67cacc-c64c-4a3e-ab5f-e212ed4ca516",
+      "quantity": 2,
+      "unit": "tbsp"
+     },
+     {
+      "id": "75da0526-3af1-48b3-86e5-0749351b3483",
+      "quantity": 3,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "5c6e2c7e-a2fe-4683-bf08-0d15e4c9e2f3",
+    "deleted": [
+     "6b67cacc-c64c-4a3e-ab5f-e212ed4ca516",
+     "75da0526-3af1-48b3-86e5-0749351b3483"
+    ]
+   },
+   {
+    "ingredientId": "9729a63d-237e-46f2-8d90-86209154dd18",
+    "name": "garlic",
+    "quantity": 3.0,
+    "unit": "clove",
+    "originals": [
+     {
+      "id": "27ee8430-9ce2-4f95-936d-8048fcf18fbb",
+      "quantity": 1,
+      "unit": "clove"
+     },
+     {
+      "id": "f82f6d1d-025a-4fa6-9d88-f2a6341c2737",
+      "quantity": 2,
+      "unit": "clove"
+     }
+    ],
+    "addedId": "18e4799b-7322-4f27-87ff-88f561b6867f",
+    "deleted": [
+     "27ee8430-9ce2-4f95-936d-8048fcf18fbb",
+     "f82f6d1d-025a-4fa6-9d88-f2a6341c2737"
+    ]
+   },
+   {
+    "ingredientId": "80980328-5ec9-406b-8ee3-64944588ec88",
+    "name": "sugar",
+    "quantity": 10.0,
+    "unit": "tsp",
+    "originals": [
+     {
+      "id": "b6d58d85-05e9-454b-92ef-77ecdf5a6257",
+      "quantity": 1,
+      "unit": "tsp"
+     },
+     {
+      "id": "bb1ad59c-7faa-4ee1-ad02-645359dacfa2",
+      "quantity": 3,
+      "unit": "tbsp"
+     }
+    ],
+    "addedId": "800a8db2-a30c-495d-9a54-6541dcc6a19d",
+    "deleted": [
+     "b6d58d85-05e9-454b-92ef-77ecdf5a6257",
+     "bb1ad59c-7faa-4ee1-ad02-645359dacfa2"
+    ]
+   }
+  ]
+ }
+]
