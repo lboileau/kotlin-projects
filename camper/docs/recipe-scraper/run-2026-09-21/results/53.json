@@ -1,0 +1,148 @@
+{
+  "name" : "Radicchio Arugula Apple Salad with Parmesan",
+  "description" : null,
+  "baseServings" : 6,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "1   small head radicchio, core removed, chopped ((about 4-5 cups))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "c3dd6094-69a7-4eec-a21f-5b4bdbc3e7b5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 cups   loosely packed arugula",
+    "quantity" : 3,
+    "unit" : "cup",
+    "matchedIngredientId" : "b7516685-a534-48ba-84cb-47d1fa5aa4e4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  large  or 2 small apples, cored, thinly sliced",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "0159e1ad-3355-405e-a264-1ff1f0427ddb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  cup  shaved parmesan**",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "f1ee4aaa-54c5-49e7-8350-e248ff7efbc7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ cup   toasted walnuts, chopped",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "2269b877-be15-4dc5-b7f1-623736c9e37c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ cup   olive oil",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tbsp   balsamic vinegar",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "41547fda-43e4-4f67-ac29-e4a089fd382d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tbsp   dijon mustard",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "91f8dbd6-2313-44fb-b6a4-9ae9f4ea2bfb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1   tbsp apple cider vinegar",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "bd2e94bc-b6a1-4048-9f74-90d25c89e451",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ tsp   kosher salt",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "*Can’t find radicchio? No problem, you could substitute with more arugula, kale (massage it in the dressing!), and/or add in some thinly sliced red cabbage for color.",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "recipe note",
+    "suggestedCategory" : "other",
+    "suggestedUnit" : "pieces",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "**This salad would also be delicious with crumbled goat cheese or feta.",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "recipe note",
+    "suggestedCategory" : "other",
+    "suggestedUnit" : "pieces",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "Pro tip:   ~ I love serving salads like these on a big platter so that the cheese and nuts on top don’t get lost in the bottom and everyone gets the perfect bite!",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "recipe note",
+    "suggestedCategory" : "other",
+    "suggestedUnit" : "pieces",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  } ]
+}

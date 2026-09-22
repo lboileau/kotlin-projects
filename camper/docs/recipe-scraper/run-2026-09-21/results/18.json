@@ -1,0 +1,278 @@
+{
+  "name" : "Chicken Biryani Recipe",
+  "description" : "Aromatic, delicious and spicy one pot chicken biryani made with basmati rice, spices, chicken and herbs. This is a beginners recipe and can be made with ease. Serve chicken biryani with raita or salan (gravy).",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "½ kg (1.1 lbs)  chicken ((skinless bone-in or boneless, large pieces such as thighs, drumsticks, legs or mix of all))",
+    "quantity" : 0.5,
+    "unit" : "kg",
+    "matchedIngredientId" : "5b4fa1d1-1b9f-49ce-93d5-57a52ac5180a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons plain yogurt ((curd or dahi))",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "565d700d-dcf3-430c-b4a7-e3634e7de37d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1¼ tablespoons ginger garlic paste ((1 inch ginger &amp; 4 garlic cloves crushed))",
+    "quantity" : 1.25,
+    "unit" : "tbsp",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "ginger garlic paste",
+    "suggestedCategory" : "condiment",
+    "suggestedUnit" : "oz",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "½ to ¾ teaspoon salt ((adjust to tase))",
+    "quantity" : 0.75,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "¼ teaspoon turmeric",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "dbb5c321-1828-4442-a905-3087109e5c9c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ to 1 teaspoon red chilli powder  ((or paprika) (use less spicy variety))",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ to 1 tablespoon garam masala ((or biryani masala) (Refer notes))",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "d61f21db-5a27-4de3-a45d-e6e1e17c9fd1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon Lemon juice  ((optional))",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  bay leaf  ((tej patta))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4ad8fd66-2186-4254-9179-950324c6182b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "4  green cardamoms ((choti elaichi))",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "1278fc49-3b11-4885-bd0c-2b381dbdc00e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "6  cloves ((lavang))",
+    "quantity" : 6,
+    "unit" : "whole",
+    "matchedIngredientId" : "b03e970c-dcd6-49be-b625-4d24f5bbf36d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 inch cinnamon ((dalchini))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "b8f8118d-d854-4b8c-a440-47e3934b4bc6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  star anise ((chakri phool ))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "1f8388cf-93b9-4da8-a74e-a6be60395201",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¾ teaspoon shahi jeera ((caraway seeds) (substitute with cumin))",
+    "quantity" : 0.75,
+    "unit" : "tsp",
+    "matchedIngredientId" : "25319908-41e6-4763-9210-59ff133dccb5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 strand mace  ((javitri, omit if you don&#39;t like))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "bfb9f5ce-d659-48b8-a46c-bf96aa82a7ca",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 cups basmati rice ((aged rice only))",
+    "quantity" : 2,
+    "unit" : "cup",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoon ghee (or Oil)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "6a171779-56d7-400a-ae43-7cf1f52325d0",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 large onion  (sliced thinly)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "¼ to ½ cup mint leaves (chopped fine (about 15 leaves))",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "669c719a-6271-415e-b29b-a54fa797bf2d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  green chili ((slit or chopped))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "208a3e41-aae3-4bd0-9718-accc1a9bdf2d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ cup plain yogurt ((Indian curd))",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "565d700d-dcf3-430c-b4a7-e3634e7de37d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "¼ to ½ teaspoon red chili powder  ((optional, for heat))",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "88dae3f5-25d3-4280-b35b-d14fc71ccffe",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon garam masala ((or biryani masala))",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "d61f21db-5a27-4de3-a45d-e6e1e17c9fd1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 cups water ((3½ cups for pot) (refer notes, more if needed ))",
+    "quantity" : 3,
+    "unit" : "cup",
+    "matchedIngredientId" : "4c50c7ea-aec7-49a1-a7f9-5bfffa61c519",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "¾ teaspoon salt ((to stir in water))",
+    "quantity" : 0.75,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoon fried onions ((optional))",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 pinch saffron ((optional)(soaked in 2 tbsps hot milk))",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "35f5ee76-5d76-4cfd-9231-3d4dcc589d09",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

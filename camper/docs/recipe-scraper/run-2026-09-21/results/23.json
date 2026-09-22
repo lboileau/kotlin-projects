@@ -1,0 +1,138 @@
+{
+  "name" : "Cucumber Edamame Salad with Sesame-Ginger Dressing",
+  "description" : "This Cucumber-Edamame Salad with Sesame-Ginger Dressing is fresh, flavorful, and filling. It's also make-ahead friendly and perfect for weekday meals.",
+  "baseServings" : 6,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "3 Tbsp. avocado oil  ((sub extra-virgin olive oil))",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 Tbsp. seasoned rice vinegar",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "612c3e41-a7e8-4293-9cc5-01f21a9360f1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 Tbsp. toasted sesame oil",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tsp. tamari or soy sauce",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 1/2 tsp. freshly grated ginger",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bc3a57fa-61c4-4c90-b151-b980223b0e81",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  garlic clove, grated or minced",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 lb. English or Persian cucumbers",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "f438a02a-3e0a-475c-a7aa-b2ac1c41d8c0",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 cup shelled edamame (I use frozen/thawed)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "66ad40bc-cfec-4d3c-91da-ea565d076a96",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 large avocado, cut into cubes",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "442e718a-fcac-4f06-9679-08196c007c6f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup thinly sliced green onion",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 Tbsp. toasted sesame seeds",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "f4ba5c00-4c15-43e7-aea2-138ff234b3a3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 to 3 Tbsp. thinly sliced fresh basil leaves",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "f5d8ae9b-95a3-41c4-bde0-d20085ba9dde",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "A pinch of Aleppo pepper flakes ((sub crushed red pepper flakes))",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "055d3a5d-5eeb-4fd8-ae86-c11a9ded0981",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

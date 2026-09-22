@@ -1,0 +1,108 @@
+{
+  "name" : "Baked Pork Tenderloin with Apples",
+  "description" : "We love this roasted pork tenderloin recipe. The key to this dish is searing the tenderloins first, then brushing them with a mustard and thyme rub before roasting them on a bed of apples and onions. One quick note: pork tenderloin and pork loin are two different cuts of meat. Tenderloins are much thinner and more delicate, which means they cook faster. Be sure to use tenderloin for this recipe to get the right timing and texture.",
+  "baseServings" : 6,
+  "meal" : "dinner",
+  "theme" : "pork",
+  "ingredients" : [ {
+    "originalText" : "2 pork tenderloins, about 1 ½ pounds each",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "c0ff48af-13ac-499a-b219-8ea09fb60db1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons avocado oil, plus more as needed",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "43d17782-30ed-4a37-8ffb-5d6f58d07b6a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 ½ teaspoons fine sea salt, plus more as needed",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon Dijon mustard or whole ground mustard",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "91f8dbd6-2313-44fb-b6a4-9ae9f4ea2bfb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon chopped fresh thyme leaves",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "88de65ff-cc4b-4f55-8d79-d177b99dc592",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ teaspoon ground black pepper",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 apples, cored and sliced",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "0159e1ad-3355-405e-a264-1ff1f0427ddb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 onions, sliced into wedges",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup chicken stock, see our homemade chicken stock",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon butter",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

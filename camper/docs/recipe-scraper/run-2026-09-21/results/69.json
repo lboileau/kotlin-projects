@@ -1,0 +1,168 @@
+{
+  "name" : "Vietnamese Lemongrass Chicken Rice Bowl",
+  "description" : "This rice bowl recipe guarantees full-on flavour and it’s so incredibly easy that it’ll be on your table in well under 30 minutes.",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "4 chicken thigh or breast fillets",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "5b4fa1d1-1b9f-49ce-93d5-57a52ac5180a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tbsp fish sauce",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 lemongrass stalks, bruised and white part finely chopped",
+    "quantity" : 2,
+    "unit" : "pieces",
+    "matchedIngredientId" : "0ad313aa-a63a-4efd-973b-c20a8a7725c9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 garlic clove, finely grated",
+    "quantity" : 1,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp caster sugar",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ tsp ground black pepper",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "steamed rice, to serve (click here to see my recipe for how to cook rice)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "sliced cucumber, to serve",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : "f438a02a-3e0a-475c-a7aa-b2ac1c41d8c0",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "coriander sprigs, to serve (optional)",
+    "quantity" : 1,
+    "unit" : "sprig",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "Nuoc cham sauce:",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "nuoc cham sauce",
+    "suggestedCategory" : "condiment",
+    "suggestedUnit" : "ml",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "3 tbsp fish sauce",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tbsp white vinegar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "d05bea1d-e272-4e6a-9184-1c3aa5a1786a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tbsp sugar",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tbsp lime juice",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "02089084-6ac0-4af5-abca-175addab4e65",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN" ]
+  }, {
+    "originalText" : "1 long red chilli, finely chopped",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "7c92d45e-a905-4734-a10f-52779dbb99d7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 garlic cloves, finely chopped",
+    "quantity" : 2,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

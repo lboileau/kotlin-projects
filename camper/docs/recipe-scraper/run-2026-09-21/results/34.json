@@ -1,0 +1,98 @@
+{
+  "name" : "Gluten-free Lemon Poppy Seed Loaf Recipe by Tasty",
+  "description" : "A light and refreshing loaf that will be a hit during a summer brunch or for an afternoon snack. The combination of tangy lemon and nutty poppy seeds creates a delicious flavor that's hard to resist.",
+  "baseServings" : 10,
+  "meal" : "breakfast",
+  "theme" : "vegetarian",
+  "ingredients" : [ {
+    "originalText" : "2 ½ cups rolled oats",
+    "quantity" : 2.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "2477bb4c-b473-4e8c-ac37-916045e6d23f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4 large eggs, room temperature",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "aefa8256-566a-40be-87ca-a27953922817",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup full-fat greek yogurt",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "565d700d-dcf3-430c-b4a7-e3634e7de37d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "¾ cup honey",
+    "quantity" : 0.75,
+    "unit" : "cup",
+    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "¼ cup lemon juice",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon lemon zest",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ cup poppy seeds",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "c1f0f3c0-41e5-4a53-8d7e-db114d3ab40a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 ¼ teaspoons baking powder",
+    "quantity" : 2.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "f2fd1b99-5e12-479f-bc0f-95a10b0a437f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 pinch salt",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

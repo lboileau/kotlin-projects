@@ -1,0 +1,148 @@
+{
+  "name" : "The Best Homemade Chicken Noodle Soup",
+  "description" : "This is the BEST easy Homemade Chicken Noodle Soup recipe. It's delicious and made from scratch, just like Grandma used to make!",
+  "baseServings" : 8,
+  "meal" : "dinner",
+  "theme" : "soup",
+  "ingredients" : [ {
+    "originalText" : "1 medium yellow onion  ($0.99)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3  garlic cloves ($0.12)",
+    "quantity" : 3,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4  carrots  ($0.65)",
+    "quantity" : 4,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 ribs celery  ($0.70)",
+    "quantity" : 2,
+    "unit" : "pieces",
+    "matchedIngredientId" : "90a1dbc0-d3ad-4064-88b8-0981481d96dc",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 Tbsp fresh parsley ($0.08)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 Tbsp olive oil  ($0.38)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp dried basil  ($0.25)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7eda7616-321f-435e-8e28-9a2eb9d4bfe4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ tsp dried thyme  ($0.24)",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "8ba3d938-d5f3-4b30-ad25-f17084c919b3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  bay leaf  ($0.12)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4ad8fd66-2186-4254-9179-950324c6182b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ tsp black pepper (freshly cracked, $0.02)",
+    "quantity" : 0.25,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1-3 tsp salt  (divided, $0.02)",
+    "quantity" : 3,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2  chicken breasts (boneless, skinless $6.21*)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "08be34b6-7724-4a95-a962-f586d2afc167",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "8 cups chicken broth ($0.72**)",
+    "quantity" : 8,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "6 oz. egg noodles  (uncooked, $0.61)",
+    "quantity" : 6,
+    "unit" : "oz",
+    "matchedIngredientId" : "82e620c8-4be1-4237-9458-765bcb4cd5a2",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

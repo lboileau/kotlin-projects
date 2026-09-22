@@ -1,0 +1,118 @@
+{
+  "name" : "Turkish Red Cabbage Salad",
+  "description" : "This Turkish Red Cabbage Salad is perfect to pop into the fridge and serve as a side dish with homemade kebabs, Shish Tawook and so much more! The crunchy cabbage paired with sumac lemon dressing and punchy pomegranate molasses is so tasty!",
+  "baseServings" : 6,
+  "meal" : "side",
+  "theme" : "salad",
+  "ingredients" : [ {
+    "originalText" : "4 cups heaping red cabbage (shredded)",
+    "quantity" : 4,
+    "unit" : "cup",
+    "matchedIngredientId" : "08625e84-3f1a-4337-a269-f5e584a3aba9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1-2  carrots (shredded or matchsticks)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "¼ cup parsley (chopped)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons fresh mint (chopped (see notes))",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "669c719a-6271-415e-b29b-a54fa797bf2d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons olive oil",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons red wine vinegar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "cc9ff150-69b8-4dd9-b34d-e0ff28ee2497",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons lemon juice",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1-2 tablespoons pomegranate molasses",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "9100c18b-ece9-4128-94ad-4f4c3a3c9702",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½ teaspoon kosher salt",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon ground sumac",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "66c13d68-bec6-4142-893c-7f17f5f71157",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon Aleppo pepper",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "055d3a5d-5eeb-4fd8-ae86-c11a9ded0981",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

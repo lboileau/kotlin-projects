@@ -1,0 +1,148 @@
+{
+  "name" : "Shrimp Cakes",
+  "description" : "These easy Shrimp Cakes are such a good weeknight meal. They're made with shrimp and sweet potatoes mixed with garlic and other spices. Serve with tartar sauce and coleslaw!",
+  "baseServings" : 8,
+  "meal" : "dinner",
+  "theme" : "seafood",
+  "ingredients" : [ {
+    "originalText" : "1/4 cup cumin seeds",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "25319908-41e6-4763-9210-59ff133dccb5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 tablespoons whole black peppercorns",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "c2ae44d0-ef7c-4fe2-bf2a-feb00defed34",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoons coriander seeds",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "310da658-bed7-49e9-a303-46e29e3eece4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons sugar",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 1/2 teaspoons sea salt",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 pound sweet potatoes",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "20530a8a-4695-47fb-9747-fee6f5a376a5",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4 tablespoons (or more) extra virgin olive oil",
+    "quantity" : 4,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4 large garlic cloves, unpeeled",
+    "quantity" : 4,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "8 ounces peeled, cooked shrimp, coarsely chopped",
+    "quantity" : 8,
+    "unit" : "oz",
+    "matchedIngredientId" : "23c3620f-a5c7-4f49-ab32-722fb97348fc",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2/3 cup chopped fresh cilantro",
+    "quantity" : 0.67,
+    "unit" : "cup",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2/3 cup finely ground breadcrumbs",
+    "quantity" : 0.67,
+    "unit" : "cup",
+    "matchedIngredientId" : "957fbd6d-b2fa-4be9-9185-19b7b44d69cf",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons finely chopped pickled or fresh jalapeños, seeds discarded",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "edd8aab0-c75f-4334-b263-9314ba637b8d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tablespoons finely chopped red onion",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "Flour for dusting (1/2 to 1 cup)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

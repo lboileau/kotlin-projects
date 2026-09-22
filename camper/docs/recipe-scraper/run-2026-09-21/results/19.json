@@ -1,0 +1,138 @@
+{
+  "name" : "Chicken with Creamy Mushroom Sauce",
+  "description" : "Recipe video above. The creamy mushroom sauce here is a cut above the usual basic recipes, thanks to the additions of wine, parmesan and chicken stock. It turns this quick chicken dinner into a meal that's both worthy and elegant enough to serve to company! It's an excellent sauce to serve with chicken breast, which is very lean and doesn't actually have very much flavour. Also, the lightly-floured crust on the chicken makes it nice and crispy, giving the sauce something to cling on to. So don't skip it!",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "2  chicken breasts, large ((boneless skinless, ~600-700g / 1.2 - 1.4 lb total, Note 1))",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "08be34b6-7724-4a95-a962-f586d2afc167",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 tsp salt",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "1/4 cup flour",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "b014009f-cf89-448e-aa64-238a94aef3c8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "15g / 1 tbsp  unsalted butter",
+    "quantity" : 15,
+    "unit" : "g",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "30g / 2 tbsp  unsalted butter",
+    "quantity" : 30,
+    "unit" : "g",
+    "matchedIngredientId" : "69225995-0284-4797-b4ff-821f94e89892",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "300g / 10 oz  mushrooms (, sliced (button or Swiss brown))",
+    "quantity" : 300,
+    "unit" : "g",
+    "matchedIngredientId" : "58f55542-c196-4ef8-87ba-a554b063d728",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2  garlic cloves (, minced)",
+    "quantity" : 2,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup dry white wine ((sub more chicken stock, Note 2))",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "a3a6d2f0-c84f-4e03-be97-2fae2a623828",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup chicken or vegetable stock (, low sodium)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup thickened / heavy cream (, full fat (Note 3))",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "ccea4d74-1b3c-4c1e-898a-adb51fd70007",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup parmesan (, finely and freshly grated (Note 4))",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "f1ee4aaa-54c5-49e7-8350-e248ff7efbc7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tbsp chives (, finely sliced (optional) – sub parsley, green onions, or omit)",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "98b220e8-9f7e-4d76-9663-b1680a189389",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

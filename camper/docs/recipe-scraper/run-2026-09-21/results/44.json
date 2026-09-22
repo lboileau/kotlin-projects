@@ -1,0 +1,238 @@
+{
+  "name" : "Korean Beef Bulgogi Rice Bowls - the easy way",
+  "description" : "Recipe video above. This has gone straight to the top of my favourite quick way to use beef mince! An easy version of Korean Beef Bulgogi, one of Korea's most famous food exports, made with ground beef rather than pricey steaks but using an authentic Bulgogi marinade so it takes a fraction of the effort and cost. I've made rice bowls, there's many ways to serve this - noodles, rice wraps, burritos or tacos (so trendy!). See in post for list!PS Don't skip the apple and grated onion. This is what sets bulgogi apart from generic soy + sugar + garlic \"Asian\" sauces!",
+  "baseServings" : 5,
+  "meal" : "dinner",
+  "theme" : "beef",
+  "ingredients" : [ {
+    "originalText" : "500g / 1 lb  beef mince ((ground beef), any fat % you like)",
+    "quantity" : 500,
+    "unit" : "g",
+    "matchedIngredientId" : "abd44ee4-7dea-4448-8b51-c5140689e216",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tbsp canola oil (, or any other plain flavoured oil, + 2 tsp (to wilt baby spinach))",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "4e6186ba-043b-4f0e-a959-86948b3fa605",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp onion (, finely grated  (~1/4 onion) (Note 1))",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tbsp red apple (, finely grated (skin on is fine, ~1/2 apple) (Note 1))",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "0159e1ad-3355-405e-a264-1ff1f0427ddb",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3  garlic cloves (, finely grated)",
+    "quantity" : 3,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp ginger (, finely grated)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bc3a57fa-61c4-4c90-b151-b980223b0e81",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 1/2 tbsp soy sauce ( - all-purpose or light (Note 2))",
+    "quantity" : 2.5,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp sesame oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp mirin (, omit for no alcohol (Note 3))",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "4db841d3-1182-403e-9b9f-36c29a6f5a96",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp brown sugar",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/8 tsp black pepper",
+    "quantity" : 0.125,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tbsp soy sauce ( - all-purpose or light (Note 2))",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp sesame oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tsp brown sugar",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 tsp rice vinegar ((or apple cider vinegar))",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "612c3e41-a7e8-4293-9cc5-01f21a9360f1",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "white rice ((medium or short grain, if you can))",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "4 large handfuls baby spinach ((or similar chopped leafy greens - cabbage, kale))",
+    "quantity" : 4,
+    "unit" : "cup",
+    "matchedIngredientId" : "e46b22f6-ad2b-40b5-8f62-a77b5a812fb2",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  large carrot (, peeled and julienned or grated using box grater (I use a julienne shredding tool))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  avocado (, mashed)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "442e718a-fcac-4f06-9679-08196c007c6f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup pickled ginger (, I like pink for colour)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "c6a88268-7204-461f-a61e-467f74f9e6a9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 1/2 cups baby cos / romaine lettuce (, torn into bite size pieces)",
+    "quantity" : 1.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "d9ae25b9-dde2-4cfc-8ee9-77ad57e948a4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tsp white sesame seeds",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "f4ba5c00-4c15-43e7-aea2-138ff234b3a3",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  green onion (, finely sliced)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  } ]
+}

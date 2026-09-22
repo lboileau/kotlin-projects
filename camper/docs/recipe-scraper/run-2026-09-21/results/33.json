@@ -1,0 +1,88 @@
+{
+  "name" : "Garlic Herb Roasted Potatoes Carrots and Zucchini",
+  "description" : "These roasted vegetables make a great savory side dish that pairs well with just about anything. Try our roasted potatoes, carrots, and zucchini recipe today!",
+  "baseServings" : 5,
+  "meal" : "side",
+  "theme" : "vegetarian",
+  "ingredients" : [ {
+    "originalText" : "1 1/4 lb baby potatoes, halved",
+    "quantity" : 1.25,
+    "unit" : "lb",
+    "matchedIngredientId" : "217cfd5d-c02d-4483-b8cf-5536083bb909",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 lb medium carrots, scrubbed clean, cut into 2-inch pieces",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "3 tablespoon olive oil, divided",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon minced fresh thyme",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "88de65ff-cc4b-4f55-8d79-d177b99dc592",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon minced fresh rosemary",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "2065499a-9c73-4a9a-9fea-dee35ddfcc2f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "Salt and freshly ground black pepper",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "12 oz. zucchini, trimmed and cut into 1-inch pieces",
+    "quantity" : 12,
+    "unit" : "oz",
+    "matchedIngredientId" : "b66ba1a6-6aef-4b84-ae4f-46383230e2e6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "4 cloves garlic, minced",
+    "quantity" : 4,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

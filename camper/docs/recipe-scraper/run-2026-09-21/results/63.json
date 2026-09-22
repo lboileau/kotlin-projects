@@ -1,0 +1,128 @@
+{
+  "name" : "Thai Basil Beef (Pad Gra Prow)",
+  "description" : "Thai Basil Beef, or Pad Gra Prow, is an easy, delicious dish of stir-fried beef and thai basil. Thai Basil Beef over white rice is a perfect 15-minute meal.",
+  "baseServings" : 4,
+  "meal" : "dinner",
+  "theme" : "beef",
+  "ingredients" : [ {
+    "originalText" : "2 tablespoons oil",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "5093fa92-5457-48cb-a17c-b1d946b03970",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "12 oz. beef ((340g, sliced thinly against the grain and mixed with 1 teaspoon oil and 2 teaspoons cornstarch))",
+    "quantity" : 12,
+    "unit" : "oz",
+    "matchedIngredientId" : "b9ef8e6f-54a2-40c4-b38f-21c3e3e4b902",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "5 cloves garlic ((chopped))",
+    "quantity" : 5,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "½  of a red bell pepper ((sliced thinly))",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "c8bf3904-3082-4176-9e59-9ccc52746b98",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1  small onion ((thinly sliced))",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 teaspoons soy sauce",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon dark soy sauce",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "bdbcc4e3-5743-4bc2-9b3d-ff44ccd01239",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon oyster sauce",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "c5f41ff4-c2a1-49fe-a3c1-bf3c736ffb0d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon fish sauce",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "a13ebb6f-d4bd-428f-aff1-fc48e5b454be",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "½ teaspoon sugar",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "80980328-5ec9-406b-8ee3-64944588ec88",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup thai basil leaves ((packed))",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "989c737b-3489-475d-8989-f60cb1aee5e9",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "cilantro ((to garnish))",
+    "quantity" : 1,
+    "unit" : "sprig",
+    "matchedIngredientId" : "864d1215-17a1-4a4d-b57d-3666fb735d8b",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}

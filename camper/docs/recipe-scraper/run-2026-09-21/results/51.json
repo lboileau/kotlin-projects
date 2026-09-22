@@ -1,0 +1,158 @@
+{
+  "name" : "Oven-Roasted Chicken Shawarma (NYTimes)",
+  "description" : "This recipe from Sam Sifton at the NYTimes is so amazing I just had to share it here. Not only is it flavorful but extremely easy - just marinate, roast and serve. It reminded me of the wonderful wraps we enjoyed for lunch on a trip to Israel. The open-air lunch stands included grilled chicken, falafel or lamb wrapped in pita and were served up with crisp cucumbers, tomatoes and a refreshing tzaziki-like white sauce - yum! The chicken should marinate from 1 to 12 hours so plan ahead - very easy to throw together before work and cook up for dinner. While it isn't Israel or cooked on a rotisserie it is certainly delicious and is do-able at home!",
+  "baseServings" : 5,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "*FOR MARINADE*",
+    "quantity" : 1,
+    "unit" : "pieces",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "marinade",
+    "suggestedCategory" : "other",
+    "suggestedUnit" : "pieces",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "2 lemons, whole (juiced)",
+    "quantity" : 2,
+    "unit" : "whole",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup olive oil (plus)",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 tablespoon olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "6 cloves garlic, peeled, smashed and minced",
+    "quantity" : 6,
+    "unit" : "clove",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon kosher salt",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 teaspoons freshly ground black pepper",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 teaspoons ground cumin",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "2 teaspoons paprika",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7c9b542f-c79e-4974-95bf-a9cc5c969067",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 teaspoon turmeric",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "dbb5c321-1828-4442-a905-3087109e5c9c",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "ground cinnamon, pinch",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "bf047d96-553c-4fb3-ab3f-b34523438542",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "Red pepper flakes, to taste",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "65cf3812-9d01-424a-a7a8-d39fb708fb45",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  }, {
+    "originalText" : "2 pounds boneless skinless chicken thighs",
+    "quantity" : 2,
+    "unit" : "lb",
+    "matchedIngredientId" : "5b4fa1d1-1b9f-49ce-93d5-57a52ac5180a",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 large red onion (peeled and quartered)",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "7e89590c-f8a5-4084-9a90-d87b8957d706",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 tablespoons chopped fresh parsley",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "14e730f4-d35b-415a-806e-826452886d21",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  } ]
+}

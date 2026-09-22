@@ -1,0 +1,158 @@
+{
+  "name" : "Greek Chicken Souvlaki Bowls with Roasted Veggies and Tzatziki Sauce",
+  "description" : "Greek chicken souvlaki bowls! This is a super easy and healthy dinner recipe that's perfect for meal prepping. I like to roast an array of veggies to go with these chicken kabobs and to top it all of we've got homemade tzatziki sauce!",
+  "baseServings" : 6,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "1/4 cup lemon juice",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "3 tablespoons olive oil",
+    "quantity" : 3,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "2 teaspoons minced garlic (or grated)",
+    "quantity" : 2,
+    "unit" : "tsp",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 teaspoon dried oregano leaves",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon salt AND 1/2 teaspoon black pepper",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1 - 1 ½ pounds boneless (skinless chicken tenders)",
+    "quantity" : 1.5,
+    "unit" : "lb",
+    "matchedIngredientId" : "08be34b6-7724-4a95-a962-f586d2afc167",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "LOW",
+    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "6 cups mixed veggies (I used diced eggplants, zucchini, baby bella mushrooms, and sweet peppers (see notes))",
+    "quantity" : 6,
+    "unit" : "cup",
+    "matchedIngredientId" : null,
+    "suggestedIngredientName" : "mixed vegetables",
+    "suggestedCategory" : "produce",
+    "suggestedUnit" : "lb",
+    "confidence" : "LOW",
+    "reviewFlags" : [ "NEW_INGREDIENT" ]
+  }, {
+    "originalText" : "2 tablespoons olive oil",
+    "quantity" : 2,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 ½ teaspoon montreal steak seasoning (or more)",
+    "quantity" : 1.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "6d5aa306-bc77-49d7-b037-70df9dfaadde",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 cup greek yogurt",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "565d700d-dcf3-430c-b4a7-e3634e7de37d",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 teaspoon garlic (grated)",
+    "quantity" : 1,
+    "unit" : "tsp",
+    "matchedIngredientId" : "9729a63d-237e-46f2-8d90-86209154dd18",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2  english cucumber (grated)",
+    "quantity" : 0.5,
+    "unit" : "whole",
+    "matchedIngredientId" : "f438a02a-3e0a-475c-a7aa-b2ac1c41d8c0",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tablespoon red wine vinegar (or lemon juice)",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "cc9ff150-69b8-4dd9-b34d-e0ff28ee2497",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 teaspoon salt AND 1/2 teaspoon black pepper",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "cooked rice or quinoa (flatbread, chopped tomatoes, kalamata olives, and pretty much anything else you wish to add)",
+    "quantity" : 1,
+    "unit" : "cup",
+    "matchedIngredientId" : "e5005e5b-948e-4530-b5bd-ee1d51b8d3f6",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
+  } ]
+}

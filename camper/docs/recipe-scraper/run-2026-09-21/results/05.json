@@ -1,0 +1,108 @@
+{
+  "name" : "Baked Chicken & Veggie Meatballs for Baby (and Kids, Too!)",
+  "description" : "These 5-Star Healthy Chicken Meatballs are a perfect first finger food for your baby, but don't be surprised when the rest of the family starts popping them in their mouths as well! Filled with ground chicken, carrots, spinach, and applesauce - these meatballs are a healthy (and completely addicting) food for babies, toddlers, kids, and the entire family! ",
+  "baseServings" : 24,
+  "meal" : "dinner",
+  "theme" : "chicken",
+  "ingredients" : [ {
+    "originalText" : "1 lb ground chicken ((or ground turkey))",
+    "quantity" : 1,
+    "unit" : "lb",
+    "matchedIngredientId" : "bc589ef7-810e-4f3e-b200-c7e2f22d8f89",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup applesauce or apple puree, (no sugar added)",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "344c8a01-010b-44b1-92ca-bf1baa313765",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup carrot,  (finely shredded )",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "67bafd1a-27ed-494e-9b56-2c465bc8eb13",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1/2 cup spinach, (finely chopped )",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "e46b22f6-ad2b-40b5-8f62-a77b5a812fb2",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/4 cup green onion, (chopped )",
+    "quantity" : 0.25,
+    "unit" : "cup",
+    "matchedIngredientId" : "1e9ee920-4d05-4080-a0e1-4b2abb18fff4",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "1  egg",
+    "quantity" : 1,
+    "unit" : "whole",
+    "matchedIngredientId" : "aefa8256-566a-40be-87ca-a27953922817",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 cup breadcrumbs ((regular or panko))",
+    "quantity" : 0.5,
+    "unit" : "cup",
+    "matchedIngredientId" : "957fbd6d-b2fa-4be9-9185-19b7b44d69cf",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1 tbsp olive oil",
+    "quantity" : 1,
+    "unit" : "tbsp",
+    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ ]
+  }, {
+    "originalText" : "1/2 tsp cumin",
+    "quantity" : 0.5,
+    "unit" : "tsp",
+    "matchedIngredientId" : "ae6cd685-59fe-4285-9c65-0e5682acb7f8",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+  }, {
+    "originalText" : "salt and pepper, (to taste)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "7669daca-8a67-409b-a67d-0e02f24a02ee",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  } ]
+}
