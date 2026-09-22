@@ -255,9 +255,9 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
   }
 
   function handleResetConfirmed() {
-    resetPurchases.mutate(undefined, {
-      onSuccess: () => toast.info('Purchases reset'),
-    });
+    // Optimistic (useResetPurchases): the rows untick as the dialog closes.
+    resetPurchases.mutate();
+    toast.info('Purchases reset');
   }
 
   const allGroups = buildShoppingRows(list);
@@ -403,7 +403,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
               </Button>
             </AlertDialog.Cancel>
             <AlertDialog.Action>
-              <Button variant="solid" color="red" size="3" onClick={handleResetConfirmed} loading={resetPurchases.isPending}>
+              <Button variant="solid" color="red" size="3" onClick={handleResetConfirmed}>
                 Reset
               </Button>
             </AlertDialog.Action>

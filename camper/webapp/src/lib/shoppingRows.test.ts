@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { ShoppingListItemResponse, ShoppingListResponse } from '../api/shopping';
 import {
   applyRowPurchases,
+  clearAllPurchases,
   buildShoppingRows,
   derivePurchaseStatus,
   formatStillNeededText,
@@ -57,6 +58,42 @@ describe('derivePurchaseStatus', () => {
     expect(derivePurchaseStatus(3, 5)).toBe('done');
     expect(derivePurchaseStatus(0, 2)).toBe('no_longer_needed');
     expect(derivePurchaseStatus(0, 0)).toBe('not_purchased');
+  });
+});
+
+describe('clearAllPurchases', () => {
+  it('unticks every row, zeroes the count and keeps the list otherwise the same', () => {
+    const list = makeList([
+      makeItem({ quantityPurchased: 3, status: 'done' }),
+      makeItem({ ingredientId: 'onion', ingredientName: 'Onion', unit: 'whole', quantityPurchased: 1, status: 'more_needed' }),
+    ]);
+    const before = { ...list, fullyPurchasedCount: 1 };
+
+    const next = clearAllPurchases(before);
+
+    expect(next.fullyPurchasedCount).toBe(0);
+    expect(next.totalItems).toBe(2);
+    for (const category of next.categories) {
+      for (const item of category.items) {
+        expect(item.quantityPurchased).toBe(0);
+        expect(item.status).toBe('not_purchased');
+      }
+    }
+    expect(onlyRow(next, 'ingredient-onion').entries[0].quantityRequired).toBe(
+      onlyRow(before, 'ingredient-onion').entries[0].quantityRequired,
+    );
+  });
+
+  it('drops an entry that was only listed because it had been bought (nothing required any more)', () => {
+    const list = makeList([
+      makeItem({}),
+      makeItem({ ingredientId: 'onion', ingredientName: 'Onion', unit: 'whole', quantityRequired: 0, quantityPurchased: 2, status: 'no_longer_needed' }),
+    ]);
+
+    const next = clearAllPurchases({ ...list, totalItems: 2 });
+
+    expect(next.totalItems).toBe(1);
+    expect(next.categories.flatMap((c) => c.items).map((i) => i.ingredientId)).toEqual(['garlic']);
   });
 });
 
