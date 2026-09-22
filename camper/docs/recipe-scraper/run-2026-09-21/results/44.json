@@ -65,8 +65,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "2 1/2 tbsp soy sauce ( - all-purpose or light (Note 2))",
-    "quantity" : 2.5,
+    "originalText" : "2 1/2 tbsp soy sauce ( - all-purpose or light (Note 2)); 2 tbsp soy sauce ( - all-purpose or light (Note 2))",
+    "quantity" : 4.5,
     "unit" : "tbsp",
     "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
     "suggestedIngredientName" : null,
@@ -75,8 +75,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1 tbsp sesame oil",
-    "quantity" : 1,
+    "originalText" : "1 tbsp sesame oil; 1 tbsp sesame oil",
+    "quantity" : 2,
     "unit" : "tbsp",
     "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
     "suggestedIngredientName" : null,
@@ -95,50 +95,20 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1 tbsp brown sugar",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1/8 tsp black pepper",
-    "quantity" : 0.125,
+    "originalText" : "1 tbsp brown sugar; 2 tsp brown sugar",
+    "quantity" : 5,
     "unit" : "tsp",
-    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "2 tbsp soy sauce ( - all-purpose or light (Note 2))",
-    "quantity" : 2,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "95a3bafd-9d56-4bf4-ad80-ca709264d774",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tbsp sesame oil",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "42341609-2935-4b29-87d7-30cd747907b7",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "2 tsp brown sugar",
-    "quantity" : 2,
+    "originalText" : "1/8 tsp black pepper",
+    "quantity" : 0.125,
     "unit" : "tsp",
-    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,

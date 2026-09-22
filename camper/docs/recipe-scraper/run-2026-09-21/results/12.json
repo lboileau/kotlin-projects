@@ -15,15 +15,15 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "3 tbsp. packed dark brown sugar",
-    "quantity" : 3,
+    "originalText" : "3 tbsp. packed dark brown sugar; 1/4 c. packed dark brown sugar",
+    "quantity" : 7,
     "unit" : "tbsp",
     "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "HIGH",
-    "reviewFlags" : [ ]
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "1 tbsp. kosher salt",
     "quantity" : 1,
@@ -134,16 +134,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1/4 c. packed dark brown sugar",
-    "quantity" : 0.25,
-    "unit" : "cup",
-    "matchedIngredientId" : "53dcaa1b-293c-430f-b499-d55230dfd858",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "2 tbsp. Worcestershire sauce",
     "quantity" : 2,

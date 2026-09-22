@@ -23,11 +23,12 @@ for e in log:
     want = [((cat.get(l['matchedIngredientId']) or l['suggestedIngredientName']).lower(), float(l['quantity']), l['unit']) for l in exp]
     have = [(l['ingredient']['name'].lower(), float(l['quantity']), l['unit']) for l in got if l.get('ingredient')]
     statuses = {l['status'] for l in got}
-    if want != have or statuses != {'approved'} or len(have) != len(got):
+    # Order-insensitive: the duplicate-line merge appends merged rows at the end.
+    if sorted(want) != sorted(have) or statuses != {'approved'} or len(have) != len(got):
         bad += 1
         print(f"MISMATCH {e['case']}: expected {len(want)} lines, got {len(got)} (statuses {statuses})")
-        for w, h in zip(want, have):
-            if w != h: print(f"   want {w}  got {h}")
+        for w in sorted(set(want) - set(have)): print(f"   want {w}")
+        for h in sorted(set(have) - set(want)): print(f"   got  {h}")
     else:
         print(f"ok {e['case']}: {len(have)} lines")
 print(f"\n{len(log) - bad}/{len(log)} recipes match expected against {API}")

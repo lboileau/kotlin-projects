@@ -29,6 +29,12 @@ does everything after that.
    - `UNIT_CONVERSION_NEEDED` — line unit ≠ matched ingredient's `defaultUnit` (computed here, not by the model)
    - `QUANTITY_ASSUMED` — source had no quantity ("to taste", "for garnish") or the value had to be corrected
    Any flag → the service stores the line as `pending_review`.
+5. **`ScrapedIngredientMerger`** collapses the per-section repeats recipe pages produce ("For the chicken…
+   For the rice…" each listing olive oil) into one line per ingredient: same unit summed; compatible units
+   (volume↔volume, weight↔weight, via `meal-plan-calculator`'s `UnitConverter`) summed in the smallest unit
+   and shown in the largest if that reads cleanly; count units only when identical. Every original line's
+   text is kept, joined with "; ". `docs/recipe-scraper/run-2026-09-21/merge-duplicate-lines.py` applies the
+   same rule to already-stored recipes through the API.
 
 Model: `RECIPE_SCRAPER_MODEL` env var, default `claude-sonnet-5` with thinking disabled (a lookup-and-copy
 task; thinking doubled the output bill for no accuracy gain). Measured on a 21-ingredient recipe with a

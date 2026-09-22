@@ -15,8 +15,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1 teaspoon dried oregano",
-    "quantity" : 1,
+    "originalText" : "1 teaspoon dried oregano; 1 teaspoon dried oregano; 1/4 teaspoon dried oregano",
+    "quantity" : 2.25,
     "unit" : "tsp",
     "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
     "suggestedIngredientName" : null,
@@ -35,8 +35,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1/4 teaspoon salt",
-    "quantity" : 0.25,
+    "originalText" : "1/4 teaspoon salt; 1/4 teaspoon salt",
+    "quantity" : 0.5,
     "unit" : "tsp",
     "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
     "suggestedIngredientName" : null,
@@ -55,18 +55,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "2 tablespoons olive oil",
-    "quantity" : 2,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tablespoon olive oil",
-    "quantity" : 1,
+    "originalText" : "2 tablespoons olive oil; 1 tablespoon olive oil; 1 tablespoon extra virgin olive oil",
+    "quantity" : 4,
     "unit" : "tbsp",
     "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
@@ -95,26 +85,6 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1 teaspoon dried oregano",
-    "quantity" : 1,
-    "unit" : "tsp",
-    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1/4 teaspoon salt",
-    "quantity" : 0.25,
-    "unit" : "tsp",
-    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
     "originalText" : "5 oz fresh spinach (chopped)",
     "quantity" : 5,
     "unit" : "oz",
@@ -125,8 +95,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "3 tablespoons freshly squeezed lemon juice",
-    "quantity" : 3,
+    "originalText" : "3 tablespoons freshly squeezed lemon juice; 1 tablespoon freshly squeezed lemon juice",
+    "quantity" : 4,
     "unit" : "tbsp",
     "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
     "suggestedIngredientName" : null,
@@ -159,36 +129,6 @@
     "quantity" : 6,
     "unit" : "oz",
     "matchedIngredientId" : "1aa17704-3805-4327-905e-6bfbf4a20d8b",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tablespoon extra virgin olive oil",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tablespoon freshly squeezed lemon juice",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "490690c6-0b4b-42bf-a4a5-1db8c7b181b4",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "LOW",
-    "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "1/4 teaspoon dried oregano",
-    "quantity" : 0.25,
-    "unit" : "tsp",
-    "matchedIngredientId" : "be6d80bf-94e4-4a2a-8bf8-917ed9dbd0f8",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,

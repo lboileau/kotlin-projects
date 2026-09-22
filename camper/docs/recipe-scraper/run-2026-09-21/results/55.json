@@ -15,18 +15,18 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "2 tablespoons extra virgin olive oil",
-    "quantity" : 2,
-    "unit" : "tbsp",
+    "originalText" : "2 tablespoons extra virgin olive oil; 1 teaspoon extra virgin olive oil",
+    "quantity" : 7,
+    "unit" : "tsp",
     "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "HIGH",
-    "reviewFlags" : [ ]
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "½ teaspoon kosher salt",
-    "quantity" : 0.5,
+    "originalText" : "½ teaspoon kosher salt; ¼ teaspoon kosher salt",
+    "quantity" : 0.75,
     "unit" : "tsp",
     "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
     "suggestedIngredientName" : null,
@@ -65,16 +65,6 @@
     "confidence" : "LOW",
     "reviewFlags" : [ "INGREDIENT_MATCH_UNCERTAIN", "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "1 teaspoon extra virgin olive oil",
-    "quantity" : 1,
-    "unit" : "tsp",
-    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
     "originalText" : "1  small garlic clove (grated with a microplane or pressed)",
     "quantity" : 1,
     "unit" : "clove",
@@ -84,16 +74,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "¼ teaspoon kosher salt",
-    "quantity" : 0.25,
-    "unit" : "tsp",
-    "matchedIngredientId" : "2b917990-d425-4d71-9ba6-2019e0c9daa4",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "freshly ground black pepper",
     "quantity" : 1,

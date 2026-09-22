@@ -15,8 +15,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "1/2 large onion, chopped",
-    "quantity" : 0.5,
+    "originalText" : "1/2 large onion, chopped; 1 medium onion",
+    "quantity" : 1.5,
     "unit" : "whole",
     "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
     "suggestedIngredientName" : null,
@@ -115,15 +115,15 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "60ml light olive oil",
-    "quantity" : 60,
+    "originalText" : "60ml light olive oil; Light olive oil",
+    "quantity" : 74.79,
     "unit" : "ml",
     "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
     "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
+    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED", "QUANTITY_ASSUMED" ]
   }, {
     "originalText" : "Juice of 1 1/2 limes",
     "quantity" : 1.5,
@@ -144,16 +144,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
-  }, {
-    "originalText" : "1 medium onion",
-    "quantity" : 1,
-    "unit" : "whole",
-    "matchedIngredientId" : "4b6f8eb0-6baf-43f2-aebb-2db63b71880b",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
   }, {
     "originalText" : "300g easy cook rice",
     "quantity" : 300,
@@ -184,15 +174,5 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "Light olive oil",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
   } ]
 }

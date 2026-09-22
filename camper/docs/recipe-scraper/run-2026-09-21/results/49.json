@@ -35,6 +35,16 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
+    "originalText" : "freshly ground black pepper (for serving)",
+    "quantity" : 1,
+    "unit" : "pinch",
+    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
+    "suggestedIngredientName" : null,
+    "suggestedCategory" : null,
+    "suggestedUnit" : null,
+    "confidence" : "HIGH",
+    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
+  }, {
     "originalText" : "1 tsp sweet paprika",
     "quantity" : 1,
     "unit" : "tsp",
@@ -154,16 +164,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "freshly ground black pepper (for serving)",
-    "quantity" : 1,
-    "unit" : "pinch",
-    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "QUANTITY_ASSUMED" ]
   }, {
     "originalText" : "chili flakes (for serving)",
     "quantity" : 1,

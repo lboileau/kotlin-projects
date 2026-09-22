@@ -65,8 +65,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1/2 teaspoon salt",
-    "quantity" : 0.5,
+    "originalText" : "1/2 teaspoon salt; 1/2 teaspoon salt",
+    "quantity" : 1,
     "unit" : "tsp",
     "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
     "suggestedIngredientName" : null,
@@ -75,8 +75,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1/2 teaspoon ground black pepper",
-    "quantity" : 0.5,
+    "originalText" : "1/2 teaspoon ground black pepper; 1/4 teaspoon ground black pepper",
+    "quantity" : 0.75,
     "unit" : "tsp",
     "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
     "suggestedIngredientName" : null,
@@ -194,26 +194,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1/2 teaspoon salt",
-    "quantity" : 0.5,
-    "unit" : "tsp",
-    "matchedIngredientId" : "3f23a769-9f70-492d-b17a-fc4be9e22291",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1/4 teaspoon ground black pepper",
-    "quantity" : 0.25,
-    "unit" : "tsp",
-    "matchedIngredientId" : "1fecae31-1706-44c6-8502-12c1c397605f",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "1/4 cup parmesan cheese",
     "quantity" : 0.25,

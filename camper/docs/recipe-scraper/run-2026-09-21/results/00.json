@@ -75,8 +75,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1-2 Tbsp sriracha",
-    "quantity" : 2,
+    "originalText" : "1-2 Tbsp sriracha; ½-1 Tbsp sriracha (more to kick up the spice)",
+    "quantity" : 3,
     "unit" : "tbsp",
     "matchedIngredientId" : "1e8bfc5d-83c8-4694-877c-f7eda05562e2",
     "suggestedIngredientName" : null,
@@ -95,8 +95,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
-    "originalText" : "2 tsp honey",
-    "quantity" : 2,
+    "originalText" : "2 tsp honey; 2 tsp honey",
+    "quantity" : 4,
     "unit" : "tsp",
     "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
     "suggestedIngredientName" : null,
@@ -155,16 +155,6 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "½-1 Tbsp sriracha (more to kick up the spice)",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "1e8bfc5d-83c8-4694-877c-f7eda05562e2",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
     "originalText" : "1 tsp rice vinegar",
     "quantity" : 1,
     "unit" : "tsp",
@@ -174,16 +164,6 @@
     "suggestedUnit" : null,
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
-  }, {
-    "originalText" : "2 tsp honey",
-    "quantity" : 2,
-    "unit" : "tsp",
-    "matchedIngredientId" : "826cca5a-f026-4e48-b1e4-10dec92ef30f",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ "UNIT_CONVERSION_NEEDED" ]
   }, {
     "originalText" : "rice, shredded carrots, sliced cucumbers, shelled edamame, pickled onions, avocado, shredded cabbage, sliced green onion, sesame seeds and more!",
     "quantity" : 1,

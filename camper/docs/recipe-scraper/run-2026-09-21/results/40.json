@@ -95,8 +95,8 @@
     "confidence" : "HIGH",
     "reviewFlags" : [ ]
   }, {
-    "originalText" : "1 tablespoon olive oil (for cooking)",
-    "quantity" : 1,
+    "originalText" : "1 tablespoon olive oil (for cooking); 1 tablespoon olive oil",
+    "quantity" : 2,
     "unit" : "tbsp",
     "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
@@ -119,16 +119,6 @@
     "quantity" : 2,
     "unit" : "cup",
     "matchedIngredientId" : "c3852b4e-0a1a-43d7-9367-80c625be82e3",
-    "suggestedIngredientName" : null,
-    "suggestedCategory" : null,
-    "suggestedUnit" : null,
-    "confidence" : "HIGH",
-    "reviewFlags" : [ ]
-  }, {
-    "originalText" : "1 tablespoon olive oil",
-    "quantity" : 1,
-    "unit" : "tbsp",
-    "matchedIngredientId" : "96b2eca0-39d6-484f-a654-7a08fe040b3e",
     "suggestedIngredientName" : null,
     "suggestedCategory" : null,
     "suggestedUnit" : null,
