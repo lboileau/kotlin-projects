@@ -80,6 +80,16 @@
   touch-action: manipulation;
 }
 
+.shopping-row__number {
+  font-weight: 700;
+  color: var(--gray-12);
+}
+
+.shopping-row__quantity--more .shopping-row__number,
+.shopping-row--checked .shopping-row__number {
+  color: inherit;
+}
+
 .shopping-row__quantity--link > span {
   text-decoration: underline dotted var(--gray-8);
   text-underline-offset: 3px;

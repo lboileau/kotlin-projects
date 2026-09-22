@@ -7,6 +7,7 @@ import { ChevronRightIcon, Cross2Icon, InfoCircledIcon } from '@radix-ui/react-i
 import { revealInContainer } from '../../lib/scrollIntoContainer';
 import { primeKeyboard } from '../../lib/primeKeyboard';
 import { formatQuantityText, formatStillNeededText, type ShoppingRow } from '../../lib/shoppingRows';
+import { splitQuantityRuns } from '../../lib/formatQuantity';
 import './ShoppingRowItem.css';
 
 function RecipeRefsCaption({ row, id }: { row: ShoppingRow; id: string }) {
@@ -74,7 +75,20 @@ export function ShoppingRowItem({
   // "1 clove more · have 2 clove" goes on two lines in the narrow column.
   const quantityLines = (moreNeeded ? stillNeededText : quantityText).split(' · ').filter(Boolean);
   const quantityClass = `shopping-row__quantity${moreNeeded ? ' shopping-row__quantity--more' : ''}`;
-  const quantityContent = quantityLines.map((line) => <span key={line}>{line}</span>);
+  // The numbers in a heavier weight than the units — "1⅓ bunch" reads at a glance.
+  const quantityContent = quantityLines.map((line) => (
+    <span key={line}>
+      {splitQuantityRuns(line).map((run, i) =>
+        run.isNumber ? (
+          <b key={i} className="shopping-row__number">
+            {run.text}
+          </b>
+        ) : (
+          run.text
+        ),
+      )}
+    </span>
+  ));
 
   useEffect(() => {
     if (highlight && rowRef.current) revealInContainer(rowRef.current);
