@@ -7,6 +7,7 @@ import com.acme.clients.recipeclient.model.RecipeFavoriteSummary as ClientRecipe
 import com.acme.clients.recipeclient.model.RecipeIngredient as ClientRecipeIngredient
 import com.acme.services.camperservice.features.recipe.dto.IngredientResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
+import com.acme.services.camperservice.features.recipe.dto.RecipePhotoResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeFavoriteStatusResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeFavoriteUserResponse
 import com.acme.services.camperservice.features.recipe.dto.RecipeIngredientResponse
@@ -70,13 +71,19 @@ object RecipeMapper {
         updatedAt = recipeIngredient.updatedAt
     )
 
-    /** [favoriteCount] and [favoritedByMe] are required for the same reason as in [toRecipeResponse]. */
+    /**
+     * [favoriteCount] and [favoritedByMe] are required for the same reason as in [toRecipeResponse];
+     * so are [steps] and [photos] — a caller that forgot to load them would otherwise ship a
+     * recipe that looks like it has none.
+     */
     fun toRecipeDetailResponse(
         recipe: ClientRecipe,
         duplicateOf: RecipeResponse?,
         ingredients: List<RecipeIngredientResponse>,
         favoriteCount: Int,
-        favoritedByMe: Boolean
+        favoritedByMe: Boolean,
+        steps: List<String>,
+        photos: List<RecipePhotoResponse>
     ): RecipeDetailResponse = RecipeDetailResponse(
         id = recipe.id,
         name = recipe.name,
@@ -91,6 +98,8 @@ object RecipeMapper {
         theme = recipe.theme,
         favoriteCount = favoriteCount,
         favoritedByMe = favoritedByMe,
+        steps = steps,
+        photos = photos,
         createdAt = recipe.createdAt,
         updatedAt = recipe.updatedAt
     )

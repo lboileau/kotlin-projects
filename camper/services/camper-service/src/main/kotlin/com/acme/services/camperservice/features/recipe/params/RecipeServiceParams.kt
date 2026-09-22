@@ -40,7 +40,8 @@ data class CreateRecipeParam(
     val baseServings: Int,
     val meal: String? = null,
     val theme: String? = null,
-    val ingredients: List<CreateRecipeIngredientParam>
+    val ingredients: List<CreateRecipeIngredientParam>,
+    val steps: List<String> = emptyList()
 )
 
 data class ImportRecipeParam(
@@ -53,11 +54,34 @@ data class ImportRecipeFromImagesParam(
     val images: List<ImportImageParam>
 )
 
-/** One photo: its media type and the bytes as raw base64 (no `data:` prefix). */
+/** One photo: its media type, the bytes as raw base64 (no `data:` prefix), and what it shows. */
 data class ImportImageParam(
+    val mediaType: String,
+    val data: String,
+    val role: String? = null
+)
+
+data class ReplaceRecipeStepsParam(
+    val recipeId: UUID,
+    val userId: UUID,
+    val steps: List<String>
+)
+
+data class AddRecipePhotoParam(
+    val recipeId: UUID,
+    val userId: UUID,
     val mediaType: String,
     val data: String
 )
+
+data class RemoveRecipePhotoParam(
+    val recipeId: UUID,
+    val photoId: UUID,
+    val userId: UUID
+)
+
+/** A stored object by its storage key, for the local store's proxy route. */
+data class GetStoredPhotoParam(val key: String)
 
 data class GetRecipeParam(
     val recipeId: UUID,

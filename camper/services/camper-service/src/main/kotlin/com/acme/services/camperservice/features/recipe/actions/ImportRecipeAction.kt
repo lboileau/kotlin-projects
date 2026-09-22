@@ -8,6 +8,7 @@ import com.acme.clients.recipescraperclient.api.RecipeScraperClient
 import com.acme.clients.recipescraperclient.api.ScrapeRecipeParam
 import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
 import com.acme.services.camperservice.features.recipe.error.RecipeError
+import com.acme.services.camperservice.features.recipe.params.GetRecipeParam
 import com.acme.services.camperservice.features.recipe.params.ImportRecipeParam
 import org.slf4j.LoggerFactory
 import java.net.URI
@@ -41,10 +42,12 @@ internal class ImportRecipeAction(
     private val recipeClient: RecipeClient,
     ingredientClient: IngredientClient,
     private val recipeScraperClient: RecipeScraperClient,
+    photoStore: RecipePhotoStore,
     private val htmlFetcher: HtmlFetcher = defaultHtmlFetcher()
 ) {
     private val logger = LoggerFactory.getLogger(ImportRecipeAction::class.java)
     private val drafter = ScrapedRecipeDrafter(recipeClient, ingredientClient)
+    private val getRecipe = GetRecipeAction(recipeClient, ingredientClient, photoStore)
 
     fun execute(param: ImportRecipeParam): Result<RecipeDetailResponse, RecipeError> {
         if (param.url.isBlank()) {
@@ -82,6 +85,10 @@ internal class ImportRecipeAction(
             is Result.Failure -> return Result.Failure(RecipeError.ScrapeFailed(result.error.message))
         }
 
-        return drafter.createDraft(scraped, webLink = param.url, userId = param.userId, catalogue = catalogue)
+        val recipeId = when (val result = drafter.createDraft(scraped, webLink = param.url, userId = param.userId)) {
+            is Result.Success -> result.value
+            is Result.Failure -> return result
+        }
+        return getRecipe.execute(GetRecipeParam(recipeId, param.userId))
     }
 }

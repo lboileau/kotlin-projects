@@ -6,6 +6,7 @@ import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.clients.recipeclient.api.AddRecipeIngredientParam
 import com.acme.clients.recipeclient.api.AddRecipeIngredientsParam
 import com.acme.clients.recipeclient.api.RecipeClient
+import com.acme.clients.recipeclient.api.ReplaceRecipeStepsParam
 import com.acme.clients.recipeclient.api.CreateRecipeParam as ClientCreateRecipeParam
 import com.acme.services.camperservice.features.recipe.dto.RecipeResponse
 import com.acme.services.camperservice.features.recipe.error.RecipeError
@@ -22,6 +23,10 @@ internal class CreateRecipeAction(
         }
         if (param.baseServings <= 0) {
             return Result.Failure(RecipeError.Invalid("baseServings", "must be greater than 0"))
+        }
+        val steps = when (val validated = ReplaceRecipeStepsAction.validateSteps(param.steps)) {
+            is Result.Success -> validated.value
+            is Result.Failure -> return validated
         }
 
         // Validate all ingredient IDs exist
@@ -62,6 +67,13 @@ internal class CreateRecipeAction(
             }
             when (val result = recipeClient.addIngredients(AddRecipeIngredientsParam(ingredientParams))) {
                 is Result.Failure -> return Result.Failure(RecipeError.Invalid("ingredients", result.error.message))
+                is Result.Success -> {}
+            }
+        }
+
+        if (steps.isNotEmpty()) {
+            when (val result = recipeClient.replaceSteps(ReplaceRecipeStepsParam(recipe.id, steps))) {
+                is Result.Failure -> return Result.Failure(RecipeError.Invalid("steps", result.error.message))
                 is Result.Success -> {}
             }
         }

@@ -7,6 +7,7 @@ import com.acme.clients.ingredientclient.api.IngredientClient
 import com.acme.clients.recipeclient.api.GetByIdParam as RecipeGetByIdParam
 import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
 import com.acme.clients.recipeclient.api.GetRecipeIngredientsParam
+import com.acme.clients.recipeclient.api.GetRecipeStepsParam
 import com.acme.clients.recipeclient.api.RecipeClient
 import com.acme.services.camperservice.features.recipe.dto.RecipeDetailResponse
 import com.acme.services.camperservice.features.recipe.error.RecipeError
@@ -16,7 +17,8 @@ import java.util.UUID
 
 internal class GetRecipeAction(
     private val recipeClient: RecipeClient,
-    private val ingredientClient: IngredientClient
+    private val ingredientClient: IngredientClient,
+    private val photoStore: RecipePhotoStore
 ) {
     fun execute(param: GetRecipeParam): Result<RecipeDetailResponse, RecipeError> {
         val recipe = when (val result = recipeClient.getById(RecipeGetByIdParam(param.recipeId))) {
@@ -71,13 +73,29 @@ internal class GetRecipeAction(
             )
         }
 
+        val steps = when (val result = recipeClient.getSteps(GetRecipeStepsParam(recipe.id))) {
+            is Result.Success -> result.value.map { it.text }
+            is Result.Failure -> return Result.Failure(RecipeError.Invalid("steps", result.error.message))
+        }
+
+        // Each photo's URL comes from the store (a presigned URL in production, memoised there).
+        val photos = when (val result = photoStore.photos(recipe.id)) {
+            is Result.Success -> when (val responses = photoStore.toResponses(result.value)) {
+                is Result.Success -> responses.value
+                is Result.Failure -> return responses
+            }
+            is Result.Failure -> return result
+        }
+
         return Result.Success(
             RecipeMapper.toRecipeDetailResponse(
                 recipe,
                 duplicateOf,
                 ingredientResponses,
                 summaries[recipe.id]?.favoriteCount ?: 0,
-                summaries[recipe.id]?.favoritedByMe ?: false
+                summaries[recipe.id]?.favoritedByMe ?: false,
+                steps,
+                photos
             )
         )
     }
