@@ -5,7 +5,7 @@ import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { useSetRowPurchases, useShoppingList } from '../../queries/shopping';
 import { buildShoppingRows, haveSheetEntries, type RowPurchase } from '../../lib/shoppingRows';
-import { formatQuantity } from '../../lib/formatQuantity';
+import { formatQuantity, formatShoppingQuantity } from '../../lib/formatQuantity';
 import { parseQuantityOrZero } from '../../lib/parseQuantity';
 import './HaveAmountSheet.css';
 
@@ -78,7 +78,7 @@ export function HaveAmountSheet() {
         <form onSubmit={handleSubmit} className="have-amount-sheet__form">
           {entries.map((entry, index) => {
             const invalid = showErrors && amountFor(index) === null;
-            const needed = `${formatQuantity(entry.quantityRequired)}${entry.unit ? ` ${entry.unit}` : ''}`;
+            const needed = `${formatShoppingQuantity(entry.quantityRequired)}${entry.unit ? ` ${entry.unit}` : ''}`;
             return (
               <label key={entry.unit ?? ''} className="have-amount-sheet__field">
                 <Text as="span" size="2" weight="medium">

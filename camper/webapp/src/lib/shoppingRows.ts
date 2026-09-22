@@ -7,7 +7,7 @@ import type {
   ShoppingListResponse,
   ShoppingRecipeRef,
 } from '../api/shopping';
-import { formatQuantity } from './formatQuantity';
+import { formatShoppingQuantity } from './formatQuantity';
 
 // Store-walk order; anything not listed sorts last, alphabetically among itself.
 const CATEGORY_ORDER = [
@@ -126,7 +126,7 @@ export function mergeShoppingItems(items: ShoppingListItemResponse[]): ShoppingR
 export function formatQuantityText(row: ShoppingRow): string {
   return row.entries
     .filter((entry) => entry.quantityRequired > 0)
-    .map((entry) => `${formatQuantity(entry.quantityRequired)}${entry.unit ? ` ${entry.unit}` : ''}`)
+    .map((entry) => `${formatShoppingQuantity(entry.quantityRequired)}${entry.unit ? ` ${entry.unit}` : ''}`)
     .join(' + ');
 }
 
@@ -139,7 +139,7 @@ export function formatQuantityText(row: ShoppingRow): string {
  * bought, or nothing is left to buy.
  */
 export function formatStillNeededText(row: ShoppingRow): string {
-  const withUnit = (quantity: number, unit: string | null) => `${formatQuantity(quantity)}${unit ? ` ${unit}` : ''}`;
+  const withUnit = (quantity: number, unit: string | null) => `${formatShoppingQuantity(quantity)}${unit ? ` ${unit}` : ''}`;
   const needed = row.entries
     .filter((entry) => entry.quantityRequired > entry.quantityPurchased)
     .map((entry) => withUnit(entry.quantityRequired - entry.quantityPurchased, entry.unit));

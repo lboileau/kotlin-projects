@@ -1,12 +1,44 @@
 import { describe, expect, it } from 'vitest';
-import { formatQuantity, splitQuantityRuns } from './formatQuantity';
+import { formatQuantity, formatShoppingQuantity, splitQuantityRuns } from './formatQuantity';
 
 describe('formatQuantity', () => {
   it('writes the common fractions as glyphs and drops trailing zeros', () => {
     expect(formatQuantity(1 / 3)).toBe('⅓');
     expect(formatQuantity(1.5)).toBe('1½');
     expect(formatQuantity(2)).toBe('2');
-    expect(formatQuantity(0.17)).toBe('0.17');
+    expect(formatQuantity(0.3)).toBe('0.3');
+    expect(formatQuantity(1.17)).toBe('1⅙');
+  });
+
+  it('knows eighths and sixths too, so a typed "1/8 tsp" is not "0.13"', () => {
+    expect(formatQuantity(1 / 8)).toBe('⅛');
+    expect(formatQuantity(5 / 6)).toBe('⅚');
+    expect(formatQuantity(2.875)).toBe('2⅞');
+  });
+});
+
+describe('formatShoppingQuantity', () => {
+  it('rounds up to the next quarter', () => {
+    expect(formatShoppingQuantity(1.17)).toBe('1¼');
+    expect(formatShoppingQuantity(0.17)).toBe('¼');
+    expect(formatShoppingQuantity(0.3)).toBe('½');
+    expect(formatShoppingQuantity(0.69)).toBe('¾');
+    expect(formatShoppingQuantity(10.92)).toBe('11');
+    expect(formatShoppingQuantity(1 / 3)).toBe('½');
+  });
+
+  it('keeps an amount that already is a quarter, including float noise around it', () => {
+    expect(formatShoppingQuantity(2)).toBe('2');
+    expect(formatShoppingQuantity(2.01)).toBe('2');
+    expect(formatShoppingQuantity(1.5)).toBe('1½');
+    expect(formatShoppingQuantity(0.75)).toBe('¾');
+    expect(formatShoppingQuantity(0.2500001)).toBe('¼');
+  });
+
+  it('only ever writes quarters, halves and three-quarters', () => {
+    for (let q = 0.01; q < 3; q += 0.07) {
+      expect(formatShoppingQuantity(q)).toMatch(/^\d*[¼½¾]?$/);
+    }
   });
 });
 
