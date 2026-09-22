@@ -34,7 +34,8 @@ internal data class ScrapedRecipeJson(
     val baseServings: Int,
     val meal: String?,
     val theme: String?,
-    val ingredients: List<ScrapedIngredientJson>
+    val ingredients: List<ScrapedIngredientJson>,
+    val steps: List<String> = emptyList()
 ) {
     /**
      * Resolves refs to ids and derives review flags deterministically. The model only reports what
@@ -54,7 +55,8 @@ internal data class ScrapedRecipeJson(
             ingredients
                 .filter { it.kind == LineKind.INGREDIENT && it.originalText.isNotBlank() }
                 .map { it.toDomain(catalogue) }
-        )
+        ),
+        steps = steps.map { it.trim() }.filter { it.isNotEmpty() }
     )
 }
 
@@ -142,8 +144,12 @@ internal fun scrapedRecipeSchema(): Map<String, Any> {
             "baseServings" to mapOf("type" to "integer"),
             "meal" to nullableEnum(ALLOWED_MEALS),
             "theme" to nullableEnum(ALLOWED_THEMES),
-            "ingredients" to mapOf("type" to "array", "items" to ingredient)
+            "ingredients" to mapOf("type" to "array", "items" to ingredient),
+            "steps" to mapOf(
+                "type" to "array", "items" to mapOf("type" to "string"),
+                "description" to "The method as an ordered list, one entry per step, as written; empty when the source has none"
+            )
         ),
-        "required" to listOf("name", "description", "baseServings", "meal", "theme", "ingredients")
+        "required" to listOf("name", "description", "baseServings", "meal", "theme", "ingredients", "steps")
     )
 }

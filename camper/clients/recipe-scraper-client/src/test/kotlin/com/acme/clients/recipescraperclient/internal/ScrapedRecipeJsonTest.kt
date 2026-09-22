@@ -119,4 +119,27 @@ class ScrapedRecipeJsonTest {
         assertEquals(1, recipe.ingredients.size)
         assertEquals("Pasta", ScrapedRecipeJson("Pasta ", null, 4, null, null, emptyList()).toDomain(catalogue).name)
     }
+
+    @Test
+    fun `steps are trimmed, blanks dropped, and default to empty for an answer without them`() {
+        val recipe = ScrapedRecipeJson(
+            name = "Soup", description = null, baseServings = 4, meal = null, theme = null,
+            ingredients = emptyList(), steps = listOf("  Chop. ", "", "   ", "Simmer.")
+        ).toDomain(catalogue)
+        assertEquals(listOf("Chop.", "Simmer."), recipe.steps)
+
+        val without = ScrapedRecipeJson("Soup", null, 4, null, null, emptyList()).toDomain(catalogue)
+        assertEquals(emptyList<String>(), without.steps)
+    }
+
+    @Test
+    fun `the schema requires steps as an array of strings`() {
+        @Suppress("UNCHECKED_CAST")
+        val schema = scrapedRecipeSchema()
+        val properties = schema["properties"] as Map<String, Any>
+        val steps = properties["steps"] as Map<String, Any>
+        assertEquals("array", steps["type"])
+        assertEquals(mapOf("type" to "string"), steps["items"])
+        assertEquals(true, (schema["required"] as List<*>).contains("steps"))
+    }
 }

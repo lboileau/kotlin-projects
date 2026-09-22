@@ -1,7 +1,8 @@
 # recipe-scraper-client
 
-Turns a recipe web page — or up to three photos of a recipe — into a `ScrapedRecipe` (name, servings,
-meal/theme, ingredient lines normalised against the app's ingredient catalogue) using the Claude API.
+Turns a recipe web page — or photos of a recipe — into a `ScrapedRecipe` (name, servings, meal/theme,
+ingredient lines normalised against the app's ingredient catalogue, and the method as a list of steps)
+using the Claude API.
 The service fetches the HTML; this client does everything after that. `scrape(ScrapeRecipeParam)` is
 the page path, `scrapeImages(ScrapeRecipeImagesParam)` the photo path; both share the system prompt,
 the catalogue block, the schema and all post-processing (`AnthropicRecipeScraperClient.complete`).
@@ -13,7 +14,11 @@ the catalogue block, the schema and all post-processing (`AnthropicRecipeScraper
 
 1. **`RecipePageExtractor`** reduces the page to what describes the recipe. It prefers the
    schema.org `Recipe` node from the page's JSON-LD (`name`, `recipeYield`, `recipeIngredient`, …
-   — ~1 KB, authoritative). Only when no JSON-LD recipe exists does it fall back to the page's visible
+   — ~1 KB, authoritative). `recipeInstructions` is kept too, **flattened to plain step strings**
+   (`flattenInstructions`): schema.org allows a string, `string[]`, `HowToStep[]` or `HowToSection[]`
+   with nested `itemListElement`; only each step's `text` (falling back to `name`) survives, HTML and
+   entities stripped, section headings and per-step urls/images dropped — the tokens they'd cost buy
+   nothing. Only when no JSON-LD recipe exists does it fall back to the page's visible
    text with scripts/styles/nav/header/footer stripped, capped at 60k chars.
    *Never send a raw prefix of the HTML*: recipe pages are 300–600 KB of ads and CSS and the ingredient
    list is routinely past the first 100 KB, which made the model reconstruct recipes from the
@@ -38,14 +43,24 @@ the catalogue block, the schema and all post-processing (`AnthropicRecipeScraper
    text is kept, joined with "; ". `docs/recipe-scraper/run-2026-09-21/merge-duplicate-lines.py` applies the
    same rule to already-stored recipes through the API.
 
+## Steps
+
+The model returns `steps: string[]` (required in the schema, may be empty) — one entry per step in source
+order, as written, numbering/labels dropped, section headings skipped. `toDomain` trims and drops blanks.
+Steps are never reviewed: the service stores them as-is on the draft.
+
 ## Photos (`scrapeImages`)
 
-The images go first in the user turn as `ImageBlockParam` / `Base64ImageSource` content blocks (the
-documented placement), each preceded by a `Photo N:` text label when there are several (also per the
-docs), then one text block: the same catalogue lines and a short instruction
-(`ScrapePromptBuilder.buildForImages`) — no source URL, no content label. The caller (the service)
-has already checked count (`RecipeImage.MAX_IMAGES` = 3), media type and size; the webapp sizes photos
-down to 1568px on the long edge before upload, so a page photo is ~300–500 KB of JPEG. Images are
+Each `RecipeImage` carries a **role** — `ingredients` or `instructions` (or null: "a photo of the recipe",
+no promise about what's on it). The images go first in the user turn as `ImageBlockParam` /
+`Base64ImageSource` content blocks (the documented placement), each preceded by a text label naming it
+(`ScrapePromptBuilder.imageLabel`: `Ingredients photo:` / `Instructions photo:`, or `Photo N:` for
+unlabelled ones when there are several), then one text block: the same catalogue lines and an
+instruction that says **which photo to read the lines from and which to read the steps from**
+(`buildForImages`) — no source URL, no content label. With only an ingredients photo it says the
+method may be absent and `steps` should be `[]`. The caller (the service) has already checked count
+(`RecipeImage.MAX_IMAGES` = 2, one per role), roles, media type and size; the webapp sizes photos down
+to 1568px on the long edge before upload, so a page photo is ~300–500 KB of JPEG. Images are
 billed in 28×28-px patches (`⌈w/28⌉ × ⌈h/28⌉`): a 1176×1568 photo is **~2,350 input tokens**, under
 Sonnet 5's 2576px / 4,784-token cap so nothing is resized server-side. Measured on a meal-kit card
 with a 286-item catalogue: ~4.8k in (800 system + 1.6k catalogue + 2.35k photo) / ~1.1k out for 9
@@ -57,7 +72,8 @@ taught the prompt and the code: the system prompt tells the model to *write a de
 title is visible* and to *use the largest serving column and set baseServings to it*; and
 `ScrapedRecipeJson.toDomain` turns a blank name into `"Untitled recipe"` rather than failing —
 Sonnet 5 returned `""` for that card, and the import must not depend on the prompt line being obeyed.
-**Only an empty ingredient list means "no recipe here"**: the schema has no "nothing found" shape, so the
+An answer without a `steps` key still parses (the field defaults to empty) so older relay/harness
+responses keep working. **Only an empty ingredient list means "no recipe here"**: the schema has no "nothing found" shape, so the
 prompt asks for an empty recipe when the photos are unreadable and the client turns that into a failure
 ("Couldn't read a recipe from the photo…").
 
@@ -116,8 +132,8 @@ name, at most three) into `<dir>/offline/images/`; `parse` then handles that fol
 1 empty redirect stub, 1 bot-blocked 403) comparing prod's stored lines, the new path, and a hand review.
 
 ## Testing
-- `RecipePageExtractorTest` — JSON-LD graph/array/top-level detection, noise-field dropping, text fallback, cap
+- `RecipePageExtractorTest` — JSON-LD graph/array/top-level detection, noise-field dropping, text fallback, cap, `recipeInstructions` flattening (sections, steps, strings, HTML)
 - `ScrapedRecipeJsonTest` — ref resolution, every flag derivation, enum/servings validation, blank-name placeholder
-- `ScrapePromptBuilderTest` — page vs photo user messages, the sentences the system prompt must keep
+- `ScrapePromptBuilderTest` — page vs photo user messages, the role-specific photo instructions and labels, the sentences the system prompt must keep
 - `FakeRecipeScraperClient` (testFixtures) for consumers (records `lastParam` / `lastImagesParam`);
   `NoOpRecipeScraperClient` returns a canned "Classic Guacamole" for both paths when `ANTHROPIC_API_KEY` is unset
