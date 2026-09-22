@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
-import { Callout, IconButton, Select, Text, TextArea, TextField } from '@radix-ui/themes';
+import { Callout, IconButton, Select, Tabs, Text, TextArea, TextField } from '@radix-ui/themes';
+import { RecipeTabsList } from '../../components/RecipeTabs';
+import type { RecipeTab } from '../../lib/recipeSteps';
 import { ExclamationTriangleIcon, ExternalLinkIcon, MinusIcon, PlusIcon } from '@radix-ui/react-icons';
 import { MEALS, THEMES, capitalize } from '../../lib/ingredientConstants';
 import { StepsEditor } from './StepsEditor';
@@ -16,6 +18,11 @@ interface RecipeFormFieldsProps {
   sourceEditable: boolean;
   autoFocusName?: boolean;
   error: string | null;
+  /** Which of the three tabs is showing; the page keeps it in the URL. */
+  tab: RecipeTab;
+  onTabChange: (tab: RecipeTab) => void;
+  /** The Photos tab's content — the photo grid on Edit, a note on New (nothing to attach to yet). */
+  photos: ReactNode;
   /** Extra content under the ingredients (the Edit form's note about lines still in review). */
   children?: ReactNode;
 }
@@ -35,6 +42,9 @@ export function RecipeFormFields({
   sourceEditable,
   autoFocusName = false,
   error,
+  tab,
+  onTabChange,
+  photos,
   children,
 }: RecipeFormFieldsProps) {
   const { name, description, servings, webLink, meal, theme, lines } = values;
@@ -153,25 +163,30 @@ export function RecipeFormFields({
         </Text>
       </div>
 
-      <div className="recipe-form-page__field">
-        <Text as="span" size="2" weight="medium">
-          Ingredients
-        </Text>
-        <LinesEditor
-          key={linesEditorKey}
-          lines={lines}
-          onChange={(next) => onChange({ lines: next })}
-          onPendingChange={onPendingLineChange}
-        />
-        {children}
-      </div>
+      {/* The same three tabs as the recipe page. Inactive panels stay mounted
+          (hidden by CSS) so a half-typed ingredient row or step survives a
+          tab switch — Radix would otherwise unmount them. */}
+      <Tabs.Root value={tab} onValueChange={(next) => onTabChange(next as RecipeTab)} className="recipe-form-page__tabs">
+        <RecipeTabsList counts={{ ingredients: lines.length, instructions: values.steps.filter((s) => s.trim()).length }} />
 
-      <div className="recipe-form-page__field">
-        <Text as="span" size="2" weight="medium">
-          Instructions
-        </Text>
-        <StepsEditor steps={values.steps} onChange={(next) => onChange({ steps: next })} />
-      </div>
+        <Tabs.Content value="ingredients" forceMount className="recipe-form-page__tab">
+          <LinesEditor
+            key={linesEditorKey}
+            lines={lines}
+            onChange={(next) => onChange({ lines: next })}
+            onPendingChange={onPendingLineChange}
+          />
+          {children}
+        </Tabs.Content>
+
+        <Tabs.Content value="instructions" forceMount className="recipe-form-page__tab">
+          <StepsEditor steps={values.steps} onChange={(next) => onChange({ steps: next })} />
+        </Tabs.Content>
+
+        <Tabs.Content value="photos" forceMount className="recipe-form-page__tab">
+          {photos}
+        </Tabs.Content>
+      </Tabs.Root>
 
       {error && (
         <Callout.Root color="red" variant="surface" size="1" role="alert">

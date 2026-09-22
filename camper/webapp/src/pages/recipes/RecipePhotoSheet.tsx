@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { AlertDialog, Badge, Button, Text } from '@radix-ui/themes';
 import { TrashIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
@@ -17,7 +17,9 @@ import './RecipePhotoSheet.css';
  */
 export function RecipePhotoSheet() {
   const { recipeId, photoId } = useParams<{ recipeId: string; photoId: string }>();
-  const sheet = useSheet(`/recipes/${recipeId}?tab=photos`);
+  // Mounted under both the recipe page and the edit form: the parent is
+  // whichever this sheet is open over, on its Photos tab.
+  const sheet = useSheet(`${useLocation().pathname.replace(/\/photos\/[^/]+\/?$/, '')}?tab=photos`);
   const { user } = useAuth();
   const { data: recipe } = useRecipe(recipeId);
   const removePhoto = useRemoveRecipePhoto(recipeId ?? '');

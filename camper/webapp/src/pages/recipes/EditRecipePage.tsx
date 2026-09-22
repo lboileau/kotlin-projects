@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 import { Button, Callout, Skeleton, Text } from '@radix-ui/themes';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { PageHeader } from '../../components/PageHeader';
@@ -14,6 +14,8 @@ import { ApiError } from '../../api/http';
 import type { RecipeDetailResponse, UpdateRecipeRequest } from '../../api/recipes';
 import type { DraftLine, PendingLine } from './LinesEditor';
 import { RecipeFormFields } from './RecipeFormFields';
+import { RecipePhotos } from './RecipePhotos';
+import { useRecipeTab } from '../../components/useRecipeTab';
 import { validateRecipeForm, type RecipeFormValues } from './recipeForm';
 import './RecipeForm.css';
 
@@ -92,6 +94,7 @@ export function EditRecipePage() {
 }
 
 function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; backTo: string }) {
+  const [tab, setTab] = useRecipeTab();
   const saveEdits = useSaveRecipeEdits(recipe.id);
   // Across tabs too: the form may have been opened from a plan's view of the recipe.
   const { goBack } = useBack(backTo, { acrossAreas: true });
@@ -197,6 +200,9 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
           onPendingLineChange={setPendingLine}
           sourceEditable={false}
           error={error}
+          tab={tab}
+          onTabChange={setTab}
+          photos={<RecipePhotos recipe={recipe} mayEdit />}
         >
           {inReviewCount > 0 && (
             <Text as="p" size="1" color="gray">
@@ -206,6 +212,7 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
           )}
         </RecipeFormFields>
       </form>
+      <Outlet />
     </div>
   );
 }

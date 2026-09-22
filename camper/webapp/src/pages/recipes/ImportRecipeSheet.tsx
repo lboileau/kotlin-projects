@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, type ChangeEvent, type FormEvent } 
 import { Link, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button, Callout, SegmentedControl, Text, TextField } from '@radix-ui/themes';
-import { CameraIcon, Cross2Icon, ExclamationTriangleIcon, ImageIcon } from '@radix-ui/react-icons';
+import { Cross2Icon, ExclamationTriangleIcon, PlusIcon } from '@radix-ui/react-icons';
 import { Sheet } from '../../components/Sheet';
 import { useSheet } from '../../components/useSheet';
 import { useImportRecipe, recipesKey } from '../../queries/recipes';
@@ -226,26 +226,26 @@ export function ImportRecipeSheet() {
                 Two photos read best: one of the ingredient list, one of the method. Get each list fully in frame and in focus.
               </Text>
             )}
-            <PhotoSlot
-              role="ingredients"
-              label="Ingredient list"
-              help="Required. Every ingredient with its amount, top to bottom."
-              photo={photos.ingredients}
-              preparing={preparing === 'ingredients'}
-              busy={busy}
-              onPick={(file) => handlePick('ingredients', file)}
-              onRemove={() => removePhoto('ingredients')}
-            />
-            <PhotoSlot
-              role="instructions"
-              label="Instructions"
-              help="Optional. The method or steps. Skip it if the card has none."
-              photo={photos.instructions}
-              preparing={preparing === 'instructions'}
-              busy={busy}
-              onPick={(file) => handlePick('instructions', file)}
-              onRemove={() => removePhoto('instructions')}
-            />
+            <div className={`import-recipe-sheet__slots${busy ? ' import-recipe-sheet__slots--compact' : ''}`}>
+              <PhotoSlot
+                label="Ingredient list"
+                help="Required · every ingredient with its amount"
+                photo={photos.ingredients}
+                preparing={preparing === 'ingredients'}
+                busy={busy}
+                onPick={(file) => handlePick('ingredients', file)}
+                onRemove={() => removePhoto('ingredients')}
+              />
+              <PhotoSlot
+                label="Instructions"
+                help="Optional · the method or steps"
+                photo={photos.instructions}
+                preparing={preparing === 'instructions'}
+                busy={busy}
+                onPick={(file) => handlePick('instructions', file)}
+                onRemove={() => removePhoto('instructions')}
+              />
+            </div>
           </div>
         )}
 
@@ -289,7 +289,6 @@ export function ImportRecipeSheet() {
 }
 
 interface PhotoSlotProps {
-  role: ImportPhotoRole;
   label: string;
   help: string;
   photo: PreparedPhoto | null;
@@ -300,13 +299,15 @@ interface PhotoSlotProps {
 }
 
 /**
- * One named photo: its own picker (camera *and* library on a phone — `accept`
- * without `capture`), a thumbnail with a remove button, and a chip while the
- * import runs so the dog below fits on the screen.
+ * One named photo as a portrait card, the same 3:4 shape the photo will take:
+ * empty, it is a dashed box with a + and the label inside, and the whole box
+ * is the picker's button (camera *and* library on a phone — `accept` without
+ * `capture`); picked, the photo fills it, a tap picks a replacement and the
+ * × removes it. While the import runs it shrinks to a chip so the dog below
+ * fits on the screen.
  */
-function PhotoSlot({ role, label, help, photo, preparing, busy, onPick, onRemove }: PhotoSlotProps) {
+function PhotoSlot({ label, help, photo, preparing, busy, onPick, onRemove }: PhotoSlotProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const labelId = useId();
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -317,18 +318,19 @@ function PhotoSlot({ role, label, help, photo, preparing, busy, onPick, onRemove
 
   if (busy && !photo) return null;
 
+  if (busy && photo) {
+    return (
+      <div className="import-recipe-sheet__photo import-recipe-sheet__photo--compact">
+        <img src={photo.previewUrl} alt={`${label} photo`} />
+        <Text size="2" color="gray">
+          {label} photo attached
+        </Text>
+      </div>
+    );
+  }
+
   return (
-    <div className={`import-recipe-sheet__slot${busy ? ' import-recipe-sheet__slot--compact' : ''}`} role="group" aria-labelledby={labelId}>
-      {!busy && (
-        <div className="import-recipe-sheet__slot-head">
-          <Text size="2" weight="medium" id={labelId}>
-            {label}
-          </Text>
-          <Text size="1" color="gray">
-            {help}
-          </Text>
-        </div>
-      )}
+    <div className="import-recipe-sheet__slot">
       <input
         ref={fileInputRef}
         className="import-recipe-sheet__file"
@@ -336,28 +338,35 @@ function PhotoSlot({ role, label, help, photo, preparing, busy, onPick, onRemove
         accept="image/*"
         tabIndex={-1}
         aria-hidden="true"
-        disabled={busy}
         onChange={handleChange}
       />
+      <button
+        type="button"
+        className={`import-recipe-sheet__card${photo ? ' import-recipe-sheet__card--filled' : ''}`}
+        aria-label={photo ? `${label} photo — tap to choose a different one` : `Take or choose the ${label.toLowerCase()} photo`}
+        disabled={preparing}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {photo ? (
+          <>
+            <img src={photo.previewUrl} alt="" />
+            <span className="import-recipe-sheet__card-caption">{label}</span>
+          </>
+        ) : (
+          <>
+            <span className="import-recipe-sheet__card-plus" aria-hidden="true">
+              <PlusIcon width={22} height={22} />
+            </span>
+            <span className="import-recipe-sheet__card-label">{label}</span>
+            <span className="import-recipe-sheet__card-help">{help}</span>
+          </>
+        )}
+        {preparing && <span className="import-recipe-sheet__card-busy" aria-hidden="true" />}
+      </button>
       {photo && (
-        <div className={`import-recipe-sheet__photo${busy ? ' import-recipe-sheet__photo--compact' : ''}`}>
-          <img src={photo.previewUrl} alt={`${label} photo`} />
-          {busy ? (
-            <Text size="2" color="gray">
-              {label} photo attached
-            </Text>
-          ) : (
-            <button type="button" className="import-recipe-sheet__photo-remove" aria-label={`Remove ${label.toLowerCase()} photo`} onClick={onRemove}>
-              <Cross2Icon />
-            </button>
-          )}
-        </div>
-      )}
-      {!busy && (
-        <Button type="button" size="3" variant="soft" loading={preparing} disabled={preparing} onClick={() => fileInputRef.current?.click()}>
-          {photo ? <ImageIcon /> : <CameraIcon />}
-          {photo ? 'Choose a different photo' : role === 'ingredients' ? 'Take or choose the ingredients photo' : 'Take or choose the instructions photo'}
-        </Button>
+        <button type="button" className="import-recipe-sheet__photo-remove" aria-label={`Remove ${label.toLowerCase()} photo`} onClick={onRemove}>
+          <Cross2Icon />
+        </button>
       )}
     </div>
   );

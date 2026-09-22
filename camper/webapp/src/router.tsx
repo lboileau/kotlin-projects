@@ -128,7 +128,12 @@ export const router = createBrowserRouter([
               { path: 'favourites', element: <FavouritedBySheet /> },
             ],
           },
-          { path: 'recipes/:recipeId/edit', element: <EditRecipePage /> },
+          {
+            path: 'recipes/:recipeId/edit',
+            element: <EditRecipePage />,
+            // The Photos tab's viewer, so opening a photo from the edit form doesn't leave it.
+            children: [{ path: 'photos/:photoId', element: <RecipePhotoSheet /> }],
+          },
           {
             path: 'ingredients',
             element: <IngredientsPage />,
