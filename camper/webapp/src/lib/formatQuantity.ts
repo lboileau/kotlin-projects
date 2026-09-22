@@ -38,7 +38,11 @@ export interface QuantityRun {
   text: string;
   /** True for the number itself; false for the unit and words around it. */
   isNumber: boolean;
+  /** A number that is only a fraction glyph ("⅓"): one small character, which a row can enlarge. */
+  isLoneFraction?: boolean;
 }
+
+const LONE_FRACTION = /^[¼⅓½⅔¾]$/;
 
 /**
  * Splits a quantity line ("1⅓ bunch", "1.17 cup + 5⅓ whole", "have 2 clove")
@@ -52,7 +56,7 @@ export function splitQuantityRuns(line: string): QuantityRun[] {
   for (const match of line.matchAll(QUANTITY_RUN)) {
     const start = match.index ?? 0;
     if (start > last) runs.push({ text: line.slice(last, start), isNumber: false });
-    runs.push({ text: match[0], isNumber: true });
+    runs.push({ text: match[0], isNumber: true, ...(LONE_FRACTION.test(match[0]) ? { isLoneFraction: true } : {}) });
     last = start + match[0].length;
   }
   if (last < line.length) runs.push({ text: line.slice(last), isNumber: false });

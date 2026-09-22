@@ -80,7 +80,7 @@ export function ShoppingRowItem({
     <span key={line}>
       {splitQuantityRuns(line).map((run, i) =>
         run.isNumber ? (
-          <b key={i} className="shopping-row__number">
+          <b key={i} className={`shopping-row__number${run.isLoneFraction ? ' shopping-row__number--fraction' : ''}`}>
             {run.text}
           </b>
         ) : (

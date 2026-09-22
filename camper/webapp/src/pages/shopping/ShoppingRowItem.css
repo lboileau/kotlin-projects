@@ -85,6 +85,13 @@
   color: var(--gray-12);
 }
 
+/* A bare fraction glyph ("⅓") is one small character: set it larger so it
+   reads like the whole numbers around it, without moving the line. */
+.shopping-row__number--fraction {
+  font-size: 1.3em;
+  line-height: 1;
+}
+
 .shopping-row__quantity--more .shopping-row__number,
 .shopping-row--checked .shopping-row__number {
   color: inherit;

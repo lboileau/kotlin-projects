@@ -24,9 +24,15 @@ describe('splitQuantityRuns', () => {
     ]);
     expect(splitQuantityRuns('have ⅓ cup')).toEqual([
       { text: 'have ', isNumber: false },
-      { text: '⅓', isNumber: true },
+      { text: '⅓', isNumber: true, isLoneFraction: true },
       { text: ' cup', isNumber: false },
     ]);
+  });
+
+  it('flags only a number that is nothing but a fraction glyph', () => {
+    expect(splitQuantityRuns('½ tsp')[0]).toEqual({ text: '½', isNumber: true, isLoneFraction: true });
+    expect(splitQuantityRuns('1½ tsp')[0]).toEqual({ text: '1½', isNumber: true });
+    expect(splitQuantityRuns('0.5 tsp')[0]).toEqual({ text: '0.5', isNumber: true });
   });
 
   it('returns one plain run for a line with no number', () => {
