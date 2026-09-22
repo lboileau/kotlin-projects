@@ -1,0 +1,27 @@
+.favourited-by-sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.favourited-by-sheet__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--gray-4);
+}
+
+.favourited-by-sheet__row:last-child {
+  border-bottom: none;
+}
+
+.favourited-by-sheet__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

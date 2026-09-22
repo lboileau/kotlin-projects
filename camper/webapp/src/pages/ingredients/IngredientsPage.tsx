@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button, Text, TextField } from '@radix-ui/themes';
 import { MagnifyingGlassIcon, MixIcon, PlusIcon } from '@radix-ui/react-icons';
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
+import { FilterChips } from '../../components/FilterChips';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { useIngredients } from '../../queries/ingredients';
@@ -21,12 +22,42 @@ export function IngredientsPage() {
   // instead of blanking an already-loaded list.
   const hasData = !!ingredients;
   const [q, setQ] = useSearchText();
+  // The category filter lives in the URL like the Recipes list's meal filter,
+  // so Back, a reload and a shared link all keep it.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selected = searchParams.get('category');
+  // A category nobody uses any more (or a mistyped link) filters nothing.
+  const category = selected && (CATEGORIES as readonly string[]).includes(selected) ? selected : null;
+
+  function setCategory(next: string | null) {
+    setSearchParams(
+      (previous) => {
+        const params = new URLSearchParams(previous);
+        if (next) params.set('category', next);
+        else params.delete('category');
+        return params;
+      },
+      { replace: true },
+    );
+  }
+
+  function clearFilters() {
+    setQ('');
+    setCategory(null);
+  }
+
+  // Only the categories that have ingredients, in the list's own order.
+  const categoryOptions = useMemo(() => {
+    const present = new Set((ingredients ?? []).map((i) => i.category));
+    return CATEGORIES.filter((c) => present.has(c)).map((c) => ({ value: c, label: capitalize(c) }));
+  }, [ingredients]);
 
   const filtered = useMemo(() => {
-    const list = ingredients ?? [];
+    let list = ingredients ?? [];
+    if (category) list = list.filter((i) => i.category === category);
     const needle = q.trim().toLowerCase();
     return needle ? list.filter((i) => i.name.toLowerCase().includes(needle)) : list;
-  }, [ingredients, q]);
+  }, [ingredients, q, category]);
 
   const groups = useMemo(() => {
     const byCategory = new Map<string, IngredientResponse[]>();
@@ -65,6 +96,7 @@ export function IngredientsPage() {
             <MagnifyingGlassIcon />
           </TextField.Slot>
         </TextField.Root>
+        <FilterChips label="Filter by category" options={categoryOptions} value={category} onChange={setCategory} />
         {/* Same place as the Recipes list's actions: on the list, not in the header. */}
         <div className="ingredients-page__actions">
           <Button size="3" onClick={() => navigate('/ingredients/new')}>
@@ -83,10 +115,10 @@ export function IngredientsPage() {
             {ingredients && ingredients.length > 0 ? (
               <>
                 <Text as="p" color="gray" size="2">
-                  No ingredients match your search.
+                  No ingredients match your filters.
                 </Text>
-                <Button size="2" variant="soft" onClick={() => setQ('')}>
-                  Clear search
+                <Button size="2" variant="soft" onClick={clearFilters}>
+                  Clear filters
                 </Button>
               </>
             ) : (

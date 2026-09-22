@@ -264,6 +264,24 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
+-- Recipe favourites
+-- ============================================================
+-- Camp Guacamole has three (Charlie has no username, so the API falls back to
+-- his email); Trail Tacos has one; Campfire Chili has none, so every state of
+-- the Show chip row has something to display locally.
+
+INSERT INTO recipe_favorites (id, recipe_id, user_id, created_at)
+VALUES
+    ('aa160000-0001-4000-8000-000000000000', 'aa140000-0001-4000-8000-000000000000', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now()),  -- Camp Guacamole, Alice
+    ('aa160000-0002-4000-8000-000000000000', 'aa140000-0001-4000-8000-000000000000', 'e4ccf033-d04f-8c3c-ffa1-affd007c4e55', now()),  -- Camp Guacamole, Bob
+    ('aa160000-0003-4000-8000-000000000000', 'aa140000-0001-4000-8000-000000000000', 'f5dda144-e150-9d4d-00b2-b00e118d5f66', now()),  -- Camp Guacamole, Charlie (no username)
+    ('aa160000-0004-4000-8000-000000000000', 'aa140000-0002-4000-8000-000000000000', 'd3bbef22-cf3e-7b2b-ee90-9eece66b3d44', now())   -- Trail Tacos, Alice
+-- Conflict target is the natural key, not id: a favourite removed and re-added
+-- locally comes back with a fresh id, and ON CONFLICT (id) would then let the
+-- re-seed hit uq_recipe_favorites_recipe_user and drop all four rows.
+ON CONFLICT (recipe_id, user_id) DO NOTHING;
+
+-- ============================================================
 -- Meal plans
 -- ============================================================
 

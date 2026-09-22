@@ -3,6 +3,8 @@ package com.acme.clients.recipeclient.api
 import com.acme.clients.common.Result
 import com.acme.clients.common.error.AppError
 import com.acme.clients.recipeclient.model.Recipe
+import com.acme.clients.recipeclient.model.RecipeFavorite
+import com.acme.clients.recipeclient.model.RecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient
 
 /**
@@ -51,4 +53,30 @@ interface RecipeClient {
 
     /** Find all recipe ingredient entries that reference a given global ingredient. */
     fun findIngredientsByIngredientId(param: FindRecipeIngredientsByIngredientIdParam): Result<List<RecipeIngredient>, AppError>
+
+    /**
+     * Favourite a recipe on behalf of a user. Idempotent: favouriting an already
+     * favourited recipe succeeds and changes nothing. Does not check whether the
+     * recipe is visible to the user — that is the caller's responsibility.
+     */
+    fun addFavorite(param: AddRecipeFavoriteParam): Result<Unit, AppError>
+
+    /**
+     * Remove a user's favourite of a recipe. Idempotent: removing a favourite
+     * that was never there succeeds.
+     */
+    fun removeFavorite(param: RemoveRecipeFavoriteParam): Result<Unit, AppError>
+
+    /** Who favourited a recipe, oldest first. Empty when nobody has. */
+    fun getFavorites(param: GetRecipeFavoritesParam): Result<List<RecipeFavorite>, AppError>
+
+    /**
+     * Favourite count and "did this user favourite it" for many recipes in one
+     * read — the list endpoint's answer to N+1.
+     *
+     * Only recipes with at least one favourite appear in the result; an id the
+     * caller asked about that nobody has favourited is simply absent, and callers
+     * must default it to `favoriteCount = 0, favoritedByMe = false`.
+     */
+    fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError>
 }

@@ -41,23 +41,45 @@
   color: var(--accent-contrast);
 }
 
+/* The Show dropdown on the left, Import / New on the right. */
 .recipes-page__actions-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
+  min-width: 0;
 }
 
-.recipes-page__mine {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 44px;
+/* Import and New keep their full width at every viewport; the dropdown is
+   what gives way. At 360px "My favourites" is wider than the space left
+   over, so the trigger shrinks and ellipsises its value rather than pushing
+   the two buttons off the row (which is what would force the page to scroll
+   sideways).
+
+   Both rules are written with the row as an ancestor purely for specificity:
+   Radix's own `.rt-SelectTrigger` sets `flex-shrink: 0`, which a
+   single-class rule of ours only beats on source order. */
+.recipes-page__actions-row .recipes-page__show {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Radix renders the trigger's value in a <span class="rt-SelectTriggerInner">
+   beside the chevron <svg>. It already ellipsises; what it lacks is
+   `min-width: 0`, without which a flex item never shrinks below its
+   content and the trigger keeps its full width regardless. */
+.recipes-page__actions-row .recipes-page__show > span {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .recipes-page__actions {
   display: flex;
   align-items: center;
+  flex: none;
   gap: 8px;
 }
 
@@ -130,6 +152,32 @@
 
 .recipes-page__row-info {
   margin-right: 8px;
+}
+
+/* The favourite count, a pill on the title line — a fact about the row, not
+   a control. Soft when only other people favourited the recipe, solid when
+   you did. Accent, not red: red means "take it away" in this app. The soft
+   pill is --accent-4, one step past the row's own hover/focus tint
+   (--accent-3), so its shape doesn't vanish when the row is hovered. */
+.recipes-page__row-favourites {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px 0 7px;
+  border-radius: 999px;
+  background: var(--accent-4);
+  color: var(--accent-11);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.recipes-page__row-favourites--mine {
+  background: var(--accent-9);
+  color: var(--accent-contrast);
 }
 
 .recipes-page__row-main {

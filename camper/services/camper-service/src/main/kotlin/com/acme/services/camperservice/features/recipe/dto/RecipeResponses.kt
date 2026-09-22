@@ -15,6 +15,8 @@ data class RecipeResponse(
     val duplicateOfId: UUID?,
     val meal: String?,
     val theme: String?,
+    val favoriteCount: Int,
+    val favoritedByMe: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant
 )
@@ -31,8 +33,24 @@ data class RecipeDetailResponse(
     val ingredients: List<RecipeIngredientResponse>,
     val meal: String?,
     val theme: String?,
+    val favoriteCount: Int,
+    val favoritedByMe: Boolean,
     val createdAt: Instant,
     val updatedAt: Instant
+)
+
+/** Answer to PUT/DELETE /api/recipes/{id}/favorite. */
+data class RecipeFavoriteStatusResponse(
+    val recipeId: UUID,
+    val favoriteCount: Int,
+    val favoritedByMe: Boolean
+)
+
+/** One row of GET /api/recipes/{id}/favorites. `username` falls back to email. */
+data class RecipeFavoriteUserResponse(
+    val userId: UUID,
+    val username: String,
+    val favoritedAt: Instant
 )
 
 data class RecipeIngredientResponse(

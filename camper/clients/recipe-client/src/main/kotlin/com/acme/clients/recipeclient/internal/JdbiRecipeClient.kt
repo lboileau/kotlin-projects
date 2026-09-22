@@ -5,6 +5,8 @@ import com.acme.clients.common.error.AppError
 import com.acme.clients.recipeclient.api.*
 import com.acme.clients.recipeclient.internal.operations.*
 import com.acme.clients.recipeclient.model.Recipe
+import com.acme.clients.recipeclient.model.RecipeFavorite
+import com.acme.clients.recipeclient.model.RecipeFavoriteSummary
 import com.acme.clients.recipeclient.model.RecipeIngredient
 import org.jdbi.v3.core.Jdbi
 
@@ -23,6 +25,10 @@ internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
     private val updateRecipeIngredient = UpdateRecipeIngredient(jdbi)
     private val removeRecipeIngredient = RemoveRecipeIngredient(jdbi)
     private val findRecipeIngredientsByIngredientId = FindRecipeIngredientsByIngredientId(jdbi)
+    private val addRecipeFavorite = AddRecipeFavorite(jdbi)
+    private val removeRecipeFavorite = RemoveRecipeFavorite(jdbi)
+    private val getRecipeFavorites = GetRecipeFavorites(jdbi)
+    private val getRecipeFavoriteSummaries = GetRecipeFavoriteSummaries(jdbi)
 
     override fun create(param: CreateRecipeParam): Result<Recipe, AppError> = createRecipe.execute(param)
     override fun getById(param: GetByIdParam): Result<Recipe, AppError> = getRecipeById.execute(param)
@@ -37,4 +43,9 @@ internal class JdbiRecipeClient(jdbi: Jdbi) : RecipeClient {
     override fun updateIngredient(param: UpdateRecipeIngredientParam): Result<RecipeIngredient, AppError> = updateRecipeIngredient.execute(param)
     override fun removeIngredient(param: RemoveRecipeIngredientParam): Result<Unit, AppError> = removeRecipeIngredient.execute(param)
     override fun findIngredientsByIngredientId(param: FindRecipeIngredientsByIngredientIdParam): Result<List<RecipeIngredient>, AppError> = findRecipeIngredientsByIngredientId.execute(param)
+
+    override fun addFavorite(param: AddRecipeFavoriteParam): Result<Unit, AppError> = addRecipeFavorite.execute(param)
+    override fun removeFavorite(param: RemoveRecipeFavoriteParam): Result<Unit, AppError> = removeRecipeFavorite.execute(param)
+    override fun getFavorites(param: GetRecipeFavoritesParam): Result<List<RecipeFavorite>, AppError> = getRecipeFavorites.execute(param)
+    override fun getFavoriteSummaries(param: GetRecipeFavoriteSummariesParam): Result<List<RecipeFavoriteSummary>, AppError> = getRecipeFavoriteSummaries.execute(param)
 }

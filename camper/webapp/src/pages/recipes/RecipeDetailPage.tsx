@@ -9,12 +9,21 @@ import {
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { PageHero } from '../../components/PageHero';
+import { HeartGlyph } from '../../components/HeartGlyph';
+import { FavouriteButton } from './FavouriteButton';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { BottomBar } from '../../components/BottomBar';
 import { useAuth } from '../../auth/useAuth';
-import { useDeleteRecipe, usePublishRecipe, useRecipe } from '../../queries/recipes';
+import {
+  useDeleteRecipe,
+  usePublishRecipe,
+  useRecipe,
+  useRecipeFavorites,
+  useToggleFavorite,
+} from '../../queries/recipes';
 import { capitalize } from '../../lib/ingredientConstants';
+import { formatFavouritedBy } from '../../lib/recipeFavorites';
 import { formatQuantity } from '../../lib/formatQuantity';
 import { toast } from '../../lib/toastStore';
 import { ApiError } from '../../api/http';
@@ -29,6 +38,14 @@ export function RecipeDetailPage() {
   const { data: recipe, isLoading, isError, error, refetch } = useRecipe(recipeId);
   const deleteRecipe = useDeleteRecipe();
   const publishRecipe = usePublishRecipe(recipeId ?? '');
+  const toggleFavorite = useToggleFavorite();
+  // The names behind the who-line, shared with the FavouritedBySheet it
+  // links to. Nothing is fetched for a recipe nobody has favourited; while
+  // it loads, and if it fails, `formatFavouritedBy` falls back to the count
+  // alone rather than showing a half-built or empty "who".
+  const favouriteCount = recipe?.favoriteCount ?? 0;
+  const { data: favouritedBy } = useRecipeFavorites(recipeId, { enabled: favouriteCount > 0 });
+  const favouritedBySummary = formatFavouritedBy(favouriteCount, favouritedBy, user?.id);
 
   const isOwner = Boolean(recipe && user && recipe.createdBy === user.id);
   const isDraft = recipe?.status === 'draft';
@@ -69,7 +86,10 @@ export function RecipeDetailPage() {
     return (
       <div className="recipe-detail-page">
         <PageHeader title="Recipe" backTo="/recipes" backAcrossAreas titleInHero />
-        <PageHero eyebrow="Recipe" title={undefined} />
+        {/* An empty box the size of the heart that replaces it once the
+            recipe arrives, so the title keeps exactly the width it will
+            have and never shifts sideways mid-load. */}
+        <PageHero eyebrow="Recipe" title={undefined} action={<span aria-hidden="true" />} />
         <PageLoader area="recipes" label="Loading recipe" />
         <Outlet />
       </div>
@@ -178,7 +198,18 @@ export function RecipeDetailPage() {
         }
       />
 
-      <PageHero eyebrow="Recipe" title={recipe.name}>
+      <PageHero
+        eyebrow="Recipe"
+        title={recipe.name}
+        // Favouriting lives here, on the recipe itself, and nowhere else:
+        // the list rows show the count but have no heart to tap.
+        action={
+          <FavouriteButton
+            favourited={recipe.favoritedByMe}
+            onToggle={(favorited) => toggleFavorite.mutate({ recipeId: recipe.id, favorited })}
+          />
+        }
+      >
         {isDraft && (
           <Badge color="amber" variant="soft">
             Draft
@@ -194,6 +225,20 @@ export function RecipeDetailPage() {
           <Badge variant="soft" color="gray">
             {capitalize(recipe.theme)}
           </Badge>
+        )}
+        {/* At 0 favourites there is no line at all — the bare heart above
+            is the whole feature until someone uses it. The count is a
+            SheetLink because every screen state in this app has a URL. */}
+        {recipe.favoriteCount > 0 && (
+          <SheetLink
+            to={`/recipes/${recipe.id}/favourites`}
+            className="recipe-detail-page__favourite-link"
+            aria-label={favouritedBySummary.label}
+          >
+            <HeartGlyph size={15} className="recipe-detail-page__favourite-heart" />
+            <span className="recipe-detail-page__favourite-who">{favouritedBySummary.text}</span>
+            <span aria-hidden="true">&rsaquo;</span>
+          </SheetLink>
         )}
       </PageHero>
 

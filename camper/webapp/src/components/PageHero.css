@@ -16,7 +16,21 @@
   text-transform: uppercase;
 }
 
+/* `align-items: flex-start` puts the action level with the title's FIRST
+   line, not centred against a title that wrapped to three. */
+.page-hero__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
 .page-hero__title {
+  /* Takes the rest of the row, and `min-width: 0` lets it shrink rather
+     than push the action off the edge. It still WRAPS — deliberately no
+     white-space/text-overflow here: a long recipe name runs onto a second
+     line as it always has, it is never cut to one line with an ellipsis. */
+  flex: 1;
+  min-width: 0;
   margin: 0;
   color: var(--gray-12);
   font-size: 1.5rem;
@@ -24,6 +38,17 @@
   line-height: 1.2;
   letter-spacing: -0.01em;
   overflow-wrap: anywhere;
+}
+
+/* A fixed 44px box whatever is inside it, so the title's width is the same
+   whether the action is the real control or a loading placeholder. */
+.page-hero__action {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .page-hero__meta {

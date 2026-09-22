@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Outlet, useNavigate, useSearchParams } from 'react-router-dom';
-import { Badge, Button, IconButton, Switch, Text, TextField } from '@radix-ui/themes';
+import { Badge, Button, IconButton, Select, Text, TextField } from '@radix-ui/themes';
 import {
   Cross2Icon,
   DownloadIcon,
@@ -11,6 +11,7 @@ import {
 import { PageLoader } from '../../components/PageLoader';
 import { PageHeader } from '../../components/PageHeader';
 import { RowActionButton } from '../../components/RowActionButton';
+import { HeartGlyph } from '../../components/HeartGlyph';
 import { RecipesIngredientsToggle } from '../../components/RecipesIngredientsToggle';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { useAuth } from '../../auth/useAuth';
@@ -19,8 +20,20 @@ import { useAddRecipeToPlan, usePlans, useRemoveRecipeFromPlan } from '../../que
 import { toast } from '../../lib/toastStore';
 import { MEALS, capitalize } from '../../lib/ingredientConstants';
 import { useSearchText } from '../../lib/useSearchText';
+import { favouritesCountLabel, matchesShowFilter, parseShowFilter } from '../../lib/recipeFavorites';
 import type { RecipeResponse } from '../../api/recipes';
 import './RecipesPage.css';
+
+// Single choice, `All recipes` first and written as an absent `show` param.
+// Replaces the old Mine switch; it ANDs with the meal chips and the search
+// box. A dropdown rather than a second chip row: chips cost a whole row of
+// vertical space above the list, which the owner declined.
+const SHOW_OPTIONS = [
+  { value: 'all', label: 'All recipes' },
+  { value: 'mine', label: 'Mine' },
+  { value: 'favourites', label: 'Favourites' },
+  { value: 'my-favourites', label: 'My favourites' },
+] as const;
 
 function updateParams(
   searchParams: URLSearchParams,
@@ -85,13 +98,13 @@ export function RecipesPage() {
 
   const [q, setQ] = useSearchText();
   const meal = searchParams.get('meal') ?? 'all';
-  const mine = searchParams.get('mine') === '1';
-  const hasFilters = q.trim().length > 0 || meal !== 'all' || mine;
+  const show = parseShowFilter(searchParams.get('show'));
+  const hasFilters = q.trim().length > 0 || meal !== 'all' || show !== 'all';
 
   const patch = (values: Record<string, string | null>) => updateParams(searchParams, setSearchParams, values);
   const clearFilters = () => {
     setQ('');
-    patch({ q: null, meal: null, mine: null });
+    patch({ q: null, meal: null, show: null });
   };
 
   const mealsPresent = useMemo(() => {
@@ -101,12 +114,12 @@ export function RecipesPage() {
 
   const filtered = useMemo(() => {
     let list = recipes ?? [];
-    if (mine && user) list = list.filter((r) => r.createdBy === user.id);
+    list = list.filter((r) => matchesShowFilter(r, show, user?.id));
     if (meal !== 'all') list = list.filter((r) => r.meal === meal);
     const needle = q.trim().toLowerCase();
     if (needle) list = list.filter((r) => r.name.toLowerCase().includes(needle));
     return [...list].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-  }, [recipes, mine, meal, q, user]);
+  }, [recipes, show, meal, q, user]);
 
   return (
     <div className="recipes-page">
@@ -162,14 +175,28 @@ export function RecipesPage() {
         </div>
 
         {/* The list's own actions sit on the list, not in the header: the
-            header only says where you are. */}
+            header only says where you are. The Show dropdown is one of
+            them, on the left of the same row — it is where the Mine switch
+            used to be, and it costs no extra vertical space. */}
         <div className="recipes-page__actions-row">
-          <label className="recipes-page__mine">
-            <Text as="span" size="2">
-              Mine
-            </Text>
-            <Switch checked={mine} onCheckedChange={(checked) => patch({ mine: checked ? '1' : null })} />
-          </label>
+          <Select.Root
+            size="3"
+            value={show}
+            onValueChange={(value) => patch({ show: value === 'all' ? null : value })}
+          >
+            <Select.Trigger variant="soft" aria-label="Show" className="recipes-page__show" />
+            {/* Plain Select.Content: this page is not inside a Sheet, so
+                there is no scroll lock to portal into (see
+                components/SheetSelectContent). */}
+            <Select.Content>
+              {SHOW_OPTIONS.map(({ value, label }) => (
+                <Select.Item key={value} value={value}>
+                  {label}
+                </Select.Item>
+              ))}
+            </Select.Content>
+          </Select.Root>
+
           <div className="recipes-page__actions">
             <Button size="3" variant="soft" onClick={() => navigate('/recipes/import')}>
               <DownloadIcon /> Import
@@ -250,6 +277,24 @@ function RecipeRow({
           <Text as="span" size="3" weight="medium" className="recipes-page__row-name">
             {recipe.name}
           </Text>
+          {/* On the title line, right after the name: under it, it fought
+              "Serves" and the tags for one line. Read-only, and only once
+              someone has favourited it — favouriting is done on the recipe
+              page. Solid when you are one of them, soft when it is only
+              other people, so your own stand out down the list.
+              `role="img"` with the spelt-out label reads as "3 favourites,
+              including you" instead of a stray number, and keeps it out of
+              the tab order: a fact about the row, not a control. */}
+          {recipe.favoriteCount > 0 && (
+            <span
+              className={`recipes-page__row-favourites${recipe.favoritedByMe ? ' recipes-page__row-favourites--mine' : ''}`}
+              role="img"
+              aria-label={favouritesCountLabel(recipe.favoriteCount, recipe.favoritedByMe)}
+            >
+              <HeartGlyph size={13} />
+              {recipe.favoriteCount}
+            </span>
+          )}
           {recipe.status === 'draft' && (
             <Badge color="amber" variant="soft">
               Draft

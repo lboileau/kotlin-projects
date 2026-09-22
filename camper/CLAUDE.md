@@ -25,7 +25,7 @@ camper/
 │   ├── invitation-client/    # JDBI data access for invitations table
 │   ├── email-client/         # Email sending via Resend SDK (+ NoOp for local dev)
 │   ├── ingredient-client/    # JDBI data access for ingredients table
-│   ├── recipe-client/        # JDBI data access for recipes & recipe_ingredients tables
+│   ├── recipe-client/        # JDBI data access for recipes, recipe_ingredients & recipe_favorites tables
 │   ├── recipe-scraper-client/ # Recipe scraping via Claude API (+ NoOp stub)
 │   ├── gear-pack-client/     # JDBI data access for gear_packs & gear_pack_items tables
 │   ├── meal-plan-client/     # JDBI data access for meal_plans, meal_plan_days, meal_plan_recipes, shopping_list_purchases
@@ -33,7 +33,7 @@ camper/
 │   └── activity-ladder-client/ # JDBI data access for activity_ladders, ladder_activities, ladder_participants, ladder_votes tables
 ├── services/
 │   ├── common/               # ApiResponse shared type
-│   └── camper-service/       # Spring Boot REST API (features: user, plan, item, itinerary, assignment, mealplan, gearpack, activityladder, gearsync, webhook, logbook, profile/avatar)
+│   └── camper-service/       # Spring Boot REST API (features: user, plan, item, itinerary, assignment, recipe, mealplan, gearpack, activityladder, gearsync, webhook, logbook, profile/avatar)
 └── databases/
     └── camper-db/            # Schema, migrations, seeds, docker-compose
 ```
@@ -64,7 +64,7 @@ Rule of thumb: "Does it do I/O? → `clients/`. Pure logic/types? → `libs/`."
 - **Client pattern:** Interface + internal facade + operations + param objects. Factory reads env vars. Fake in testFixtures.
 - **Service pattern:** Actions (validate → convert → call client) composed into a Service facade. Validations are 1:1 with actions.
 - **Live updates:** STOMP-over-WebSocket. Controllers publish `{ resource, action }` messages to `/topic/plans/{planId}` (camping features) or `/topic/meal-plans/{mealPlanId}` (meal planning) after successful mutations. Frontend subscribes per-plan and refetches on notification (deferred while modals are open). See `webapp/CLAUDE.md` for frontend patterns.
-- **Computed read-time data:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles unit conversion and aggregation (pure logic, no I/O). Only purchase records are stored.
+- **Computed read-time data:** Shopping list quantities are fully computed at read time (no stored quantities). The `meal-plan-calculator` lib handles unit conversion and aggregation (pure logic, no I/O). Only purchase records are stored. Recipe favorite counts are computed at read time via a batched query per list, with zero-rows omitted and `0/false` as defaults.
 - **Computed avatars:** Avatar properties are deterministically generated at read time from a stored seed string using the `avatar-generator` lib (SHA-256 → enum indices). No avatar images are stored.
 - **Testing:** Unit tests with FakeClient, acceptance tests with Testcontainers + @SpringBootTest.
 

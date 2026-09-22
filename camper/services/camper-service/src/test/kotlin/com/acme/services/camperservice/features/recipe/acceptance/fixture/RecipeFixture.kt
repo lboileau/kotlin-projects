@@ -79,7 +79,20 @@ class RecipeFixture(private val jdbcTemplate: JdbcTemplate) {
         return id
     }
 
+    fun insertFavorite(
+        id: UUID = UUID.randomUUID(),
+        recipeId: UUID,
+        userId: UUID,
+        createdAt: Instant = Instant.now()
+    ): UUID {
+        jdbcTemplate.update(
+            "INSERT INTO recipe_favorites (id, recipe_id, user_id, created_at) VALUES (?, ?, ?, ?)",
+            id, recipeId, userId, java.sql.Timestamp.from(createdAt)
+        )
+        return id
+    }
+
     fun truncateAll() {
-        jdbcTemplate.execute("TRUNCATE TABLE recipe_ingredients, recipes, ingredients, users CASCADE")
+        jdbcTemplate.execute("TRUNCATE TABLE recipe_favorites, recipe_ingredients, recipes, ingredients, users CASCADE")
     }
 }
