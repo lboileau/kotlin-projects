@@ -268,7 +268,10 @@ export function RecipeDetailPage() {
         )}
 
         <Tabs.Root value={tab} onValueChange={(next) => setTab(parseRecipeTab(next))} className="recipe-detail-page__tabs">
-          <RecipeTabsList counts={{ instructions: recipe.steps.length, photos: recipe.photos.length }} />
+          {/* Sticks under the pinned toolbar while the panel scrolls (see the CSS). */}
+          <div className="recipe-detail-page__tabs-bar">
+            <RecipeTabsList counts={{ instructions: recipe.steps.length, photos: recipe.photos.length }} />
+          </div>
 
           <Tabs.Content value="ingredients" className="recipe-detail-page__tab">
             {isDraft && isOwner ? (
