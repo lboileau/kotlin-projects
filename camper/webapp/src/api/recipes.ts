@@ -1,5 +1,6 @@
 import { request } from './http';
 import type { IngredientResponse } from './ingredients';
+import type { ImportImage } from '../lib/importPhotos';
 
 export type RecipeStatus = 'draft' | 'published';
 
@@ -130,21 +131,37 @@ export function resolveRecipeIngredient(
 const DEV_IMPORT_MIN_MS = 5000;
 
 /**
+ * Dev server only: a real import takes up to a minute, but locally (no
+ * ANTHROPIC_API_KEY, so the backend's stub scraper) it answers at once and
+ * the waiting state — the dog — is gone before it can be seen. Hold the
+ * answer, success or failure, until it has been up for five seconds.
+ */
+function holdForTheDog<T>(sent: Promise<T>): Promise<T> {
+  if (!import.meta.env.DEV) return sent;
+  const shown = new Promise<void>((resolve) => window.setTimeout(resolve, DEV_IMPORT_MIN_MS));
+  return Promise.allSettled([sent, shown]).then(() => sent);
+}
+
+/**
  * POST /api/recipes/import — server-side scrape + LLM extraction, expect
  * 10-60s. 400 on a blank/invalid url, 409 (code CONFLICT) when a recipe
  * with that webLink already exists, 422 (code IMPORT_FAILED or
  * SCRAPE_FAILED) when the page couldn't be fetched or read.
  */
 export function importRecipe(url: string): Promise<RecipeDetailResponse> {
-  const sent = request<RecipeDetailResponse>('/api/recipes/import', { method: 'POST', body: { url } });
-  if (!import.meta.env.DEV) return sent;
+  return holdForTheDog(request<RecipeDetailResponse>('/api/recipes/import', { method: 'POST', body: { url } }));
+}
 
-  // Dev server only: a real import takes up to a minute, but locally (no
-  // ANTHROPIC_API_KEY, so the backend's stub scraper) it answers at once and
-  // the waiting state — the dog — is gone before it can be seen. Hold the
-  // answer, success or failure, until it has been up for five seconds.
-  const shown = new Promise<void>((resolve) => window.setTimeout(resolve, DEV_IMPORT_MIN_MS));
-  return Promise.allSettled([sent, shown]).then(() => sent);
+/**
+ * POST /api/recipes/import-images — the same extraction from 1–3 photos of
+ * the recipe, sent as raw base64 in the JSON body (no multipart anywhere in
+ * the app; the photos are already sized down to a few hundred KB each by
+ * `preparePhoto`). 400 on no/too many photos, a bad media type or bad
+ * base64; 422 (code SCRAPE_FAILED) when no recipe could be read from them.
+ * The draft has no webLink, so there is no 409 here.
+ */
+export function importRecipeFromImages(images: ImportImage[]): Promise<RecipeDetailResponse> {
+  return holdForTheDog(request<RecipeDetailResponse>('/api/recipes/import-images', { method: 'POST', body: { images } }));
 }
 
 export type ResolveDuplicateAction = 'NOT_DUPLICATE' | 'USE_EXISTING';

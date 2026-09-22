@@ -21,6 +21,12 @@ data class CreateRecipeIngredientRequest(
 
 data class ImportRecipeRequest(val url: String)
 
+/** Up to three photos of one recipe, in reading order. */
+data class ImportRecipeFromImagesRequest(val images: List<ImportImageRequest>)
+
+/** `mediaType` is image/jpeg, image/png, image/gif or image/webp; `data` is raw base64 (no `data:` prefix). */
+data class ImportImageRequest(val mediaType: String, val data: String)
+
 data class UpdateRecipeRequest(val name: String?, val description: String?, val baseServings: Int?, val meal: String? = null, val theme: String? = null)
 
 data class ResolveIngredientRequest(
