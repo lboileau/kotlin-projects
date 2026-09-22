@@ -6,8 +6,13 @@
 }
 
 /* Radix's ghost buttons pull themselves outward with negative margins so
-   their icon lines up with surrounding text; here the button keeps its full
-   44px box so it lines up with the soft ones in other rows. */
+   their icon lines up with surrounding text, and size themselves
+   content-box with 8px of padding — which turned the "44px" box into 60px
+   and made every row with a quiet button (the shopping list's info button)
+   taller than the rest. Here the button keeps a true 44px box so it lines
+   up with the soft ones in other rows. */
 .row-action-button--quiet {
   margin: 0;
+  box-sizing: border-box;
+  padding: 0;
 }
