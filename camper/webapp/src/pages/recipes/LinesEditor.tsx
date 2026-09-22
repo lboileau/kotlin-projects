@@ -152,6 +152,7 @@ export function LinesEditor({ lines, onChange, onPendingChange }: LinesEditorPro
           key={pickerKey}
           value={selected}
           onSelect={handleSelect}
+          onClear={() => setSelected(null)}
           placeholder="Add ingredient"
           // Focus the fresh picker after an Add (pickerKey > 0 means this is a
           // remount, not the editor's initial one) so entry continues back to
