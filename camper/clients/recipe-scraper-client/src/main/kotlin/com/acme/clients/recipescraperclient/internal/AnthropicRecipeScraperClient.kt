@@ -60,8 +60,16 @@ internal class AnthropicRecipeScraperClient(
         logger.info("Scraping recipe from {}", source)
         return guarded(source = source, sourceNoun = "photos") {
             val prompt = ScrapePromptBuilder.buildForImages(param)
-            // Images first, then the instructions: the documented placement for image prompts.
-            val userContent = param.images.map { imageBlock(it) } + textBlock(prompt.userMessage)
+            // Images first, then the instructions: the documented placement for image prompts. With
+            // several, each gets a short label before it (also per the docs) so "in reading order"
+            // has something to refer to.
+            val userContent = buildList {
+                param.images.forEachIndexed { i, image ->
+                    if (param.images.size > 1) add(textBlock("Photo ${i + 1}:"))
+                    add(imageBlock(image))
+                }
+                add(textBlock(prompt.userMessage))
+            }
             val result = complete(prompt, userContent, param.existingIngredients, source)
             // The schema has no "nothing here" shape, so the prompt asks for an empty recipe when
             // the photos can't be read; that is a failure, not a draft with nothing in it. Only the

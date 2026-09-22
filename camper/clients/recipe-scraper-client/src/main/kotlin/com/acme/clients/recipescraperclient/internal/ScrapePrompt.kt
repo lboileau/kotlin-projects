@@ -46,7 +46,7 @@ internal object ScrapePromptBuilder {
         val photos = if (param.images.size == 1) {
             "The photo above is of one recipe. Read the recipe from it. If it shows more than one recipe, extract only the first."
         } else {
-            "The ${param.images.size} photos above are of one recipe, in reading order (for example consecutive pages of a cookbook). " +
+            "The ${param.images.size} photos above (Photo 1 to Photo ${param.images.size}) are of one recipe, in reading order (for example consecutive pages of a cookbook). " +
                 "Read the recipe from them. If they show more than one recipe, extract only the first."
         }
         val userMessage = listOf(

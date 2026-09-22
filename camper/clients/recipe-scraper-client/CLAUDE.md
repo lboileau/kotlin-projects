@@ -41,10 +41,16 @@ the catalogue block, the schema and all post-processing (`AnthropicRecipeScraper
 ## Photos (`scrapeImages`)
 
 The images go first in the user turn as `ImageBlockParam` / `Base64ImageSource` content blocks (the
-SDK's documented placement), then one text block: the same catalogue lines and a short instruction
+documented placement), each preceded by a `Photo N:` text label when there are several (also per the
+docs), then one text block: the same catalogue lines and a short instruction
 (`ScrapePromptBuilder.buildForImages`) — no source URL, no content label. The caller (the service)
 has already checked count (`RecipeImage.MAX_IMAGES` = 3), media type and size; the webapp sizes photos
-down to 1568px before upload, so a page photo is ~300–500 KB of JPEG.
+down to 1568px on the long edge before upload, so a page photo is ~300–500 KB of JPEG. Images are
+billed in 28×28-px patches (`⌈w/28⌉ × ⌈h/28⌉`): a 1176×1568 photo is **~2,350 input tokens**, under
+Sonnet 5's 2576px / 4,784-token cap so nothing is resized server-side. Measured on a meal-kit card
+with a 286-item catalogue: ~4.8k in (800 system + 1.6k catalogue + 2.35k photo) / ~1.1k out for 9
+lines ≈ $0.02 on Sonnet 5; three photos ≈ 9.5k in ≈ $0.03–0.04. The catalogue, not the photo, is the
+text cost that grows.
 
 Two things the first real photo (a meal-kit card, title out of frame, "2 Person" / "4 Person" columns)
 taught the prompt and the code: the system prompt tells the model to *write a descriptive name when no

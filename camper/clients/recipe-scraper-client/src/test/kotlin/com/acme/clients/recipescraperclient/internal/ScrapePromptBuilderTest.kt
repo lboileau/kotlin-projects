@@ -50,7 +50,7 @@ class ScrapePromptBuilderTest {
     fun `image prompt words several photos as pages of the same recipe in order`() {
         val prompt = ScrapePromptBuilder.buildForImages(ScrapeRecipeImagesParam(listOf(image, image, image), catalogue))
 
-        assertTrue("The 3 photos above are of one recipe, in reading order" in prompt.userMessage, prompt.userMessage)
+        assertTrue("The 3 photos above (Photo 1 to Photo 3) are of one recipe, in reading order" in prompt.userMessage, prompt.userMessage)
         assertTrue("extract only the first" in prompt.userMessage, prompt.userMessage)
     }
 
