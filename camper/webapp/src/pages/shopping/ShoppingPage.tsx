@@ -7,6 +7,7 @@ import { PlanHeader } from '../../components/PlanHeader';
 import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { BottomBar } from '../../components/BottomBar';
+import { CategoryBand } from '../../components/CategoryBand';
 import { ApiError } from '../../api/http';
 import type { ShoppingListResponse } from '../../api/shopping';
 import { usePageTitle } from '../../lib/usePageTitle';
@@ -327,11 +328,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
           )}
           {groups.map((group) => (
             <div key={group.category}>
-              <div className="shopping-page__category-header">
-                <Text size="2" weight="medium" className="shopping-page__category-title">
-                  {categoryLabel(group.category)}
-                </Text>
-              </div>
+              <CategoryBand>{categoryLabel(group.category)}</CategoryBand>
               <div className="shopping-page__rows">
                 {group.rows.map((row) => (
                   <ShoppingRowItem

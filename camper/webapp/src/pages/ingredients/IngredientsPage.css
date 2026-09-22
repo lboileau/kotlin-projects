@@ -44,11 +44,10 @@
   flex-direction: column;
 }
 
+/* The same sticky band as the shopping list (components/CategoryBand),
+   with this list's side padding since its rows pad themselves. */
 .ingredients-page__group-header {
-  margin: 0;
-  padding: 12px 16px 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  padding: 12px 16px 6px;
 }
 
 .ingredients-page__rows {

@@ -80,40 +80,7 @@
   gap: 20px;
 }
 
-/* A category is a band, not a row: a soft accent pill with a small-caps
-   label, so the eye finds "Produce" / "Dairy" while scanning down the list.
-   Plain medium-weight text was tried first and vanished among the rows.
-   The band sticks just under the plan header (which publishes its height)
-   until the next category pushes it away. The sticky element is a strip in
-   the page colour with the pill inside it, so rows sliding underneath don't
-   show through the pill's rounded corners or the gap below it. */
-.shopping-page__category-header {
-  position: sticky;
-  top: var(--page-top-height, 0px);
-  z-index: 5;
-  padding: 2px 0 6px;
-  background: var(--color-background);
-  /* Follows the plan header's tuck-away with its easing (PlanHeader.css). */
-  transition: top 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .shopping-page__category-header {
-    transition: none;
-  }
-}
-
-.shopping-page__category-title {
-  display: block;
-  padding: 6px 12px;
-  border-radius: var(--radius-4);
-  background: var(--accent-3);
-  color: var(--accent-11);
-  font-weight: 700;
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
+/* Category headings are `components/CategoryBand` (shared with the Ingredients list). */
 
 .shopping-page__rows {
   display: flex;
