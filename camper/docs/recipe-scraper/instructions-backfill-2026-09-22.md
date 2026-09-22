@@ -31,3 +31,19 @@ tokens per URL import (~4 chars/token; output because steps are echoed back), �
 
 The six unfilled recipes can be given steps by hand on the edit page, or by the photo import if a printed
 copy is to hand.
+
+## Prod run (same day, after deploying PR #324 + #325)
+
+75 prod recipes had a source URL. 66 answers were reused from the local run above (same URLs); the
+harness ran on the 9 others — 4 usable (marionskitchen let us in this time), 5 the same blocked/dead
+pages. `run-2026-09-22-steps/apply-steps.py` then applied `steps-plan.json` to prod (owner-run):
+**69 applied, 1 skipped** (the tandoori chicken had just been imported live, steps included),
+**0 failed**. The script GETs each recipe first and only writes steps to one that has none, so it is
+safe to re-run; `--clear` is the rollback, `--dry-run` shows the plan.
+
+Still without steps on prod: Chewy No Sugar Greek Yogurt Brownies (dead page), Fish Stew with Ginger
+and Tomatoes, Shrimp Cakes (simplyrecipes 403), Japchae (maangchi 403), Korean Beef Bowl
+(damndelicious 403).
+
+Real-key cost seen in the same session: a URL import with steps was 6,820 in / 3,028 out tokens
+(≈ $0.044 on Sonnet 5); a two-photo import 10,275 in / 3,092 out (≈ $0.052).
