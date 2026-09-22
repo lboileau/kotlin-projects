@@ -3,7 +3,8 @@
   flex-direction: column;
   gap: 2px;
   padding: 6px 4px;
-  border-radius: var(--radius-3);
+  /* The same corner as the plan and recipe rows. */
+  border-radius: var(--radius-4);
 }
 
 .shopping-row--checked .shopping-row__name,
@@ -86,9 +87,12 @@
   outline-offset: -2px;
 }
 
-.shopping-row__hit-area:focus-within {
+/* The focus ring goes around the whole row, not just the check-off label
+   (which stops before the quantity and the info button) — the owner found
+   the half-width ring odd. `:has()` reads the checkbox's focus from the row. */
+.shopping-row:has(.shopping-row__hit-area:focus-within) {
   outline: 2px solid var(--accent-9);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .shopping-row__recipes {
