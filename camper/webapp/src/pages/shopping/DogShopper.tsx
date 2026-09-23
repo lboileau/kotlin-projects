@@ -23,7 +23,7 @@ export function DogShopper() {
         <g className="dog-shopper__tail">
           <path
             className="dog-shopper__tail-fur"
-            d="M138 162 q24 -12 20 -34 q8 24 -8 44 z"
+            d="M126 160 q34 -8 36 -40 q8 32 -22 54 z"
           />
         </g>
 
@@ -33,32 +33,32 @@ export function DogShopper() {
         <ellipse
           className="dog-shopper__fur"
           cx="100"
-          cy="150"
-          rx="48"
+          cy="152"
+          rx="38"
           ry="44"
         />
         <ellipse
           className="dog-shopper__belly"
           cx="100"
-          cy="150"
-          rx="30"
-          ry="30"
+          cy="154"
+          rx="24"
+          ry="28"
         />
         <ellipse
           className="dog-shopper__arm"
-          cx="60"
+          cx="66"
           cy="150"
-          rx="10"
+          rx="7"
           ry="20"
-          transform="rotate(-14 60 150)"
+          transform="rotate(-12 66 150)"
         />
         <ellipse
           className="dog-shopper__arm"
-          cx="140"
+          cx="134"
           cy="150"
-          rx="10"
+          rx="7"
           ry="20"
-          transform="rotate(14 140 150)"
+          transform="rotate(12 134 150)"
         />
 
         {/* Head. */}

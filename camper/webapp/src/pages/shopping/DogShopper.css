@@ -173,7 +173,7 @@
 }
 
 .dog-shopper__tail {
-  transform-origin: 10% 90%;
+  transform-origin: 5% 95%;
   animation: dog-shopper-tail 0.45s ease-in-out infinite alternate;
 }
 @keyframes dog-shopper-tail {
