@@ -204,4 +204,15 @@ describe('onlyStillToBuy', () => {
     ]);
     expect(names).toEqual([['produce', ['Garlic', 'Onion']]]);
   });
+
+  it('keeps a bought row that is lingering (just ticked off, still pulsing), and its category with it', () => {
+    const names = onlyStillToBuy(buildShoppingRows(list), new Set(['ingredient-milk'])).map((group) => [
+      group.category,
+      group.rows.map((row) => row.ingredientName),
+    ]);
+    expect(names).toEqual([
+      ['produce', ['Garlic', 'Onion']],
+      ['dairy', ['Milk']],
+    ]);
+  });
 });
