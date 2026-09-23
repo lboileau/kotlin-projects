@@ -23,7 +23,7 @@ export function DogShopper() {
         <g className="dog-shopper__tail">
           <path
             className="dog-shopper__tail-fur"
-            d="M122 156 q22 -6 22 -30 q8 24 -10 40 z"
+            d="M122 156 q26 -8 26 -35 q10 28 -12 46 z"
           />
         </g>
 
