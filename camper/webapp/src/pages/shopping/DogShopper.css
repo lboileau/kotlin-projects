@@ -173,12 +173,13 @@
   transform-origin: 5% 95%;
   animation: dog-shopper-tail 0.45s ease-in-out infinite alternate;
 }
+/* Wags down and out, never up past where it rests. */
 @keyframes dog-shopper-tail {
   from {
-    transform: rotate(-16deg);
+    transform: rotate(0deg);
   }
   to {
-    transform: rotate(18deg);
+    transform: rotate(26deg);
   }
 }
 
