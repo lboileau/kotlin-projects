@@ -32,6 +32,12 @@
 .dog-shopper__patch {
   fill: var(--amber-10);
 }
+.dog-shopper__belly {
+  fill: var(--amber-6);
+}
+.dog-shopper__arm {
+  fill: var(--amber-8);
+}
 .dog-shopper__muzzle {
   fill: var(--amber-3);
 }

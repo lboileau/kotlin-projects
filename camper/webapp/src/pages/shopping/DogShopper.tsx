@@ -23,17 +23,42 @@ export function DogShopper() {
         <g className="dog-shopper__tail">
           <path
             className="dog-shopper__tail-fur"
-            d="M150 164 q22 -14 16 -34 q6 22 -10 40 z"
+            d="M138 162 q24 -12 20 -34 q8 24 -8 44 z"
           />
         </g>
 
-        {/* Body: a round tummy the bag sits in front of. */}
+        {/* Body: a plump tummy reaching up under the chin and out past the
+            bag, with the arms coming down its sides to the paws on the bag —
+            so head, body, bag and tail read as one dog. */}
         <ellipse
           className="dog-shopper__fur"
           cx="100"
-          cy="162"
-          rx="40"
-          ry="32"
+          cy="150"
+          rx="48"
+          ry="44"
+        />
+        <ellipse
+          className="dog-shopper__belly"
+          cx="100"
+          cy="150"
+          rx="30"
+          ry="30"
+        />
+        <ellipse
+          className="dog-shopper__arm"
+          cx="60"
+          cy="150"
+          rx="10"
+          ry="20"
+          transform="rotate(-14 60 150)"
+        />
+        <ellipse
+          className="dog-shopper__arm"
+          cx="140"
+          cy="150"
+          rx="10"
+          ry="20"
+          transform="rotate(14 140 150)"
         />
 
         {/* Head. */}
