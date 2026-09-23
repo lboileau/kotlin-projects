@@ -137,18 +137,30 @@
 
 .recipes-page__row-main {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
 }
 
+/* Up to two lines before it's cut — a one-line ellipsis lost the end of
+   most titles ("Baked Chicken & Veggie Meatballs for Baby (and…"). The
+   badges beside it sit on the first line. */
 .recipes-page__row-name {
   font-size: 17px;
   font-weight: 600;
+  line-height: 1.25;
   color: var(--gray-12);
   min-width: 0;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow-wrap: anywhere;
+}
+
+.recipes-page__row-main > :not(.recipes-page__row-name) {
+  /* Keep the first-line height of the title so badges align with its first line. */
+  margin-top: 1px;
 }
 
 .recipes-page__row-imported {

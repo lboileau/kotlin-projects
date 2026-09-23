@@ -34,6 +34,8 @@ interface ShoppingRowItemProps {
   disabled?: boolean;
   /** Just quick-added: scroll it into view and flash it, so it is clear where the item went. */
   highlight?: boolean;
+  /** Ticked off with "hide bought" on: pulses for a moment, then the list drops it. */
+  leaving?: boolean;
 }
 
 /**
@@ -55,6 +57,7 @@ export function ShoppingRowItem({
   onClearNoLongerNeeded,
   disabled,
   highlight,
+  leaving = false,
 }: ShoppingRowItemProps) {
   const name = row.ingredientName ?? row.description ?? 'Item';
   const quantityText = formatQuantityText(row);
@@ -116,7 +119,7 @@ export function ShoppingRowItem({
   return (
     <div
       ref={rowRef}
-      className={`shopping-row${checked ? ' shopping-row--checked' : ''}${highlight ? ' shopping-row--highlight' : ''}`}
+      className={`shopping-row${checked ? ' shopping-row--checked' : ''}${highlight ? ' shopping-row--highlight' : ''}${leaving ? ' shopping-row--leaving' : ''}`}
     >
       <div className="shopping-row__main">
         <label className="shopping-row__hit-area">

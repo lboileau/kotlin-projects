@@ -8,6 +8,7 @@ import { SheetLink } from '../../components/SheetLink';
 import { QueryErrorState } from '../../components/QueryErrorState';
 import { BottomBar } from '../../components/BottomBar';
 import { CategoryBand } from '../../components/CategoryBand';
+import { DogShopper } from './DogShopper';
 import { ApiError } from '../../api/http';
 import type { ShoppingListResponse } from '../../api/shopping';
 import { usePageTitle } from '../../lib/usePageTitle';
@@ -44,6 +45,9 @@ function categoryLabel(category: string): string {
 function isTempRow(row: ShoppingRow): boolean {
   return row.manualItemId?.startsWith('temp-') ?? false;
 }
+
+/** How long a ticked-off row stays (pulsing) before "hide bought" takes it. */
+const LINGER_MS = 700;
 
 export function ShoppingPage() {
   const { planId } = useParams<{ planId: string }>();
@@ -179,8 +183,40 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
     setHideBought(hide);
   }
 
+  // With "hide bought" on, a row ticked off pulses for a moment before it
+  // goes, so the tap is seen to land (it vanished at once before, which the
+  // owner found abrupt). The tick itself is immediate; only the row's exit
+  // waits. Un-ticking within the moment keeps it.
+  const [lingering, setLingering] = useState<ReadonlySet<string>>(() => new Set());
+  const lingerTimersRef = useRef(new Map<string, number>());
+  useEffect(() => {
+    const timers = lingerTimersRef.current;
+    return () => timers.forEach((timer) => window.clearTimeout(timer));
+  }, []);
+
+  function stopLingering(key: string) {
+    window.clearTimeout(lingerTimersRef.current.get(key));
+    lingerTimersRef.current.delete(key);
+    setLingering((current) => {
+      if (!current.has(key)) return current;
+      const next = new Set(current);
+      next.delete(key);
+      return next;
+    });
+  }
+
   function handleToggle(row: ShoppingRow, checked: boolean) {
     setRowPurchases.mutate({ row, purchases: rowPurchasesForToggle(row, checked) });
+    if (checked && hideBought) {
+      window.clearTimeout(lingerTimersRef.current.get(row.key));
+      lingerTimersRef.current.set(
+        row.key,
+        window.setTimeout(() => stopLingering(row.key), LINGER_MS),
+      );
+      setLingering((current) => new Set(current).add(row.key));
+    } else {
+      stopLingering(row.key);
+    }
   }
 
   function handleClearNoLongerNeeded(row: ShoppingRow) {
@@ -262,7 +298,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
 
   const allGroups = buildShoppingRows(list);
   const isEmpty = allGroups.length === 0;
-  const groups = hideBought ? onlyStillToBuy(allGroups) : allGroups;
+  const groups = hideBought ? onlyStillToBuy(allGroups, lingering) : allGroups;
   const progress = list.totalItems > 0 ? (list.fullyPurchasedCount / list.totalItems) * 100 : 0;
 
   return (
@@ -318,8 +354,9 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
         <div className="shopping-page__body">
           {groups.length === 0 && (
             <div className="shopping-page__all-bought">
+              <DogShopper />
               <Text size="4" weight="medium">
-                Everything is bought
+                Everything is bought!
               </Text>
               <Button size="3" variant="soft" onClick={() => handleHideBoughtChange(false)}>
                 Show bought items
@@ -336,6 +373,7 @@ function ShoppingListBody({ planId, list }: ShoppingListBodyProps) {
                     row={row}
                     disabled={isTempRow(row)}
                     highlight={row.source === 'manual' && row.description !== null && justAdded.includes(row.description)}
+                    leaving={lingering.has(row.key)}
                     onToggle={(checked) => handleToggle(row, checked)}
                     onRemoveManual={row.source === 'manual' ? () => handleRemoveManual(row.manualItemId!) : undefined}
                     onClearNoLongerNeeded={() => handleClearNoLongerNeeded(row)}

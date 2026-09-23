@@ -93,7 +93,7 @@ export function EditPlanSheet() {
 
   async function handleCopySummary() {
     if (!plan) return;
-    const summary = buildMealPlanSummary(plan);
+    const summary = buildMealPlanSummary(plan, window.location.origin);
     try {
       await navigator.clipboard.writeText(summary);
       toast.info('Copied');

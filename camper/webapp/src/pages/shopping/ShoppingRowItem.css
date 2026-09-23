@@ -205,6 +205,29 @@
   animation: shopping-row-highlight 1400ms ease-out;
 }
 
+/* Ticked off with "hide bought" on: one pulse (a soft accent wash swelling
+   in and fading, the row lifting a touch) over the moment before the list
+   drops the row — the tap is seen to land before the row goes. */
+.shopping-row--leaving {
+  animation: shopping-row-leaving 700ms ease-in-out forwards;
+}
+
+@keyframes shopping-row-leaving {
+  0% {
+    background: transparent;
+    transform: scale(1);
+  }
+  35% {
+    background: var(--accent-4);
+    transform: scale(1.015);
+  }
+  100% {
+    background: transparent;
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
 @keyframes shopping-row-highlight {
   from {
     background: var(--accent-5);
@@ -216,6 +239,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .shopping-row--highlight {
+    animation: none;
+    background: var(--accent-3);
+  }
+
+  .shopping-row--leaving {
     animation: none;
     background: var(--accent-3);
   }

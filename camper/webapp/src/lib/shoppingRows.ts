@@ -192,10 +192,14 @@ export function isStillToBuy(row: ShoppingRow): boolean {
   return row.overallStatus === 'not_purchased' || row.overallStatus === 'more_needed';
 }
 
-/** The "hide bought" view: only rows with something left to buy, and only the categories that still have any. */
-export function onlyStillToBuy(groups: ShoppingCategoryGroup[]): ShoppingCategoryGroup[] {
+/**
+ * The "hide bought" view: only rows with something left to buy, and only the
+ * categories that still have any. `linger` keeps named rows (by key) a
+ * moment longer — a row just ticked off pulses before it goes.
+ */
+export function onlyStillToBuy(groups: ShoppingCategoryGroup[], linger: ReadonlySet<string> = new Set()): ShoppingCategoryGroup[] {
   return groups
-    .map((group) => ({ ...group, rows: group.rows.filter(isStillToBuy) }))
+    .map((group) => ({ ...group, rows: group.rows.filter((row) => isStillToBuy(row) || linger.has(row.key)) }))
     .filter((group) => group.rows.length > 0);
 }
 
