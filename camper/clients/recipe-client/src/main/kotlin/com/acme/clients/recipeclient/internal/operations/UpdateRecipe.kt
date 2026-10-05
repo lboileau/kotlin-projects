@@ -35,6 +35,10 @@ internal class UpdateRecipe(
                 param.clearDescription -> sets.add("description = NULL")
                 param.description != null -> sets.add("description = :description")
             }
+            when {
+                param.clearWebLink -> sets.add("web_link = NULL")
+                param.webLink != null -> sets.add("web_link = :webLink")
+            }
             if (param.baseServings != null) sets.add("base_servings = :baseServings")
             if (param.status != null) sets.add("status = :status")
             when {
@@ -57,6 +61,7 @@ internal class UpdateRecipe(
                     .bind("id", param.id)
                     .also { q -> if (param.name != null) q.bind("name", param.name) }
                     .also { q -> if (param.description != null && !param.clearDescription) q.bind("description", param.description) }
+                    .also { q -> if (param.webLink != null && !param.clearWebLink) q.bind("webLink", param.webLink) }
                     .also { q -> if (param.baseServings != null) q.bind("baseServings", param.baseServings) }
                     .also { q -> if (param.status != null) q.bind("status", param.status) }
                     .also { q -> if (param.duplicateOfId != null && !param.clearDuplicateOf) q.bind("duplicateOfId", param.duplicateOfId) }
@@ -74,7 +79,9 @@ internal class UpdateRecipe(
             }
             Result.Success(entity)
         } catch (e: Exception) {
-            if (e.message?.contains("duplicate key") == true) {
+            if (e.message?.contains("uq_recipes_web_link") == true) {
+                failure(ConflictError("Recipe", "web_link '${param.webLink}' already exists"))
+            } else if (e.message?.contains("duplicate key") == true) {
                 failure(ConflictError("Recipe", "update conflict"))
             } else {
                 throw e

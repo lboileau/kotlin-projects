@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Callout, IconButton, Select, Tabs, Text, TextArea, TextField } from '@radix-ui/themes';
 import { RecipeTabsList } from '../../components/RecipeTabs';
 import type { RecipeTab } from '../../lib/recipeSteps';
-import { ExclamationTriangleIcon, ExternalLinkIcon, MinusIcon, PlusIcon } from '@radix-ui/react-icons';
+import { ExclamationTriangleIcon, MinusIcon, PlusIcon } from '@radix-ui/react-icons';
 import { MEALS, THEMES, capitalize } from '../../lib/ingredientConstants';
 import { StepsEditor } from './StepsEditor';
 import { LinesEditor, type PendingLine } from './LinesEditor';
@@ -14,8 +14,6 @@ interface RecipeFormFieldsProps {
   onPendingLineChange: (pending: PendingLine | null) => void;
   /** Bump to empty the ingredient add row (the New form's Discard). */
   linesEditorKey?: number;
-  /** The source link can only be set when the recipe is created; afterwards it is shown, not edited. */
-  sourceEditable: boolean;
   autoFocusName?: boolean;
   error: string | null;
   /** Which of the three tabs is showing; the page keeps it in the URL. */
@@ -39,7 +37,6 @@ export function RecipeFormFields({
   onChange,
   onPendingLineChange,
   linesEditorKey,
-  sourceEditable,
   autoFocusName = false,
   error,
   tab,
@@ -105,33 +102,20 @@ export function RecipeFormFields({
         </div>
       </div>
 
-      {sourceEditable ? (
-        <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
-          Source URL
-          <TextField.Root
-            type="url"
-            inputMode="url"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck={false}
-            size="3"
-            placeholder="https://…"
-            value={webLink}
-            onChange={(event) => onChange({ webLink: event.target.value })}
-          />
-        </Text>
-      ) : (
-        webLink && (
-          <div className="recipe-form-page__field">
-            <Text as="span" size="2" weight="medium">
-              Source
-            </Text>
-            <a href={webLink} target="_blank" rel="noopener noreferrer" className="recipe-form-page__readonly-link">
-              {webLink} <ExternalLinkIcon />
-            </a>
-          </div>
-        )
-      )}
+      <Text as="label" size="2" weight="medium" className="recipe-form-page__field">
+        Source URL
+        <TextField.Root
+          type="url"
+          inputMode="url"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+          size="3"
+          placeholder="https://…"
+          value={webLink}
+          onChange={(event) => onChange({ webLink: event.target.value })}
+        />
+      </Text>
 
       <div className="recipe-form-page__row">
         <Text as="label" size="2" weight="medium" className="recipe-form-page__field">

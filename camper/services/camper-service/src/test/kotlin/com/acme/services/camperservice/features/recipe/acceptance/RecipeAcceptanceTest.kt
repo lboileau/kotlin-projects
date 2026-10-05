@@ -277,6 +277,50 @@ class RecipeAcceptanceTest {
 
             assertThat(response.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
         }
+
+        private fun putWebLink(recipeId: UUID, webLink: String?) = restTemplate.exchange(
+            "/api/recipes/$recipeId",
+            HttpMethod.PUT,
+            entityWithUser(UpdateRecipeRequest(name = null, description = null, baseServings = null, webLink = webLink), userId),
+            RecipeResponse::class.java
+        )
+
+        @Test
+        fun `PUT sets the web link, leaves it when absent and clears it when blank`() {
+            val recipeId = fixture.insertRecipe(name = "Linked", createdBy = userId)
+
+            val set = putWebLink(recipeId, "https://example.com/recipe/linked")
+            assertThat(set.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(set.body!!.webLink).isEqualTo("https://example.com/recipe/linked")
+
+            val untouched = putWebLink(recipeId, null)
+            assertThat(untouched.body!!.webLink).isEqualTo("https://example.com/recipe/linked")
+
+            val cleared = putWebLink(recipeId, "")
+            assertThat(cleared.statusCode).isEqualTo(HttpStatus.OK)
+            assertThat(cleared.body!!.webLink).isNull()
+        }
+
+        @Test
+        fun `PUT returns 409 when another recipe already has the web link, and changes nothing`() {
+            val webLink = "https://example.com/recipe/taken"
+            fixture.insertRecipe(name = "Original", webLink = webLink, createdBy = userId)
+            val recipeId = fixture.insertRecipe(name = "Other", webLink = "https://example.com/recipe/other", createdBy = userId)
+
+            val response = restTemplate.exchange(
+                "/api/recipes/$recipeId",
+                HttpMethod.PUT,
+                entityWithUser(UpdateRecipeRequest(name = "Renamed", description = null, baseServings = null, webLink = webLink), userId),
+                Map::class.java
+            )
+
+            assertThat(response.statusCode).isEqualTo(HttpStatus.CONFLICT)
+            val after = restTemplate.exchange(
+                "/api/recipes/$recipeId", HttpMethod.GET, entityWithUser(null, userId), RecipeDetailResponse::class.java
+            ).body!!
+            assertThat(after.name).isEqualTo("Other")
+            assertThat(after.webLink).isEqualTo("https://example.com/recipe/other")
+        }
     }
 
     @Nested

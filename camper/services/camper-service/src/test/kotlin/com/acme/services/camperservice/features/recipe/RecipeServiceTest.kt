@@ -475,6 +475,39 @@ class RecipeServiceTest {
             assertThat(result.isFailure).isTrue()
             assertThat((result as Result.Failure).error).isInstanceOf(RecipeError.NotFound::class.java)
         }
+
+        @Test
+        fun `update sets, leaves and clears the web link`() {
+            val recipe = createRecipe("Linked")
+            fun update(webLink: String?) = recipeService.update(UpdateRecipeParam(
+                recipeId = recipe.id, userId = userId, name = null, description = null, baseServings = null, webLink = webLink
+            ))
+
+            val set = update("  https://example.com/linked  ")
+            assertThat((set as Result.Success).value.webLink).isEqualTo("https://example.com/linked")
+
+            val untouched = update(null)
+            assertThat((untouched as Result.Success).value.webLink).isEqualTo("https://example.com/linked")
+
+            val cleared = update("")
+            assertThat((cleared as Result.Success).value.webLink).isNull()
+        }
+
+        @Test
+        fun `update returns DuplicateWebLink when another recipe has the link`() {
+            val first = createRecipe("First")
+            val second = createRecipe("Second")
+            val link = "https://example.com/shared"
+            recipeService.update(UpdateRecipeParam(
+                recipeId = first.id, userId = userId, name = null, description = null, baseServings = null, webLink = link
+            ))
+
+            val result = recipeService.update(UpdateRecipeParam(
+                recipeId = second.id, userId = userId, name = null, description = null, baseServings = null, webLink = link
+            ))
+
+            assertThat((result as Result.Failure).error).isEqualTo(RecipeError.DuplicateWebLink(link))
+        }
     }
 
     @Nested

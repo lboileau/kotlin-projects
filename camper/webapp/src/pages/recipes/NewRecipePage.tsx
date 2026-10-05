@@ -60,22 +60,11 @@ export function NewRecipePage() {
     writeNewRecipeDraft({ ...values, lines });
   }, [values, completePendingLine]);
 
-  function validateSource(): string | null {
-    const webLink = values.webLink.trim();
-    if (!webLink) return null;
-    try {
-      return new URL(webLink).protocol.startsWith('http') ? null : 'Enter a valid source URL.';
-    } catch {
-      return 'Enter a valid source URL.';
-    }
-  }
-
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     const result = validateRecipeForm(values, pendingLine);
-    const validationError = 'error' in result ? result.error : validateSource();
-    if (validationError || 'error' in result) {
-      setError(validationError);
+    if ('error' in result) {
+      setError(result.error);
       return;
     }
     setError(null);
@@ -118,7 +107,6 @@ export function NewRecipePage() {
           onChange={(patch) => setValues((current) => ({ ...current, ...patch }))}
           onPendingLineChange={setPendingLine}
           linesEditorKey={linesEditorKey}
-          sourceEditable
           autoFocusName
           error={error}
           tab={tab}

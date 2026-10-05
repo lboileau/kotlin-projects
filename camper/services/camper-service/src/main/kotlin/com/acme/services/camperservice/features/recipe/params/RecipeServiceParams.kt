@@ -97,7 +97,8 @@ data class UpdateRecipeParam(
     val description: String?,
     val baseServings: Int?,
     val meal: String? = null,
-    val theme: String? = null
+    val theme: String? = null,
+    val webLink: String? = null
 )
 
 data class DeleteRecipeParam(

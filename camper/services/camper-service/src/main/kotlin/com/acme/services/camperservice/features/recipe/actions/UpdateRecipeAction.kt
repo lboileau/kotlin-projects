@@ -1,6 +1,7 @@
 package com.acme.services.camperservice.features.recipe.actions
 
 import com.acme.clients.common.Result
+import com.acme.clients.common.error.ConflictError
 import com.acme.clients.common.error.NotFoundError
 import com.acme.clients.recipeclient.api.GetByIdParam
 import com.acme.clients.recipeclient.api.GetRecipeFavoriteSummariesParam
@@ -23,13 +24,17 @@ internal class UpdateRecipeAction(
             }
         }
 
-        // For description, meal, and theme: null/absent means "unchanged", a present-but-blank
-        // string means "clear this field" (NULL it out), and a non-blank string updates it.
+        // For description, webLink, meal, and theme: null/absent means "unchanged", a
+        // present-but-blank string means "clear this field" (NULL it out), and a non-blank
+        // string updates it.
+        val webLink = param.webLink?.trim()?.takeIf { it.isNotEmpty() }
         val updated = when (val result = recipeClient.update(ClientUpdateRecipeParam(
             id = param.recipeId,
             name = param.name,
             description = param.description?.takeIf { it.isNotBlank() },
             clearDescription = param.description != null && param.description.isBlank(),
+            webLink = webLink,
+            clearWebLink = param.webLink != null && webLink == null,
             baseServings = param.baseServings,
             meal = param.meal?.takeIf { it.isNotBlank() },
             clearMeal = param.meal != null && param.meal.isBlank(),
@@ -37,7 +42,11 @@ internal class UpdateRecipeAction(
             clearTheme = param.theme != null && param.theme.isBlank(),
         ))) {
             is Result.Success -> result.value
-            is Result.Failure -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))
+            is Result.Failure -> when {
+                // The only unique thing an edit can collide on is another recipe's link.
+                result.error is ConflictError && webLink != null -> return Result.Failure(RecipeError.DuplicateWebLink(webLink))
+                else -> return Result.Failure(RecipeError.Invalid("recipe", result.error.message))
+            }
         }
 
         // An edit never changes who favourited the recipe, but the response must still carry the

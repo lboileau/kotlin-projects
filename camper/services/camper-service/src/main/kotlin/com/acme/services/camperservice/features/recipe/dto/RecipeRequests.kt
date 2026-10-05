@@ -42,7 +42,15 @@ data class ReplaceRecipeStepsRequest(val steps: List<String>)
 /** Body of POST /api/recipes/{id}/photos: same shape as an import image, no role. */
 data class AddRecipePhotoRequest(val mediaType: String, val data: String)
 
-data class UpdateRecipeRequest(val name: String?, val description: String?, val baseServings: Int?, val meal: String? = null, val theme: String? = null)
+/** `description`, `webLink`, `meal` and `theme`: absent means unchanged, blank clears it. */
+data class UpdateRecipeRequest(
+    val name: String?,
+    val description: String?,
+    val baseServings: Int?,
+    val meal: String? = null,
+    val theme: String? = null,
+    val webLink: String? = null
+)
 
 data class ResolveIngredientRequest(
     val action: String,

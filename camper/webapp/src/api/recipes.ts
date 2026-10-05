@@ -88,6 +88,8 @@ export interface CreateRecipeRequest {
 export interface UpdateRecipeRequest {
   name?: string;
   description?: string;
+  /** Omitted means unchanged, `""` clears it; 409 (code CONFLICT) when another recipe already has it. */
+  webLink?: string;
   baseServings?: number;
   meal?: string;
   theme?: string;
