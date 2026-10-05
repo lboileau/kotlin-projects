@@ -14,6 +14,17 @@ export interface RecipeFormValues {
   steps: string[];
 }
 
+/** The source link is optional; when given it must be an http(s) URL. */
+function isValidSource(webLink: string): boolean {
+  const trimmed = webLink.trim();
+  if (!trimmed) return true;
+  try {
+    return new URL(trimmed).protocol.startsWith('http');
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Shared validation. Returns the error, or the lines to save — which include
  * a complete line still sitting in the add row (typed but never added with
@@ -26,6 +37,7 @@ export function validateRecipeForm(
 ): { error: string } | { lines: DraftLine[] } {
   if (!values.name.trim()) return { error: 'Name is required.' };
   if (!Number.isFinite(values.servings) || values.servings < 1) return { error: 'Servings must be at least 1.' };
+  if (!isValidSource(values.webLink)) return { error: 'Enter a valid source URL.' };
   if (values.lines.some((line) => parseQuantity(line.quantity) === null)) {
     return { error: 'Every ingredient needs a valid quantity (e.g. "2" or "1.5").' };
   }

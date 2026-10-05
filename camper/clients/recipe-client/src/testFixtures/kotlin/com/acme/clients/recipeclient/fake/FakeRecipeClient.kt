@@ -96,12 +96,20 @@ class FakeRecipeClient : RecipeClient {
         if (validation is Result.Failure) return validation
 
         val existing = recipes[param.id] ?: return failure(NotFoundError("Recipe", param.id.toString()))
+        if (param.webLink != null && !param.clearWebLink && recipes.values.any { it.id != param.id && it.webLink == param.webLink }) {
+            return failure(ConflictError("Recipe", "web_link '${param.webLink}' already exists"))
+        }
         val updated = existing.copy(
             name = param.name ?: existing.name,
             description = when {
                 param.clearDescription -> null
                 param.description != null -> param.description
                 else -> existing.description
+            },
+            webLink = when {
+                param.clearWebLink -> null
+                param.webLink != null -> param.webLink
+                else -> existing.webLink
             },
             baseServings = param.baseServings ?: existing.baseServings,
             status = param.status ?: existing.status,

@@ -106,7 +106,8 @@ class RecipeController(
             description = request.description,
             baseServings = request.baseServings,
             meal = request.meal,
-            theme = request.theme
+            theme = request.theme,
+            webLink = request.webLink
         )
         return recipeService.update(param).toResponseEntity { it }
     }

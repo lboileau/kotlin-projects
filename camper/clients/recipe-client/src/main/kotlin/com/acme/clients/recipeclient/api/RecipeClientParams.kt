@@ -27,16 +27,20 @@ data class GetAllParam(
 /**
  * Parameter for updating an existing recipe. Null fields are left unchanged.
  *
- * [description], [meal], and [theme] can be explicitly cleared to NULL via their
+ * [description], [webLink], [meal], and [theme] can be explicitly cleared to NULL via their
  * respective `clear*` flags (mirroring [clearDuplicateOf]) — the field itself should
  * stay null when clearing; callers should not set both a non-null value and its
  * clear flag at once.
+ *
+ * A [webLink] another recipe already has is a `ConflictError` (`uq_recipes_web_link`).
  */
 data class UpdateRecipeParam(
     val id: UUID,
     val name: String? = null,
     val description: String? = null,
     val clearDescription: Boolean = false,
+    val webLink: String? = null,
+    val clearWebLink: Boolean = false,
     val baseServings: Int? = null,
     val status: String? = null,
     val duplicateOfId: UUID? = null,

@@ -20,7 +20,7 @@ import { validateRecipeForm, type RecipeFormValues } from './recipeForm';
 import './RecipeForm.css';
 
 /**
- * description/meal/theme: `undefined` means "omit — unchanged", a string
+ * description/webLink/meal/theme: `undefined` means "omit — unchanged", a string
  * (including `""`) means "send this — the user changed it". Comparing
  * against the ORIGINAL server value (not e.g. re-trimming an already-empty
  * string) is what lets clearing a previously-set value send `""` rather
@@ -133,7 +133,7 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
     }
     setError(null);
 
-    // description/meal/theme are omitted when unchanged, but sent as "" (not
+    // description/webLink/meal/theme are omitted when unchanged, but sent as "" (not
     // omitted) when the user cleared a previously non-empty value — the
     // backend only clears a field it's explicitly given "" for, so omitting
     // it there would silently leave the old value in place.
@@ -142,6 +142,8 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
     if (values.servings !== recipe.baseServings) fields.baseServings = values.servings;
     const descriptionPatch = fieldPatch(recipe.description, values.description);
     if (descriptionPatch !== undefined) fields.description = descriptionPatch;
+    const webLinkPatch = fieldPatch(recipe.webLink, values.webLink);
+    if (webLinkPatch !== undefined) fields.webLink = webLinkPatch;
     const mealPatch = fieldPatch(recipe.meal, values.meal);
     if (mealPatch !== undefined) fields.meal = mealPatch;
     const themePatch = fieldPatch(recipe.theme, values.theme);
@@ -169,7 +171,13 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
 
     try {
       await saveEdits.mutateAsync(edits);
-    } catch {
+    } catch (saveError) {
+      // A link another recipe already has is refused by the fields request,
+      // the first of the save: nothing was written, so stay and let it be fixed.
+      if (fields.webLink && saveError instanceof ApiError && saveError.status === 409) {
+        setError('Another recipe already uses that source URL.');
+        return;
+      }
       // The global mutation error toast said what failed. Some of the changes
       // may have been saved before it; the recipe is being refetched, so
       // leave the form rather than show it a state that may no longer be true.
@@ -198,7 +206,6 @@ function EditRecipeForm({ recipe, backTo }: { recipe: RecipeDetailResponse; back
           values={values}
           onChange={(patch) => setValues((current) => ({ ...current, ...patch }))}
           onPendingLineChange={setPendingLine}
-          sourceEditable={false}
           error={error}
           tab={tab}
           onTabChange={setTab}
