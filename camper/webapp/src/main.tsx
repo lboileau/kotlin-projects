@@ -20,6 +20,8 @@ import '@radix-ui/themes/tokens/colors/mauve.css';
 import '@radix-ui/themes/tokens/colors/red.css';
 import '@radix-ui/themes/tokens/colors/green.css';
 import '@radix-ui/themes/tokens/colors/amber.css';
+// The workout page's own nested dark theme (pages/workout): cool slate greys; its green accent is above.
+import '@radix-ui/themes/tokens/colors/slate.css';
 import '@radix-ui/themes/components.css';
 import '@radix-ui/themes/layout.css';
 import '@radix-ui/themes/utilities.css';

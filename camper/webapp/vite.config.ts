@@ -7,7 +7,7 @@ import react from '@vitejs/plugin-react'
 // every barrel is literally named "index.ts", they'd otherwise all come
 // out as indistinguishable "index-<hash>.js" — naming them explicitly
 // here keeps production chunk names readable for debugging.
-const ROUTE_AREAS = ['plans', 'shopping', 'recipes', 'ingredients', 'sign-in', 'account']
+const ROUTE_AREAS = ['plans', 'shopping', 'recipes', 'ingredients', 'sign-in', 'account', 'workout']
 
 // Overridable so the dev server can point at a different local backend
 // (e.g. a branch running on another port) without editing this file:
