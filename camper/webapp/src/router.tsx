@@ -38,6 +38,13 @@ const AddToPlanSheet = lazy(() => import('./pages/recipes').then((m) => ({ defau
 const FavouritedBySheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.FavouritedBySheet })));
 const RecipePhotoSheet = lazy(() => import('./pages/recipes').then((m) => ({ default: m.RecipePhotoSheet })));
 
+// The workout page (rep counting from the camera): standalone, no sign-in, no API, one area chunk.
+const WorkoutLayout = lazy(() => import('./pages/workout').then((m) => ({ default: m.WorkoutLayout })));
+const WorkoutSetupScreen = lazy(() => import('./pages/workout').then((m) => ({ default: m.WorkoutSetupScreen })));
+const WorkoutCameraScreen = lazy(() => import('./pages/workout').then((m) => ({ default: m.WorkoutCameraScreen })));
+const WorkoutLiveScreen = lazy(() => import('./pages/workout').then((m) => ({ default: m.WorkoutLiveScreen })));
+const WorkoutSummaryScreen = lazy(() => import('./pages/workout').then((m) => ({ default: m.WorkoutSummaryScreen })));
+
 const IngredientsPage = lazy(() => import('./pages/ingredients').then((m) => ({ default: m.IngredientsPage })));
 const NewIngredientSheet = lazy(() =>
   import('./pages/ingredients').then((m) => ({ default: m.NewIngredientSheet })),
@@ -59,6 +66,24 @@ export const router = createBrowserRouter([
       </Suspense>
     ),
     errorElement: <RouteError />,
+  },
+  {
+    // Outside the guarded shell: the workout page needs a camera, not an account. Its layout holds
+    // the Suspense boundary its screens render through (they share one chunk, so only the first
+    // visit ever waits).
+    path: '/workout',
+    element: (
+      <Suspense fallback={<RouteFallback />}>
+        <WorkoutLayout />
+      </Suspense>
+    ),
+    errorElement: <RouteError />,
+    children: [
+      { index: true, element: <WorkoutSetupScreen /> },
+      { path: 'camera', element: <WorkoutCameraScreen /> },
+      { path: 'live', element: <WorkoutLiveScreen /> },
+      { path: 'summary', element: <WorkoutSummaryScreen /> },
+    ],
   },
   {
     element: <RequireAuth />,

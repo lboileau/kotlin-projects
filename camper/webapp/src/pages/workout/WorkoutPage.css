@@ -1,0 +1,735 @@
+/*
+ * The workout page: a near-black, cool-neutral surface, white type, one green accent — crisp
+ * enough to read from across a garage, with the energy in the accent and nowhere else.
+ *
+ * Nested Radix theme (dark, green, slate): every button, switch and select takes the accent
+ * from Radix's own scale, so the accent is one word in WorkoutLayout.tsx to change. Same rules
+ * as the rest of the app: the document never scrolls (only `.workout-scroll`), no `100vh`,
+ * safe-area insets, 44px targets.
+ */
+.workout-theme {
+  --color-background: #0b0c0f;
+  --color-panel-solid: #15171c;
+  --color-surface: #15171c;
+  --wk-gut: 16px;
+  --wk-sat: env(safe-area-inset-top, 0px);
+  --wk-sab: env(safe-area-inset-bottom, 0px);
+  --wk-sal: env(safe-area-inset-left, 0px);
+  --wk-sar: env(safe-area-inset-right, 0px);
+  height: 100%;
+  color: var(--gray-12);
+  color-scheme: dark;
+}
+
+.workout {
+  position: relative;
+  height: 100%;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+/* ---- screens: one full-height flex column each ---- */
+.workout-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: var(--wk-sat) var(--wk-sar) var(--wk-sab) var(--wk-sal);
+}
+
+.workout-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px var(--wk-gut);
+  border-bottom: 1px solid var(--gray-4);
+  background: var(--color-panel-solid);
+}
+
+.workout-header__leading,
+.workout-header__trailing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.workout-header__trailing {
+  flex-shrink: 0;
+}
+
+.workout-header__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-3);
+  background: var(--accent-a3);
+  color: var(--accent-11);
+}
+
+.workout-header__chip svg {
+  width: 20px;
+  height: 20px;
+}
+
+.workout-header__title {
+  margin: 0;
+  color: var(--gray-12);
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.workout-header__back,
+.workout-header__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 44px;
+  padding: 0 14px 0 8px;
+  border-radius: 999px;
+  background: var(--accent-a3);
+  color: var(--accent-11);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.workout-header__link {
+  padding: 0 14px;
+}
+
+.workout-header__back svg {
+  width: 20px;
+  height: 20px;
+}
+
+.workout-header__back:hover,
+.workout-header__link:hover {
+  background: var(--accent-a4);
+}
+
+.workout-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 4px var(--wk-gut) 32px;
+}
+
+.workout-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px var(--wk-gut) 14px;
+  border-top: 1px solid var(--gray-4);
+  background: var(--color-background);
+}
+
+.workout-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.workout-row > * {
+  min-width: 0;
+}
+
+.workout-row--even > * {
+  flex: 1;
+}
+
+.workout-wide {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.workout-big {
+  width: 100%;
+  min-height: 60px;
+  font-size: 1.1875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.workout-h2 {
+  margin: 20px 0 10px;
+  color: var(--gray-11);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.workout-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 16px 0;
+  padding: 14px 16px;
+  border: 1px solid var(--gray-4);
+  border-radius: var(--radius-4);
+  background: var(--color-panel-solid);
+}
+
+.workout-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.workout-field--start {
+  justify-content: flex-start;
+}
+
+.workout-field__unit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.workout-field__num {
+  width: 112px;
+}
+
+.workout-field__select {
+  max-width: 60%;
+}
+
+.workout-hint {
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* a section title with a small action across from it (the reset) */
+.workout-h2-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+
+.workout-h2-row .workout-h2 {
+  margin: 0;
+}
+
+/* a full 44px target, like the row buttons, with a bigger glyph than the 15px icon set */
+.workout-reset {
+  width: 44px;
+  height: 44px;
+}
+
+.workout-reset svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* the sound options, revealed at the top by the speaker button */
+.workout-sound {
+  margin-top: 12px;
+}
+
+/* the exercise list: grab handle (number + grip) | name | reps | remove. Rows animate into the gap
+   a drag opens; the dragged row itself follows the pointer without easing (lib/reorder). */
+.workout-exlist {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.workout-ex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: var(--radius-3);
+  transition: transform 120ms ease;
+}
+
+.workout-ex--dragging {
+  position: relative;
+  z-index: 1;
+  transition: none;
+  background: var(--gray-3);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+}
+
+/* While something is being dragged, nothing else may catch the pointer: the drag stays on the handle that captured it. */
+.workout-exlist--dragging input,
+.workout-exlist--dragging .workout-ex__remove {
+  pointer-events: none;
+}
+
+/* The 44px grab target: the exercise's number over a grip. `touch-action: none` is what lets a finger drag it instead of scrolling. */
+.workout-ex__handle {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 40px;
+  min-height: 44px;
+  padding: 4px 0;
+  border: none;
+  border-radius: var(--radius-3);
+  background: transparent;
+  color: var(--gray-11);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.workout-ex__handle:active,
+.workout-ex--dragging .workout-ex__handle {
+  color: var(--accent-11);
+  cursor: grabbing;
+  background: var(--accent-a3);
+}
+
+.workout-ex__handle:focus-visible {
+  outline: 2px solid var(--accent-9);
+  outline-offset: -2px;
+}
+
+.workout-ex__num {
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.workout-ex__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.workout-ex__reps {
+  flex: none;
+  width: 118px;
+}
+
+/* "100 reps", "10 sec": the unit sits inside the field, quietly */
+.workout-ex__unit {
+  padding-right: 10px;
+  color: var(--gray-10);
+  font-size: 0.875rem;
+}
+
+/* remove is quiet until it is pointed at: six red squares down a list was the loudest thing on the screen */
+.workout-ex__remove {
+  width: 44px;
+  height: 44px;
+  color: var(--gray-9);
+}
+
+.workout-ex__remove:hover:not(:disabled),
+.workout-ex__remove:focus-visible {
+  color: var(--red-11);
+  background: var(--red-a3);
+}
+
+.workout-ex__remove:disabled {
+  opacity: 0.3;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ---- the camera stage: one video + overlay, fitted over a slot or parked as a thumbnail ---- */
+.workout-slot {
+  position: relative;
+  flex: 1;
+  min-height: 120px;
+  margin: 0 var(--wk-gut);
+}
+
+/* the start countdown, over the preview (above the stage's z-index 5) */
+.workout-countdown {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.workout-countdown__number {
+  color: var(--accent-11);
+  font-size: min(40vw, 30dvh);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
+}
+
+.workout-stage {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  width: 120px;
+  height: 90px;
+  overflow: hidden;
+  border-radius: var(--radius-4);
+  background: #000;
+  visibility: hidden;
+}
+
+.workout-stage video,
+.workout-stage canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.workout-stage--thumb {
+  border: 2px solid var(--gray-6);
+  pointer-events: none;
+}
+
+.workout-stage--thumb[data-tone='ok'] {
+  border-color: var(--accent-9);
+}
+
+.workout-stage--thumb[data-tone='hunt'] {
+  border-color: var(--amber-9);
+}
+
+.workout-status {
+  min-height: 24px;
+  margin: 0;
+  color: var(--gray-11);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.workout-status[data-tone='ok'] {
+  color: var(--accent-11);
+}
+
+.workout-status[data-tone='warn'] {
+  color: var(--amber-11);
+}
+
+.workout-status[data-tone='bad'] {
+  color: var(--red-11);
+}
+
+.workout-camera__select {
+  max-width: 220px;
+}
+
+/* ---- the live screen ---- */
+.workout-live__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 60px;
+  padding: 10px calc(var(--wk-gut) + 112px) 10px var(--wk-gut); /* room for the preview thumbnail */
+}
+
+.workout-live__head {
+  flex: 1;
+  min-width: 0;
+}
+
+.workout-live__index {
+  color: var(--gray-11);
+  font-size: 1.0625rem;
+}
+
+.workout-live__name {
+  overflow: hidden;
+  color: var(--gray-12);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workout-live__clock {
+  padding-top: 4px;
+  color: var(--gray-11);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.workout-live__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  padding: 0 var(--wk-gut);
+}
+
+.workout-phase {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 0;
+}
+
+.workout-count {
+  font-size: min(62vw, 46dvh);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  color: var(--gray-12);
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  transition:
+    transform 0.08s,
+    color 0.2s;
+}
+
+.workout-count[data-digits='3'] {
+  font-size: min(50vw, 46dvh);
+}
+
+.workout-count[data-digits='4'] {
+  font-size: min(38vw, 46dvh);
+}
+
+@keyframes workout-pop {
+  from {
+    transform: scale(1.05);
+    color: var(--accent-11);
+  }
+  to {
+    transform: none;
+    color: var(--gray-12);
+  }
+}
+
+.workout-count--pop {
+  animation: workout-pop 0.18s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workout-count--pop {
+    animation: none;
+  }
+}
+
+.workout-count--rest {
+  color: var(--amber-11);
+}
+
+.workout-live[data-paused] .workout-count {
+  opacity: 0.35;
+}
+
+.workout-paused {
+  color: var(--amber-11);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.workout-progress {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--gray-4);
+}
+
+.workout-progress__bar {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent-9);
+  transition: width 0.2s;
+}
+
+.workout-count-sub {
+  color: var(--gray-11);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.workout-phase__label {
+  color: var(--amber-11);
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.workout-next {
+  text-align: center;
+}
+
+.workout-next__name {
+  color: var(--gray-12);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+/* ---- summary ---- */
+.workout-totals {
+  display: flex;
+  gap: 24px;
+  margin: 14px 0;
+}
+
+.workout-totals div {
+  color: var(--gray-11);
+  font-size: 1rem;
+}
+
+.workout-totals b {
+  display: block;
+  color: var(--gray-12);
+  font-size: 2.25rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.workout-summary__short {
+  color: var(--amber-11);
+}
+
+/* ---- laptop / desktop: the same screens, centred in a capped column ---- */
+@media (min-width: 720px) {
+  .workout-screen > .workout-header,
+  .workout-screen > .workout-scroll,
+  .workout-screen > .workout-actions,
+  .workout-screen > .workout-live__main,
+  .workout-screen > .workout-live__top {
+    width: 100%;
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .workout-screen--wide > .workout-header,
+  .workout-screen--wide > .workout-actions,
+  .workout-screen--wide > .workout-live__main,
+  .workout-screen--wide > .workout-live__top {
+    max-width: 840px;
+  }
+
+  .workout-screen > .workout-slot {
+    width: calc(100% - 2 * var(--wk-gut));
+    max-width: calc(840px - 2 * var(--wk-gut));
+    min-height: 240px;
+    margin: 0 auto;
+  }
+
+  .workout-live__top {
+    padding-right: calc(var(--wk-gut) + 176px); /* room for the larger thumbnail */
+  }
+
+  .workout-actions {
+    padding-bottom: 24px;
+    border-top: 0;
+  }
+
+  .workout-count {
+    font-size: min(62vw, 44dvh);
+  }
+
+  .workout-count[data-digits='3'] {
+    font-size: min(50vw, 44dvh);
+  }
+
+  .workout-live__actions {
+    flex-direction: row;
+  }
+
+  .workout-live__actions .workout-row {
+    flex: 1;
+  }
+
+  .workout-summary {
+    flex: 0 1 auto; /* buttons follow the table instead of sitting at the bottom of a tall window */
+  }
+}
+
+/* ---- landscape phone: shorter bars, one row of controls, count sized by height ---- */
+@media (orientation: landscape) and (max-height: 520px) {
+  .workout-header {
+    min-height: 44px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .workout-live__top {
+    align-items: center;
+    min-height: 40px;
+  }
+
+  .workout-live__head {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .workout-live__name {
+    order: -1;
+    font-size: 1.25rem;
+  }
+
+  .workout-live__index {
+    overflow: hidden;
+    font-size: 0.9375rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .workout-live__actions {
+    flex-direction: row;
+  }
+
+  .workout-live__actions .workout-row {
+    flex: 1;
+  }
+
+  .workout-phase {
+    gap: 8px;
+  }
+
+  .workout-count--rest {
+    font-size: min(50vw, 32dvh);
+  }
+
+  .workout-next__name {
+    font-size: 1.5rem;
+  }
+
+  .workout-big {
+    min-height: 56px;
+  }
+}
